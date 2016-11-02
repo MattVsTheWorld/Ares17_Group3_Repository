@@ -3,6 +3,7 @@
 
 #include "MeshManager.h"
 #include "SDL.h"
+#include "Object.h"
 
 namespace SceneManager {
 	void update(void);

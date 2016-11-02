@@ -1,5 +1,7 @@
 #include "SceneManager.h"
 
+using namespace std;
+
 namespace SceneManager {
 
 	void update(void) {
