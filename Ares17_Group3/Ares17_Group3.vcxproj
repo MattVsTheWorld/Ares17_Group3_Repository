@@ -151,10 +151,16 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MeshManager.cpp" />
+    <ClCompile Include="SceneManager.cpp" />
     <ClCompile Include="SDLmanager.cpp" />
+    <ClCompile Include="ShaderManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="MeshManager.h" />
+    <ClInclude Include="SceneManager.h" />
     <ClInclude Include="SDLmanager.h" />
+    <ClInclude Include="ShaderManager.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

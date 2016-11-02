@@ -1,6 +1,7 @@
 #include <SDL.h>
 #include <iostream>
 #include "SDLmanager.h"
+#include "SceneManager.h"
 
 #if _DEBUG
 #pragma comment(linker, "/subsystem:\"console\" /entry:\"WinMainCRTStartup\"")
@@ -34,8 +35,8 @@ int main(int argc, char *argv[])
 	{
 		SDL_PollEvent(&sdlEvent);
 		running = SDLmanager::handleSDLEvent(sdlEvent);
-		//update();			// not used yet!
-		//draw(hWindow);		// not used yet!
+		SceneManager::update();		
+		SceneManager::draw(hWindow);		
 	}
 
 
