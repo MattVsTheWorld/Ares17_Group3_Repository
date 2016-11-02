@@ -8,6 +8,8 @@
 #endif
 
 
+// please push. please lord A.I.
+
 // Program entry point - SDL manages the actual WinMain entry point for us
 int main(int argc, char *argv[]) {
 
