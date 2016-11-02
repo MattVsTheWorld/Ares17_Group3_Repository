@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
 		//draw(hWindow);		// not used yet!
 	}
 
-
+	//test
 
 	SDL_DestroyWindow(hWindow);
 	SDL_Quit();
