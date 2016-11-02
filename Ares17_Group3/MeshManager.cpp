@@ -9,7 +9,7 @@ Based on rt3d.cpp from Real Time 3d graphics module
 
 namespace MeshManager {
 
-	// struct vaoBuffers will be used inside the rt3d library
+	// struct vaoBuffers will be used inside the library
 	// clients should not need to know about this data structure
 	struct vaoBuffers {
 		GLuint vertex_buffer;
