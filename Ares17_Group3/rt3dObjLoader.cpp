@@ -112,7 +112,7 @@ namespace rt3d {
 		std::vector<GLfloat> &texcoords, std::vector<GLuint> &indices) {
 
 		GLint fileLength;
-		char *fileSource = loadFile(filename, fileLength);
+		char *fileSource = ShaderManager::loadFile(filename, fileLength);
 
 		if (fileLength == 0)
 			// should report error here too

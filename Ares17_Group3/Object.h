@@ -1,6 +1,8 @@
 #ifndef OBJECT
 #define OBJECT
 #include "MeshManager.h"
+#include "rt3dObjLoader.h"
+#include "loadBitmap.h"
 #include <vector>
 using namespace std;
 
@@ -11,12 +13,19 @@ private:
 	vector<GLfloat> norms; // contains normal of loaded object
 	vector<GLfloat> tex_coords; // contains texture coordinates of loaded object
 	vector<GLuint> indices; // contains indices of loaded object
+	GLuint meshIndexCount = 0;
+	GLuint texture;
+	GLuint meshObject;
 
 protected:
 
 public:
 	Object();
 	~Object();
+
+	GLuint object_getIndex();
+	GLuint object_getTexture();
+	GLuint object_getMesh();
 
 };
 

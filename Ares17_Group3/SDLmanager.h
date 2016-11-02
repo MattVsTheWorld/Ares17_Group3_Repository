@@ -7,7 +7,7 @@
 namespace SDLmanager {
 	// Something went wrong - print error message and quit
 	void exitFatalError(char *message);
-	bool handleSDLEvent(SDL_Event const &sdlEvent);
+	SDL_Window * setupRC(SDL_GLContext &context);
 }
 
 #endif
