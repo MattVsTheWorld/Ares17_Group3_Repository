@@ -71,8 +71,11 @@ namespace SceneManager {
 		
 		MeshManager::setLight(shaderProgram, testLight);
 		mvStack.push(mvStack.top());// push modelview to stack
+		mvStack.top() = glm::translate(mvStack.top(), glm::vec3(-10.0f, -0.1f, -10.0f));
+		mvStack.top() = glm::scale(mvStack.top(), glm::vec3(20.0f, 0.1f, 20.0f));
 		glBindTexture(GL_TEXTURE_2D, testCube->object_getTexture());
 		MeshManager::setUniformMatrix4fv(shaderProgram, "modelview", glm::value_ptr(mvStack.top()));
+		MeshManager::setMaterial(shaderProgram, testMaterial);
 		MeshManager::drawIndexedMesh(testCube->object_getMesh(), testCube->object_getIndex(), GL_TRIANGLES);
 		mvStack.pop();
 	}
@@ -84,7 +87,7 @@ namespace SceneManager {
 	void draw(SDL_Window * window) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear window
 		glEnable(GL_CULL_FACE);
-		glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+		glClearColor(0.5f, 0.7f, 0.8f, 1.0f);
 		glm::mat4 projection(1.0);
 		glUseProgram(shaderProgram);
 		MeshManager::setLight(shaderProgram, testLight);
@@ -94,11 +97,15 @@ namespace SceneManager {
 		glm::mat4 modelview(1.0); // set base position for scene
 		mvStack.push(modelview);
 
-		renderTestCube();
-
 		at = moveForward(eye, r, 1.0f);
 		mvStack.top() = glm::lookAt(eye, at, up);
 
+
+		projection = glm::perspective(float(60.0f*DEG_TO_RADIAN), 800.0f / 600.0f, 1.0f, 100.0f);
+		MeshManager::setUniformMatrix4fv(shaderProgram, "projection", glm::value_ptr(projection));
+		renderTestCube();
+
+	
 		SDL_GL_SwapWindow(window); // swap buffers
 	}
 }
