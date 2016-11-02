@@ -28,6 +28,7 @@ int main(int argc, char *argv[])
 
 
 	glContext = SDL_GL_CreateContext(hWindow);
+	SceneManager::init();
 
 	SDL_Event sdlEvent;	// variable to detect SDL events
 	bool running = true;
