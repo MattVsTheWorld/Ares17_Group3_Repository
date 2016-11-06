@@ -124,7 +124,6 @@ int main(int argc, char *argv[]) {
 		//SDL_Delay(500); // 500 should make 2 frames per second.
 
 		fpsthink();
-		//printf("%f\n", framespersecond);
 
 	}
 

@@ -2,6 +2,8 @@
 
 using namespace std;
 
+// this class still needs a lot of work
+
 namespace SceneManager {
 	Object *testCube;
 	GLuint shaderProgram;
@@ -17,6 +19,7 @@ namespace SceneManager {
 	mvstack mvStack;
 	
 	GLfloat camRotation = 0.0f;
+	GLfloat camy = 0.0f;
 
 	glm::vec3 eye(0.0f, 1.0f, 0.0f);
 	glm::vec3 at(0.0f, 1.0f, -1.0f);
@@ -59,6 +62,9 @@ namespace SceneManager {
 		if (keys[SDL_SCANCODE_COMMA]) camRotation -= 1.0f;
 		if (keys[SDL_SCANCODE_PERIOD]) camRotation += 1.0f;
 
+		if (keys[SDL_SCANCODE_O]) camy += 0.05; // move camera downwards (because of how the controls are set)
+		if (keys[SDL_SCANCODE_P]) camy -= 0.05; // move camera upwards
+
 		if (keys[SDL_SCANCODE_1]) {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 			glDisable(GL_CULL_FACE);
@@ -67,6 +73,26 @@ namespace SceneManager {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 			glEnable(GL_CULL_FACE);
 		}
+		/*
+		SDL_Event event;
+
+		if (event.type == SDL_MOUSEMOTION)
+		{
+	//		SDL_PixelFormat* fmt = screen->format;
+			/* If the mouse is moving to the left 
+			if (event.motion.xrel < 0)
+				camRotation -= 1.0f;
+			/* If the mouse is moving to the right 
+			else if (event.motion.xrel > 0)
+				camRotation += 1.0f;
+			/* If the mouse is moving up 
+			else if (event.motion.yrel < 0)
+				camy -= 0.1;
+			/* If the mouse is moving down 
+			else if (event.motion.yrel > 0)
+				camy += 0.1;
+			
+		} */
 	}
 
 
@@ -100,6 +126,7 @@ namespace SceneManager {
 
 	void camera() {
 		at = moveForward(eye, camRotation, 1.0f);
+		at.y -= camy;
 		mvStack.top() = glm::lookAt(eye, at, up);
 	}
 
