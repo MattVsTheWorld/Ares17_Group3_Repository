@@ -1,12 +1,8 @@
 #include "Skybox.h"
 
-Skybox::Skybox() {
+Skybox::Skybox(const char *cubeTexFiles[6]) {
 	skyboxProgram = ShaderManager::initShaders("cubeMap.vert", "cubeMap.frag");
-
-	const char *cubeTexFiles[6] = {
-		"Town-skybox/Town_bk.bmp", "Town-skybox/Town_ft.bmp", "Town-skybox/Town_rt.bmp", "Town-skybox/Town_lf.bmp", "Town-skybox/Town_up.bmp", "Town-skybox/Town_dn.bmp"
-	};
-	loadCubeMap(cubeTexFiles, &textures[0]);
+		loadCubeMap(cubeTexFiles, &textures);
 }
 
 GLuint Skybox::loadCubeMap(const char *fname[6], GLuint *texID) {
@@ -59,7 +55,7 @@ std::stack<glm::mat4> Skybox::renderSkybox(glm::mat4 projection, std::stack<glm:
 	glm::mat3 mvRotOnlyMat3 = glm::mat3(mvStack.top());
 	mvStack.push(glm::mat4(mvRotOnlyMat3));
 	glCullFace(GL_FRONT); // drawing inside of cube!
-	glBindTexture(GL_TEXTURE_CUBE_MAP, textures[0]);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, textures);
 	mvStack.top() = glm::scale(mvStack.top(), glm::vec3(1.5f, 1.5f, 1.5f));
 	MeshManager::setUniformMatrix4fv(skyboxProgram, "modelview", glm::value_ptr(mvStack.top()));
 	MeshManager::drawIndexedMesh(meshObject, meshIndexCount, GL_TRIANGLES);

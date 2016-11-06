@@ -9,6 +9,10 @@ namespace SceneManager {
 	hudManager *h_manager;
 	Skybox *skybox;
 
+	const char *testTexFiles[6] = {
+		"Town-skybox/Town_bk.bmp", "Town-skybox/Town_ft.bmp", "Town-skybox/Town_rt.bmp", "Town-skybox/Town_lf.bmp", "Town-skybox/Town_up.bmp", "Town-skybox/Town_dn.bmp"
+	};
+
 	typedef stack<glm::mat4> mvstack;
 	mvstack mvStack;
 	
@@ -73,7 +77,7 @@ namespace SceneManager {
 		MeshManager::setMaterial(shaderProgram, testMaterial);
 		testCube = new Object();
 		h_manager = new hudManager();
-		skybox = new Skybox();
+		skybox = new Skybox(testTexFiles);
 	}
 
 	void renderTestCube(glm::mat4 proj) {

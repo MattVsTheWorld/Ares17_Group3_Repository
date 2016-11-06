@@ -10,7 +10,7 @@
 
 class Skybox {
 public:
-	Skybox();
+	Skybox(const char *cubeTexFiles[6]);
 	// A simple cubemap loading function taken from lab
 	// Make more general for different levels!
 	GLuint loadCubeMap(const char *fname[6], GLuint *texID);
@@ -20,6 +20,6 @@ public:
 protected:
 private:
 	GLuint skyboxProgram;
-	GLuint textures[5];
+	GLuint textures;
 };
 #endif
