@@ -5,7 +5,7 @@
 
 
 // please push. please lord A.I.
-
+// http://sdl.beuc.net/sdl.wiki/SDL_Average_FPS_Measurement
 // How many frames time values to keep
 // The higher the value the smoother the result is...
 // Don't make it 0 or less :)
@@ -124,7 +124,6 @@ int main(int argc, char *argv[]) {
 		//SDL_Delay(500); // 500 should make 2 frames per second.
 
 		fpsthink();
-		//printf("%f\n", framespersecond);
 
 	}
 

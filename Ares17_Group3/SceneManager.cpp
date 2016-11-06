@@ -2,13 +2,24 @@
 
 using namespace std;
 
+// this class still needs a lot of work
+
 namespace SceneManager {
 	Object *testCube;
 	GLuint shaderProgram;
 	GLuint texturedProgram;
 	hudManager *h_manager;
+	Skybox *skybox;
+
+	const char *testTexFiles[6] = {
+		"Town-skybox/Town_bk.bmp", "Town-skybox/Town_ft.bmp", "Town-skybox/Town_rt.bmp", "Town-skybox/Town_lf.bmp", "Town-skybox/Town_up.bmp", "Town-skybox/Town_dn.bmp"
+	};
+
+	typedef stack<glm::mat4> mvstack;
+	mvstack mvStack;
 	
 	GLfloat camRotation = 0.0f;
+	GLfloat camy = 0.0f;
 
 	glm::vec3 eye(0.0f, 1.0f, 0.0f);
 	glm::vec3 at(0.0f, 1.0f, -1.0f);
@@ -28,7 +39,7 @@ namespace SceneManager {
 		2.0f  // shininess
 	};
 
-	stack<glm::mat4> mvStack;
+
 
 	glm::vec3 moveForward(glm::vec3 pos, GLfloat angle, GLfloat d) {
 		return glm::vec3(pos.x + d*std::sin(camRotation*DEG_TO_RADIAN), pos.y, pos.z - d*std::cos(camRotation*DEG_TO_RADIAN));
@@ -51,6 +62,9 @@ namespace SceneManager {
 		if (keys[SDL_SCANCODE_COMMA]) camRotation -= 1.0f;
 		if (keys[SDL_SCANCODE_PERIOD]) camRotation += 1.0f;
 
+		if (keys[SDL_SCANCODE_O]) camy += 0.05; // move camera downwards (because of how the controls are set)
+		if (keys[SDL_SCANCODE_P]) camy -= 0.05; // move camera upwards
+
 		if (keys[SDL_SCANCODE_1]) {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 			glDisable(GL_CULL_FACE);
@@ -59,6 +73,26 @@ namespace SceneManager {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 			glEnable(GL_CULL_FACE);
 		}
+		/*
+		SDL_Event event;
+
+		if (event.type == SDL_MOUSEMOTION)
+		{
+	//		SDL_PixelFormat* fmt = screen->format;
+			/* If the mouse is moving to the left 
+			if (event.motion.xrel < 0)
+				camRotation -= 1.0f;
+			/* If the mouse is moving to the right 
+			else if (event.motion.xrel > 0)
+				camRotation += 1.0f;
+			/* If the mouse is moving up 
+			else if (event.motion.yrel < 0)
+				camy -= 0.1;
+			/* If the mouse is moving down 
+			else if (event.motion.yrel > 0)
+				camy += 0.1;
+			
+		} */
 	}
 
 
@@ -69,6 +103,7 @@ namespace SceneManager {
 		MeshManager::setMaterial(shaderProgram, testMaterial);
 		testCube = new Object();
 		h_manager = new hudManager();
+		skybox = new Skybox(testTexFiles);
 	}
 
 	void renderTestCube(glm::mat4 proj) {
@@ -91,6 +126,7 @@ namespace SceneManager {
 
 	void camera() {
 		at = moveForward(eye, camRotation, 1.0f);
+		at.y -= camy;
 		mvStack.top() = glm::lookAt(eye, at, up);
 	}
 
@@ -105,9 +141,10 @@ namespace SceneManager {
 		mvStack.push(modelview);
 
 		camera();
-
 		projection = glm::perspective(float(60.0f*DEG_TO_RADIAN), 800.0f / 600.0f, 1.0f, 100.0f);
 	
+		mvStack = skybox->renderSkybox(projection, mvStack, testCube->object_getMesh(), testCube->object_getIndex());
+
 		renderTestCube(projection);
 	
 		h_manager->renderFPS(texturedProgram, testLight, glm::mat4 (1.0), testCube->object_getMesh(), testCube->object_getIndex(), fps);

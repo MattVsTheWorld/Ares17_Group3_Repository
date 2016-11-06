@@ -159,6 +159,7 @@
     <ClCompile Include="SceneManager.cpp" />
     <ClCompile Include="SDLmanager.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
+    <ClCompile Include="Skybox.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="hudManager.h" />
@@ -170,6 +171,7 @@
     <ClInclude Include="SceneManager.h" />
     <ClInclude Include="SDLmanager.h" />
     <ClInclude Include="ShaderManager.h" />
+    <ClInclude Include="Skybox.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="phong-tex.frag" />
