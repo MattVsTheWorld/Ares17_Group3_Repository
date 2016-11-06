@@ -150,6 +150,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="hudManager.cpp" />
     <ClCompile Include="loadBitmap.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MeshManager.cpp" />
@@ -160,7 +161,9 @@
     <ClCompile Include="ShaderManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="hudManager.h" />
     <ClInclude Include="loadBitmap.h" />
+    <ClInclude Include="main.h" />
     <ClInclude Include="MeshManager.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="rt3dObjLoader.h" />
@@ -171,6 +174,8 @@
   <ItemGroup>
     <None Include="phong-tex.frag" />
     <None Include="phong-tex.vert" />
+    <None Include="textured.frag" />
+    <None Include="textured.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

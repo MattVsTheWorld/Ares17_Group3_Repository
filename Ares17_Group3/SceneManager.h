@@ -4,6 +4,7 @@
 #include "MeshManager.h"
 #include "SDL.h"
 #include "Object.h"
+#include "hudManager.h"
 #include <stack>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -14,7 +15,7 @@
 namespace SceneManager {
 	void init(void);
 	void update(void);
-	void draw(SDL_Window *window);
+	void draw(SDL_Window *window, float fps);
 }
 
 #endif

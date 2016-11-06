@@ -1,7 +1,6 @@
 #include "SDLmanager.h"
 
 
-
 namespace SDLmanager {
 	// Something went wrong - print error message and quit
 	void exitFatalError(char *message)
@@ -38,5 +37,6 @@ namespace SDLmanager {
 		SDL_GL_SetSwapInterval(1); // set swap buffers to sync with monitor's vertical refresh rate
 		return window;
 	}
+
 
 }

@@ -5,6 +5,8 @@ using namespace std;
 namespace SceneManager {
 	Object *testCube;
 	GLuint shaderProgram;
+	GLuint texturedProgram;
+	hudManager *h_manager;
 	
 	GLfloat camRotation = 0.0f;
 
@@ -62,10 +64,13 @@ namespace SceneManager {
 
 	void init(void) {
 		shaderProgram = ShaderManager::initShaders("phong-tex.vert", "phong-tex.frag");
+		texturedProgram = ShaderManager::initShaders("textured.vert", "textured.frag");
 		MeshManager::setLight(shaderProgram, testLight);
 		MeshManager::setMaterial(shaderProgram, testMaterial);
 		testCube = new Object();
+		h_manager = new hudManager();
 	}
+
 	void renderTestCube(glm::mat4 proj) {
 		glUseProgram(shaderProgram);
 		MeshManager::setLight(shaderProgram, testLight);
@@ -89,7 +94,8 @@ namespace SceneManager {
 		mvStack.top() = glm::lookAt(eye, at, up);
 	}
 
-	void draw(SDL_Window * window) {
+
+	void draw(SDL_Window * window, float fps) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear window
 		glEnable(GL_CULL_FACE);
 		glClearColor(0.5f, 0.7f, 0.8f, 1.0f);
@@ -103,6 +109,8 @@ namespace SceneManager {
 		projection = glm::perspective(float(60.0f*DEG_TO_RADIAN), 800.0f / 600.0f, 1.0f, 100.0f);
 	
 		renderTestCube(projection);
+	
+		h_manager->renderFPS(texturedProgram, testLight, glm::mat4 (1.0), testCube->object_getMesh(), testCube->object_getIndex(), fps);
 	
 		SDL_GL_SwapWindow(window); // swap buffers
 	}
