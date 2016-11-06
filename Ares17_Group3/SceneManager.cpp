@@ -7,6 +7,10 @@ namespace SceneManager {
 	GLuint shaderProgram;
 	GLuint texturedProgram;
 	hudManager *h_manager;
+	Skybox *skybox;
+
+	typedef stack<glm::mat4> mvstack;
+	mvstack mvStack;
 	
 	GLfloat camRotation = 0.0f;
 
@@ -28,7 +32,7 @@ namespace SceneManager {
 		2.0f  // shininess
 	};
 
-	stack<glm::mat4> mvStack;
+
 
 	glm::vec3 moveForward(glm::vec3 pos, GLfloat angle, GLfloat d) {
 		return glm::vec3(pos.x + d*std::sin(camRotation*DEG_TO_RADIAN), pos.y, pos.z - d*std::cos(camRotation*DEG_TO_RADIAN));
@@ -69,6 +73,7 @@ namespace SceneManager {
 		MeshManager::setMaterial(shaderProgram, testMaterial);
 		testCube = new Object();
 		h_manager = new hudManager();
+		skybox = new Skybox();
 	}
 
 	void renderTestCube(glm::mat4 proj) {
@@ -105,9 +110,10 @@ namespace SceneManager {
 		mvStack.push(modelview);
 
 		camera();
-
 		projection = glm::perspective(float(60.0f*DEG_TO_RADIAN), 800.0f / 600.0f, 1.0f, 100.0f);
 	
+		mvStack = skybox->renderSkybox(projection, mvStack, testCube->object_getMesh(), testCube->object_getIndex());
+
 		renderTestCube(projection);
 	
 		h_manager->renderFPS(texturedProgram, testLight, glm::mat4 (1.0), testCube->object_getMesh(), testCube->object_getIndex(), fps);
