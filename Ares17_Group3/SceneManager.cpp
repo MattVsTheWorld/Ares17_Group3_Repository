@@ -11,6 +11,10 @@ namespace SceneManager {
 	hudManager *h_manager;
 	Skybox *skybox;
 
+	glm::vec3 transTest = glm::vec3(-10.0f, -0.1f, -10.0f);
+	glm::vec3 scaleTest = glm::vec3(20.0f, 0.1f, 20.0f);
+	glm::vec3 nullTest = glm::vec3(0.0f, 0.0f, 0.0f);
+
 	const char *testTexFiles[6] = {
 		"Town-skybox/Town_bk.bmp", "Town-skybox/Town_ft.bmp", "Town-skybox/Town_rt.bmp", "Town-skybox/Town_lf.bmp", "Town-skybox/Town_up.bmp", "Town-skybox/Town_dn.bmp"
 	};
@@ -106,19 +110,6 @@ namespace SceneManager {
 		skybox = new Skybox(testTexFiles);
 	}
 
-	void renderTestCube(glm::mat4 proj) {
-		glUseProgram(shaderProgram);
-		MeshManager::setLight(shaderProgram, testLight);
-		mvStack.push(mvStack.top());// push modelview to stack
-		mvStack.top() = glm::translate(mvStack.top(), glm::vec3(-10.0f, -0.1f, -10.0f));
-		mvStack.top() = glm::scale(mvStack.top(), glm::vec3(20.0f, 0.1f, 20.0f));
-		glBindTexture(GL_TEXTURE_2D, testCube->object_getTexture());
-		MeshManager::setUniformMatrix4fv(shaderProgram, "modelview", glm::value_ptr(mvStack.top()));
-		MeshManager::setUniformMatrix4fv(shaderProgram, "projection", glm::value_ptr(proj));
-		MeshManager::setMaterial(shaderProgram, testMaterial);
-		MeshManager::drawIndexedMesh(testCube->object_getMesh(), testCube->object_getIndex(), GL_TRIANGLES);
-		mvStack.pop();
-	}
 
 	void update(void) {
 		controls();
@@ -140,12 +131,13 @@ namespace SceneManager {
 		glm::mat4 modelview(1.0); // set base position for scene
 		mvStack.push(modelview);
 
+	
 		camera();
 		projection = glm::perspective(float(60.0f*DEG_TO_RADIAN), 800.0f / 600.0f, 1.0f, 100.0f);
 	
 		mvStack = skybox->renderSkybox(projection, mvStack, testCube->object_getMesh(), testCube->object_getIndex());
-
-		renderTestCube(projection);
+		mvStack = testCube->renderObject(projection, mvStack, shaderProgram, testLight, testMaterial, transTest, scaleTest, nullTest, 0);
+		//renderTestCube(projection);
 	
 		h_manager->renderFPS(texturedProgram, testLight, glm::mat4 (1.0), testCube->object_getMesh(), testCube->object_getIndex(), fps);
 	
