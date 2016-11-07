@@ -27,6 +27,8 @@ public:
 	GLuint object_getTexture();
 	GLuint object_getMesh();
 
+	// I need a blue banana
+
 };
 
 #endif
