@@ -51,7 +51,7 @@ namespace SceneManager {
 
 
 	void controls() {
-		/*const Uint8 *keys = SDL_GetKeyboardState(NULL);
+		const Uint8 *keys = SDL_GetKeyboardState(NULL);
 		if (keys[SDL_SCANCODE_W]) eye = moveForward(eye, camRotation, 0.1f);
 		if (keys[SDL_SCANCODE_S]) eye = moveForward(eye, camRotation, -0.1f);
 		if (keys[SDL_SCANCODE_A]) eye = moveRight(eye, camRotation, -0.1f);
@@ -73,22 +73,22 @@ namespace SceneManager {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 			glEnable(GL_CULL_FACE);
 		}
-		/*
+		
 		SDL_Event event;
 
-		if (event.type == SDL_MOUSEMOTION)
+		/*if (event.type == SDL_MOUSEMOTION)
 		{
 	//		SDL_PixelFormat* fmt = screen->format;
-			/* If the mouse is moving to the left 
+			// If the mouse is moving to the left 
 			if (event.motion.xrel < 0)
 				camRotation -= 1.0f;
-			/* If the mouse is moving to the right 
+			// If the mouse is moving to the right 
 			else if (event.motion.xrel > 0)
 				camRotation += 1.0f;
 			/* If the mouse is moving up 
 			else if (event.motion.yrel < 0)
 				camy -= 0.1;
-			/* If the mouse is moving down 
+			// If the mouse is moving down 
 			else if (event.motion.yrel > 0)
 				camy += 0.1;
 			
