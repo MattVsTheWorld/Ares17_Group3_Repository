@@ -51,7 +51,7 @@ namespace SceneManager {
 
 
 	void controls() {
-		const Uint8 *keys = SDL_GetKeyboardState(NULL);
+		/*const Uint8 *keys = SDL_GetKeyboardState(NULL);
 		if (keys[SDL_SCANCODE_W]) eye = moveForward(eye, camRotation, 0.1f);
 		if (keys[SDL_SCANCODE_S]) eye = moveForward(eye, camRotation, -0.1f);
 		if (keys[SDL_SCANCODE_A]) eye = moveRight(eye, camRotation, -0.1f);
@@ -93,6 +93,9 @@ namespace SceneManager {
 				camy += 0.1;
 			
 		} */
+
+
+
 	}
 
 
