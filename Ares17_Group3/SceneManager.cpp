@@ -17,7 +17,7 @@ namespace SceneManager {
 
 	typedef stack<glm::mat4> mvstack;
 	mvstack mvStack;
-	
+
 	GLfloat camRotation = 0.0f;
 	GLfloat camy = 0.0f;
 
@@ -50,7 +50,7 @@ namespace SceneManager {
 	}
 
 
-	void controls() {
+	void controls(SDL_Event event) {
 		const Uint8 *keys = SDL_GetKeyboardState(NULL);
 		if (keys[SDL_SCANCODE_W]) eye = moveForward(eye, camRotation, 0.1f);
 		if (keys[SDL_SCANCODE_S]) eye = moveForward(eye, camRotation, -0.1f);
@@ -73,25 +73,23 @@ namespace SceneManager {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 			glEnable(GL_CULL_FACE);
 		}
-		
-		SDL_Event event;
 
 		/*if (event.type == SDL_MOUSEMOTION)
 		{
-	//		SDL_PixelFormat* fmt = screen->format;
-			// If the mouse is moving to the left 
-			if (event.motion.xrel < 0)
-				camRotation -= 1.0f;
-			// If the mouse is moving to the right 
-			else if (event.motion.xrel > 0)
-				camRotation += 1.0f;
-			/* If the mouse is moving up 
-			else if (event.motion.yrel < 0)
-				camy -= 0.1;
-			// If the mouse is moving down 
-			else if (event.motion.yrel > 0)
-				camy += 0.1;
-			
+		//		SDL_PixelFormat* fmt = screen->format;
+		// If the mouse is moving to the left
+		if (event.motion.xrel < 0)
+		camRotation -= 1.0f;
+		// If the mouse is moving to the right
+		else if (event.motion.xrel > 0)
+		camRotation += 1.0f;
+		/* If the mouse is moving up
+		else if (event.motion.yrel < 0)
+		camy -= 0.1;
+		// If the mouse is moving down
+		else if (event.motion.yrel > 0)
+		camy += 0.1;
+
 		} */
 
 
@@ -123,8 +121,8 @@ namespace SceneManager {
 		mvStack.pop();
 	}
 
-	void update(void) {
-		controls();
+	void update(SDL_Event event) {
+		controls(event);
 	}
 
 	void camera() {
@@ -145,13 +143,13 @@ namespace SceneManager {
 
 		camera();
 		projection = glm::perspective(float(60.0f*DEG_TO_RADIAN), 800.0f / 600.0f, 1.0f, 100.0f);
-	
+
 		mvStack = skybox->renderSkybox(projection, mvStack, testCube->object_getMesh(), testCube->object_getIndex());
 
 		renderTestCube(projection);
-	
-		h_manager->renderFPS(texturedProgram, testLight, glm::mat4 (1.0), testCube->object_getMesh(), testCube->object_getIndex(), fps);
-	
+
+		h_manager->renderFPS(texturedProgram, testLight, glm::mat4(1.0), testCube->object_getMesh(), testCube->object_getIndex(), fps);
+
 		SDL_GL_SwapWindow(window); // swap buffers
 	}
 }
