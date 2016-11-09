@@ -54,10 +54,10 @@ namespace SceneManager {
 
 	void lockCamera()
 	{
-		if (camy>90)
-			camy = 90;
-		if (camy<-90)
-			camy = -90;
+		if (camy>70)
+			camy = 70;
+		if (camy<-70)
+			camy = -70;
 		if (camRotation<0.0)
 			camRotation += 360.0;
 		if (camRotation>360.0)
@@ -68,25 +68,13 @@ namespace SceneManager {
 
 		if (event.type == SDL_MOUSEMOTION)
 		{
-			// If the mouse is moving to the left
-			/*if (event.motion.xrel < 0)
-			camRotation -= 1.0;
-			// If the mouse is moving to the right
-			if (event.motion.xrel > 0)
-			camRotation += 1.0;
-			// If the mouse is moving up
-			if (event.motion.yrel < 0)
-			camy -= 0.1;
-			// If the mouse is moving down
-			if (event.motion.yrel > 0)
-			camy += 0.1;*/
 			int MidX = SCREENWIDTH / 2;
 			int MidY = SCREENHEIGHT / 2;
 			SDL_ShowCursor(SDL_DISABLE);
 			int tmpx, tmpy;
 			SDL_GetMouseState(&tmpx, &tmpy);
-			camRotation += 0.2*(MidX - tmpx); //for y
-			camy += 0.2*(MidY - tmpy)/10; //for x
+			camRotation -= 0.1*(MidX - tmpx); //for y
+			camy -= 0.1*(MidY - tmpy)/10; //for x
 			lockCamera();
 
 			//rotate the camera (move everything in the opposit direction)
