@@ -11,6 +11,9 @@ namespace SceneManager {
 	hudManager *h_manager;
 	Skybox *skybox;
 
+	float SCREENWIDTH = 800.0f;
+	float SCREENHEIGHT = 600.0f;
+
 	const char *testTexFiles[6] = {
 		"Town-skybox/Town_bk.bmp", "Town-skybox/Town_ft.bmp", "Town-skybox/Town_rt.bmp", "Town-skybox/Town_lf.bmp", "Town-skybox/Town_up.bmp", "Town-skybox/Town_dn.bmp"
 	};
@@ -49,21 +52,62 @@ namespace SceneManager {
 		return glm::vec3(pos.x + d*std::cos(camRotation*DEG_TO_RADIAN), pos.y, pos.z + d*std::sin(camRotation*DEG_TO_RADIAN));
 	}
 
+	void lockCamera()
+	{
+		if (camy>90)
+			camy = 90;
+		if (camy<-90)
+			camy = -90;
+		if (camRotation<0.0)
+			camRotation += 360.0;
+		if (camRotation>360.0)
+			camRotation -= 360;
+	}
 
-	void controls(SDL_Event event) {
+	void controls(SDL_Event event, SDL_Window * window) {
+
+		if (event.type == SDL_MOUSEMOTION)
+		{
+			// If the mouse is moving to the left
+			/*if (event.motion.xrel < 0)
+			camRotation -= 1.0;
+			// If the mouse is moving to the right
+			if (event.motion.xrel > 0)
+			camRotation += 1.0;
+			// If the mouse is moving up
+			if (event.motion.yrel < 0)
+			camy -= 0.1;
+			// If the mouse is moving down
+			if (event.motion.yrel > 0)
+			camy += 0.1;*/
+			int MidX = SCREENWIDTH / 2;
+			int MidY = SCREENHEIGHT / 2;
+			SDL_ShowCursor(SDL_DISABLE);
+			int tmpx, tmpy;
+			SDL_GetMouseState(&tmpx, &tmpy);
+			camRotation += 0.2*(MidX - tmpx); //for y
+			camy += 0.2*(MidY - tmpy)/10; //for x
+			lockCamera();
+
+			//rotate the camera (move everything in the opposit direction)
+			glRotatef(-camy, 1.0, 0.0, 0.0);       
+			glRotatef(-camRotation, 0.0, 1.0, 0.0);
+			SDL_WarpMouseInWindow(window, MidX, MidY);
+		}
+
 		const Uint8 *keys = SDL_GetKeyboardState(NULL);
 		if (keys[SDL_SCANCODE_W]) eye = moveForward(eye, camRotation, 0.1f);
-		if (keys[SDL_SCANCODE_S]) eye = moveForward(eye, camRotation, -0.1f);
+		else if (keys[SDL_SCANCODE_S]) eye = moveForward(eye, camRotation, -0.1f);
 		if (keys[SDL_SCANCODE_A]) eye = moveRight(eye, camRotation, -0.1f);
-		if (keys[SDL_SCANCODE_D]) eye = moveRight(eye, camRotation, 0.1f);
+		else if (keys[SDL_SCANCODE_D]) eye = moveRight(eye, camRotation, 0.1f);
 		if (keys[SDL_SCANCODE_R]) eye.y += 0.1;
-		if (keys[SDL_SCANCODE_F]) eye.y -= 0.1;
+		else if (keys[SDL_SCANCODE_F]) eye.y -= 0.1;
 
 		if (keys[SDL_SCANCODE_COMMA]) camRotation -= 1.0f;
-		if (keys[SDL_SCANCODE_PERIOD]) camRotation += 1.0f;
+		else if (keys[SDL_SCANCODE_PERIOD]) camRotation += 1.0f;
 
 		if (keys[SDL_SCANCODE_O]) camy += 0.05; // move camera downwards (because of how the controls are set)
-		if (keys[SDL_SCANCODE_P]) camy -= 0.05; // move camera upwards
+		else if (keys[SDL_SCANCODE_P]) camy -= 0.05; // move camera upwards
 
 		if (keys[SDL_SCANCODE_1]) {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -73,27 +117,25 @@ namespace SceneManager {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 			glEnable(GL_CULL_FACE);
 		}
-
+		if (keys[SDL_SCANCODE_ESCAPE]) {
+			exit(0);
+		}
+		
 		/*if (event.type == SDL_MOUSEMOTION)
 		{
-		//		SDL_PixelFormat* fmt = screen->format;
-		// If the mouse is moving to the left
-		if (event.motion.xrel < 0)
-		camRotation -= 1.0f;
-		// If the mouse is moving to the right
-		else if (event.motion.xrel > 0)
-		camRotation += 1.0f;
-		/* If the mouse is moving up
-		else if (event.motion.yrel < 0)
-		camy -= 0.1;
-		// If the mouse is moving down
-		else if (event.motion.yrel > 0)
-		camy += 0.1;
-
-		} */
-
-
-
+			// If the mouse is moving to the left
+			if (event.motion.xrel < 0)
+			camRotation -= 1.0;
+			// If the mouse is moving to the right
+			else if (event.motion.xrel > 0)
+			camRotation += 1.0;
+			// If the mouse is moving up
+			else if (event.motion.yrel < 0)
+			camy -= 0.1;
+			// If the mouse is moving down
+			else if (event.motion.yrel > 0)
+			camy += 0.1;
+		}*/
 	}
 
 
@@ -121,8 +163,8 @@ namespace SceneManager {
 		mvStack.pop();
 	}
 
-	void update(SDL_Event event) {
-		controls(event);
+	void update(SDL_Event event, SDL_Window * window) {
+		controls(event, window);
 	}
 
 	void camera() {
@@ -142,7 +184,7 @@ namespace SceneManager {
 		mvStack.push(modelview);
 
 		camera();
-		projection = glm::perspective(float(60.0f*DEG_TO_RADIAN), 800.0f / 600.0f, 1.0f, 100.0f);
+		projection = glm::perspective(float(60.0f*DEG_TO_RADIAN), SCREENWIDTH / SCREENHEIGHT, 1.0f, 100.0f);
 
 		mvStack = skybox->renderSkybox(projection, mvStack, testCube->object_getMesh(), testCube->object_getIndex());
 
