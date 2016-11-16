@@ -145,7 +145,7 @@ namespace SceneManager {
 
 	void renderObject(glm::mat4 proj) {
 		shader.Use();
-		MeshManager::setLight(shader.Program, testLight);
+	//	MeshManager::setLight(shader.Program, testLight);
 		mvStack.push(mvStack.top());// push modelview to stack
 		MeshManager::setUniformMatrix4fv(shader.Program, "projection", glm::value_ptr(proj));
 		MeshManager::setUniformMatrix4fv(shader.Program, "view", glm::value_ptr(mvStack.top()));
