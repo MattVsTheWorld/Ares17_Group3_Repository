@@ -3,7 +3,7 @@
 #pragma comment(linker, "/subsystem:\"console\" /entry:\"WinMainCRTStartup\"")
 #endif
 
-
+/*
 // please push. please lord A.I.
 // http://sdl.beuc.net/sdl.wiki/SDL_Average_FPS_Measurement
 // How many frames time values to keep
@@ -88,7 +88,7 @@ void fpsthink() {
 	framespersecond = 1000.f / framespersecond;
 
 }
-
+*/
 
 // Program entry point - SDL manages the actual WinMain entry point for us
 int main(int argc, char *argv[]) {
@@ -102,7 +102,7 @@ int main(int argc, char *argv[]) {
 	glewExperimental = GL_TRUE;
 	GLenum err = glewInit();
 
-	fpsinit();
+	//fpsinit();
 
 	if (GLEW_OK != err) { // glewInit failed, something is seriously wrong
 		std::cout << "glewInit failed, aborting." << endl;
@@ -119,11 +119,11 @@ int main(int argc, char *argv[]) {
 				running = false;
 		}
 		SceneManager::update(sdlEvent, hWindow);	// update function
-		SceneManager::draw(hWindow, trunc(framespersecond)); // draw function
+		SceneManager::draw(hWindow, 0); // draw function
 
 		//SDL_Delay(500); // 500 should make 2 frames per second.
 
-		fpsthink();
+	//	fpsthink();
 
 	}
 

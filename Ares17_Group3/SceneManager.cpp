@@ -178,7 +178,7 @@ namespace SceneManager {
 
 		renderTestCube(projection);
 
-		h_manager->renderFPS(texturedProgram, testLight, glm::mat4(1.0), testCube->object_getMesh(), testCube->object_getIndex(), fps);
+		// h_manager->renderFPS(texturedProgram, testLight, glm::mat4(1.0), testCube->object_getMesh(), testCube->object_getIndex(), fps);
 
 		SDL_GL_SwapWindow(window); // swap buffers
 	}
