@@ -1,13 +1,14 @@
 #include "SceneManager.h"
-
+#include "Model.h"
+#include "Shader.h"
 using namespace std;
 
 // this class still needs a lot of work
-
 namespace SceneManager {
 	Object *testCube;
 	GLuint shaderProgram;
 	GLuint texturedProgram;
+	GLuint modelProgram;
 	hudManager *h_manager;
 	Skybox *skybox;
 
@@ -17,6 +18,12 @@ namespace SceneManager {
 	const char *testTexFiles[6] = {
 		"Town-skybox/Town_bk.bmp", "Town-skybox/Town_ft.bmp", "Town-skybox/Town_rt.bmp", "Town-skybox/Town_lf.bmp", "Town-skybox/Town_up.bmp", "Town-skybox/Town_dn.bmp"
 	};
+
+	// Setup and compile our shaders
+	Shader shader("modelLoading.vert", "modelLoading.frag");
+
+	// Load models
+	Model ourModel("Nanosuit/nanosuit.obj");
 
 	typedef stack<glm::mat4> mvstack;
 	mvstack mvStack;
@@ -108,28 +115,13 @@ namespace SceneManager {
 		if (keys[SDL_SCANCODE_ESCAPE]) {
 			exit(0);
 		}
-		
-		/*if (event.type == SDL_MOUSEMOTION)
-		{
-			// If the mouse is moving to the left
-			if (event.motion.xrel < 0)
-			camRotation -= 1.0;
-			// If the mouse is moving to the right
-			else if (event.motion.xrel > 0)
-			camRotation += 1.0;
-			// If the mouse is moving up
-			else if (event.motion.yrel < 0)
-			camy -= 0.1;
-			// If the mouse is moving down
-			else if (event.motion.yrel > 0)
-			camy += 0.1;
-		}*/
 	}
 
 
 	void init(void) {
 		shaderProgram = ShaderManager::initShaders("phong-tex.vert", "phong-tex.frag");
 		texturedProgram = ShaderManager::initShaders("textured.vert", "textured.frag");
+		//modelProgram = ShaderManager::initShaders("modelLoading.vert", "modelLoading.frag");
 		MeshManager::setLight(shaderProgram, testLight);
 		MeshManager::setMaterial(shaderProgram, testMaterial);
 		testCube = new Object();
@@ -148,6 +140,26 @@ namespace SceneManager {
 		MeshManager::setUniformMatrix4fv(shaderProgram, "projection", glm::value_ptr(proj));
 		MeshManager::setMaterial(shaderProgram, testMaterial);
 		MeshManager::drawIndexedMesh(testCube->object_getMesh(), testCube->object_getIndex(), GL_TRIANGLES);
+		mvStack.pop();
+	}
+
+	void renderObject(glm::mat4 proj) {
+		shader.Use();
+		MeshManager::setLight(shader.Program, testLight);
+		mvStack.push(mvStack.top());// push modelview to stack
+		MeshManager::setUniformMatrix4fv(shader.Program, "projection", glm::value_ptr(proj));
+		MeshManager::setUniformMatrix4fv(shader.Program, "view", glm::value_ptr(mvStack.top()));
+		mvStack.top() = glm::translate(mvStack.top(), glm::vec3(-10.0f, -0.1f, -10.0f));
+		// Draw the loaded model
+		glm::mat4 model;
+		model = glm::translate(model, glm::vec3(0.0f, -1.75f, 0.0f)); // Translate it down a bit so it's at the center of the scene
+		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));	// It's a bit too big for our scene, so scale it down
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		ourModel.Draw(shader);
+		//mvStack.top() = glm::scale(mvStack.top(), glm::vec3(20.0f, 0.1f, 20.0f));
+		//glBindTexture(GL_TEXTURE_2D, testCube->object_getTexture());
+		
+		MeshManager::setMaterial(shader.Program, testMaterial);
 		mvStack.pop();
 	}
 
@@ -177,6 +189,7 @@ namespace SceneManager {
 		mvStack = skybox->renderSkybox(projection, mvStack, testCube->object_getMesh(), testCube->object_getIndex());
 
 		renderTestCube(projection);
+		renderObject(projection);
 
 		h_manager->renderFPS(texturedProgram, testLight, glm::mat4(1.0), testCube->object_getMesh(), testCube->object_getIndex(), fps);
 
