@@ -130,13 +130,16 @@ namespace SceneManager {
 		testCube2 = new Object("studdedmetal.bmp");
 		h_manager = new hudManager();
 		skybox = new Skybox(testTexFiles);
+
+
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	}
 
 
 	void renderObject(glm::mat4 proj) {
-		//shader->Use();
 		glUseProgram(modelProgram);
-	//	MeshManager::setLight(shader.Program, testLight);
 		mvStack.push(mvStack.top());// push modelview to stack
 //		glCullFace(GL_BACK);
 		MeshManager::setUniformMatrix4fv(modelProgram, "projection", glm::value_ptr(proj));
@@ -148,11 +151,9 @@ namespace SceneManager {
 		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));	// It's a bit too big for our scene, so scale it down
 		glUniformMatrix4fv(glGetUniformLocation(modelProgram, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(model));
 		ourModel->Draw(modelProgram);
-		//glBindTexture(GL_TEXTURE_2D, testCube->object_getTexture());
 		
-		//	MeshManager::setMaterial(shader->Program, testMaterial);
 		mvStack.pop();
-	//	glCullFace(GL_BACK);-+
+	//	glCullFace(GL_BACK);
 	}
 
 	void update(SDL_Window * window) {
@@ -163,23 +164,8 @@ namespace SceneManager {
 		at = moveForward(eye, camRotation, 1.0f);
 		at.y -= camy;
 		mvStack.top() = glm::lookAt(eye, at, up);
-	}
-	/*
-	void renderTest(glm::mat4 projection) {
-		glUseProgram(shaderProgram);
-		MeshManager::setLight(shaderProgram, testLight);
-
-		mvStack.push(mvStack.top());// push modelview to stack
-
-		glBindTexture(GL_TEXTURE_2D, testCube2->object_getTexture());
-		MeshManager::setUniformMatrix4fv(shaderProgram, "modelview", glm::value_ptr(mvStack.top()));
-		MeshManager::setUniformMatrix4fv(shaderProgram, "projection", glm::value_ptr(projection));
-		MeshManager::setMaterial(shaderProgram, testMaterial);
-		MeshManager::drawIndexedMesh(testCube->object_getMesh(), testCube->object_getIndex(), GL_TRIANGLES);
-		mvStack.pop();
 
 	}
-	*/
 
 	void draw(SDL_Window * window, float fps) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear window
@@ -189,7 +175,7 @@ namespace SceneManager {
 		GLfloat scale(1.0f); // just to allow easy scaling of complete scene
 		glm::mat4 modelview(1.0); // set base position for scene
 		mvStack.push(modelview);
-
+		glDepthMask(GL_TRUE);
 		camera();
 		projection = glm::perspective(float(60.0f*DEG_TO_RADIAN), SCREENWIDTH / SCREENHEIGHT, 1.0f, 100.0f);
 
@@ -205,6 +191,7 @@ namespace SceneManager {
 		mvStack.pop();
 		// h_manager->renderFPS(texturedProgram, testLight, glm::mat4(1.0), testCube->object_getMesh(), testCube->object_getIndex(), fps);
 
+		glDepthMask(GL_TRUE);
 		SDL_GL_SwapWindow(window); // swap buffers
 	}
 }
