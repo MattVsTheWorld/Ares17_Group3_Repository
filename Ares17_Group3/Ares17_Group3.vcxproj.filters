@@ -77,6 +77,15 @@
     <ClInclude Include="Skybox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="phong-tex.frag">
@@ -95,6 +104,12 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="cubeMap.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="modelLoading.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="modelLoading.frag">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

@@ -15,7 +15,7 @@
 
 namespace SceneManager {
 	void init(void);
-	void update(SDL_Event event);
+	void update(SDL_Window * window);
 	void draw(SDL_Window *window, float fps);
 }
 
