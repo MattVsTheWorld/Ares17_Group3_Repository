@@ -29,6 +29,7 @@ namespace SceneManager {
 
 	// Load models
 	Model *ourModel;
+	Model *ourModel2;
 
 
 	typedef stack<glm::mat4> mvstack;
@@ -123,6 +124,8 @@ namespace SceneManager {
 		texturedProgram = ShaderManager::initShaders("textured.vert", "textured.frag");
 		modelProgram = ShaderManager::initShaders("modelLoading.vert", "modelLoading.frag");
 		ourModel = new Model("Nanosuit/nanosuit.obj");
+	//	ourModel2 = new Model("gun/wep.obj");
+		ourModel2 = new Model("gun/tkb022_3.obj");
 		//shader = new Shader("modelLoading.vert", "modelLoading.frag");
 		MeshManager::setLight(shaderProgram, testLight);
 		MeshManager::setMaterial(shaderProgram, testMaterial);
@@ -138,7 +141,7 @@ namespace SceneManager {
 	}
 
 
-	void renderObject(glm::mat4 proj) {
+	void renderObject(glm::mat4 proj, Model *modelData) {
 		glUseProgram(modelProgram);
 		mvStack.push(mvStack.top());// push modelview to stack
 //		glCullFace(GL_BACK);
@@ -150,10 +153,29 @@ namespace SceneManager {
 		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Translate it down a bit so it's at the center of the scene
 		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));	// It's a bit too big for our scene, so scale it down
 		glUniformMatrix4fv(glGetUniformLocation(modelProgram, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(model));
-		ourModel->Draw(modelProgram);
+		modelData->Draw(modelProgram);
 		
 		mvStack.pop();
 	//	glCullFace(GL_BACK);
+	}
+
+	void renderWep(glm::mat4 proj, Model *modelData) {
+		glUseProgram(modelProgram);
+		mvStack.push(mvStack.top());// push modelview to stack
+									//		glCullFace(GL_BACK);
+		MeshManager::setLight(modelProgram, testLight);
+		MeshManager::setUniformMatrix4fv(modelProgram, "projection", glm::value_ptr(proj));
+		MeshManager::setUniformMatrix4fv(modelProgram, "view", glm::value_ptr(mvStack.top()));
+		//	mvStack.top() = glm::translate(mvStack.top(), glm::vec3(-10.0f, -0.1f, -10.0f));
+		// Draw the loaded model
+		glm::mat4 model;
+		model = glm::translate(model, glm::vec3(0.0f, 2.0f, 1.0f)); // Translate it down a bit so it's at the center of the scene
+		model = glm::scale(model, glm::vec3(0.05f, 0.05f, 0.05f));	// It's a bit too big for our scene, so scale it down
+		glUniformMatrix4fv(glGetUniformLocation(modelProgram, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(model));
+		modelData->Draw(modelProgram);
+
+		mvStack.pop();
+		//	glCullFace(GL_BACK);
 	}
 
 	void update(SDL_Window * window) {
@@ -186,7 +208,9 @@ namespace SceneManager {
 		mvStack = testCube2->renderObject(projection, mvStack, shaderProgram, testLight, testMaterial, glm::vec3(0.0, 2.0, -2.0), glm::vec3(0.5,0.5,0.5), nullTest, 0);
 
 //		renderTest(projection);
-		renderObject(projection);
+		
+		renderObject(projection,ourModel);
+		renderWep(projection, ourModel2);
 
 		mvStack.pop();
 		// h_manager->renderFPS(texturedProgram, testLight, glm::mat4(1.0), testCube->object_getMesh(), testCube->object_getIndex(), fps);
