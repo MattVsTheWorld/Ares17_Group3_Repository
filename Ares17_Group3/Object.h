@@ -4,6 +4,11 @@
 #include "rt3dObjLoader.h"
 #include "loadBitmap.h"
 #include <vector>
+#include <stack>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 using namespace std;
 
 class Object {
@@ -22,7 +27,9 @@ protected:
 public:
 	Object();
 	~Object();
-
+	std::stack<glm::mat4> Object::renderObject(glm::mat4 projection, std::stack<glm::mat4> mvStack, GLuint shader,
+		MeshManager::lightStruct light, MeshManager::materialStruct material,
+		glm::vec3 transVec, glm::vec3 scaleVec, glm::vec3 rotateVec, float angle);
 	GLuint object_getIndex();
 	GLuint object_getTexture();
 	GLuint object_getMesh();

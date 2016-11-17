@@ -15,6 +15,10 @@ namespace SceneManager {
 	float SCREENWIDTH = 800.0f;
 	float SCREENHEIGHT = 600.0f;
 
+	glm::vec3 transTest = glm::vec3(-10.0f, -0.1f, -10.0f);		
+	glm::vec3 scaleTest = glm::vec3(20.0f, 0.1f, 20.0f);
+	glm::vec3 nullTest = glm::vec3(0.0f, 0.0f, 0.0f);
+
 	const char *testTexFiles[6] = {
 		"Town-skybox/Town_bk.bmp", "Town-skybox/Town_ft.bmp", "Town-skybox/Town_rt.bmp", "Town-skybox/Town_lf.bmp", "Town-skybox/Town_up.bmp", "Town-skybox/Town_dn.bmp"
 	};
@@ -96,11 +100,8 @@ namespace SceneManager {
 		if (keys[SDL_SCANCODE_R]) eye.y += 0.1;
 		else if (keys[SDL_SCANCODE_F]) eye.y -= 0.1;
 
-		if (keys[SDL_SCANCODE_COMMA]) camRotation -= 1.0f;
-		else if (keys[SDL_SCANCODE_PERIOD]) camRotation += 1.0f;
-
-		if (keys[SDL_SCANCODE_O]) camy += 0.05; // move camera downwards (because of how the controls are set)
-		else if (keys[SDL_SCANCODE_P]) camy -= 0.05; // move camera upwards
+	//	if (keys[SDL_SCANCODE_COMMA]) camRotation -= 1.0f;
+	//	else if (keys[SDL_SCANCODE_PERIOD]) camRotation += 1.0f;s
 
 		if (keys[SDL_SCANCODE_1]) {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -129,25 +130,12 @@ namespace SceneManager {
 		skybox = new Skybox(testTexFiles);
 	}
 
-	void renderTestCube(glm::mat4 proj) {
-		glUseProgram(shaderProgram);
-		MeshManager::setLight(shaderProgram, testLight);
-		mvStack.push(mvStack.top());// push modelview to stack
-		mvStack.top() = glm::translate(mvStack.top(), glm::vec3(-10.0f, -0.1f, -10.0f));
-		mvStack.top() = glm::scale(mvStack.top(), glm::vec3(20.0f, 0.1f, 20.0f));
-		glBindTexture(GL_TEXTURE_2D, testCube->object_getTexture());
-		MeshManager::setUniformMatrix4fv(shaderProgram, "modelview", glm::value_ptr(mvStack.top()));
-		MeshManager::setUniformMatrix4fv(shaderProgram, "projection", glm::value_ptr(proj));
-		MeshManager::setMaterial(shaderProgram, testMaterial);
-		MeshManager::drawIndexedMesh(testCube->object_getMesh(), testCube->object_getIndex(), GL_TRIANGLES);
-		mvStack.pop();
-	}
 
 	void renderObject(glm::mat4 proj) {
 		shader->Use();
 	//	MeshManager::setLight(shader.Program, testLight);
 		mvStack.push(mvStack.top());// push modelview to stack
-		glCullFace(GL_FRONT);
+		glCullFace(GL_BACK);
 		MeshManager::setUniformMatrix4fv(shader->Program, "projection", glm::value_ptr(proj));
 		MeshManager::setUniformMatrix4fv(shader->Program, "view", glm::value_ptr(mvStack.top()));
 		mvStack.top() = glm::translate(mvStack.top(), glm::vec3(-10.0f, -0.1f, -10.0f));
@@ -161,7 +149,7 @@ namespace SceneManager {
 		
 		//	MeshManager::setMaterial(shader->Program, testMaterial);
 		mvStack.pop();
-		glCullFace(GL_BACK);
+	//	glCullFace(GL_BACK);
 	}
 
 	void update(SDL_Window * window) {
@@ -189,7 +177,7 @@ namespace SceneManager {
 
 		mvStack = skybox->renderSkybox(projection, mvStack, testCube->object_getMesh(), testCube->object_getIndex());
 
-		renderTestCube(projection);
+		mvStack = testCube->renderObject(projection, mvStack, shaderProgram, testLight, testMaterial, transTest, scaleTest, nullTest, 0);
 		renderObject(projection);
 
 		mvStack.pop();
