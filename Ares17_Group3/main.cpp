@@ -118,7 +118,7 @@ int main(int argc, char *argv[]) {
 			if (sdlEvent.type == SDL_QUIT)
 				running = false;
 		}
-		SceneManager::update(sdlEvent, hWindow);	// update function
+		SceneManager::update(hWindow);	// update function
 		SceneManager::draw(hWindow, 0); // draw function
 
 		//SDL_Delay(500); // 500 should make 2 frames per second.
