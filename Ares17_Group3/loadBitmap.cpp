@@ -4,7 +4,9 @@
 // taken from the labs
 namespace loadBitmap
 {
+
 	GLuint loadBitmap(char *fname) {
+		std::cout << "++ load bitmap debug message, once\n";
 		GLuint texID;
 		glGenTextures(1, &texID); // generate texture ID
 

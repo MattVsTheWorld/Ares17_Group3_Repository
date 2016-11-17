@@ -138,8 +138,9 @@ namespace SceneManager {
 		mvStack = skybox->renderSkybox(projection, mvStack, testCube->object_getMesh(), testCube->object_getIndex());
 		mvStack = testCube->renderObject(projection, mvStack, shaderProgram, testLight, testMaterial, transTest, scaleTest, nullTest, 0);
 		//renderTestCube(projection);
+		mvStack.pop();
 	
-		h_manager->renderFPS(texturedProgram, testLight, glm::mat4 (1.0), testCube->object_getMesh(), testCube->object_getIndex(), fps);
+		//h_manager->renderFPS(texturedProgram, testLight, glm::mat4 (1.0), testCube->object_getMesh(), testCube->object_getIndex(), fps);
 	
 		SDL_GL_SwapWindow(window); // swap buffers
 	}

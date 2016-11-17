@@ -1,6 +1,7 @@
 #include "Object.h"
 
 Object::Object(){
+	std::cout << "++ load object debug message, once\n";
 	rt3d::loadObj("cube.obj", verts, norms, tex_coords, indices);
 	GLuint size = indices.size();
 	meshIndexCount = size;

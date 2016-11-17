@@ -25,6 +25,7 @@ namespace MeshManager {
 		const GLfloat* normals, const GLfloat* texcoords, const GLuint indexCount, const GLuint* indices) {
 		GLuint VAO;
 		// generate and set up a VAO for the mesh
+		std::cout << "++ create mesh debug message, once\n";
 		glGenVertexArrays(1, &VAO);
 		glBindVertexArray(VAO);
 

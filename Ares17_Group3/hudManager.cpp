@@ -3,6 +3,7 @@
 // functions provided in the labs
 // allow to render text to a texture
 GLuint hudManager::textToTexture(const char * str, GLuint textID) {
+
 	GLuint texture = textID;
 	TTF_Font * font = textFont;
 
@@ -35,6 +36,7 @@ void hudManager::clearTextTexture(GLuint textID) {
 
 // initialize hud manager, open font
 hudManager::hudManager() {
+	std::cout << "++ hud manager debug message, once\n";
 	// set up TrueType / SDL_ttf
 	if (TTF_Init() == -1)
 		std::cout << "TTF failed to initialise." << std::endl;
