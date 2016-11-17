@@ -1,11 +1,12 @@
 #include "SceneManager.h"
 #include "Model.h"
-#include "Shader.h"
+//#include "Shader.h"
 using namespace std;
 
 // this class still needs a lot of work
 namespace SceneManager {
 	Object *testCube;
+	Object *testCube2;
 	GLuint shaderProgram;
 	GLuint texturedProgram;
 	GLuint modelProgram;
@@ -24,7 +25,7 @@ namespace SceneManager {
 	};
 
 	// Setup and compile our shaders
-	Shader *shader;
+//	Shader *shader;
 
 	// Load models
 	Model *ourModel;
@@ -120,36 +121,38 @@ namespace SceneManager {
 	void init(void) {
 		shaderProgram = ShaderManager::initShaders("phong-tex.vert", "phong-tex.frag");
 		texturedProgram = ShaderManager::initShaders("textured.vert", "textured.frag");
-		//modelProgram = ShaderManager::initShaders("modelLoading.vert", "modelLoading.frag");
+		modelProgram = ShaderManager::initShaders("modelLoading.vert", "modelLoading.frag");
 		ourModel = new Model("Nanosuit/nanosuit.obj");
-		shader = new Shader("modelLoading.vert", "modelLoading.frag");
+		//shader = new Shader("modelLoading.vert", "modelLoading.frag");
 		MeshManager::setLight(shaderProgram, testLight);
 		MeshManager::setMaterial(shaderProgram, testMaterial);
 		testCube = new Object();
+		testCube2 = new Object("studdedmetal.bmp");
 		h_manager = new hudManager();
 		skybox = new Skybox(testTexFiles);
 	}
 
 
 	void renderObject(glm::mat4 proj) {
-		shader->Use();
+		//shader->Use();
+		glUseProgram(modelProgram);
 	//	MeshManager::setLight(shader.Program, testLight);
 		mvStack.push(mvStack.top());// push modelview to stack
-		glCullFace(GL_BACK);
-		MeshManager::setUniformMatrix4fv(shader->Program, "projection", glm::value_ptr(proj));
-		MeshManager::setUniformMatrix4fv(shader->Program, "view", glm::value_ptr(mvStack.top()));
-		mvStack.top() = glm::translate(mvStack.top(), glm::vec3(-10.0f, -0.1f, -10.0f));
+//		glCullFace(GL_BACK);
+		MeshManager::setUniformMatrix4fv(modelProgram, "projection", glm::value_ptr(proj));
+		MeshManager::setUniformMatrix4fv(modelProgram, "view", glm::value_ptr(mvStack.top()));
+	//	mvStack.top() = glm::translate(mvStack.top(), glm::vec3(-10.0f, -0.1f, -10.0f));
 		// Draw the loaded model
 		glm::mat4 model;
-		model = glm::translate(model, glm::vec3(0.0f, -1.75f, 0.0f)); // Translate it down a bit so it's at the center of the scene
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Translate it down a bit so it's at the center of the scene
 		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));	// It's a bit too big for our scene, so scale it down
-		glUniformMatrix4fv(glGetUniformLocation(shader->Program, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(model));
-		ourModel->Draw(shader);
+		glUniformMatrix4fv(glGetUniformLocation(modelProgram, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(model));
+		ourModel->Draw(modelProgram);
 		//glBindTexture(GL_TEXTURE_2D, testCube->object_getTexture());
 		
 		//	MeshManager::setMaterial(shader->Program, testMaterial);
 		mvStack.pop();
-	//	glCullFace(GL_BACK);
+	//	glCullFace(GL_BACK);-+
 	}
 
 	void update(SDL_Window * window) {
@@ -161,7 +164,22 @@ namespace SceneManager {
 		at.y -= camy;
 		mvStack.top() = glm::lookAt(eye, at, up);
 	}
+	/*
+	void renderTest(glm::mat4 projection) {
+		glUseProgram(shaderProgram);
+		MeshManager::setLight(shaderProgram, testLight);
 
+		mvStack.push(mvStack.top());// push modelview to stack
+
+		glBindTexture(GL_TEXTURE_2D, testCube2->object_getTexture());
+		MeshManager::setUniformMatrix4fv(shaderProgram, "modelview", glm::value_ptr(mvStack.top()));
+		MeshManager::setUniformMatrix4fv(shaderProgram, "projection", glm::value_ptr(projection));
+		MeshManager::setMaterial(shaderProgram, testMaterial);
+		MeshManager::drawIndexedMesh(testCube->object_getMesh(), testCube->object_getIndex(), GL_TRIANGLES);
+		mvStack.pop();
+
+	}
+	*/
 
 	void draw(SDL_Window * window, float fps) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear window
@@ -178,6 +196,10 @@ namespace SceneManager {
 		mvStack = skybox->renderSkybox(projection, mvStack, testCube->object_getMesh(), testCube->object_getIndex());
 
 		mvStack = testCube->renderObject(projection, mvStack, shaderProgram, testLight, testMaterial, transTest, scaleTest, nullTest, 0);
+
+		mvStack = testCube2->renderObject(projection, mvStack, shaderProgram, testLight, testMaterial, glm::vec3(0.0, 2.0, -2.0), glm::vec3(0.5,0.5,0.5), nullTest, 0);
+
+//		renderTest(projection);
 		renderObject(projection);
 
 		mvStack.pop();

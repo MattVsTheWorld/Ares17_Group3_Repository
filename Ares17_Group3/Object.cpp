@@ -9,6 +9,15 @@ Object::Object(){
 		norms.data(), tex_coords.data(), size, indices.data()); // create a mesh
 }
 
+Object::Object(char *texturePath) {
+	rt3d::loadObj("cube.obj", verts, norms, tex_coords, indices);
+	GLuint size = indices.size();
+	meshIndexCount = size;
+	texture = loadBitmap::loadBitmap(texturePath); // load a texture
+	meshObject = MeshManager::createMesh(verts.size() / 3, verts.data(), nullptr,
+		norms.data(), tex_coords.data(), size, indices.data()); // create a mesh
+}
+
 Object::~Object() {
 //	delete this;
 }
@@ -18,7 +27,6 @@ std::stack<glm::mat4> Object::renderObject(glm::mat4 projection, std::stack<glm:
 	glm::vec3 transVec, glm::vec3 scaleVec, glm::vec3 rotateVec, float angle) {
 	glUseProgram(shader);
 	MeshManager::setLight(shader, light);
-	MeshManager::setMaterial(shader, material);
 	mvStack.push(mvStack.top());// push modelview to stack
 	//	if (transVec != glm::vec3(0.0f, 0.0f, 0.0f))
 		mvStack.top() = glm::translate(mvStack.top(), transVec);

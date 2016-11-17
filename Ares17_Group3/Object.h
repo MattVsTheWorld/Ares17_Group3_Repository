@@ -26,6 +26,7 @@ protected:
 
 public:
 	Object();
+	Object(char *texturePath);
 	~Object();
 	std::stack<glm::mat4> Object::renderObject(glm::mat4 projection, std::stack<glm::mat4> mvStack, GLuint shader,
 		MeshManager::lightStruct light, MeshManager::materialStruct material,

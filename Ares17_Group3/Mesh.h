@@ -10,7 +10,6 @@ using namespace std;
 #include <GL/glew.h> // Contains all the necessery OpenGL includes
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include "Shader.h"
 
 struct Vertex {
 	// Position
@@ -47,7 +46,7 @@ public:
 	}
 
 	// Render the mesh
-	void Draw(Shader shader)
+	void Draw(GLuint shader)
 	{
 		// Bind appropriate textures
 		GLuint diffuseNr = 1;
@@ -65,13 +64,13 @@ public:
 				ss << specularNr++; // Transfer GLuint to stream
 			number = ss.str();
 			// Now set the sampler to the correct texture unit
-			glUniform1i(glGetUniformLocation(shader.Program, (name + number).c_str()), i);
+			glUniform1i(glGetUniformLocation(shader, (name + number).c_str()), i);
 			// And finally bind the texture
 			glBindTexture(GL_TEXTURE_2D, this->textures[i].id);
 		}
 
 		// Also set each mesh's shininess property to a default value (if you want you could extend this to another mesh property and possibly change this value)
-		glUniform1f(glGetUniformLocation(shader.Program, "material.shininess"), 16.0f);
+		glUniform1f(glGetUniformLocation(shader, "material.shininess"), 16.0f);
 
 		// Draw mesh
 		glBindVertexArray(this->VAO);
