@@ -125,7 +125,7 @@ namespace SceneManager {
 		modelProgram = ShaderManager::initShaders("modelLoading.vert", "modelLoading.frag");
 		ourModel = new Model("Nanosuit/nanosuit.obj");
 	//	ourModel2 = new Model("gun/wep.obj");
-		ourModel2 = new Model("gun/tkb022_3.obj");
+		ourModel2 = new Model("CHOO/Socom pistol.obj");
 		//shader = new Shader("modelLoading.vert", "modelLoading.frag");
 		MeshManager::setLight(shaderProgram, testLight);
 		MeshManager::setMaterial(shaderProgram, testMaterial);
@@ -208,9 +208,9 @@ namespace SceneManager {
 		mvStack = testCube2->renderObject(projection, mvStack, shaderProgram, testLight, testMaterial, glm::vec3(0.0, 2.0, -2.0), glm::vec3(0.5,0.5,0.5), nullTest, 0);
 
 //		renderTest(projection);
-		
-		renderObject(projection,ourModel);
 		renderWep(projection, ourModel2);
+		renderObject(projection,ourModel);
+
 
 		mvStack.pop();
 		// h_manager->renderFPS(texturedProgram, testLight, glm::mat4(1.0), testCube->object_getMesh(), testCube->object_getIndex(), fps);
