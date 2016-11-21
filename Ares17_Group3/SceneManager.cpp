@@ -5,10 +5,12 @@ using namespace std;
 
 // this class still needs a lot of work
 namespace SceneManager {
+	/*
 	Object *testCube;
 	Object *testCube2;
 	Object *testCube3;
-	Object *testCube4;
+	Object *testCube4;*/ // cubes were starting to get out of hand
+	Object *testCubes[5]; // arrays :D
 	float theta = 0.0f;
 	float movement = 0.05;
 	GLuint shaderProgram;
@@ -26,9 +28,7 @@ namespace SceneManager {
 	glm::vec3 nullTest = glm::vec3(0.0f, 0.0f, 0.0f);
 	glm::vec3 testMove = glm::vec3(0.0, 2.0, -2.0);
 
-	transformation_Matrices testTransformation = {
-		transTest, scaleTest, nullTest
-	};
+	transformation_Matrices testTransformation = { transTest, scaleTest, nullTest };
 
 	float angleTest;
 
@@ -138,14 +138,16 @@ namespace SceneManager {
 	}
 
 	void initObjects() {
-		testCube = new Object(testTransformation);
+		testCubes[0] = new Object(testTransformation);
 		transformation_Matrices test2 = { testMove, glm::vec3(0.5, 0.5, 0.5), nullTest };
 	//	transformation_Matrices(testMove, glm::vec3(0.5, 0.5, 0.5), nullTest)
-		testCube2 = new Object(test2, "studdedmetal.bmp");
+		testCubes[1] = new Object(test2, "studdedmetal.bmp");
 		transformation_Matrices test3 = { glm::vec3(-3.0, 2.0, 0.0), glm::vec3(0.5, 1.5, 0.5), glm::vec3(0.0, 1.0, 0.0) };
-		testCube3 = new Object(test3, "angry.bmp");
+		testCubes[2] = new Object(test3, "angry.bmp");
 		transformation_Matrices test4 = { glm::vec3(2.0, 3.0, -2.0), glm::vec3(0.8, 0.8, 0.8), nullTest };
-		testCube4 = new Object(test4);
+		testCubes[3] = new Object(test4);
+		transformation_Matrices test5 = { glm::vec3(2.0,4.0, 2.0), glm::vec3(1.5,1.5,1.5), nullTest };
+		testCubes[4] = new Object(test5);
 	}
 
 	void init(void) {
@@ -164,7 +166,6 @@ namespace SceneManager {
 		skybox = new Skybox(testTexFiles);
 		physicsManager = new Physics();
 
-
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -174,7 +175,6 @@ namespace SceneManager {
 	void renderObject(glm::mat4 proj, Model *modelData) {
 		glUseProgram(modelProgram);
 		mvStack.push(mvStack.top());// push modelview to stack
-//		glCullFace(GL_BACK);
 		MeshManager::setUniformMatrix4fv(modelProgram, "projection", glm::value_ptr(proj));
 		MeshManager::setUniformMatrix4fv(modelProgram, "view", glm::value_ptr(mvStack.top()));
 	//	mvStack.top() = glm::translate(mvStack.top(), glm::vec3(-10.0f, -0.1f, -10.0f));
@@ -186,7 +186,6 @@ namespace SceneManager {
 		modelData->Draw(modelProgram);
 		
 		mvStack.pop();
-	//	glCullFace(GL_BACK);
 	}
 
 	void renderWep(glm::mat4 proj, Model *modelData) {
@@ -200,7 +199,7 @@ namespace SceneManager {
 		// Draw the loaded model
 		glm::mat4 model;
 		model = glm::translate(model, glm::vec3(0.0f, 2.0f, 1.0f)); // Translate it down a bit so it's at the center of the scene
-		model = glm::scale(model, glm::vec3(0.0005f, 0.0005f, 0.0005f));	// It's a bit too big for our scene, so scale it down
+		model = glm::scale(model, glm::vec3(0.005f, 0.005f, 0.005f));	// It's a bit too big for our scene, so scale it down
 		glUniformMatrix4fv(glGetUniformLocation(modelProgram, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(model));
 		modelData->Draw(modelProgram);
 
@@ -208,8 +207,26 @@ namespace SceneManager {
 		//	glCullFace(GL_BACK);
 	}
 
+	void moveObjects() {
+		// MOVEMENT TESTING (testcube 2)
+		if (testMove.x >= 1.0) movement = -0.05;
+		else if (testMove.x <= -1.0) movement = 0.05;
+		testMove.x += movement;
+		testCubes[1]->setPosition(testMove);
+
+		// rotate rotating cube (testcube 3)
+		theta += 0.1f;
+
+		// move testcube 4
+		glm::vec3 currentPos = testCubes[3]->getPosition();
+		currentPos.y = physicsManager->applyGravity(currentPos);
+		testCubes[3]->setPosition(currentPos);
+
+	}
+
 	void update(SDL_Window * window) {
 		controls(window);
+		moveObjects();
 	}
 
 	void camera() {
@@ -231,25 +248,16 @@ namespace SceneManager {
 		camera();
 		projection = glm::perspective(float(60.0f*DEG_TO_RADIAN), SCREENWIDTH / SCREENHEIGHT, 1.0f, 100.0f);
 
-		mvStack = skybox->renderSkybox(projection, mvStack, testCube->object_getMesh(), testCube->object_getIndex());
+		mvStack = skybox->renderSkybox(projection, mvStack, testCubes[0]->object_getMesh(), testCubes[0]->object_getIndex());
 
-		mvStack = testCube->renderObject(projection, mvStack, shaderProgram, testLight, greenMaterial, 0);
+		mvStack = testCubes[0]->renderObject(projection, mvStack, shaderProgram, testLight, greenMaterial, 0);
 
-		mvStack = testCube2->renderObject(projection, mvStack, shaderProgram, testLight, greenMaterial, 0);
+		mvStack = testCubes[1]->renderObject(projection, mvStack, shaderProgram, testLight, greenMaterial, 0);
 	
-		if (testMove.x >= 1.0) movement = -0.05;
-		else if (testMove.x <= -1.0) movement = 0.05;
-		testMove.x += movement;
-		testCube2->setPosition(testMove);
-
-		theta += 0.1f;
-		mvStack = testCube3->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, theta);
-
-		glm::vec3 currentPos = testCube4->getPosition();
-		currentPos.y = physicsManager->applyGravity(currentPos);
-		testCube4->setPosition(currentPos);
-		mvStack = testCube4->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, theta);
-
+		mvStack = testCubes[2]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, theta);
+	
+		mvStack = testCubes[3]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0);
+		// RENDERING MODELS
 //		renderTest(projection);
 		renderWep(projection, ourModel2);
 		renderObject(projection,ourModel);

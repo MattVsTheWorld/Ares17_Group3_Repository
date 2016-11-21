@@ -19,9 +19,9 @@ private:
 protected:
 public:
 	Physics();
-
-	// EXTREMELY simplistic gravity; will modify it once I get home
+	// simplistic definition	
 	float applyGravity(glm::vec3 pos);
+
 
 };
 #endif
