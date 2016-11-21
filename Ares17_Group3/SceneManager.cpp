@@ -97,7 +97,15 @@ namespace SceneManager {
 			camRotation -= 360;
 	}
 
-	void controls(SDL_Window * window) {
+	void move() {
+		eye = moveForward(eye, camRotation, 0.1f);
+	}
+	void move2() {
+		eye = moveRight(eye, camRotation, 0.1f);
+	}
+	bool click = false;
+	bool click2 = false;
+	void controls(SDL_Window * window, SDL_Event sdlEvent) {
 		int MidX = SCREENWIDTH / 2;
 		int MidY = SCREENHEIGHT / 2;
 
@@ -112,6 +120,20 @@ namespace SceneManager {
 		glRotatef(-camy, 1.0, 0.0, 0.0);
 		glRotatef(-camRotation, 0.0, 1.0, 0.0);
 		SDL_WarpMouseInWindow(window, MidX, MidY);
+
+		if (sdlEvent.type == SDL_MOUSEBUTTONDOWN) {
+			if (sdlEvent.button.button == SDL_BUTTON_LEFT) click = true;
+			if (sdlEvent.button.button == SDL_BUTTON_RIGHT) click2 = true;
+		}
+		if (sdlEvent.type == SDL_MOUSEBUTTONUP) {
+			click = false;
+			click2 = false;
+		}
+		
+		if (click == true)
+			move();
+		if (click2 == true)
+			move2();
 
 		const Uint8 *keys = SDL_GetKeyboardState(NULL);
 		if (keys[SDL_SCANCODE_W]) eye = moveForward(eye, camRotation, 0.1f);
@@ -224,8 +246,8 @@ namespace SceneManager {
 
 	}
 
-	void update(SDL_Window * window) {
-		controls(window);
+	void update(SDL_Window * window, SDL_Event sdlEvent) {
+		controls(window, sdlEvent);
 		moveObjects();
 	}
 
