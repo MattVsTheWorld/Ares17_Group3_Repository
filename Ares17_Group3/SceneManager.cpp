@@ -7,6 +7,8 @@ using namespace std;
 namespace SceneManager {
 	Object *testCube;
 	Object *testCube2;
+	Object *testCube3;
+	float theta = 0.0f;
 	GLuint shaderProgram;
 	GLuint texturedProgram;
 	GLuint modelProgram;
@@ -19,6 +21,7 @@ namespace SceneManager {
 	glm::vec3 transTest = glm::vec3(-10.0f, -0.1f, -10.0f);		
 	glm::vec3 scaleTest = glm::vec3(20.0f, 0.1f, 20.0f);
 	glm::vec3 nullTest = glm::vec3(0.0f, 0.0f, 0.0f);
+	float angleTest;
 
 	const char *testTexFiles[6] = {
 		"Town-skybox/Town_bk.bmp", "Town-skybox/Town_ft.bmp", "Town-skybox/Town_rt.bmp", "Town-skybox/Town_lf.bmp", "Town-skybox/Town_up.bmp", "Town-skybox/Town_dn.bmp"
@@ -129,8 +132,9 @@ namespace SceneManager {
 		//shader = new Shader("modelLoading.vert", "modelLoading.frag");
 		MeshManager::setLight(shaderProgram, testLight);
 		MeshManager::setMaterial(shaderProgram, testMaterial);
-		testCube = new Object();
-		testCube2 = new Object("studdedmetal.bmp");
+		testCube = new Object(transTest, scaleTest, nullTest);
+		testCube2 = new Object(nullTest, glm::vec3(0.5, 0.5, 0.5), nullTest, "studdedmetal.bmp");
+		testCube3 = new Object(glm::vec3(-3.0, 2.0, 0.0), glm::vec3(0.5, 1.5, 0.5), glm::vec3(0.0, 1.0, 0.0), "angry.bmp");
 		h_manager = new hudManager();
 		skybox = new Skybox(testTexFiles);
 
@@ -150,7 +154,7 @@ namespace SceneManager {
 	//	mvStack.top() = glm::translate(mvStack.top(), glm::vec3(-10.0f, -0.1f, -10.0f));
 		// Draw the loaded model
 		glm::mat4 model;
-		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Translate it down a bit so it's at the center of the scene
+		model = glm::translate(model, glm::vec3(0.0f, 0.5f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));	// It's a bit too big for our scene, so scale it down
 		glUniformMatrix4fv(glGetUniformLocation(modelProgram, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(model));
 		modelData->Draw(modelProgram);
@@ -203,9 +207,12 @@ namespace SceneManager {
 
 		mvStack = skybox->renderSkybox(projection, mvStack, testCube->object_getMesh(), testCube->object_getIndex());
 
-		mvStack = testCube->renderObject(projection, mvStack, shaderProgram, testLight, testMaterial, transTest, scaleTest, nullTest, 0);
+		mvStack = testCube->renderObject(projection, mvStack, shaderProgram, testLight, testMaterial, 0);
 
-		mvStack = testCube2->renderObject(projection, mvStack, shaderProgram, testLight, testMaterial, glm::vec3(0.0, 2.0, -2.0), glm::vec3(0.5,0.5,0.5), nullTest, 0);
+		mvStack = testCube2->renderObject(projection, mvStack, shaderProgram, testLight, testMaterial, 0);
+		
+		theta += 0.1f;
+		mvStack = testCube3->renderObject(projection, mvStack, shaderProgram, testLight, testMaterial, theta);
 
 //		renderTest(projection);
 		renderWep(projection, ourModel2);

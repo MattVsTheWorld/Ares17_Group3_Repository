@@ -21,21 +21,26 @@ private:
 	GLuint meshIndexCount = 0;
 	GLuint texture;
 	GLuint meshObject;
+	glm::vec3 position;
+	glm::vec3 scale;
+	glm::vec3 rotation;
+	float rotationAngle;
+
 
 protected:
 
 public:
-	Object();
-	Object(char *texturePath);
+	// deprecated constructor
+	Object(glm::vec3 pos, glm::vec3 scal, glm::vec3 rot);
+	Object(glm::vec3 pos, glm::vec3 scal, glm::vec3 rot, char *texturePath);
 	~Object();
 	std::stack<glm::mat4> Object::renderObject(glm::mat4 projection, std::stack<glm::mat4> mvStack, GLuint shader,
-		MeshManager::lightStruct light, MeshManager::materialStruct material,
-		glm::vec3 transVec, glm::vec3 scaleVec, glm::vec3 rotateVec, float angle);
+		MeshManager::lightStruct light, MeshManager::materialStruct material, float rot);
 	GLuint object_getIndex();
 	GLuint object_getTexture();
 	GLuint object_getMesh();
+	void setPosition(glm::vec3 NewPos);
 
-	// I need a blue banana
 
 };
 

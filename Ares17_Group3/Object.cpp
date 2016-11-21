@@ -1,21 +1,28 @@
 #include "Object.h"
 
-Object::Object(){
+// probably get rid of this constructor
+Object::Object(glm::vec3 pos, glm::vec3 scal, glm::vec3 rot) {
 	rt3d::loadObj("cube.obj", verts, norms, tex_coords, indices);
 	GLuint size = indices.size();
 	meshIndexCount = size;
 	texture = loadBitmap::loadBitmap("wall.bmp"); // load a texture
 	meshObject = MeshManager::createMesh(verts.size() / 3, verts.data(), nullptr,
 		norms.data(), tex_coords.data(), size, indices.data()); // create a mesh
+	position = pos;
+	scale = scal;
+	rotation = rot;
 }
 
-Object::Object(char *texturePath) {
+Object::Object(glm::vec3 pos, glm::vec3 scal, glm::vec3 rot, char *texturePath) {
 	rt3d::loadObj("cube.obj", verts, norms, tex_coords, indices);
 	GLuint size = indices.size();
 	meshIndexCount = size;
 	texture = loadBitmap::loadBitmap(texturePath); // load a texture
 	meshObject = MeshManager::createMesh(verts.size() / 3, verts.data(), nullptr,
 		norms.data(), tex_coords.data(), size, indices.data()); // create a mesh
+	position = pos;
+	scale = scal;
+	rotation = rot;
 }
 
 Object::~Object() {
@@ -23,18 +30,19 @@ Object::~Object() {
 }
 
 std::stack<glm::mat4> Object::renderObject(glm::mat4 projection, std::stack<glm::mat4> mvStack, GLuint shader,
-	MeshManager::lightStruct light, MeshManager::materialStruct material,
-	glm::vec3 transVec, glm::vec3 scaleVec, glm::vec3 rotateVec, float angle) {
+	MeshManager::lightStruct light, MeshManager::materialStruct material, float rot) {
 
 	glUseProgram(shader);
 	MeshManager::setLight(shader, light);
 	mvStack.push(mvStack.top());// push modelview to stack
-	//	if (transVec != glm::vec3(0.0f, 0.0f, 0.0f))
-		mvStack.top() = glm::translate(mvStack.top(), transVec);
-	if (rotateVec != glm::vec3(0.0f, 0.0f, 0.0f))
-		mvStack.top() = glm::rotate(mvStack.top(), angle, rotateVec);
-	//	if (scaleVec != glm::vec3(0.0f, 0.0f, 0.0f))
-		mvStack.top() = glm::scale(mvStack.top(), scaleVec);
+	if (position != glm::vec3(0.0f, 0.0f, 0.0f))
+		mvStack.top() = glm::translate(mvStack.top(), position);
+	if (rotation != glm::vec3(0.0f, 0.0f, 0.0f)){
+		rotationAngle = rot;
+		mvStack.top() = glm::rotate(mvStack.top(), rotationAngle, rotation);
+	}
+	if (scale != glm::vec3(0.0f, 0.0f, 0.0f))
+		mvStack.top() = glm::scale(mvStack.top(), scale);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture);
 	MeshManager::setUniformMatrix4fv(shader, "modelview", glm::value_ptr(mvStack.top()));
@@ -54,4 +62,8 @@ GLuint Object::object_getTexture() {
 }
 GLuint Object::object_getMesh() {
 	return meshObject;
+}
+
+void Object::setPosition(glm::vec3 newPos) {
+	position = newPos;
 }
