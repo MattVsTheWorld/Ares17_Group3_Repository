@@ -11,6 +11,7 @@ namespace SceneManager {
 	Object *testCube3;
 	Object *testCube4;*/ // cubes were starting to get out of hand
 	Object *testCubes[5]; // arrays :D
+	Object *bullet;
 	float theta = 0.0f;
 	float movement = 0.05;
 	GLuint shaderProgram;
@@ -97,14 +98,22 @@ namespace SceneManager {
 			camRotation -= 360;
 	}
 
-	void move() {
-		eye = moveForward(eye, camRotation, 0.1f);
-	}
 	void move2() {
 		eye = moveRight(eye, camRotation, 0.1f);
 	}
 	bool click = false;
 	bool click2 = false;
+
+	void bulletCreation(transformation_Matrices bulletTest) {
+		bullet = new Object(bulletTest, "angry.bmp");
+	}
+	float increment = 0.1;
+	glm::vec3 bulletPos(eye);
+	void bulletFunction() {
+		glm::vec3 newPosition(bulletPos.x + increment*std::sin(camRotation*DEG_TO_RADIAN), bulletPos.y + increment, bulletPos.z + increment*std::cos(camRotation*DEG_TO_RADIAN));
+		bullet->setPosition(newPosition);
+	}
+
 	void controls(SDL_Window * window, SDL_Event sdlEvent) {
 		int MidX = SCREENWIDTH / 2;
 		int MidY = SCREENHEIGHT / 2;
@@ -130,8 +139,12 @@ namespace SceneManager {
 			click2 = false;
 		}
 		
-		if (click == true)
-			move();
+		if (click == true) {
+			//position, scale, rotation
+			transformation_Matrices bulletTest = { eye, glm::vec3(0.5, 0.5, 0.5), glm::vec3(0.0, 0.0, 0.0) };
+			bulletCreation(bulletTest);
+		}
+
 		if (click2 == true)
 			move2();
 
@@ -144,7 +157,7 @@ namespace SceneManager {
 		else if (keys[SDL_SCANCODE_F]) eye.y -= 0.1;
 
 	//	if (keys[SDL_SCANCODE_COMMA]) camRotation -= 1.0f;
-	//	else if (keys[SDL_SCANCODE_PERIOD]) camRotation += 1.0f;s
+	//	else if (keys[SDL_SCANCODE_PERIOD]) camRotation += 1.0f;
 
 		if (keys[SDL_SCANCODE_1]) {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -283,6 +296,9 @@ namespace SceneManager {
 //		renderTest(projection);
 		renderWep(projection, ourModel2);
 		renderObject(projection,ourModel);
+		
+		//bulletFunction();
+
 		//:thinking:
 
 		mvStack.pop();
