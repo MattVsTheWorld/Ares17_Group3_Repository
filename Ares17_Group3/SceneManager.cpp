@@ -231,7 +231,7 @@ namespace SceneManager {
 //		renderTest(projection);
 		renderWep(projection, ourModel2);
 		renderObject(projection,ourModel);
-
+		//:thinking:
 
 		mvStack.pop();
 		// h_manager->renderFPS(texturedProgram, testLight, glm::mat4(1.0), testCube->object_getMesh(), testCube->object_getIndex(), fps);
