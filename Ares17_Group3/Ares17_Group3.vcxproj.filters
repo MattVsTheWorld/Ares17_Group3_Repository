@@ -16,6 +16,9 @@
     <Filter Include="Engine">
       <UniqueIdentifier>{f7566477-288d-478d-b7d0-c31cf8a5c67e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Being worked on">
+      <UniqueIdentifier>{d6406d72-4a65-4021-8bdf-075a39d54a7a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -47,6 +50,9 @@
     </ClCompile>
     <ClCompile Include="Skybox.cpp">
       <Filter>Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="Physics.cpp">
+      <Filter>Being worked on</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -85,6 +91,9 @@
     </ClInclude>
     <ClInclude Include="Mesh.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics.h">
+      <Filter>Being worked on</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
