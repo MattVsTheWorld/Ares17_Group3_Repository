@@ -11,6 +11,20 @@
 
 using namespace std;
 
+struct transformation_Matrices {
+	glm::vec3 position;
+	glm::vec3 scale;
+	glm::vec3 rotation;
+};
+
+struct physics_Properties {
+	float mass;
+	float bounciness = 0.0f;
+	glm::vec3 velocity = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec3 acceleration = glm::vec3(0.0f, 0.0f, 0.0f);
+	bool isOnGround = false;
+};
+
 class Object {
 private:
 	// cube is used for the walls and the skybox
@@ -21,18 +35,17 @@ private:
 	GLuint meshIndexCount = 0;
 	GLuint texture;
 	GLuint meshObject;
-	glm::vec3 position;
-	glm::vec3 scale;
-	glm::vec3 rotation;
+	
 	float rotationAngle;
-
+	transformation_Matrices trans_m;
+	physics_Properties phys_p;
 
 protected:
 
 public:
 	// deprecated constructor
-	Object(glm::vec3 pos, glm::vec3 scal, glm::vec3 rot);
-	Object(glm::vec3 pos, glm::vec3 scal, glm::vec3 rot, char *texturePath);
+	Object(transformation_Matrices transformation);
+	Object(transformation_Matrices transformation, char *texturePath);
 	~Object();
 	std::stack<glm::mat4> Object::renderObject(glm::mat4 projection, std::stack<glm::mat4> mvStack, GLuint shader,
 		MeshManager::lightStruct light, MeshManager::materialStruct material, float rot);
