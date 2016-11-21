@@ -40,8 +40,7 @@ public:
 	GLuint object_getTexture();
 	GLuint object_getMesh();
 	void setPosition(glm::vec3 NewPos);
-
-
+	glm::vec3 getPosition();
 };
 
 #endif

@@ -67,3 +67,7 @@ GLuint Object::object_getMesh() {
 void Object::setPosition(glm::vec3 newPos) {
 	position = newPos;
 }
+
+glm::vec3 Object::getPosition() {
+	return position;
+}

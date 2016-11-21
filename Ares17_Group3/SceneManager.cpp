@@ -9,6 +9,7 @@ namespace SceneManager {
 	Object *testCube2;
 	Object *testCube3;
 	float theta = 0.0f;
+	float movement = 0.05;
 	GLuint shaderProgram;
 	GLuint texturedProgram;
 	GLuint modelProgram;
@@ -21,6 +22,7 @@ namespace SceneManager {
 	glm::vec3 transTest = glm::vec3(-10.0f, -0.1f, -10.0f);		
 	glm::vec3 scaleTest = glm::vec3(20.0f, 0.1f, 20.0f);
 	glm::vec3 nullTest = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec3 testMove = glm::vec3(0.0, 2.0, -2.0);
 	float angleTest;
 
 	const char *testTexFiles[6] = {
@@ -52,10 +54,17 @@ namespace SceneManager {
 		{ 0.0f, 5.0f, 0.0f, 1.0f }  // position
 	};
 
-	MeshManager::materialStruct testMaterial = {
+	MeshManager::materialStruct greenMaterial = {
 		{ 0.6f, 0.4f, 0.2f, 1.0f }, // ambient
 		{ 0.5f, 1.0f, 0.5f, 1.0f }, // diffuse
 		{ 0.0f, 0.1f, 0.0f, 1.0f }, // specular
+		2.0f  // shininess
+	};
+
+	MeshManager::materialStruct defaultMaterial = {
+		{ 0.5f, 0.5f, 0.5f, 1.0f }, // ambient
+		{ 0.5f, 0.5f, 0.5f, 1.0f }, // diffuse
+		{ 0.5f, 0.5f, 0.5f, 1.0f }, // specular
 		2.0f  // shininess
 	};
 
@@ -131,9 +140,9 @@ namespace SceneManager {
 		ourModel2 = new Model("CHOO/Socom pistol.obj");
 		//shader = new Shader("modelLoading.vert", "modelLoading.frag");
 		MeshManager::setLight(shaderProgram, testLight);
-		MeshManager::setMaterial(shaderProgram, testMaterial);
+		MeshManager::setMaterial(shaderProgram, greenMaterial);
 		testCube = new Object(transTest, scaleTest, nullTest);
-		testCube2 = new Object(nullTest, glm::vec3(0.5, 0.5, 0.5), nullTest, "studdedmetal.bmp");
+		testCube2 = new Object(testMove, glm::vec3(0.5, 0.5, 0.5), nullTest, "studdedmetal.bmp");
 		testCube3 = new Object(glm::vec3(-3.0, 2.0, 0.0), glm::vec3(0.5, 1.5, 0.5), glm::vec3(0.0, 1.0, 0.0), "angry.bmp");
 		h_manager = new hudManager();
 		skybox = new Skybox(testTexFiles);
@@ -154,7 +163,7 @@ namespace SceneManager {
 	//	mvStack.top() = glm::translate(mvStack.top(), glm::vec3(-10.0f, -0.1f, -10.0f));
 		// Draw the loaded model
 		glm::mat4 model;
-		model = glm::translate(model, glm::vec3(0.0f, 0.5f, 0.0f));
+	//	model = glm::translate(model, glm::vec3(0.0f, 0.5f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));	// It's a bit too big for our scene, so scale it down
 		glUniformMatrix4fv(glGetUniformLocation(modelProgram, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(model));
 		modelData->Draw(modelProgram);
@@ -207,12 +216,17 @@ namespace SceneManager {
 
 		mvStack = skybox->renderSkybox(projection, mvStack, testCube->object_getMesh(), testCube->object_getIndex());
 
-		mvStack = testCube->renderObject(projection, mvStack, shaderProgram, testLight, testMaterial, 0);
+		mvStack = testCube->renderObject(projection, mvStack, shaderProgram, testLight, greenMaterial, 0);
 
-		mvStack = testCube2->renderObject(projection, mvStack, shaderProgram, testLight, testMaterial, 0);
-		
+		mvStack = testCube2->renderObject(projection, mvStack, shaderProgram, testLight, greenMaterial, 0);
+	
+		if (testMove.x >= 1.0) movement = -0.05;
+		else if (testMove.x <= -1.0) movement = 0.05;
+		testMove.x += movement;
+		testCube2->setPosition(testMove);
+
 		theta += 0.1f;
-		mvStack = testCube3->renderObject(projection, mvStack, shaderProgram, testLight, testMaterial, theta);
+		mvStack = testCube3->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, theta);
 
 //		renderTest(projection);
 		renderWep(projection, ourModel2);
