@@ -8,6 +8,7 @@ namespace SceneManager {
 	Object *testCube;
 	Object *testCube2;
 	Object *testCube3;
+	Object *testCube4;
 	float theta = 0.0f;
 	float movement = 0.05;
 	GLuint shaderProgram;
@@ -15,6 +16,7 @@ namespace SceneManager {
 	GLuint modelProgram;
 	hudManager *h_manager;
 	Skybox *skybox;
+	Physics *physicsManager;
 
 	float SCREENWIDTH = 800.0f;
 	float SCREENHEIGHT = 600.0f;
@@ -23,6 +25,11 @@ namespace SceneManager {
 	glm::vec3 scaleTest = glm::vec3(20.0f, 0.1f, 20.0f);
 	glm::vec3 nullTest = glm::vec3(0.0f, 0.0f, 0.0f);
 	glm::vec3 testMove = glm::vec3(0.0, 2.0, -2.0);
+
+	transformation_Matrices testTransformation = {
+		transTest, scaleTest, nullTest
+	};
+
 	float angleTest;
 
 	const char *testTexFiles[6] = {
@@ -130,6 +137,16 @@ namespace SceneManager {
 		}
 	}
 
+	void initObjects() {
+		testCube = new Object(testTransformation);
+		transformation_Matrices test2 = { testMove, glm::vec3(0.5, 0.5, 0.5), nullTest };
+	//	transformation_Matrices(testMove, glm::vec3(0.5, 0.5, 0.5), nullTest)
+		testCube2 = new Object(test2, "studdedmetal.bmp");
+		transformation_Matrices test3 = { glm::vec3(-3.0, 2.0, 0.0), glm::vec3(0.5, 1.5, 0.5), glm::vec3(0.0, 1.0, 0.0) };
+		testCube3 = new Object(test3, "angry.bmp");
+		transformation_Matrices test4 = { glm::vec3(2.0, 3.0, -2.0), glm::vec3(0.8, 0.8, 0.8), nullTest };
+		testCube4 = new Object(test4);
+	}
 
 	void init(void) {
 		shaderProgram = ShaderManager::initShaders("phong-tex.vert", "phong-tex.frag");
@@ -141,11 +158,11 @@ namespace SceneManager {
 		//shader = new Shader("modelLoading.vert", "modelLoading.frag");
 		MeshManager::setLight(shaderProgram, testLight);
 		MeshManager::setMaterial(shaderProgram, greenMaterial);
-		testCube = new Object(transTest, scaleTest, nullTest);
-		testCube2 = new Object(testMove, glm::vec3(0.5, 0.5, 0.5), nullTest, "studdedmetal.bmp");
-		testCube3 = new Object(glm::vec3(-3.0, 2.0, 0.0), glm::vec3(0.5, 1.5, 0.5), glm::vec3(0.0, 1.0, 0.0), "angry.bmp");
+		
+		initObjects();
 		h_manager = new hudManager();
 		skybox = new Skybox(testTexFiles);
+		physicsManager = new Physics();
 
 
 		glEnable(GL_DEPTH_TEST);
@@ -227,6 +244,11 @@ namespace SceneManager {
 
 		theta += 0.1f;
 		mvStack = testCube3->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, theta);
+
+		glm::vec3 currentPos = testCube4->getPosition();
+		currentPos.y = physicsManager->applyGravity(currentPos);
+		testCube4->setPosition(currentPos);
+		mvStack = testCube4->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, theta);
 
 //		renderTest(projection);
 		renderWep(projection, ourModel2);

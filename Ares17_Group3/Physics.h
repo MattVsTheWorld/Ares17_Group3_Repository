@@ -8,12 +8,20 @@
 #include <glm/gtc/type_ptr.hpp>
 
 using namespace std;
+#define GRAVITY_VALUE 0.005
+#define GROUND_POSITION 0.5
 
 
 class Physics {
 private:
+	const float gravity = GRAVITY_VALUE;
+	// 
 protected:
 public:
+	Physics();
+
+	// EXTREMELY simplistic gravity; will modify it once I get home
+	float applyGravity(glm::vec3 pos);
 
 };
 #endif
