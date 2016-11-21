@@ -3,6 +3,19 @@
 //#include "Shader.h"
 using namespace std;
 
+
+
+/*
+http://www.dreamincode.net/forums/topic/217793-bullets-in-copengl/
+http://gamedev.stackexchange.com/questions/72253/c-fps-game-collision-detection-with-partitioning-system-or-physics-engine
+http://www.cplusplus.com/forum/beginner/77941/
+*/
+
+
+
+
+
+
 // this class still needs a lot of work
 namespace SceneManager {
 	Object *testCube;
@@ -90,7 +103,16 @@ namespace SceneManager {
 			camRotation -= 360;
 	}
 
-	void controls(SDL_Window * window) {
+	void move() {
+		eye = moveForward(eye, camRotation, 0.1f);
+	}
+	void move2() {
+		eye = moveRight(eye, camRotation, 0.1f);
+	}
+	
+	bool click = false;
+	bool click2 = false;
+	void controls(SDL_Window * window, SDL_Event sdlEvent) {
 		int MidX = SCREENWIDTH / 2;
 		int MidY = SCREENHEIGHT / 2;
 
@@ -105,6 +127,20 @@ namespace SceneManager {
 		glRotatef(-camy, 1.0, 0.0, 0.0);
 		glRotatef(-camRotation, 0.0, 1.0, 0.0);
 		SDL_WarpMouseInWindow(window, MidX, MidY);
+		
+		if (sdlEvent.type == SDL_MOUSEBUTTONDOWN) {
+			if (sdlEvent.button.button == SDL_BUTTON_LEFT) click = true;
+			if (sdlEvent.button.button == SDL_BUTTON_RIGHT) click2 = true;
+		}
+		if (sdlEvent.type == SDL_MOUSEBUTTONUP) {
+			click = false;
+			click2 = false;
+		}
+
+		if (click == true)
+			move();
+		if (click2 == true)
+			move2();
 
 		const Uint8 *keys = SDL_GetKeyboardState(NULL);
 		if (keys[SDL_SCANCODE_W]) eye = moveForward(eye, camRotation, 0.1f);
@@ -137,13 +173,13 @@ namespace SceneManager {
 		modelProgram = ShaderManager::initShaders("modelLoading.vert", "modelLoading.frag");
 		ourModel = new Model("Nanosuit/nanosuit.obj");
 	//	ourModel2 = new Model("gun/wep.obj");
-		ourModel2 = new Model("CHOO/Socom pistol.obj");
+		//ourModel2 = new Model("CHOO/Socom pistol.obj");
 		//shader = new Shader("modelLoading.vert", "modelLoading.frag");
 		MeshManager::setLight(shaderProgram, testLight);
 		MeshManager::setMaterial(shaderProgram, greenMaterial);
 		testCube = new Object(transTest, scaleTest, nullTest);
 		testCube2 = new Object(testMove, glm::vec3(0.5, 0.5, 0.5), nullTest, "studdedmetal.bmp");
-		testCube3 = new Object(glm::vec3(-3.0, 2.0, 0.0), glm::vec3(0.5, 1.5, 0.5), glm::vec3(0.0, 1.0, 0.0), "angry.bmp");
+		testCube3 = new Object(glm::vec3(-3.0, 2.0, 0.0), glm::vec3(0.5, 1.5, 0.5), glm::vec3(0.0, 1.0, 0.0));
 		h_manager = new hudManager();
 		skybox = new Skybox(testTexFiles);
 
@@ -191,8 +227,8 @@ namespace SceneManager {
 		//	glCullFace(GL_BACK);
 	}
 
-	void update(SDL_Window * window) {
-		controls(window);
+	void update(SDL_Window * window, SDL_Event sdlEvent) {
+		controls(window, sdlEvent);
 	}
 
 	void camera() {
@@ -229,7 +265,7 @@ namespace SceneManager {
 		mvStack = testCube3->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, theta);
 
 //		renderTest(projection);
-		renderWep(projection, ourModel2);
+		//renderWep(projection, ourModel2);
 		renderObject(projection,ourModel);
 
 
