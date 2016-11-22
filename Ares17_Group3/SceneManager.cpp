@@ -3,6 +3,9 @@
 //#include "Shader.h"
 using namespace std;
 
+#define objectNumber 7
+#define BULLET_NO 30
+
 typedef std::pair < glm::vec3, glm::vec3 > vectorPair;
 typedef stack<glm::mat4> mvstack;
 
@@ -13,8 +16,8 @@ namespace SceneManager {
 	Object *testCube2;
 	Object *testCube3;
 	Object *testCube4;*/ // cubes were starting to get out of hand
-	Object *testCubes[7]; // arrays :D
-	Object *bullet[12];
+	Object *testCubes[objectNumber]; // arrays :D
+	Object *bullet[BULLET_NO];
 	bool shotsFired = false;
 	int noShotsFired = 0;
 	float theta = 0.0f;
@@ -109,43 +112,75 @@ namespace SceneManager {
 		transformation_Matrices bulletTest = { bulletSpawn, glm::vec3(0.1, 0.1, 0.1), glm::vec3(0.0, 0.0, 0.0) };
 		bullet[noShotsFired] = new Object(bulletTest, "angry.bmp");
 		bullet[noShotsFired]->setAngle(camRotation);
+		bullet[noShotsFired]->setVelocity(glm::vec3(0.1, 0.1, 0.1));
 		noShotsFired++;
+	
+	}
+
+	bool collision(glm::vec3 position_A, glm::vec3 scale_A, glm::vec3 position_B, glm::vec3 scale_B) {
+
+		bool collision = false;
+
+		if ((position_A.x + (scale_A.x )) >= (position_B.x - (scale_B.x )) // if right side on the right of left side
+			&& position_A.x - (scale_A.x ) <= (position_B.x + (scale_B.x ))) // and left side is left of right side
+		{
+			// if possible collision in x, then check z
+			if ((position_A.z + (scale_A.z)) >= (position_B.z - (scale_B.z)) // if right side on the right of left side
+				&& position_A.z - (scale_A.z) <= (position_B.z + (scale_B.z))) // and left side is left of right side
+			{
+				if ((position_A.y + (scale_A.y)) >= (position_B.y - (scale_B.y)) // if right side on the right of left side
+					&& position_A.y - (scale_A.y) <= (position_B.y + (scale_B.y))) // and left side is left of right side
+					collision = true;
+			}
+
+				
+		}
+
+		return collision;
+		
 	}
 
 	void bulletFunction(Object *bullet) {
-		float increment = 0.1;
-		glm::vec3 currentPos = bullet->getPosition();
-		//glm::vec3 scenePos = testCubes[0]->getPosition();
-		//glm::vec3 sceneScale = testCubes[0]->getScale();
+	//	float increment = 0.1;
+		glm::vec3 bulletPos = bullet->getPosition();
+		glm::vec3 bulletScale = bullet->getScale();
+		//glm::vec3 ObjectsPos = testCubes[0]->getPosition();
+		//glm::vec3 ObjectsScale = testCubes[0]->getScale();
 
-		glm::vec3 scenePos[5];
-		glm::vec3 sceneScale[5];
-		for (int i = 0; i < 5; i++){
-			scenePos[i] = testCubes[i]->getPosition();
-			sceneScale[i] = testCubes[i]->getScale();
+		glm::vec3 ObjectsPos[objectNumber];
+		glm::vec3 ObjectsScale[objectNumber];
+		for (int i = 0; i < objectNumber; i++){
+			ObjectsPos[i] = testCubes[i]->getPosition();
+			ObjectsScale[i] = testCubes[i]->getScale();
 		}
-		for (int i = 1; i < 5; i++) {
-			/*if (currentPos.x > scenePos[i].x + sceneScale[i].x ||
-				currentPos.z > scenePos[i].z + sceneScale[i].z ||
-				currentPos.x < scenePos[i].x - sceneScale[i].x ||
-				currentPos.z < scenePos[i].z - sceneScale[i].z) {
+		for (int i = 1; i < objectNumber; i++) {
+			/*if (bulletPos.x > ObjectsPos[i].x + ObjectsScale[i].x ||
+				bulletPos.z > ObjectsPos[i].z + ObjectsScale[i].z ||
+				bulletPos.x < ObjectsPos[i].x - ObjectsScale[i].x ||
+				bulletPos.z < ObjectsPos[i].z - ObjectsScale[i].z) {
 				cout<<"collision"<<endl;//delete bullet;
 			}*/
-			if (currentPos.x >= scenePos[i].x - sceneScale[i].x && currentPos.x <= scenePos[i].x + sceneScale[i].x) 
-				if(currentPos.z >= scenePos[i].z - sceneScale[i].z && currentPos.z <= scenePos[i].z + sceneScale[i].z)
-					cout << "collision" << endl;//delete bullet;
-			 else {
+			/*			if (bulletPos.x >= ObjectsPos[i].x - ObjectsScale[i].x && bulletPos.x <= ObjectsPos[i].x + ObjectsScale[i].x)
+							if(bulletPos.z >= ObjectsPos[i].z - ObjectsScale[i].z && bulletPos.z <= ObjectsPos[i].z + ObjectsScale[i].z)
+								cout << "collision" << endl;//delete bullet;
+
+				*/		
+			if (collision(ObjectsPos[i], ObjectsScale[i], bulletPos, bulletScale)) {
+			//	cout << "colliding" << endl;
+				bullet->setVelocity(glm::vec3(0.0, 0.0, 0.0));
+			}
+			else {
 				float angleAtShot = bullet->getAngle();
-				glm::vec3 newPos = glm::vec3(currentPos.x + increment*std::sin(angleAtShot*DEG_TO_RADIAN),
-					currentPos.y /*need the right math for this*/,
-					currentPos.z - increment*std::cos(angleAtShot*DEG_TO_RADIAN));
+				glm::vec3 newPos = glm::vec3(bulletPos.x + bullet->getVelocity().x*std::sin(angleAtShot*DEG_TO_RADIAN),
+					bulletPos.y + bullet->getVelocity().y /*need the right math for this*/,
+					bulletPos.z - bullet->getVelocity().z*std::cos(angleAtShot*DEG_TO_RADIAN));
 				bullet->setPosition(newPos);
 			}
 		}
-		/*if (currentPos.x > scenePos.x + sceneScale.x ||
-			currentPos.z > scenePos.z + sceneScale.z ||
-			currentPos.x < scenePos.x - sceneScale.x ||
-			currentPos.z < scenePos.z - sceneScale.z) {
+		/*if (bulletPos.x > ObjectsPos.x + ObjectsScale.x ||
+			bulletPos.z > ObjectsPos.z + ObjectsScale.z ||
+			bulletPos.x < ObjectsPos.x - ObjectsScale.x ||
+			bulletPos.z < ObjectsPos.z - ObjectsScale.z) {
 			;//delete bullet;
 		}*/
 		
@@ -176,7 +211,7 @@ namespace SceneManager {
 		}
 		
 		if (leftClick == true) {
-			if (noShotsFired >= 12)
+			if (noShotsFired >= BULLET_NO)
 				cout << "no more ammo";
 			else {
 				shotsFired = true;
@@ -339,13 +374,21 @@ namespace SceneManager {
 
 		// move testcube 4
 		vectorPair currentProperties = make_pair(testCubes[3]->getPosition(), testCubes[3]->getVelocity());
-		glm::vec3 gravity = glm::vec3(0.0, -3.0, 0.0);
+		glm::vec3 gravity = glm::vec3(0.0, -2.0, 0.0);
 		currentProperties = physicsManager->applyGravity(currentProperties.first, currentProperties.second, gravity);
 		testCubes[3]->setPosition(currentProperties.first);
 		testCubes[3]->setVelocity(currentProperties.second);
 
 	}
-
+	/*
+	void moveBullets(int i) {
+		vectorPair currentProperties = make_pair(bullet[i]->getPosition(), bullet[i]->getVelocity());
+	//	glm::vec3 gravity = glm::vec3(0.0, -2.0, 0.0);
+	//	currentProperties = physicsManager->applyGravity(currentProperties.first, currentProperties.second, gravity);
+		bullet[i]->setPosition(currentProperties.first);
+		bullet[i]->setVelocity(currentProperties.second);
+	}
+	*/
 	void update(SDL_Window * window, SDL_Event sdlEvent) {
 		controls(window, sdlEvent);
 		moveObjects();
@@ -385,6 +428,7 @@ namespace SceneManager {
 
 		if (shotsFired) {
 			for (int i = 0; i < noShotsFired; i++) {
+			//	moveBullets(i);
 				mvStack = bullet[i]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0);
 				bulletFunction(bullet[i]);
 			}

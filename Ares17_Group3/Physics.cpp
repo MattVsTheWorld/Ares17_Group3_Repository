@@ -28,13 +28,13 @@ vectorPair Physics::applyGravity(glm::vec3 pos, glm::vec3 vel, glm::vec3 acc) {
 		glm::vec3 pos2(0.0, 0.0, 0.0);
 		glm::vec3 avg_vel(0.0, 0.0, 0.0);
 		currentTime = clock();
-		if (currentTime > lastTime + DT_MILLISECONDS) { // operations done every ~33ms
+	//	if (currentTime > lastTime + DT_MILLISECONDS) { // operations done every ~33ms
 														//	printf("Diff: %d\n", currentTime - lastTime);
 
 			unsigned int dt = currentTime - lastTime;
 			float dt_secs = (float)dt / 1000;
-			if (dt_secs > 0.033) dt_secs = 0.033; // first value is off ( 5.5~)
-												  //	std::cout << dt_secs << std::endl;
+			if (dt_secs > 0.017) dt_secs = 0.017; // first value is off ( 5.5~)
+		//	std::cout << dt_secs << std::endl;
 			lastTime = currentTime;
 
 			//acc.y = GRAVITY_VALUE;
@@ -55,7 +55,7 @@ vectorPair Physics::applyGravity(glm::vec3 pos, glm::vec3 vel, glm::vec3 acc) {
 
 
 			//		cout << vel.y << endl;
-		}
+	//	}
 	}
 	/*
 	else {
