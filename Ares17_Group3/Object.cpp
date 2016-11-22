@@ -51,6 +51,7 @@ std::stack<glm::mat4> Object::renderObject(glm::mat4 projection, std::stack<glm:
 	MeshManager::setUniformMatrix4fv(shader, "projection", glm::value_ptr(projection));
 	MeshManager::setMaterial(shader, material);
 	MeshManager::drawIndexedMesh(meshObject, meshIndexCount, GL_TRIANGLES);
+	glBindTexture(GL_TEXTURE_2D, 0);
 	mvStack.pop();
 	return mvStack;
 }
@@ -72,4 +73,15 @@ void Object::setPosition(glm::vec3 newPos) {
 
 glm::vec3 Object::getPosition() {
 	return trans_m.position;
+}
+
+glm::vec3 Object::getScale() {
+	return trans_m.scale;
+}
+
+float Object::getAngle() {
+	return angleAtShot;
+}
+void Object::setAngle(float angle) {
+	angleAtShot = angle;
 }

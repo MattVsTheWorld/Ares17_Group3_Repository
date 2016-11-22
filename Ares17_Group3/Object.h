@@ -40,6 +40,8 @@ private:
 	transformation_Matrices trans_m;
 	physics_Properties phys_p;
 
+	float angleAtShot;
+
 protected:
 
 public:
@@ -54,6 +56,11 @@ public:
 	GLuint object_getMesh();
 	void setPosition(glm::vec3 NewPos);
 	glm::vec3 getPosition();
+
+	glm::vec3 getScale();
+
+	float getAngle();
+	void setAngle(float angle);
 };
 
 #endif
