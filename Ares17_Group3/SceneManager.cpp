@@ -244,7 +244,8 @@ namespace SceneManager {
 
 		// move testcube 4
 		vectorPair currentProperties = make_pair(testCubes[3]->getPosition(), testCubes[3]->getVelocity());
-		currentProperties = physicsManager->applyGravity(currentProperties.first, currentProperties.second, glm::vec3(0.0,-2.0,0.0));
+		glm::vec3 gravity = glm::vec3(0.0, -3.0, 0.0);
+		currentProperties = physicsManager->applyGravity(currentProperties.first, currentProperties.second, gravity);
 		testCubes[3]->setPosition(currentProperties.first);
 		testCubes[3]->setVelocity(currentProperties.second);
 

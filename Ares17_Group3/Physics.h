@@ -11,24 +11,10 @@
 #include <time.h>
 
 typedef std::pair < glm::vec3, glm::vec3 > vectorPair;
-/*
-vectorPair pairTest() {
-	vectorPair bananas;
-	bananas = std::make_pair(glm::vec3(3.0, 0.0, 0.0), glm::vec3(1.0, 0.0, 5.0));
 
-	return bananas;
-}
-
-
-vectorPair fruits;
-fruits = std::make_pair(glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 0.0, 0.0));
-std::cout << "fruits: " << fruits.first.x << ", " << fruits.second.z << '\n';
-fruits = pairTest();
-std::cout << "bananas: " << fruits.first.x << ", " << fruits.second.z << '\n';
-*/
 using namespace std;
 #define GRAVITY_VALUE -0.5
-#define GROUND_POSITION 0.5
+#define GROUND_POSITION 0.9
 #define DT_MILLISECONDS 20
 // this seems to give a time step of 0.033 seconds
 // Seems strange, will have to check if reliable
