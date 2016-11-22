@@ -52,8 +52,10 @@ public:
 	GLuint object_getIndex();
 	GLuint object_getTexture();
 	GLuint object_getMesh();
-	void setPosition(glm::vec3 NewPos);
+	void setPosition(glm::vec3 newPos);
 	glm::vec3 getPosition();
+	void setVelocity(glm::vec3 newVel);
+	glm::vec3 getVelocity();
 };
 
 #endif
