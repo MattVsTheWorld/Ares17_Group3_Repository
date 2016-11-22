@@ -3,6 +3,9 @@
 //#include "Shader.h"
 using namespace std;
 
+typedef std::pair < glm::vec3, glm::vec3 > vectorPair;
+typedef stack<glm::mat4> mvstack;
+
 // this class still needs a lot of work
 namespace SceneManager {
 	/*
@@ -10,7 +13,7 @@ namespace SceneManager {
 	Object *testCube2;
 	Object *testCube3;
 	Object *testCube4;*/ // cubes were starting to get out of hand
-	Object *testCubes[5]; // arrays :D
+	Object *testCubes[7]; // arrays :D
 	Object *bullet[12];
 	bool shotsFired = false;
 	int noShotsFired = 0;
@@ -46,7 +49,6 @@ namespace SceneManager {
 	Model *ourModel;
 	Model *ourModel2;
 
-	typedef stack<glm::mat4> mvstack;
 	mvstack mvStack;
 
 	GLfloat camRotation = 0.0f;
@@ -217,14 +219,18 @@ namespace SceneManager {
 	void initObjects() {
 		testCubes[0] = new Object(testTransformation);
 		transformation_Matrices test2 = { testMove, glm::vec3(0.5, 0.5, 0.5), nullTest };
-	//	transformation_Matrices(testMove, glm::vec3(0.5, 0.5, 0.5), nullTest)
+		//	transformation_Matrices(testMove, glm::vec3(0.5, 0.5, 0.5), nullTest)
 		testCubes[1] = new Object(test2, "studdedmetal.bmp");
 		transformation_Matrices test3 = { glm::vec3(-3.0, 2.0, 0.0), glm::vec3(0.5, 1.5, 0.5), glm::vec3(0.0, 1.0, 0.0) };
 		testCubes[2] = new Object(test3, "angry.bmp");
-		transformation_Matrices test4 = { glm::vec3(2.0, 3.0, -2.0), glm::vec3(0.8, 0.8, 0.8), nullTest };
+		transformation_Matrices test4 = { glm::vec3(2.0, 10.0, -2.0), glm::vec3(0.8, 0.8, 0.8), nullTest };
 		testCubes[3] = new Object(test4);
 		transformation_Matrices test5 = { glm::vec3(2.0,4.0, 2.0), glm::vec3(1.5,1.5,1.5), nullTest };
 		testCubes[4] = new Object(test5);
+		transformation_Matrices testScale = { glm::vec3(1.0,4.0,5.0),nullTest,nullTest };
+		transformation_Matrices testScale2 = { glm::vec3(0.5,4.5,3.0),glm::vec3(0.5,0.5,0.5),nullTest };
+		testCubes[5] = new Object(testScale);
+		testCubes[6] = new Object(testScale2);
 	}
 
 	void init(void) {
@@ -332,9 +338,11 @@ namespace SceneManager {
 		theta += 0.1f;
 
 		// move testcube 4
-		glm::vec3 currentPos = testCubes[3]->getPosition();
-		currentPos.y = physicsManager->applyGravity(currentPos);
-		testCubes[3]->setPosition(currentPos);
+		vectorPair currentProperties = make_pair(testCubes[3]->getPosition(), testCubes[3]->getVelocity());
+		glm::vec3 gravity = glm::vec3(0.0, -3.0, 0.0);
+		currentProperties = physicsManager->applyGravity(currentProperties.first, currentProperties.second, gravity);
+		testCubes[3]->setPosition(currentProperties.first);
+		testCubes[3]->setVelocity(currentProperties.second);
 
 	}
 
@@ -371,6 +379,9 @@ namespace SceneManager {
 		mvStack = testCubes[2]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, theta);
 	
 		mvStack = testCubes[3]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0);
+
+		mvStack = testCubes[5]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0);
+		mvStack = testCubes[6]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0);
 
 		if (shotsFired) {
 			for (int i = 0; i < noShotsFired; i++) {

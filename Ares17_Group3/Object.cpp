@@ -75,6 +75,14 @@ glm::vec3 Object::getPosition() {
 	return trans_m.position;
 }
 
+void Object::setVelocity(glm::vec3 newVel) {
+	phys_p.velocity = newVel;
+}
+
+glm::vec3 Object::getVelocity() {
+	return phys_p.velocity;
+}
+
 glm::vec3 Object::getScale() {
 	return trans_m.scale;
 }
