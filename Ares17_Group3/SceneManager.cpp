@@ -3,6 +3,9 @@
 //#include "Shader.h"
 using namespace std;
 
+typedef std::pair < glm::vec3, glm::vec3 > vectorPair;
+typedef stack<glm::mat4> mvstack;
+
 // this class still needs a lot of work
 namespace SceneManager {
 	/*
@@ -44,7 +47,7 @@ namespace SceneManager {
 	Model *ourModel2;
 
 
-	typedef stack<glm::mat4> mvstack;
+
 	mvstack mvStack;
 
 	GLfloat camRotation = 0.0f;
@@ -166,7 +169,7 @@ namespace SceneManager {
 		testCubes[1] = new Object(test2, "studdedmetal.bmp");
 		transformation_Matrices test3 = { glm::vec3(-3.0, 2.0, 0.0), glm::vec3(0.5, 1.5, 0.5), glm::vec3(0.0, 1.0, 0.0) };
 		testCubes[2] = new Object(test3, "angry.bmp");
-		transformation_Matrices test4 = { glm::vec3(2.0, 3.0, -2.0), glm::vec3(0.8, 0.8, 0.8), nullTest };
+		transformation_Matrices test4 = { glm::vec3(2.0, 10.0, -2.0), glm::vec3(0.8, 0.8, 0.8), nullTest };
 		testCubes[3] = new Object(test4);
 		transformation_Matrices test5 = { glm::vec3(2.0,4.0, 2.0), glm::vec3(1.5,1.5,1.5), nullTest };
 		testCubes[4] = new Object(test5);
@@ -240,9 +243,10 @@ namespace SceneManager {
 		theta += 0.1f;
 
 		// move testcube 4
-		glm::vec3 currentPos = testCubes[3]->getPosition();
-		currentPos.y = physicsManager->applyGravity(currentPos);
-		testCubes[3]->setPosition(currentPos);
+		vectorPair currentProperties = make_pair(testCubes[3]->getPosition(), testCubes[3]->getVelocity());
+		currentProperties = physicsManager->applyGravity(currentProperties.first, currentProperties.second, glm::vec3(0.0,-2.0,0.0));
+		testCubes[3]->setPosition(currentProperties.first);
+		testCubes[3]->setVelocity(currentProperties.second);
 
 	}
 

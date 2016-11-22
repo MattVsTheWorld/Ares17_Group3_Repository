@@ -104,6 +104,7 @@ int main(int argc, char *argv[]) {
 
 	//fpsinit();
 
+
 	if (GLEW_OK != err) { // glewInit failed, something is seriously wrong
 		std::cout << "glewInit failed, aborting." << endl;
 		exit(1);
@@ -122,6 +123,7 @@ int main(int argc, char *argv[]) {
 		SceneManager::draw(hWindow, 0); // draw function
 
 		//SDL_Delay(500); // 500 should make 2 frames per second.
+		
 
 	//	fpsthink();
 
