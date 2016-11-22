@@ -13,7 +13,7 @@ namespace SceneManager {
 	Object *testCube2;
 	Object *testCube3;
 	Object *testCube4;*/ // cubes were starting to get out of hand
-	Object *testCubes[5]; // arrays :D
+	Object *testCubes[7]; // arrays :D
 	float theta = 0.0f;
 	float movement = 0.05;
 	GLuint shaderProgram;
@@ -173,6 +173,10 @@ namespace SceneManager {
 		testCubes[3] = new Object(test4);
 		transformation_Matrices test5 = { glm::vec3(2.0,4.0, 2.0), glm::vec3(1.5,1.5,1.5), nullTest };
 		testCubes[4] = new Object(test5);
+		transformation_Matrices testScale = { glm::vec3(1.0,4.0,5.0),nullTest,nullTest };
+		transformation_Matrices testScale2 = { glm::vec3(0.5,4.5,3.0),glm::vec3(0.5,0.5,0.5),nullTest };
+		testCubes[5] = new Object(testScale);
+		testCubes[6] = new Object(testScale2);
 	}
 
 	void init(void) {
@@ -284,6 +288,10 @@ namespace SceneManager {
 		mvStack = testCubes[2]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, theta);
 	
 		mvStack = testCubes[3]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0);
+
+		mvStack = testCubes[5]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0);
+		mvStack = testCubes[6]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0);
+
 		// RENDERING MODELS
 //		renderTest(projection);
 		renderWep(projection, ourModel2);
