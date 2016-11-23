@@ -104,7 +104,7 @@ namespace SceneManager {
 
 	bool leftClick = false;
 	bool rightClick = false;
-	
+	//
 	void bulletCreation() {
 		//position, scale, rotation
 		glm::vec3 bulletSpawn = eye;
