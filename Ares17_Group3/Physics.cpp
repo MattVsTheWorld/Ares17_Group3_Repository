@@ -7,15 +7,15 @@ Physics::Physics() {
 // EXTREMELY simplistic gravity; will modify it once I get home
 float Physics::applyGravity(glm::vec3 pos) {
 	if (pos.y > GROUND_POSITION) pos.y -= gravity;
-/*	currentTime = clock();
+	/*	currentTime = clock();
 	if (currentTime > lastTime + DT_MILLISECONDS) { // operations done every ~33ms
-		//	printf("Diff: %d\n", currentTime - lastTime);
-		
-		unsigned int dt = currentTime - lastTime;
-		float dt_secs = (float)dt / 1000;
-		std::cout << dt_secs << std::endl;
-		lastTime = currentTime;
-		//printf()
+	//	printf("Diff: %d\n", currentTime - lastTime);
+
+	unsigned int dt = currentTime - lastTime;
+	float dt_secs = (float)dt / 1000;
+	std::cout << dt_secs << std::endl;
+	lastTime = currentTime;
+	//printf()
 	} */
 	return pos.y;
 }
@@ -28,12 +28,12 @@ vectorPair Physics::applyGravity(glm::vec3 pos, glm::vec3 vel, glm::vec3 acc) {
 		glm::vec3 pos2(0.0, 0.0, 0.0);
 		glm::vec3 avg_vel(0.0, 0.0, 0.0);
 		currentTime = clock();
-		if (currentTime > lastTime + DT_MILLISECONDS) { // operations done every ~33ms
-			//	printf("Diff: %d\n", currentTime - lastTime);
+	//	if (currentTime > lastTime + DT_MILLISECONDS) { // operations done every ~33ms
+														//	printf("Diff: %d\n", currentTime - lastTime);
 
 			unsigned int dt = currentTime - lastTime;
 			float dt_secs = (float)dt / 1000;
-			if (dt_secs > 0.033) dt_secs = 0.033; // first value is off ( 5.5~)
+			if (dt_secs > 0.017) dt_secs = 0.017; // first value is off ( 5.5~)
 		//	std::cout << dt_secs << std::endl;
 			lastTime = currentTime;
 
@@ -44,27 +44,27 @@ vectorPair Physics::applyGravity(glm::vec3 pos, glm::vec3 vel, glm::vec3 acc) {
 			vel2.y = vel.y + acc.y * dt_secs; // next velocity
 			avg_vel.y = (vel.y + vel2.y) / 2; // average velocoiy
 			pos2.y = pos.y + avg_vel.y * dt_secs; // new position
-											   // same for x component
-		//	cout << avg_vel.y << endl;
+												  // same for x component
+												  //	cout << avg_vel.y << endl;
 
 
-		//	bodies[i]->moveTo(pos2.x, pos2.y); // move to new position
-											   // update values
+												  //	bodies[i]->moveTo(pos2.x, pos2.y); // move to new position
+												  // update values
 			pos.y = pos2.y;
 			vel.y = vel2.y;
 
 
-	//		cout << vel.y << endl;
-		}
+			//		cout << vel.y << endl;
+	//	}
 	}
 	/*
 	else {
-		pos.y += 0.05;
-		vel.y = -vel.y;
-		vel *= 1.0;
-//		cout << vel.y << endl;
+	pos.y += 0.05;
+	vel.y = -vel.y;
+	vel *= 1.0;
+	//		cout << vel.y << endl;
 	} */ // Simple bounciness
-	return std::make_pair(pos,vel);
+	return std::make_pair(pos, vel);
 	// return position and velocity :thinking:
 }
 
