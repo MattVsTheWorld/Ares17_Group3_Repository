@@ -93,3 +93,19 @@ float Object::getAngle() {
 void Object::setAngle(float angle) {
 	angleAtShot = angle;
 }
+
+////EXPERIMENTING
+void Object::setAt(glm::vec3 newAt) {
+	at = newAt;
+}
+glm::vec3 Object::getAt() {
+	return at;
+}
+
+void Object::setInitialPosition(glm::vec3 newPos) {
+	initialPos = newPos;
+}
+
+glm::vec3 Object::getInitialPosition() {
+	return initialPos;
+}

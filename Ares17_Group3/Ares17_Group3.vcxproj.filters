@@ -36,9 +36,6 @@
     <ClCompile Include="MeshManager.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
-    <ClCompile Include="Object.cpp">
-      <Filter>Engine</Filter>
-    </ClCompile>
     <ClCompile Include="rt3dObjLoader.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
@@ -54,6 +51,9 @@
     <ClCompile Include="Physics.cpp">
       <Filter>Being worked on</Filter>
     </ClCompile>
+    <ClCompile Include="Object.cpp">
+      <Filter>Being worked on</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SDLmanager.h">
@@ -63,12 +63,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MeshManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SceneManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Object.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="rt3dObjLoader.h">
@@ -93,6 +87,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Physics.h">
+      <Filter>Being worked on</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneManager.h">
+      <Filter>Being worked on</Filter>
+    </ClInclude>
+    <ClInclude Include="Object.h">
       <Filter>Being worked on</Filter>
     </ClInclude>
   </ItemGroup>

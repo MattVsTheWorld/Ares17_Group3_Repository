@@ -41,6 +41,8 @@ private:
 	physics_Properties phys_p;
 
 	float angleAtShot;
+	glm::vec3 at;
+	glm::vec3 initialPos;
 
 protected:
 
@@ -63,6 +65,13 @@ public:
 
 	float getAngle();
 	void setAngle(float angle);
+
+	////EXPERIMENTING
+	void setAt(glm::vec3 newAt);
+	glm::vec3 getAt();
+
+	void setInitialPosition(glm::vec3 newPos);
+	glm::vec3 getInitialPosition();
 };
 
 #endif

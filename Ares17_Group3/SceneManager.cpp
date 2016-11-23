@@ -58,7 +58,7 @@ namespace SceneManager {
 	GLfloat camy = 0.0f;
 
 	glm::vec3 eye(0.0f, 1.0f, 0.0f);
-	glm::vec3 at(0.0f, 1.0f, -1.0f);
+	glm::vec3 at(0.0f, 0.0f, -1.0f);
 	glm::vec3 up(0.0f, 1.0f, 0.0f);
 
 	MeshManager::lightStruct testLight = {
@@ -110,11 +110,14 @@ namespace SceneManager {
 		glm::vec3 bulletSpawn = eye;
 		bulletSpawn = moveForward(eye, camRotation, 0.5f);
 		transformation_Matrices bulletTest = { bulletSpawn, glm::vec3(0.1, 0.1, 0.1), glm::vec3(0.0, 0.0, 0.0) };
-		bullet[noShotsFired] = new Object(bulletTest, "angry.bmp");
+		bullet[noShotsFired] = new Object(bulletTest);
 		bullet[noShotsFired]->setAngle(camRotation);
 		bullet[noShotsFired]->setVelocity(glm::vec3(0.1, 0.1, 0.1));
+
+		////EXPERIMENTING
+		bullet[noShotsFired]->setAt(at);
+		bullet[noShotsFired]->setInitialPosition(bulletSpawn);
 		noShotsFired++;
-	
 	}
 
 	bool collision(glm::vec3 position_A, glm::vec3 scale_A, glm::vec3 position_B, glm::vec3 scale_B) {
@@ -131,9 +134,7 @@ namespace SceneManager {
 				if ((position_A.y + (scale_A.y)) >= (position_B.y - (scale_B.y)) // if right side on the right of left side
 					&& position_A.y - (scale_A.y) <= (position_B.y + (scale_B.y))) // and left side is left of right side
 					collision = true;
-			}
-
-				
+			}	
 		}
 
 		return collision;
@@ -168,11 +169,15 @@ namespace SceneManager {
 			if (collision(ObjectsPos[i], ObjectsScale[i], bulletPos, bulletScale)) {
 			//	cout << "colliding" << endl;
 				bullet->setVelocity(glm::vec3(0.0, 0.0, 0.0));
+			//	bullet->~Object();
 			}
 			else {
 				float angleAtShot = bullet->getAngle();
 				glm::vec3 newPos = glm::vec3(bulletPos.x + bullet->getVelocity().x*std::sin(angleAtShot*DEG_TO_RADIAN),
-					bulletPos.y + bullet->getVelocity().y /*need the right math for this*/,
+					////EXPERIMENTING
+					//bulletPos.y + bullet->getVelocity().y*std::atan2(bullet->getAt().y - bulletPos.y , bullet->getAt().x - bulletPos.x)  /*need the right math for this*/,
+					//bulletPos.y + bullet->getVelocity().y*sin(std::atan2(bullet->getAt().y-bullet->getInitialPosition().y, bullet->getAt().x-bullet->getInitialPosition().x)),
+					bulletPos.y,
 					bulletPos.z - bullet->getVelocity().z*std::cos(angleAtShot*DEG_TO_RADIAN));
 				bullet->setPosition(newPos);
 			}
@@ -257,7 +262,7 @@ namespace SceneManager {
 		//	transformation_Matrices(testMove, glm::vec3(0.5, 0.5, 0.5), nullTest)
 		testCubes[1] = new Object(test2, "studdedmetal.bmp");
 		transformation_Matrices test3 = { glm::vec3(-3.0, 2.0, 0.0), glm::vec3(0.5, 1.5, 0.5), glm::vec3(0.0, 1.0, 0.0) };
-		testCubes[2] = new Object(test3, "angry.bmp");
+		testCubes[2] = new Object(test3);
 		transformation_Matrices test4 = { glm::vec3(2.0, 10.0, -2.0), glm::vec3(0.8, 0.8, 0.8), nullTest };
 		testCubes[3] = new Object(test4);
 		transformation_Matrices test5 = { glm::vec3(2.0,4.0, 2.0), glm::vec3(1.5,1.5,1.5), nullTest };
