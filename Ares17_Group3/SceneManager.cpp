@@ -3,7 +3,7 @@
 //#include "Shader.h"
 using namespace std;
 
-#define objectNumber 7
+#define OBJECT_NO 7
 #define BULLET_NO 30
 
 typedef std::pair < glm::vec3, glm::vec3 > vectorPair;
@@ -16,8 +16,9 @@ namespace SceneManager {
 	Object *testCube2;
 	Object *testCube3;
 	Object *testCube4;*/ // cubes were starting to get out of hand
-	Object *testCubes[objectNumber]; // arrays :D
-	Object *bullet[BULLET_NO];
+	Object *testCubes[OBJECT_NO]; // arrays :D
+	//Object *bullet[BULLET_NO];
+	Bullet *bullet[BULLET_NO];
 	bool shotsFired = false;
 	int noShotsFired = 0;
 	float theta = 0.0f;
@@ -35,9 +36,13 @@ namespace SceneManager {
 	glm::vec3 transTest = glm::vec3(-10.0f, -0.1f, -10.0f);		
 	glm::vec3 scaleTest = glm::vec3(20.0f, 0.1f, 20.0f);
 	glm::vec3 nullTest = glm::vec3(0.0f, 0.0f, 0.0f);
+	glm::vec3 pitchTest = glm::vec3(1.0f, 0.0f, 0.0f);
+	glm::vec3 yawTest = glm::vec3(0.0f, 1.0f, 0.0f);
+	glm::vec3 rollTest = glm::vec3(0.0f, 0.0f, 1.0f);
 	glm::vec3 testMove = glm::vec3(0.0, 2.0, -2.0);
 
-	transformation_Matrices testTransformation = { transTest, scaleTest, nullTest };
+	//transformation_Matrices testTransformation = { transTest, scaleTest, pitchTest, yawTest, rollTest };
+	transformation_Matrices testTransformation = { transTest, scaleTest, nullTest, nullTest, nullTest };
 
 	float angleTest;
 
@@ -54,11 +59,12 @@ namespace SceneManager {
 
 	mvstack mvStack;
 
-	GLfloat camRotation = 0.0f;
-	GLfloat camy = 0.0f;
-
+	GLfloat pitch = 0.0f;
+	GLfloat yaw = 0.0f;
+	GLfloat roll = 0.0f;
+	
 	glm::vec3 eye(0.0f, 1.0f, 0.0f);
-	glm::vec3 at(0.0f, 0.0f, -1.0f);
+	glm::vec3 at(0.0f, 0.5f, -1.0f);
 	glm::vec3 up(0.0f, 1.0f, 0.0f);
 
 	MeshManager::lightStruct testLight = {
@@ -83,23 +89,23 @@ namespace SceneManager {
 	};
 
 	glm::vec3 moveForward(glm::vec3 pos, GLfloat angle, GLfloat d) {
-		return glm::vec3(pos.x + d*std::sin(camRotation*DEG_TO_RADIAN), pos.y, pos.z - d*std::cos(camRotation*DEG_TO_RADIAN));
+		return glm::vec3(pos.x + d*std::sin(yaw*DEG_TO_RADIAN), pos.y, pos.z - d*std::cos(yaw*DEG_TO_RADIAN));
 	}
 
 	glm::vec3 moveRight(glm::vec3 pos, GLfloat angle, GLfloat d) {
-		return glm::vec3(pos.x + d*std::cos(camRotation*DEG_TO_RADIAN), pos.y, pos.z + d*std::sin(camRotation*DEG_TO_RADIAN));
+		return glm::vec3(pos.x + d*std::cos(yaw*DEG_TO_RADIAN), pos.y, pos.z + d*std::sin(yaw*DEG_TO_RADIAN));
 	}
 
 	void lockCamera()
 	{
-		if (camy > 70)
-			camy = 70;
-		if (camy < -70)
-			camy = -70;
-		if (camRotation < 0.0)
-			camRotation += 360.0;
-		if (camRotation > 360.0)
-			camRotation -= 360;
+		if (pitch > 70)
+			pitch = 70;
+		if (pitch < -70)
+			pitch = -70;
+		if (yaw < 0.0)
+			yaw += 360.0;
+		if (yaw > 360.0)
+			yaw -= 360;
 	}
 
 	bool leftClick = false;
@@ -108,15 +114,14 @@ namespace SceneManager {
 	void bulletCreation() {
 		//position, scale, rotation
 		glm::vec3 bulletSpawn = eye;
-		bulletSpawn = moveForward(eye, camRotation, 0.5f);
-		transformation_Matrices bulletTest = { bulletSpawn, glm::vec3(0.1, 0.1, 0.1), glm::vec3(0.0, 0.0, 0.0) };
-		bullet[noShotsFired] = new Object(bulletTest);
-		bullet[noShotsFired]->setAngle(camRotation);
+		bulletSpawn = moveForward(eye, yaw, 0.5f);
+		glm::mat4 model;
+		transformation_Matrices bulletTest = { bulletSpawn, glm::vec3(0.1, 0.1, 0.1),
+		  pitchTest, yawTest, rollTest };
+		bullet[noShotsFired] = new Bullet(bulletTest);
+		bullet[noShotsFired]->setYawAngle(yaw);
+		bullet[noShotsFired]->setPitchAngle(pitch);
 		bullet[noShotsFired]->setVelocity(glm::vec3(0.1, 0.1, 0.1));
-
-		////EXPERIMENTING
-		bullet[noShotsFired]->setAt(at);
-		bullet[noShotsFired]->setInitialPosition(bulletSpawn);
 		noShotsFired++;
 	}
 
@@ -138,57 +143,33 @@ namespace SceneManager {
 		}
 
 		return collision;
-		
+
 	}
 
-	void bulletFunction(Object *bullet) {
-	//	float increment = 0.1;
+	void bulletFunction(Bullet *bullet) {
 		glm::vec3 bulletPos = bullet->getPosition();
 		glm::vec3 bulletScale = bullet->getScale();
-		//glm::vec3 ObjectsPos = testCubes[0]->getPosition();
-		//glm::vec3 ObjectsScale = testCubes[0]->getScale();
 
-		glm::vec3 ObjectsPos[objectNumber];
-		glm::vec3 ObjectsScale[objectNumber];
-		for (int i = 0; i < objectNumber; i++){
+		glm::vec3 ObjectsPos[OBJECT_NO];
+		glm::vec3 ObjectsScale[OBJECT_NO];
+		for (int i = 0; i < OBJECT_NO; i++){
 			ObjectsPos[i] = testCubes[i]->getPosition();
 			ObjectsScale[i] = testCubes[i]->getScale();
 		}
-		for (int i = 1; i < objectNumber; i++) {
-			/*if (bulletPos.x > ObjectsPos[i].x + ObjectsScale[i].x ||
-				bulletPos.z > ObjectsPos[i].z + ObjectsScale[i].z ||
-				bulletPos.x < ObjectsPos[i].x - ObjectsScale[i].x ||
-				bulletPos.z < ObjectsPos[i].z - ObjectsScale[i].z) {
-				cout<<"collision"<<endl;//delete bullet;
-			}*/
-			/*			if (bulletPos.x >= ObjectsPos[i].x - ObjectsScale[i].x && bulletPos.x <= ObjectsPos[i].x + ObjectsScale[i].x)
-							if(bulletPos.z >= ObjectsPos[i].z - ObjectsScale[i].z && bulletPos.z <= ObjectsPos[i].z + ObjectsScale[i].z)
-								cout << "collision" << endl;//delete bullet;
-
-				*/		
+		for (int i = 1; i < OBJECT_NO; i++) {		
 			if (collision(ObjectsPos[i], ObjectsScale[i], bulletPos, bulletScale)) {
 			//	cout << "colliding" << endl;
 				bullet->setVelocity(glm::vec3(0.0, 0.0, 0.0));
 			//	bullet->~Object();
 			}
 			else {
-				float angleAtShot = bullet->getAngle();
+				float angleAtShot = bullet->getYawAngle();
 				glm::vec3 newPos = glm::vec3(bulletPos.x + bullet->getVelocity().x*std::sin(angleAtShot*DEG_TO_RADIAN),
-					////EXPERIMENTING
-					//bulletPos.y + bullet->getVelocity().y*std::atan2(bullet->getAt().y - bulletPos.y , bullet->getAt().x - bulletPos.x)  /*need the right math for this*/,
-					//bulletPos.y + bullet->getVelocity().y*sin(std::atan2(bullet->getAt().y-bullet->getInitialPosition().y, bullet->getAt().x-bullet->getInitialPosition().x)),
-					bulletPos.y,
-					bulletPos.z - bullet->getVelocity().z*std::cos(angleAtShot*DEG_TO_RADIAN));
+										     bulletPos.y - bullet->getVelocity().y*sin(std::atan(bullet->getPitchAngle())),
+											 bulletPos.z - bullet->getVelocity().z*std::cos(angleAtShot*DEG_TO_RADIAN));
 				bullet->setPosition(newPos);
 			}
-		}
-		/*if (bulletPos.x > ObjectsPos.x + ObjectsScale.x ||
-			bulletPos.z > ObjectsPos.z + ObjectsScale.z ||
-			bulletPos.x < ObjectsPos.x - ObjectsScale.x ||
-			bulletPos.z < ObjectsPos.z - ObjectsScale.z) {
-			;//delete bullet;
-		}*/
-		
+		}		
 	}
 
 	void controls(SDL_Window * window, SDL_Event sdlEvent) {
@@ -198,18 +179,16 @@ namespace SceneManager {
 		SDL_ShowCursor(SDL_DISABLE);
 		int tmpx, tmpy;
 		SDL_GetMouseState(&tmpx, &tmpy);
-		camRotation -= 0.1*(MidX - tmpx); //for y
-		camy -= 0.1*(MidY - tmpy) / 10; //for x
+		yaw -= 0.1*(MidX - tmpx); //for y
+		pitch -= 0.1*(MidY - tmpy) / 10; //for x
 		lockCamera();
 
 		//rotate the camera (move everything in the opposit direction)
-		glRotatef(-camy, 1.0, 0.0, 0.0);
-		glRotatef(-camRotation, 0.0, 1.0, 0.0);
+		glRotatef(-pitch, 1.0, 0.0, 0.0); //basically glm::rotate
+		glRotatef(-yaw, 0.0, 1.0, 0.0);
 		SDL_WarpMouseInWindow(window, MidX, MidY);
-
-		///////////////////////////////////
-		////////////MOUSE CLICK////////////
-		///////////////////////////////////
+		
+		//MOUSECLICK
 		if (sdlEvent.type == SDL_MOUSEBUTTONDOWN) {
 			if (sdlEvent.button.button == SDL_BUTTON_LEFT) leftClick = true;
 			if (sdlEvent.button.button == SDL_BUTTON_RIGHT) rightClick = true;
@@ -229,19 +208,17 @@ namespace SceneManager {
 			rightClick = false;
 		}
 		
-		///////////////////////////////////
-		////////////KEYBOARD///////////////
-		///////////////////////////////////
+		//KEYBOARD
 		const Uint8 *keys = SDL_GetKeyboardState(NULL);
-		if (keys[SDL_SCANCODE_W]) eye = moveForward(eye, camRotation, 0.1f);
-		else if (keys[SDL_SCANCODE_S]) eye = moveForward(eye, camRotation, -0.1f);
-		if (keys[SDL_SCANCODE_A]) eye = moveRight(eye, camRotation, -0.1f);
-		else if (keys[SDL_SCANCODE_D]) eye = moveRight(eye, camRotation, 0.1f);
+		if (keys[SDL_SCANCODE_W]) eye = moveForward(eye, yaw, 0.1f);
+		else if (keys[SDL_SCANCODE_S]) eye = moveForward(eye, yaw, -0.1f);
+		if (keys[SDL_SCANCODE_A]) eye = moveRight(eye, yaw, -0.1f);
+		else if (keys[SDL_SCANCODE_D]) eye = moveRight(eye, yaw, 0.1f);
 		if (keys[SDL_SCANCODE_R]) eye.y += 0.1;
 		else if (keys[SDL_SCANCODE_F]) eye.y -= 0.1;
 
-	//	if (keys[SDL_SCANCODE_COMMA]) camRotation -= 1.0f;
-	//	else if (keys[SDL_SCANCODE_PERIOD]) camRotation += 1.0f;
+	//	if (keys[SDL_SCANCODE_COMMA]) yaw -= 1.0f;
+	//	else if (keys[SDL_SCANCODE_PERIOD]) yaw += 1.0f;
 
 		if (keys[SDL_SCANCODE_1]) {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -261,7 +238,7 @@ namespace SceneManager {
 		transformation_Matrices test2 = { testMove, glm::vec3(0.5, 0.5, 0.5), nullTest };
 		//	transformation_Matrices(testMove, glm::vec3(0.5, 0.5, 0.5), nullTest)
 		testCubes[1] = new Object(test2, "studdedmetal.bmp");
-		transformation_Matrices test3 = { glm::vec3(-3.0, 2.0, 0.0), glm::vec3(0.5, 1.5, 0.5), glm::vec3(0.0, 1.0, 0.0) };
+		transformation_Matrices test3 = { glm::vec3(-3.0, 2.0, 0.0), glm::vec3(0.5, 1.5, 0.5), pitchTest, yawTest };
 		testCubes[2] = new Object(test3);
 		transformation_Matrices test4 = { glm::vec3(2.0, 10.0, -2.0), glm::vec3(0.8, 0.8, 0.8), nullTest };
 		testCubes[3] = new Object(test4);
@@ -293,7 +270,6 @@ namespace SceneManager {
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	}
-
 
 	void renderObject(glm::mat4 proj, Model *modelData) {
 		glUseProgram(modelProgram);
@@ -345,7 +321,7 @@ namespace SceneManager {
 			glm::vec3 gun_pos(0.0f, -2.0f, -5.0f);
 			float Y_axisRotation = -85.0f*DEG_TO_RADIAN;
 			float Z_axisRotation = -25.0f*DEG_TO_RADIAN;
-			model = glm::translate(model, gun_pos); // Translate it down a bit so it's at the center of the scene
+			model = glm::translate(model, gun_pos); 
 			model = glm::rotate(model, Y_axisRotation, glm::vec3(0.0f, 1.0f, 0.0f)); // Rotate in y axis
 		//	model = glm::rotate(model, Z_axisRotation, glm::vec3(0.0f, 0.0f, 1.0f)); // Rotate in z axis
 		}
@@ -353,7 +329,7 @@ namespace SceneManager {
 			glm::vec3 gun_pos(2.5f, -2.5f, -5.0f);
 			float Y_axisRotation = -50.0f*DEG_TO_RADIAN;
 			float Z_axisRotation = -25.0f*DEG_TO_RADIAN;
-			model = glm::translate(model, gun_pos); // Translate it down a bit so it's at the center of the scene
+			model = glm::translate(model, gun_pos); 
 			model = glm::rotate(model, Y_axisRotation, glm::vec3(0.0f, 1.0f, 0.0f)); // Rotate in y axis
 			model = glm::rotate(model, Z_axisRotation, glm::vec3(0.0f, 0.0f, 1.0f)); // Rotate in z axis
 		}
@@ -400,8 +376,8 @@ namespace SceneManager {
 	}
 
 	void camera() {
-		at = moveForward(eye, camRotation, 1.0f);
-		at.y -= camy;
+		at = moveForward(eye, yaw, 1.0f);
+		at.y -= pitch;
 		mvStack.top() = glm::lookAt(eye, at, up);
 
 	}
@@ -419,22 +395,23 @@ namespace SceneManager {
 		projection = glm::perspective(float(60.0f*DEG_TO_RADIAN), SCREENWIDTH / SCREENHEIGHT, 0.1f, 100.0f);
 
 		mvStack = skybox->renderSkybox(projection, mvStack, testCubes[0]->object_getMesh(), testCubes[0]->object_getIndex());
+																								
+																										//pitch, yaw, roll
+		mvStack = testCubes[0]->renderObject(projection, mvStack, shaderProgram, testLight, greenMaterial, 0, 0, 0);
 
-		mvStack = testCubes[0]->renderObject(projection, mvStack, shaderProgram, testLight, greenMaterial, 0);
-
-		mvStack = testCubes[1]->renderObject(projection, mvStack, shaderProgram, testLight, greenMaterial, 0);
+		mvStack = testCubes[1]->renderObject(projection, mvStack, shaderProgram, testLight, greenMaterial, 0, 0, 0);
 	
-		mvStack = testCubes[2]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, theta);
+		mvStack = testCubes[2]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, theta, 0);
 	
-		mvStack = testCubes[3]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0);
+		mvStack = testCubes[3]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, 0, 0);
 
-		mvStack = testCubes[5]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0);
-		mvStack = testCubes[6]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0);
+		mvStack = testCubes[5]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, 0, 0);
+		mvStack = testCubes[6]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, 0, 0);
 
 		if (shotsFired) {
 			for (int i = 0; i < noShotsFired; i++) {
 			//	moveBullets(i);
-				mvStack = bullet[i]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0);
+				mvStack = bullet[i]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, bullet[i]->getPitchAngle(), bullet[i]->getYawAngle(), 0);
 				bulletFunction(bullet[i]);
 			}
 		}
