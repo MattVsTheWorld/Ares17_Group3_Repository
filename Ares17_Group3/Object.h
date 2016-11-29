@@ -14,7 +14,9 @@ using namespace std;
 struct transformation_Matrices {
 	glm::vec3 position;
 	glm::vec3 scale;
-	glm::vec3 rotation;
+	glm::vec3 pitch;
+	glm::vec3 yaw;
+	glm::vec3 roll;
 };
 
 struct physics_Properties {
@@ -36,13 +38,17 @@ private:
 	GLuint texture;
 	GLuint meshObject;
 	
-	float rotationAngle;
+	//current pitch,yaw,angle, of object
+	float pitchAngle;
+	float yawAngle;
+	float rollAngle;
+	//initial pitch,yaw,angle, of object
+	float pitchAngleAtShot;
+	float yawAngleAtShot;
+	float rollAngleAtShot;
+
 	transformation_Matrices trans_m;
 	physics_Properties phys_p;
-
-	float angleAtShot;
-	glm::vec3 at;
-	glm::vec3 initialPos;
 
 protected:
 
@@ -52,7 +58,7 @@ public:
 	Object(transformation_Matrices transformation, char *texturePath);
 	~Object();
 	std::stack<glm::mat4> Object::renderObject(glm::mat4 projection, std::stack<glm::mat4> mvStack, GLuint shader,
-		MeshManager::lightStruct light, MeshManager::materialStruct material, float rot);
+		MeshManager::lightStruct light, MeshManager::materialStruct material, float pitch, float yaw, float roll);
 	GLuint object_getIndex();
 	GLuint object_getTexture();
 	GLuint object_getMesh();
@@ -63,15 +69,12 @@ public:
 
 	glm::vec3 getScale();
 
-	float getAngle();
-	void setAngle(float angle);
-
-	////EXPERIMENTING
-	void setAt(glm::vec3 newAt);
-	glm::vec3 getAt();
-
-	void setInitialPosition(glm::vec3 newPos);
-	glm::vec3 getInitialPosition();
+	float getPitchAngle();
+	void setPitchAngle(float angle);
+	float getYawAngle();
+	void setYawAngle(float angle);
+	float getRollAngle();
+	void setRollAngle(float angle);
 };
 
 #endif

@@ -10,9 +10,10 @@ Object::Object(transformation_Matrices transformation) {
 		norms.data(), tex_coords.data(), size, indices.data()); // create a mesh
 	trans_m.position = transformation.position;
 	trans_m.scale = transformation.scale;
-	trans_m.rotation = transformation.rotation;
+	trans_m.pitch = transformation.pitch;
+	trans_m.yaw = transformation.yaw;
+	trans_m.roll = transformation.roll;
 //	scale = scal;
-//	rotation = rot;
 }
 
 Object::Object(transformation_Matrices transformation, char *texturePath) {
@@ -24,7 +25,9 @@ Object::Object(transformation_Matrices transformation, char *texturePath) {
 		norms.data(), tex_coords.data(), size, indices.data()); // create a mesh
 	trans_m.position = transformation.position;
 	trans_m.scale = transformation.scale;
-	trans_m.rotation = transformation.rotation;
+	trans_m.pitch = transformation.pitch;
+	trans_m.yaw = transformation.yaw;
+	trans_m.roll = transformation.roll;
 }
 
 Object::~Object() {
@@ -32,16 +35,24 @@ Object::~Object() {
 }
 
 std::stack<glm::mat4> Object::renderObject(glm::mat4 projection, std::stack<glm::mat4> mvStack, GLuint shader,
-	MeshManager::lightStruct light, MeshManager::materialStruct material, float rot) {
+	MeshManager::lightStruct light, MeshManager::materialStruct material, float pitch, float yaw, float roll) {
 
 	glUseProgram(shader);
 	MeshManager::setLight(shader, light);
 	mvStack.push(mvStack.top());// push modelview to stack
 	if (trans_m.position != glm::vec3(0.0f, 0.0f, 0.0f))
 		mvStack.top() = glm::translate(mvStack.top(), trans_m.position);
-	if (trans_m.rotation != glm::vec3(0.0f, 0.0f, 0.0f)){
-		rotationAngle = rot;
-		mvStack.top() = glm::rotate(mvStack.top(), rotationAngle, trans_m.rotation);
+	if (trans_m.pitch != glm::vec3(0.0f, 0.0f, 0.0f)) {
+		pitchAngle = pitch;
+		mvStack.top() = glm::rotate(mvStack.top(), pitchAngle, trans_m.pitch);
+	}
+	if (trans_m.yaw != glm::vec3(0.0f, 0.0f, 0.0f)){
+		yawAngle = yaw;
+		mvStack.top() = glm::rotate(mvStack.top(), yawAngle, trans_m.yaw);
+	}
+	if (trans_m.roll != glm::vec3(0.0f, 0.0f, 0.0f)) {
+		rollAngle = roll;
+		mvStack.top() = glm::rotate(mvStack.top(), rollAngle, trans_m.roll);
 	}
 	if (trans_m.scale != glm::vec3(0.0f, 0.0f, 0.0f))
 		mvStack.top() = glm::scale(mvStack.top(), trans_m.scale);
@@ -70,7 +81,6 @@ GLuint Object::object_getMesh() {
 void Object::setPosition(glm::vec3 newPos) {
 	trans_m.position = newPos;
 }
-
 glm::vec3 Object::getPosition() {
 	return trans_m.position;
 }
@@ -78,7 +88,6 @@ glm::vec3 Object::getPosition() {
 void Object::setVelocity(glm::vec3 newVel) {
 	phys_p.velocity = newVel;
 }
-
 glm::vec3 Object::getVelocity() {
 	return phys_p.velocity;
 }
@@ -87,25 +96,22 @@ glm::vec3 Object::getScale() {
 	return trans_m.scale;
 }
 
-float Object::getAngle() {
-	return angleAtShot;
+float Object::getPitchAngle() {
+	return pitchAngleAtShot;
 }
-void Object::setAngle(float angle) {
-	angleAtShot = angle;
+void Object::setPitchAngle(float angle) {
+	pitchAngleAtShot = angle;
+}
+float Object::getYawAngle() {
+	return yawAngleAtShot;
+}
+void Object::setYawAngle(float angle) {
+	yawAngleAtShot = angle;
+}
+float Object::getRollAngle() {
+	return rollAngleAtShot;
+}
+void Object::setRollAngle(float angle) {
+	rollAngleAtShot = angle;
 }
 
-////EXPERIMENTING
-void Object::setAt(glm::vec3 newAt) {
-	at = newAt;
-}
-glm::vec3 Object::getAt() {
-	return at;
-}
-
-void Object::setInitialPosition(glm::vec3 newPos) {
-	initialPos = newPos;
-}
-
-glm::vec3 Object::getInitialPosition() {
-	return initialPos;
-}
