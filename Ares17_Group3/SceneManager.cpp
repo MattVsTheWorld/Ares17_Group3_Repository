@@ -32,6 +32,7 @@ namespace SceneManager {
 
 	float SCREENWIDTH = 800.0f;
 	float SCREENHEIGHT = 600.0f;
+	unsigned int lastTime = 0, currentTime;
 
 	glm::vec3 transTest = glm::vec3(-10.0f, -0.1f, -10.0f);		
 	glm::vec3 scaleTest = glm::vec3(20.0f, 0.1f, 20.0f);
@@ -346,6 +347,21 @@ namespace SceneManager {
 		glDepthMask(GL_TRUE);
 	}
 
+	float gameTime() {
+		currentTime = clock();
+		//	if (currentTime > lastTime + DT_MILLISECONDS) { // operations done every ~33ms
+		//	printf("Diff: %d\n", currentTime - lastTime);
+
+		unsigned int dt = currentTime - lastTime;
+		float dt_secs = (float)dt / 1000;
+		if (dt_secs > 0.017) dt_secs = 0.017; // first value is off ( 5.5~)
+											  //	std::cout << dt_secs << std::endl;
+		lastTime = currentTime;
+
+		return dt_secs;
+	}
+
+	bool once = true;
 	void moveObjects() {
 		// MOVEMENT TESTING (testcube 2)
 		if (testMove.x >= 1.0) movement = -0.05;
@@ -353,15 +369,32 @@ namespace SceneManager {
 		testMove.x += movement;
 		testCubes[1]->setPosition(testMove);
 
-		// rotate rotating cube (testcube 3)
+		// rotate rotating cube (testcube 3 ([2]))
 		theta += 0.1f;
+		
+		float dt_secs = gameTime();
+		
 
+		glm::vec3 speed = glm::vec3(1.0, 0.0, -3.0);
+		glm::vec3 friction = glm::vec3(speed.x / 7, 0.0, speed.z / 7);
+		if (once) {
+			testCubes[2]->setVelocity(speed);
+			once = false;
+		}
+		vectorPair currentProperties = make_pair(testCubes[2]->getPosition(), testCubes[2]->getVelocity());
+		currentProperties = physicsManager->applyPhysics(testCubes[2]->getPosition(), testCubes[2]->getVelocity(), friction, dt_secs);
+		testCubes[2]->setPosition(currentProperties.first);
+		testCubes[2]->setVelocity(currentProperties.second);
+		cout << "\n" << testCubes[2]->getVelocity().x << "<- x , z -> " << testCubes[2]->getVelocity().z << "\n";
+		
 		// move testcube 4
-		vectorPair currentProperties = make_pair(testCubes[3]->getPosition(), testCubes[3]->getVelocity());
+		currentProperties = make_pair(testCubes[3]->getPosition(), testCubes[3]->getVelocity());
 		glm::vec3 gravity = glm::vec3(0.0, -2.0, 0.0);
-		currentProperties = physicsManager->applyGravity(currentProperties.first, currentProperties.second, gravity);
+		currentProperties = physicsManager->applyGravity(currentProperties.first, currentProperties.second, gravity, dt_secs);
 		testCubes[3]->setPosition(currentProperties.first);
 		testCubes[3]->setVelocity(currentProperties.second);
+
+
 
 	}
 	/*
