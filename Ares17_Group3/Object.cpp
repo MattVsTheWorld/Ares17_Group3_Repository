@@ -1,13 +1,12 @@
 #include "Object.h"
 
 // probably get rid of this constructor
-Object::Object(transformation_Matrices transformation) {
-	rt3d::loadObj("cube.obj", verts, norms, tex_coords, indices);
-	GLuint size = indices.size();
+Object::Object(transformation_Matrices transformation, object_Properties obj_p) {
+	GLuint size = obj_p.indices.size();
 	meshIndexCount = size;
 	texture = loadBitmap::loadBitmap("wall.bmp"); // load a texture
-	meshObject = MeshManager::createMesh(verts.size() / 3, verts.data(), nullptr,
-		norms.data(), tex_coords.data(), size, indices.data()); // create a mesh
+	meshObject = MeshManager::createMesh(obj_p.verts.size() / 3, obj_p.verts.data(), nullptr,
+		obj_p.norms.data(), obj_p.tex_coords.data(), size, obj_p.indices.data()); // create a mesh
 	trans_m.position = transformation.position;
 	trans_m.scale = transformation.scale;
 	trans_m.pitch = transformation.pitch;
@@ -16,13 +15,13 @@ Object::Object(transformation_Matrices transformation) {
 //	scale = scal;
 }
 
-Object::Object(transformation_Matrices transformation, char *texturePath) {
-	rt3d::loadObj("cube.obj", verts, norms, tex_coords, indices);
-	GLuint size = indices.size();
+
+Object::Object(transformation_Matrices transformation, char *texturePath, object_Properties obj_p) {
+	GLuint size = obj_p.indices.size();
 	meshIndexCount = size;
 	texture = loadBitmap::loadBitmap(texturePath); // load a texture
-	meshObject = MeshManager::createMesh(verts.size() / 3, verts.data(), nullptr,
-		norms.data(), tex_coords.data(), size, indices.data()); // create a mesh
+	meshObject = MeshManager::createMesh(obj_p.verts.size() / 3, obj_p.verts.data(), nullptr,
+		obj_p.norms.data(), obj_p.tex_coords.data(), size, obj_p.indices.data()); // create a mesh
 	trans_m.position = transformation.position;
 	trans_m.scale = transformation.scale;
 	trans_m.pitch = transformation.pitch;
@@ -32,6 +31,17 @@ Object::Object(transformation_Matrices transformation, char *texturePath) {
 
 Object::~Object() {
 //	delete this;
+}
+
+
+object_Properties Object::initializeObject(char *objectPath) {
+	vector<GLfloat> verts; // contains vertices of loaded object
+	vector<GLfloat> norms; // contains normal of loaded object
+	vector<GLfloat> tex_coords; // contains texture coordinates of loaded object
+	vector<GLuint> indices; // contains indices of loaded object
+	rt3d::loadObj(objectPath, verts, norms, tex_coords, indices);
+
+	return{ verts, norms, tex_coords, indices };
 }
 
 std::stack<glm::mat4> Object::renderObject(glm::mat4 projection, std::stack<glm::mat4> mvStack, GLuint shader,
@@ -54,6 +64,7 @@ std::stack<glm::mat4> Object::renderObject(glm::mat4 projection, std::stack<glm:
 		rollAngle = roll;
 		mvStack.top() = glm::rotate(mvStack.top(), rollAngle, trans_m.roll);
 	}
+	
 	if (trans_m.scale != glm::vec3(0.0f, 0.0f, 0.0f))
 		mvStack.top() = glm::scale(mvStack.top(), trans_m.scale);
 	glActiveTexture(GL_TEXTURE0);

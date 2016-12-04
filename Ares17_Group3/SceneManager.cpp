@@ -43,6 +43,7 @@ namespace SceneManager {
 
 	//transformation_Matrices testTransformation = { transTest, scaleTest, pitchTest, yawTest, rollTest };
 	transformation_Matrices testTransformation = { transTest, scaleTest, nullTest, nullTest, nullTest };
+	object_Properties cube;
 
 	float angleTest;
 
@@ -118,7 +119,7 @@ namespace SceneManager {
 		glm::mat4 model;
 		transformation_Matrices bulletTest = { bulletSpawn, glm::vec3(0.1, 0.1, 0.1),
 		  pitchTest, yawTest, rollTest };
-		bullet[noShotsFired] = new Bullet(bulletTest);
+		bullet[noShotsFired] = new Bullet(bulletTest, cube);
 		bullet[noShotsFired]->setYawAngle(yaw);
 		bullet[noShotsFired]->setPitchAngle(pitch);
 		bullet[noShotsFired]->setVelocity(glm::vec3(0.1, 0.1, 0.1));
@@ -234,20 +235,20 @@ namespace SceneManager {
 	}
 
 	void initObjects() {
-		testCubes[0] = new Object(testTransformation);
+		testCubes[0] = new Object(testTransformation, cube);
 		transformation_Matrices test2 = { testMove, glm::vec3(0.5, 0.5, 0.5), nullTest };
 		//	transformation_Matrices(testMove, glm::vec3(0.5, 0.5, 0.5), nullTest)
-		testCubes[1] = new Object(test2, "studdedmetal.bmp");
+		testCubes[1] = new Object(test2, "studdedmetal.bmp", cube);
 		transformation_Matrices test3 = { glm::vec3(-3.0, 2.0, 0.0), glm::vec3(0.5, 1.5, 0.5), pitchTest, yawTest };
-		testCubes[2] = new Object(test3);
+		testCubes[2] = new Object(test3, cube);
 		transformation_Matrices test4 = { glm::vec3(2.0, 10.0, -2.0), glm::vec3(0.8, 0.8, 0.8), nullTest };
-		testCubes[3] = new Object(test4);
+		testCubes[3] = new Object(test4, cube);
 		transformation_Matrices test5 = { glm::vec3(2.0,4.0, 2.0), glm::vec3(1.5,1.5,1.5), nullTest };
-		testCubes[4] = new Object(test5);
+		testCubes[4] = new Object(test5, cube);
 		transformation_Matrices testScale = { glm::vec3(1.0,4.0,5.0),nullTest,nullTest };
 		transformation_Matrices testScale2 = { glm::vec3(0.5,4.5,3.0),glm::vec3(0.5,0.5,0.5),nullTest };
-		testCubes[5] = new Object(testScale);
-		testCubes[6] = new Object(testScale2);
+		testCubes[5] = new Object(testScale, cube);
+		testCubes[6] = new Object(testScale2, cube);
 	}
 
 	void init(void) {
@@ -260,6 +261,7 @@ namespace SceneManager {
 		//shader = new Shader("modelLoading.vert", "modelLoading.frag");
 		MeshManager::setLight(shaderProgram, testLight);
 		MeshManager::setMaterial(shaderProgram, greenMaterial);
+		cube = testCubes[0]->initializeObject("cube.obj");
 		
 		initObjects();
 		h_manager = new hudManager();
@@ -278,6 +280,7 @@ namespace SceneManager {
 		MeshManager::setUniformMatrix4fv(modelProgram, "view", glm::value_ptr(mvStack.top()));
 	//	mvStack.top() = glm::translate(mvStack.top(), glm::vec3(-10.0f, -0.1f, -10.0f));
 		// Draw the loaded model
+
 		glm::mat4 model;
 	//	model = glm::translate(model, glm::vec3(0.0f, 0.5f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));	// It's a bit too big for our scene, so scale it down

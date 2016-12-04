@@ -27,13 +27,18 @@ struct physics_Properties {
 	bool isOnGround = false;
 };
 
-class Object {
-private:
-	// cube is used for the walls and the skybox
+struct object_Properties {
 	vector<GLfloat> verts; // contains vertices of loaded object
 	vector<GLfloat> norms; // contains normal of loaded object
 	vector<GLfloat> tex_coords; // contains texture coordinates of loaded object
 	vector<GLuint> indices; // contains indices of loaded object
+
+};
+
+class Object {
+private:
+	// cube is used for the walls and the skybox
+//	object_Properties obj_p;
 	GLuint meshIndexCount = 0;
 	GLuint texture;
 	GLuint meshObject;
@@ -50,9 +55,11 @@ protected:
 
 public:
 	// deprecated constructor
-	Object(transformation_Matrices transformation);
-	Object(transformation_Matrices transformation, char *texturePath);
+	Object(transformation_Matrices transformation, object_Properties obj_p);
+	Object(transformation_Matrices transformation, char *texturePath, object_Properties obj_p);
 	~Object();
+
+	object_Properties initializeObject(char *objectPath);
 	std::stack<glm::mat4> Object::renderObject(glm::mat4 projection, std::stack<glm::mat4> mvStack, GLuint shader,
 		MeshManager::lightStruct light, MeshManager::materialStruct material, float pitch, float yaw, float roll);
 	GLuint object_getIndex();
@@ -75,8 +82,8 @@ private:
 protected:
 
 public:
-	Bullet(transformation_Matrices transformation) : Object(transformation) {}
-	Bullet(transformation_Matrices transformation, char *texturePath) : Object(transformation, texturePath) {}
+	Bullet(transformation_Matrices transformation, object_Properties obj_p) : Object(transformation, obj_p) {}
+	Bullet(transformation_Matrices transformation, char *texturePath, object_Properties obj_p) : Object(transformation, texturePath, obj_p) {}
 
 	//get and set angles at shot
 	float getPitchAngle() { return pitchAngleAtShot; }
