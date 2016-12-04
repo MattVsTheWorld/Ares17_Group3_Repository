@@ -38,10 +38,12 @@ vectorPair Physics::applyGravity(glm::vec3 pos, glm::vec3 vel, glm::vec3 acc, fl
 		//	std::cout << dt_secs << std::endl;
 		//	lastTime = currentTime;
 			//acc.y = GRAVITY_VALUE;
-			// euler's method
+			// euler's method 
 			vel2.y = vel.y + acc.y * dt_secs; // next velocity
 			avg_vel.y = (vel.y + vel2.y) / 2; // average velocoiy
 			pos2.y = pos.y + avg_vel.y * dt_secs; // new position
+		//	cout << "vel " << vel.y << " vel2 " << vel2.y << " avg " << avg_vel.y << " dt " << dt_secs << " pos " << pos.y << " pos2 " << pos2.y << endl;
+			
 			// same for x component
 			//	cout << avg_vel.y << endl;
 			//	bodies[i]->moveTo(pos2.x, pos2.y); // move to new position
@@ -51,6 +53,7 @@ vectorPair Physics::applyGravity(glm::vec3 pos, glm::vec3 vel, glm::vec3 acc, fl
 			//		cout << vel.y << endl;
 	//	}
 	}
+	else vel.y = 0;
 	/*
 	else {
 	pos.y += 0.05;

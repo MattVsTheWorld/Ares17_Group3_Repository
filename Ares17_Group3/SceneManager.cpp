@@ -4,7 +4,7 @@
 using namespace std;
 
 #define OBJECT_NO 7
-#define BULLET_NO 30
+#define BULLET_NO 1
 
 typedef std::pair < glm::vec3, glm::vec3 > vectorPair;
 typedef stack<glm::mat4> mvstack;
@@ -98,6 +98,20 @@ namespace SceneManager {
 		return glm::vec3(pos.x + d*std::cos(yaw*DEG_TO_RADIAN), pos.y, pos.z + d*std::sin(yaw*DEG_TO_RADIAN));
 	}
 
+	float gameTime() {
+		currentTime = clock();
+		//	if (currentTime > lastTime + DT_MILLISECONDS) { // operations done every ~33ms
+		//	printf("Diff: %d\n", currentTime - lastTime);
+
+		unsigned int dt = currentTime - lastTime;
+		float dt_secs = (float)dt / 1000;
+		if (dt_secs > 0.017) dt_secs = 0.017; // first value is off ( 5.5~)
+											  //	std::cout << dt_secs << std::endl;
+		lastTime = currentTime;
+
+		return dt_secs;
+	}
+
 	void lockCamera()
 	{
 		if (pitch > 70)
@@ -158,10 +172,15 @@ namespace SceneManager {
 			ObjectsPos[i] = testCubes[i]->getPosition();
 			ObjectsScale[i] = testCubes[i]->getScale();
 		}
-		for (int i = 1; i < OBJECT_NO; i++) {		
+		for (int i = 0; i < OBJECT_NO; i++) {
+
+
+		//	cout << bullet->getVelocity().y << "\n";
+
+
 			if (collision(ObjectsPos[i], ObjectsScale[i], bulletPos, bulletScale)) {
 			//	cout << "colliding" << endl;
-				bullet->setVelocity(glm::vec3(0.0, 0.0, 0.0));
+				bullet->setVelocity(glm::vec3(0.0, bullet->getVelocity().y, 0.0));
 			//	bullet->~Object();
 			}
 			else {
@@ -170,8 +189,14 @@ namespace SceneManager {
 										     bulletPos.y - bullet->getVelocity().y*sin(std::atan(bullet->getPitchAngle())),
 											 bulletPos.z - bullet->getVelocity().z*std::cos(angleAtShot*DEG_TO_RADIAN));
 				bullet->setPosition(newPos);
-			}
+			}		
 		}		
+
+		vectorPair currentProperties = make_pair(bullet->getPosition(), bullet->getVelocity());
+		glm::vec3 gravity = glm::vec3(0.0, -2.0, 0.0);
+		currentProperties = physicsManager->applyGravity(currentProperties.first, currentProperties.second, gravity, gameTime());
+		bullet->setPosition(currentProperties.first);
+		bullet->setVelocity(currentProperties.second);
 	}
 
 	void controls(SDL_Window * window, SDL_Event sdlEvent) {
@@ -246,7 +271,7 @@ namespace SceneManager {
 		testCubes[3] = new Object(test4, cube);
 		transformation_Matrices test5 = { glm::vec3(2.0,4.0, 2.0), glm::vec3(1.5,1.5,1.5), nullTest };
 		testCubes[4] = new Object(test5, cube);
-		transformation_Matrices testScale = { glm::vec3(1.0,4.0,5.0),nullTest,nullTest };
+		transformation_Matrices testScale = { glm::vec3(1.0,4.0,5.0),glm::vec3(0.8, 0.8, 0.8),nullTest };
 		transformation_Matrices testScale2 = { glm::vec3(0.5,4.5,3.0),glm::vec3(0.5,0.5,0.5),nullTest };
 		testCubes[5] = new Object(testScale, cube);
 		testCubes[6] = new Object(testScale2, cube);
@@ -347,19 +372,7 @@ namespace SceneManager {
 		glDepthMask(GL_TRUE);
 	}
 
-	float gameTime() {
-		currentTime = clock();
-		//	if (currentTime > lastTime + DT_MILLISECONDS) { // operations done every ~33ms
-		//	printf("Diff: %d\n", currentTime - lastTime);
-
-		unsigned int dt = currentTime - lastTime;
-		float dt_secs = (float)dt / 1000;
-		if (dt_secs > 0.017) dt_secs = 0.017; // first value is off ( 5.5~)
-											  //	std::cout << dt_secs << std::endl;
-		lastTime = currentTime;
-
-		return dt_secs;
-	}
+	
 
 	bool once = true;
 	void moveObjects() {
@@ -375,17 +388,21 @@ namespace SceneManager {
 		float dt_secs = gameTime();
 		
 
-		glm::vec3 speed = glm::vec3(1.0, 0.0, -3.0);
+		glm::vec3 speed = glm::vec3(1.0, 0.0, 3.0);
 		glm::vec3 friction = glm::vec3(speed.x / 7, 0.0, speed.z / 7);
 		if (once) {
 			testCubes[2]->setVelocity(speed);
 			once = false;
 		}
-		vectorPair currentProperties = make_pair(testCubes[2]->getPosition(), testCubes[2]->getVelocity());
-		currentProperties = physicsManager->applyPhysics(testCubes[2]->getPosition(), testCubes[2]->getVelocity(), friction, dt_secs);
-		testCubes[2]->setPosition(currentProperties.first);
-		testCubes[2]->setVelocity(currentProperties.second);
-		cout << "\n" << testCubes[2]->getVelocity().x << "<- x , z -> " << testCubes[2]->getVelocity().z << "\n";
+		vectorPair currentProperties;
+		if (testCubes[2]->getVelocity() != glm::vec3(0.0,0.0,0.0))
+		{
+			currentProperties = make_pair(testCubes[2]->getPosition(), testCubes[2]->getVelocity());
+			currentProperties = physicsManager->applyPhysics(testCubes[2]->getPosition(), testCubes[2]->getVelocity(), friction, dt_secs);
+			testCubes[2]->setPosition(currentProperties.first);
+			testCubes[2]->setVelocity(currentProperties.second);
+		//	cout << "\n" << testCubes[2]->getVelocity().x << "<- x , z -> " << testCubes[2]->getVelocity().z << "\n";
+		}
 		
 		// move testcube 4
 		currentProperties = make_pair(testCubes[3]->getPosition(), testCubes[3]->getVelocity());
@@ -394,7 +411,8 @@ namespace SceneManager {
 		testCubes[3]->setPosition(currentProperties.first);
 		testCubes[3]->setVelocity(currentProperties.second);
 
-
+//		if (bullet[0])
+//			cout << "vel " <<  bullet[0]->getVelocity().y << " pos " << bullet[0]->getPosition().y << endl;
 
 	}
 	/*
