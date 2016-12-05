@@ -54,6 +54,12 @@
     <ClCompile Include="Object.cpp">
       <Filter>Being worked on</Filter>
     </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>Being worked on</Filter>
+    </ClCompile>
+    <ClCompile Include="Bullet.cpp">
+      <Filter>Being worked on</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SDLmanager.h">
@@ -93,6 +99,12 @@
       <Filter>Being worked on</Filter>
     </ClInclude>
     <ClInclude Include="Object.h">
+      <Filter>Being worked on</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>Being worked on</Filter>
+    </ClInclude>
+    <ClInclude Include="Bullet.h">
       <Filter>Being worked on</Filter>
     </ClInclude>
   </ItemGroup>

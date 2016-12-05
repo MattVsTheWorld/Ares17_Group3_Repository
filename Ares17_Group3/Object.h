@@ -55,6 +55,7 @@ protected:
 
 public:
 	// deprecated constructor
+	Object(transformation_Matrices transformation);
 	Object(transformation_Matrices transformation, object_Properties obj_p);
 	Object(transformation_Matrices transformation, char *texturePath, object_Properties obj_p);
 	~Object();
@@ -72,26 +73,5 @@ public:
 	glm::vec3 getScale();
 };
 
-class Bullet : public Object {
-private:
-	//initial pitch,yaw,angle, of object
-	float pitchAngleAtShot;
-	float yawAngleAtShot;
-	float rollAngleAtShot;
-
-protected:
-
-public:
-	Bullet(transformation_Matrices transformation, object_Properties obj_p) : Object(transformation, obj_p) {}
-	Bullet(transformation_Matrices transformation, char *texturePath, object_Properties obj_p) : Object(transformation, texturePath, obj_p) {}
-
-	//get and set angles at shot
-	float getPitchAngle() { return pitchAngleAtShot; }
-	void setPitchAngle(float angle) { pitchAngleAtShot = angle; }
-	float getYawAngle() { return yawAngleAtShot; }
-	void setYawAngle(float angle) { yawAngleAtShot = angle; }
-	float getRollAngle() { return rollAngleAtShot; }
-	void setRollAngle(float angle) { rollAngleAtShot = angle; }
-};
 
 #endif

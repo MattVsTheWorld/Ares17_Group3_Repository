@@ -1,5 +1,14 @@
 #include "Object.h"
 
+
+Object::Object(transformation_Matrices transformation) {
+	trans_m.position = transformation.position;
+	trans_m.scale = transformation.scale;
+	trans_m.pitch = transformation.pitch;
+	trans_m.yaw = transformation.yaw;
+	trans_m.roll = transformation.roll;
+}
+
 // probably get rid of this constructor
 Object::Object(transformation_Matrices transformation, object_Properties obj_p) {
 	GLuint size = obj_p.indices.size();

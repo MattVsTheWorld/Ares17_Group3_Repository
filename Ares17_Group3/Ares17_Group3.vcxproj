@@ -150,12 +150,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Bullet.cpp" />
     <ClCompile Include="hudManager.cpp" />
     <ClCompile Include="loadBitmap.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MeshManager.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="Physics.cpp" />
+    <ClCompile Include="Player.cpp" />
     <ClCompile Include="rt3dObjLoader.cpp" />
     <ClCompile Include="SceneManager.cpp" />
     <ClCompile Include="SDLmanager.cpp" />
@@ -163,6 +165,7 @@
     <ClCompile Include="Skybox.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Bullet.h" />
     <ClInclude Include="hudManager.h" />
     <ClInclude Include="loadBitmap.h" />
     <ClInclude Include="main.h" />
@@ -171,6 +174,7 @@
     <ClInclude Include="Model.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="Physics.h" />
+    <ClInclude Include="Player.h" />
     <ClInclude Include="rt3dObjLoader.h" />
     <ClInclude Include="SceneManager.h" />
     <ClInclude Include="SDLmanager.h" />

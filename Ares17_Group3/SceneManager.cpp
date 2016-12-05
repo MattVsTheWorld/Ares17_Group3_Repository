@@ -19,6 +19,8 @@ namespace SceneManager {
 	Object *testCubes[OBJECT_NO]; // arrays :D
 	//Object *bullet[BULLET_NO];
 	Bullet *bullet[BULLET_NO];
+
+	Player *player;
 	bool shotsFired = false;
 	int noShotsFired = 0;
 	float theta = 0.0f;
@@ -68,7 +70,6 @@ namespace SceneManager {
 	glm::vec3 eye(2.0f, 3.0f, -6.0f);
 	glm::vec3 at(0.0f, 0.5f, -1.0f);
 	glm::vec3 up(0.0f, 1.0f, 0.0f);
-	GLfloat upwardsSpeed = 0.0f;
 
 	MeshManager::lightStruct testLight = {
 		{ 0.6f, 0.4f, 0.6f, 1.0f }, // ambient
@@ -131,8 +132,8 @@ namespace SceneManager {
 	//
 	void bulletCreation() {
 		//position, scale, rotation
-		glm::vec3 bulletSpawn = eye;
-		bulletSpawn = moveForward(eye, yaw, 0.5f);
+		glm::vec3 bulletSpawn = player->getPosition();
+		bulletSpawn = moveForward(player->getPosition(), yaw, 0.5f);
 		glm::mat4 model;
 		transformation_Matrices bulletTest = { bulletSpawn, glm::vec3(0.1, 0.1, 0.1),
 		  pitchTest, yawTest, rollTest };
@@ -253,40 +254,41 @@ namespace SceneManager {
 		glm::vec3 playerScale(0.5, 1.5, 0.5);
 		const Uint8 *keys = SDL_GetKeyboardState(NULL);
 		if (keys[SDL_SCANCODE_W]) {
-			collisionPosition = moveForward(eye, yaw, 0.1f);
+			collisionPosition = moveForward(player->getPosition(), yaw, 0.1f);
 			if(!playerCollision(collisionPosition, playerScale))
-				eye = moveForward(eye, yaw, 0.1f);
+				player->setPosition(moveForward(player->getPosition(), yaw, 0.1f));
 		}
 		else if (keys[SDL_SCANCODE_S]) {
-			collisionPosition = moveForward(eye, yaw, -0.1f);
+			collisionPosition = moveForward(player->getPosition(), yaw, -0.1f);
 			if (!playerCollision(collisionPosition, playerScale))
-				eye = moveForward(eye, yaw, -0.1f);
+				player->setPosition(moveForward(player->getPosition(), yaw, -0.1f));
 		}
 		if (keys[SDL_SCANCODE_A]) {
-			collisionPosition = moveRight(eye, yaw, -0.1f);
+			collisionPosition = moveRight(player->getPosition(), yaw, -0.1f);
 			if (!playerCollision(collisionPosition, playerScale))
-				eye = moveRight(eye, yaw, -0.1f);
+				player->setPosition(moveRight(player->getPosition(), yaw, -0.1f));
 		}
 		else if (keys[SDL_SCANCODE_D]) {
-			collisionPosition = moveRight(eye, yaw, 0.1f);
+			collisionPosition = moveRight(player->getPosition(), yaw, 0.1f);
 			if (!playerCollision(collisionPosition, playerScale))
-				eye = moveRight(eye, yaw, 0.1f);
+				player->setPosition(moveRight(player->getPosition(), yaw, 0.1f));
 		}
 		if (keys[SDL_SCANCODE_R]) {
-			collisionPosition = eye;
+			collisionPosition = player->getPosition();
 			collisionPosition.y += 0.1;
 			if (!playerCollision(collisionPosition, playerScale))
-				eye.y += 0.1;
+				player->setPosition(glm::vec3(player->getPosition().x, player->getPosition().y + 0.1, player->getPosition().z));
 		}
 		else if (keys[SDL_SCANCODE_F]) {
-			collisionPosition = eye;
+			collisionPosition = player->getPosition();
 			collisionPosition.y -= 0.1;
 			if (!playerCollision(collisionPosition, playerScale))
-				eye.y -= 0.1;
+				player->setPosition(glm::vec3(player->getPosition().x, player->getPosition().y - 0.1, player->getPosition().z));
 		}
 
-		if (keys[SDL_SCANCODE_SPACE]) {
-			upwardsSpeed = 4.0;
+		if (keys[SDL_SCANCODE_SPACE] && player->getState() != JUMPING) {
+			player->setVelocity(glm::vec3(player->getVelocity().x, 6.0f, player->getVelocity().z));
+			player->setState(JUMPING);
 		}
 
 	//	if (keys[SDL_SCANCODE_COMMA]) yaw -= 1.0f;
@@ -323,6 +325,12 @@ namespace SceneManager {
 		testCubes[6] = new Object(testScale2, cube);
 	}
 
+	void initPlayer() {
+		glm::vec3 playerScale(0.5, 1.5, 0.5);
+		transformation_Matrices playerTrans = { eye, playerScale, nullTest , nullTest , nullTest };
+		player = new Player(playerTrans);
+	}
+
 	void init(void) {
 		shaderProgram = ShaderManager::initShaders("phong-tex.vert", "phong-tex.frag");
 		texturedProgram = ShaderManager::initShaders("textured.vert", "textured.frag");
@@ -336,6 +344,8 @@ namespace SceneManager {
 		cube = testCubes[0]->initializeObject("cube.obj");
 		
 		initObjects();
+		
+		initPlayer();
 		h_manager = new hudManager();
 		skybox = new Skybox(testTexFiles);
 		physicsManager = new Physics();
@@ -423,15 +433,29 @@ namespace SceneManager {
 	bool once = true;
 
 	void movePlayer(float dt_secs) {
+		// gravity-y-y-y-y
 		glm::vec3 collisionPosition;
 		glm::vec3 playerScale(0.5, 1.5, 0.5);
-		vectorPair currentProperties = make_pair(eye, glm::vec3(0.0f, upwardsSpeed, 0.0f));
-		glm::vec3 gravity = glm::vec3(0.0, -2.0, 0.0);
-		currentProperties = physicsManager->applyGravity(currentProperties.first, currentProperties.second, gravity, dt_secs);
+		vectorPair currentProperties = make_pair(player->getPosition(), player->getVelocity());
+		glm::vec3 gravity = glm::vec3(0.0, -10.0, 0.0);
+		if (player->getState() == JUMPING) 
+			currentProperties = physicsManager->applyGravity(currentProperties.first, currentProperties.second, gravity, dt_secs);
 		collisionPosition = currentProperties.first;
 		if (!playerCollision(collisionPosition, playerScale))
-			eye = currentProperties.first;
-		upwardsSpeed = currentProperties.second.y;
+		{
+			player->setPosition(currentProperties.first);
+			player->setState(JUMPING);
+		}
+		else {
+			player->setState(ON_GROUND);
+			player->setVelocity(glm::vec3(player->getVelocity().x, 0.0f, player->getVelocity().z));
+		}
+		
+		if(player->getState() == JUMPING)
+			player->setVelocity(glm::vec3(player->getVelocity().x, currentProperties.second.y, player->getVelocity().z));
+
+	//cout << "\n" << player->getVelocity().y << "\n";
+
 	}
 
 	void moveObjects() {
@@ -495,9 +519,9 @@ namespace SceneManager {
 	}
 
 	void camera() {
-		at = moveForward(eye, yaw, 1.0f);
+		at = moveForward(player->getPosition(), yaw, 1.0f);
 		at.y -= pitch;
-		mvStack.top() = glm::lookAt(eye, at, up);
+		mvStack.top() = glm::lookAt(player->getPosition(), at, up);
 
 		glm::vec4 tmp = mvStack.top()*lightPos;
 		testLight.position[0] = tmp.x;
