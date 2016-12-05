@@ -313,6 +313,7 @@ namespace SceneManager {
 		//	transformation_Matrices(testMove, glm::vec3(0.5, 0.5, 0.5), nullTest)
 		transformation_Matrices test0 = { glm::vec3(0.0, 2.0, -4.0), glm::vec3(0.5, 0.5, 0.5), nullTest };
 		testCubes[1] = new Object(test0, "studdedmetal.bmp", cube);
+		testCubes[1]->setVelocity(glm::vec3(-1.5, 0.0, 0.0));
 		transformation_Matrices test3 = { glm::vec3(-3.0, 2.0, 0.0), glm::vec3(0.5, 1.5, 0.5), pitchTest, yawTest };
 		testCubes[2] = new Object(test3, cube);
 		transformation_Matrices test4 = { glm::vec3(2.0, 10.0, -2.0), glm::vec3(0.8, 0.8, 0.8), nullTest };
@@ -463,13 +464,23 @@ namespace SceneManager {
 		// eye
 
 		movePlayer(dt_secs);
-		
+		vectorPair currentProperties;
 
 		// MOVEMENT TESTING (testcube 2)
-		if (testMove.x >= 1.0) movement = -0.05;
-		else if (testMove.x <= -1.0) movement = 0.05;
-		testMove.x += movement;
-		testCubes[1]->setPosition(testMove);
+
+	
+
+		if (testCubes[1]->getPosition().x >= 1.0) testCubes[1]->setVelocity(glm::vec3(-1.5, testCubes[1]->getVelocity().y, testCubes[1]->getVelocity().z));
+		else if (testCubes[1]->getPosition().x <= -1.0) testCubes[1]->setVelocity(glm::vec3(1.5, testCubes[1]->getVelocity().y, testCubes[1]->getVelocity().z));
+
+
+		currentProperties = make_pair(testCubes[1]->getPosition(), testCubes[1]->getVelocity());
+		currentProperties = physicsManager->applyPhysics(testCubes[1]->getPosition(), testCubes[1]->getVelocity(), nullTest, dt_secs);
+		testCubes[1]->setPosition(currentProperties.first);
+		testCubes[1]->setVelocity(currentProperties.second);
+
+	//	testMove.x += movement;
+	//	testCubes[1]->setPosition(testMove);
 
 		// rotate rotating cube (testcube 3 ([2]))
 		theta += 0.1f;
@@ -483,7 +494,7 @@ namespace SceneManager {
 			testCubes[2]->setVelocity(speed);
 			once = false;
 		}
-		vectorPair currentProperties;
+		
 		if (testCubes[2]->getVelocity() != glm::vec3(0.0,0.0,0.0))
 		{
 			currentProperties = make_pair(testCubes[2]->getPosition(), testCubes[2]->getVelocity());
@@ -502,6 +513,13 @@ namespace SceneManager {
 
 //		if (bullet[0])
 //			cout << "vel " <<  bullet[0]->getVelocity().y << " pos " << bullet[0]->getPosition().y << endl;
+		for (int i = 0; i < OBJECT_NO; i++) {
+			if (testCubes[i]->getVelocity() == glm::vec3(0.0, 0.0, 0.0))
+				testCubes[i]->setState(STILL);
+			else testCubes[i]->setState(MOVING);
+
+		//	cout << i << " " << testCubes[i]->getState() << endl;
+		}
 
 	}
 	/*

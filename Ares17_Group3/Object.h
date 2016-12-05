@@ -11,6 +11,8 @@
 
 using namespace std;
 
+enum objectState { STILL, MOVING };
+
 struct transformation_Matrices {
 	glm::vec3 position;
 	glm::vec3 scale;
@@ -51,6 +53,8 @@ private:
 	transformation_Matrices trans_m;
 	physics_Properties phys_p;
 
+	objectState obj_s = STILL;
+
 protected:
 
 public:
@@ -71,6 +75,9 @@ public:
 	void setVelocity(glm::vec3 newVel);
 	glm::vec3 getVelocity();
 	glm::vec3 getScale();
+
+	objectState getState();
+	void setState(objectState state);
 };
 
 

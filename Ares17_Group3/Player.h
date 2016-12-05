@@ -14,8 +14,7 @@ public:
 protected:
 
 private:
-	States player_state = JUMPING;
-
+	States player_state = JUMPING; // because of initial player pos
 
 };
 

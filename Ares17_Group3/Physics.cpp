@@ -66,13 +66,12 @@ vectorPair Physics::applyGravity(glm::vec3 pos, glm::vec3 vel, glm::vec3 acc, fl
 }
 
 vectorPair Physics::applyPhysics(glm::vec3 pos, glm::vec3 vel, glm::vec3 acc, float dt_secs) {
-	if (vel.x >= 0.1 || vel.x <= -0.1 && vel.z >= 0.1 || vel.z <= -0.1) {
-
-		glm::vec3 vel2(0.0, 0.0, 0.0);
-		glm::vec3 pos2(0.0, 0.0, 0.0);
-		glm::vec3 avg_vel(0.0, 0.0, 0.0);
-		
-		//acc.y = GRAVITY_VALUE;
+	
+	glm::vec3 vel2(0.0, 0.0, 0.0);
+	glm::vec3 pos2(0.0, 0.0, 0.0);
+	glm::vec3 avg_vel(0.0, 0.0, 0.0);
+	if (vel.x >= 0.1 || vel.x <= -0.1) {
+				//acc.y = GRAVITY_VALUE;
 		// euler's method
 		// ensure acc is always friction
 
@@ -90,23 +89,27 @@ vectorPair Physics::applyPhysics(glm::vec3 pos, glm::vec3 vel, glm::vec3 acc, fl
 
 		pos.x = pos2.x;
 		vel.x = vel2.x;
-		// ensure acc is always friction
-		if (vel.z >= 0 && acc.z <= 0)
-			vel2.z = vel.z + acc.z * dt_secs; // next velocity
-		else if (vel.z <= 0 && acc.z >= 0)
-			vel2.z = vel.z + acc.z * dt_secs;
-		else if (vel.z >= 0 && acc.z >= 0)
-			vel2.z = vel.z - acc.z * dt_secs; // next velocity
-		else if (vel.z <= 0 && acc.z <= 0)
-			vel2.z = vel.z - acc.z * dt_secs;
+	} else vel.x = 0.0;
 
-		avg_vel.z = (vel.z + vel2.z) / 2; // average velocoiy
-		pos2.z = pos.z + avg_vel.z * dt_secs; // new position
+		if (vel.z >= 0.1 || vel.z <= -0.1) {
+			// ensure acc is always friction
+			if (vel.z >= 0 && acc.z <= 0)
+				vel2.z = vel.z + acc.z * dt_secs; // next velocity
+			else if (vel.z <= 0 && acc.z >= 0)
+				vel2.z = vel.z + acc.z * dt_secs;
+			else if (vel.z >= 0 && acc.z >= 0)
+				vel2.z = vel.z - acc.z * dt_secs; // next velocity
+			else if (vel.z <= 0 && acc.z <= 0)
+				vel2.z = vel.z - acc.z * dt_secs;
 
-		pos.z = pos2.z;
-		vel.z = vel2.z;
-	}
-	else { vel.x = 0.0; vel.z = 0.0; }
+			avg_vel.z = (vel.z + vel2.z) / 2; // average velocoiy
+			pos2.z = pos.z + avg_vel.z * dt_secs; // new position
+
+			pos.z = pos2.z;
+			vel.z = vel2.z;
+		}
+		else vel.z = 0.0;
+	
 	return std::make_pair(pos, vel);
 
 }

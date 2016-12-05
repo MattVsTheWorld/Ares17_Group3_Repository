@@ -115,3 +115,10 @@ glm::vec3 Object::getVelocity() {
 glm::vec3 Object::getScale() {
 	return trans_m.scale;
 }
+
+objectState Object::getState() {
+	return obj_s;
+}
+void Object::setState(objectState state) {
+	obj_s = state;
+}
