@@ -68,6 +68,7 @@ namespace SceneManager {
 	glm::vec3 eye(2.0f, 3.0f, -6.0f);
 	glm::vec3 at(0.0f, 0.5f, -1.0f);
 	glm::vec3 up(0.0f, 1.0f, 0.0f);
+	GLfloat upwardsSpeed = 0.0f;
 
 	MeshManager::lightStruct testLight = {
 		{ 0.6f, 0.4f, 0.6f, 1.0f }, // ambient
@@ -202,7 +203,7 @@ namespace SceneManager {
 
 	bool playerCollision(glm::vec3 eye, glm::vec3 playerScale) {
 		bool p_coll = false;
-		for (int i = 1; i < OBJECT_NO; i++) {
+		for (int i = 0; i < OBJECT_NO; i++) {
 			p_coll = collision(eye, playerScale, testCubes[i]->getPosition(), testCubes[i]->getScale());
 			if (p_coll) {
 				return p_coll;
@@ -249,38 +250,43 @@ namespace SceneManager {
 		
 		//KEYBOARD
 		glm::vec3 collisionPosition;
+		glm::vec3 playerScale(0.5, 1.5, 0.5);
 		const Uint8 *keys = SDL_GetKeyboardState(NULL);
 		if (keys[SDL_SCANCODE_W]) {
 			collisionPosition = moveForward(eye, yaw, 0.1f);
-			if(!playerCollision(collisionPosition, glm::vec3(0.5,0.5,0.5)))
+			if(!playerCollision(collisionPosition, playerScale))
 				eye = moveForward(eye, yaw, 0.1f);
 		}
 		else if (keys[SDL_SCANCODE_S]) {
 			collisionPosition = moveForward(eye, yaw, -0.1f);
-			if (!playerCollision(collisionPosition, glm::vec3(0.5, 0.5, 0.5)))
+			if (!playerCollision(collisionPosition, playerScale))
 				eye = moveForward(eye, yaw, -0.1f);
 		}
 		if (keys[SDL_SCANCODE_A]) {
 			collisionPosition = moveRight(eye, yaw, -0.1f);
-			if (!playerCollision(collisionPosition, glm::vec3(0.5, 0.5, 0.5)))
+			if (!playerCollision(collisionPosition, playerScale))
 				eye = moveRight(eye, yaw, -0.1f);
 		}
 		else if (keys[SDL_SCANCODE_D]) {
 			collisionPosition = moveRight(eye, yaw, 0.1f);
-			if (!playerCollision(collisionPosition, glm::vec3(0.5, 0.5, 0.5)))
+			if (!playerCollision(collisionPosition, playerScale))
 				eye = moveRight(eye, yaw, 0.1f);
 		}
 		if (keys[SDL_SCANCODE_R]) {
 			collisionPosition = eye;
 			collisionPosition.y += 0.1;
-			if (!playerCollision(collisionPosition, glm::vec3(0.5, 0.5, 0.5)))
+			if (!playerCollision(collisionPosition, playerScale))
 				eye.y += 0.1;
 		}
 		else if (keys[SDL_SCANCODE_F]) {
 			collisionPosition = eye;
 			collisionPosition.y -= 0.1;
-			if (!playerCollision(collisionPosition, glm::vec3(0.5, 0.5, 0.5)))
+			if (!playerCollision(collisionPosition, playerScale))
 				eye.y -= 0.1;
+		}
+
+		if (keys[SDL_SCANCODE_SPACE]) {
+			upwardsSpeed = 4.0;
 		}
 
 	//	if (keys[SDL_SCANCODE_COMMA]) yaw -= 1.0f;
@@ -415,7 +421,26 @@ namespace SceneManager {
 	
 
 	bool once = true;
+
+	void movePlayer(float dt_secs) {
+		glm::vec3 collisionPosition;
+		glm::vec3 playerScale(0.5, 1.5, 0.5);
+		vectorPair currentProperties = make_pair(eye, glm::vec3(0.0f, upwardsSpeed, 0.0f));
+		glm::vec3 gravity = glm::vec3(0.0, -2.0, 0.0);
+		currentProperties = physicsManager->applyGravity(currentProperties.first, currentProperties.second, gravity, dt_secs);
+		collisionPosition = currentProperties.first;
+		if (!playerCollision(collisionPosition, playerScale))
+			eye = currentProperties.first;
+		upwardsSpeed = currentProperties.second.y;
+	}
+
 	void moveObjects() {
+		float dt_secs = gameTime();
+		// eye
+
+		movePlayer(dt_secs);
+		
+
 		// MOVEMENT TESTING (testcube 2)
 		if (testMove.x >= 1.0) movement = -0.05;
 		else if (testMove.x <= -1.0) movement = 0.05;
@@ -425,7 +450,7 @@ namespace SceneManager {
 		// rotate rotating cube (testcube 3 ([2]))
 		theta += 0.1f;
 		
-		float dt_secs = gameTime();
+		
 		
 
 		glm::vec3 speed = glm::vec3(1.0, 0.0, 3.0);
