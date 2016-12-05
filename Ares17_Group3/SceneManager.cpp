@@ -3,8 +3,9 @@
 //#include "Shader.h"
 using namespace std;
 
-#define OBJECT_NO 7
+#define OBJECT_NO 9
 #define BULLET_NO 30
+#define TEST_VELOCITY 0.5
 
 typedef std::pair < glm::vec3, glm::vec3 > vectorPair;
 typedef stack<glm::mat4> mvstack;
@@ -83,6 +84,13 @@ namespace SceneManager {
 		{ 0.6f, 0.4f, 0.2f, 1.0f }, // ambient
 		{ 0.5f, 1.0f, 0.5f, 1.0f }, // diffuse
 		{ 0.0f, 0.1f, 0.0f, 1.0f }, // specular
+		2.0f  // shininess
+	};
+
+	MeshManager::materialStruct redMaterial = {
+		{ 0.6f, 0.4f, 0.4f, 1.0f }, // ambient
+		{ 0.6f, 0.4f, 0.4f, 1.0f }, // diffuse
+		{ 0.6f, 0.4f, 0.4f, 1.0f }, // specular
 		2.0f  // shininess
 	};
 
@@ -201,18 +209,37 @@ namespace SceneManager {
 	//	bullet->setPosition(currentProperties.first);
 	//	bullet->setVelocity(currentProperties.second);
 	}
-
+/*
+	bool shovePhysics(glm::vec3 eye, glm::vec3 playerScale) {
+		bool p_coll = false;
+		for (int i = 0; i < OBJECT_NO; i++) {
+			p_coll = collision(eye, playerScale, testCubes[i]->getPosition(), testCubes[i]->getScale());
+			if (p_coll) {
+				player->setVelocity(testCubes[i]->getVelocity());
+				cout << "v: " << player->getVelocity().x << " " << player->getVelocity().y << " " << player->getVelocity().z << endl;
+				return p_coll;
+				//	cout << "COLLIDING MAH MAN\n";
+			}
+		}
+		return p_coll;
+	}
+	*/
 	bool playerCollision(glm::vec3 eye, glm::vec3 playerScale) {
 		bool p_coll = false;
 		for (int i = 0; i < OBJECT_NO; i++) {
 			p_coll = collision(eye, playerScale, testCubes[i]->getPosition(), testCubes[i]->getScale());
 			if (p_coll) {
+				player->setVelocity(testCubes[i]->getVelocity());
+		//		cout << "v: " << player->getVelocity().x << " " << player->getVelocity().y << " " << player->getVelocity().z << endl;
 				return p_coll;
 			//	cout << "COLLIDING MAH MAN\n";
 			}
 		}
 		return p_coll;
 	}
+
+
+
 	void controls(SDL_Window * window, SDL_Event sdlEvent) {
 		int MidX = SCREENWIDTH / 2;
 		int MidY = SCREENHEIGHT / 2;
@@ -313,7 +340,12 @@ namespace SceneManager {
 		//	transformation_Matrices(testMove, glm::vec3(0.5, 0.5, 0.5), nullTest)
 		transformation_Matrices test0 = { glm::vec3(0.0, 2.0, -4.0), glm::vec3(0.5, 0.5, 0.5), nullTest };
 		testCubes[1] = new Object(test0, "studdedmetal.bmp", cube);
-		testCubes[1]->setVelocity(glm::vec3(-1.5, 0.0, 0.0));
+		testCubes[1]->setVelocity(glm::vec3(TEST_VELOCITY, 0.0, 0.0));
+		transformation_Matrices test7 = { glm::vec3(-2.0, 2.0, -4.0), glm::vec3(0.5, 0.5, 0.5), nullTest };
+		testCubes[7] = new Object(test7, "studdedmetal.bmp", cube);
+		testCubes[7]->setVelocity(glm::vec3(TEST_VELOCITY, 0.0, 0.0));
+		transformation_Matrices test8 = { glm::vec3(-1.0, 2.0, -4.0), glm::vec3(0.25, 0.25, 0.25), nullTest };
+		testCubes[8] = new Object(test8, cube);
 		transformation_Matrices test3 = { glm::vec3(-3.0, 2.0, 0.0), glm::vec3(0.5, 1.5, 0.5), pitchTest, yawTest };
 		testCubes[2] = new Object(test3, cube);
 		transformation_Matrices test4 = { glm::vec3(2.0, 10.0, -2.0), glm::vec3(0.8, 0.8, 0.8), nullTest };
@@ -331,6 +363,8 @@ namespace SceneManager {
 		transformation_Matrices playerTrans = { eye, playerScale, nullTest , nullTest , nullTest };
 		player = new Player(playerTrans);
 	}
+
+
 
 	void init(void) {
 		shaderProgram = ShaderManager::initShaders("phong-tex.vert", "phong-tex.frag");
@@ -455,8 +489,39 @@ namespace SceneManager {
 		if(player->getState() == JUMPING)
 			player->setVelocity(glm::vec3(player->getVelocity().x, currentProperties.second.y, player->getVelocity().z));
 
+
+		//PLAYAH
+		//currentProperties = make_pair(player->getPosition(), player->getVelocity());
+		currentProperties = physicsManager->applyPhysics(player->getPosition(), player->getVelocity(), nullTest, dt_secs);
+		player->setPosition(currentProperties.first);
+		player->setVelocity(currentProperties.second);
+
 	//cout << "\n" << player->getVelocity().y << "\n";
 
+	}
+
+	bool objectCollision(Object*& object, glm::vec3 objectPos, glm::vec3 objectScale, int current) {
+		bool o_coll = false;
+		for (int i = 0; i < OBJECT_NO; i++) {
+			if (i != current) {
+				o_coll = collision(objectPos, objectScale, testCubes[i]->getPosition(), testCubes[i]->getScale());
+				if (o_coll) {
+					if(testCubes[i]->getVelocity() != nullTest)
+						object->setVelocity(testCubes[i]->getVelocity());
+					//		cout << "v: " << player->getVelocity().x << " " << player->getVelocity().y << " " << player->getVelocity().z << endl;
+					return o_coll;
+					//	cout << "COLLIDING MAH MAN\n";
+				}
+			}
+		}
+			return o_coll;
+		
+	}
+
+	void shoveCubes() {
+		for (int i = 0; i < OBJECT_NO; i++) {
+			objectCollision(testCubes[i], testCubes[i]->getPosition(), testCubes[i]->getScale(), i);
+		}
 	}
 
 	void moveObjects() {
@@ -466,27 +531,39 @@ namespace SceneManager {
 		movePlayer(dt_secs);
 		vectorPair currentProperties;
 
+		shoveCubes();
 		// MOVEMENT TESTING (testcube 2)
 
-	
-
-		if (testCubes[1]->getPosition().x >= 1.0) testCubes[1]->setVelocity(glm::vec3(-1.5, testCubes[1]->getVelocity().y, testCubes[1]->getVelocity().z));
-		else if (testCubes[1]->getPosition().x <= -1.0) testCubes[1]->setVelocity(glm::vec3(1.5, testCubes[1]->getVelocity().y, testCubes[1]->getVelocity().z));
-
-
+		// green moving
+		if (testCubes[1]->getPosition().x >= 1.0) testCubes[1]->setVelocity(glm::vec3(-TEST_VELOCITY, testCubes[1]->getVelocity().y, testCubes[1]->getVelocity().z));
+		else if (testCubes[1]->getPosition().x <= -1.0) testCubes[1]->setVelocity(glm::vec3(TEST_VELOCITY, testCubes[1]->getVelocity().y, testCubes[1]->getVelocity().z));
+		// probably make this a method since it's repeated so often
 		currentProperties = make_pair(testCubes[1]->getPosition(), testCubes[1]->getVelocity());
 		currentProperties = physicsManager->applyPhysics(testCubes[1]->getPosition(), testCubes[1]->getVelocity(), nullTest, dt_secs);
 		testCubes[1]->setPosition(currentProperties.first);
 		testCubes[1]->setVelocity(currentProperties.second);
+
+		// red moving
+		if (testCubes[7]->getPosition().x >= -1.0) testCubes[7]->setVelocity(glm::vec3(-TEST_VELOCITY, testCubes[7]->getVelocity().y, testCubes[7]->getVelocity().z));
+		else if (testCubes[7]->getPosition().x <= -3.0) testCubes[7]->setVelocity(glm::vec3(TEST_VELOCITY, testCubes[7]->getVelocity().y, testCubes[7]->getVelocity().z));
+
+		currentProperties = make_pair(testCubes[7]->getPosition(), testCubes[7]->getVelocity());
+		currentProperties = physicsManager->applyPhysics(testCubes[7]->getPosition(), testCubes[7]->getVelocity(), nullTest, dt_secs);
+		testCubes[7]->setPosition(currentProperties.first);
+		testCubes[7]->setVelocity(currentProperties.second);
+
+		//small cube
+		currentProperties = make_pair(testCubes[8]->getPosition(), testCubes[8]->getVelocity());
+		currentProperties = physicsManager->applyPhysics(testCubes[8]->getPosition(), testCubes[8]->getVelocity(), nullTest, dt_secs);
+		testCubes[8]->setPosition(currentProperties.first);
+		testCubes[8]->setVelocity(currentProperties.second);
+		
 
 	//	testMove.x += movement;
 	//	testCubes[1]->setPosition(testMove);
 
 		// rotate rotating cube (testcube 3 ([2]))
 		theta += 0.1f;
-		
-		
-		
 
 		glm::vec3 speed = glm::vec3(1.0, 0.0, 3.0);
 		glm::vec3 friction = glm::vec3(speed.x / 7, 0.0, speed.z / 7);
@@ -568,7 +645,9 @@ namespace SceneManager {
 		mvStack = testCubes[0]->renderObject(projection, mvStack, shaderProgram, testLight, greenMaterial, 0, 0, 0);
 
 		mvStack = testCubes[1]->renderObject(projection, mvStack, shaderProgram, testLight, greenMaterial, 0, 0, 0);
-	
+		mvStack = testCubes[7]->renderObject(projection, mvStack, shaderProgram, testLight, redMaterial, 0, 0, 0);
+		mvStack = testCubes[8]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, 0, 0);
+
 		mvStack = testCubes[2]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, theta, 0);
 	
 		mvStack = testCubes[3]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, 0, 0);
