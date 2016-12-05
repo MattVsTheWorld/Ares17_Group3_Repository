@@ -4,7 +4,7 @@
 using namespace std;
 
 #define OBJECT_NO 7
-#define BULLET_NO 1
+#define BULLET_NO 30
 
 typedef std::pair < glm::vec3, glm::vec3 > vectorPair;
 typedef stack<glm::mat4> mvstack;
@@ -65,7 +65,7 @@ namespace SceneManager {
 	GLfloat yaw = 0.0f;
 	GLfloat roll = 0.0f;
 	
-	glm::vec3 eye(0.0f, 1.0f, 0.0f);
+	glm::vec3 eye(2.0f, 3.0f, -6.0f);
 	glm::vec3 at(0.0f, 0.5f, -1.0f);
 	glm::vec3 up(0.0f, 1.0f, 0.0f);
 
@@ -75,6 +75,7 @@ namespace SceneManager {
 		{ 1.0f, 1.0f, 1.0f, 1.0f }, // specular
 		{ 0.0f, 5.0f, 0.0f, 1.0f }  // position
 	};
+	glm::vec4 lightPos(0.0, 5.0, 0.0, 1.0);
 
 	MeshManager::materialStruct greenMaterial = {
 		{ 0.6f, 0.4f, 0.2f, 1.0f }, // ambient
@@ -152,8 +153,8 @@ namespace SceneManager {
 			if ((position_A.z + (scale_A.z)) >= (position_B.z - (scale_B.z)) // if right side on the right of left side
 				&& position_A.z - (scale_A.z) <= (position_B.z + (scale_B.z))) // and left side is left of right side
 			{
-				if ((position_A.y + (scale_A.y)) >= (position_B.y - (scale_B.y)) // if right side on the right of left side
-					&& position_A.y - (scale_A.y) <= (position_B.y + (scale_B.y))) // and left side is left of right side
+				if ((position_A.y + (scale_A.y)) >= (position_B.y - (scale_B.y)) 
+					&& position_A.y - (scale_A.y) <= (position_B.y + (scale_B.y))) 
 					collision = true;
 			}	
 		}
@@ -162,7 +163,7 @@ namespace SceneManager {
 
 	}
 
-	void bulletFunction(Bullet *bullet) {
+	void bulletFunction(Bullet *&bullet) {
 		glm::vec3 bulletPos = bullet->getPosition();
 		glm::vec3 bulletScale = bullet->getScale();
 
@@ -192,13 +193,24 @@ namespace SceneManager {
 			}		
 		}		
 
-		vectorPair currentProperties = make_pair(bullet->getPosition(), bullet->getVelocity());
-		glm::vec3 gravity = glm::vec3(0.0, -2.0, 0.0);
-		currentProperties = physicsManager->applyGravity(currentProperties.first, currentProperties.second, gravity, gameTime());
-		bullet->setPosition(currentProperties.first);
-		bullet->setVelocity(currentProperties.second);
+	//	vectorPair currentProperties = make_pair(bullet->getPosition(), bullet->getVelocity());
+	//	glm::vec3 gravity = glm::vec3(0.0, -2.0, 0.0);
+	//	currentProperties = physicsManager->applyGravity(currentProperties.first, currentProperties.second, gravity, gameTime());
+	//	bullet->setPosition(currentProperties.first);
+	//	bullet->setVelocity(currentProperties.second);
 	}
 
+	bool playerCollision(glm::vec3 eye, glm::vec3 playerScale) {
+		bool p_coll = false;
+		for (int i = 1; i < OBJECT_NO; i++) {
+			p_coll = collision(eye, playerScale, testCubes[i]->getPosition(), testCubes[i]->getScale());
+			if (p_coll) {
+				return p_coll;
+			//	cout << "COLLIDING MAH MAN\n";
+			}
+		}
+		return p_coll;
+	}
 	void controls(SDL_Window * window, SDL_Event sdlEvent) {
 		int MidX = SCREENWIDTH / 2;
 		int MidY = SCREENHEIGHT / 2;
@@ -236,13 +248,40 @@ namespace SceneManager {
 		}
 		
 		//KEYBOARD
+		glm::vec3 collisionPosition;
 		const Uint8 *keys = SDL_GetKeyboardState(NULL);
-		if (keys[SDL_SCANCODE_W]) eye = moveForward(eye, yaw, 0.1f);
-		else if (keys[SDL_SCANCODE_S]) eye = moveForward(eye, yaw, -0.1f);
-		if (keys[SDL_SCANCODE_A]) eye = moveRight(eye, yaw, -0.1f);
-		else if (keys[SDL_SCANCODE_D]) eye = moveRight(eye, yaw, 0.1f);
-		if (keys[SDL_SCANCODE_R]) eye.y += 0.1;
-		else if (keys[SDL_SCANCODE_F]) eye.y -= 0.1;
+		if (keys[SDL_SCANCODE_W]) {
+			collisionPosition = moveForward(eye, yaw, 0.1f);
+			if(!playerCollision(collisionPosition, glm::vec3(0.5,0.5,0.5)))
+				eye = moveForward(eye, yaw, 0.1f);
+		}
+		else if (keys[SDL_SCANCODE_S]) {
+			collisionPosition = moveForward(eye, yaw, -0.1f);
+			if (!playerCollision(collisionPosition, glm::vec3(0.5, 0.5, 0.5)))
+				eye = moveForward(eye, yaw, -0.1f);
+		}
+		if (keys[SDL_SCANCODE_A]) {
+			collisionPosition = moveRight(eye, yaw, -0.1f);
+			if (!playerCollision(collisionPosition, glm::vec3(0.5, 0.5, 0.5)))
+				eye = moveRight(eye, yaw, -0.1f);
+		}
+		else if (keys[SDL_SCANCODE_D]) {
+			collisionPosition = moveRight(eye, yaw, 0.1f);
+			if (!playerCollision(collisionPosition, glm::vec3(0.5, 0.5, 0.5)))
+				eye = moveRight(eye, yaw, 0.1f);
+		}
+		if (keys[SDL_SCANCODE_R]) {
+			collisionPosition = eye;
+			collisionPosition.y += 0.1;
+			if (!playerCollision(collisionPosition, glm::vec3(0.5, 0.5, 0.5)))
+				eye.y += 0.1;
+		}
+		else if (keys[SDL_SCANCODE_F]) {
+			collisionPosition = eye;
+			collisionPosition.y -= 0.1;
+			if (!playerCollision(collisionPosition, glm::vec3(0.5, 0.5, 0.5)))
+				eye.y -= 0.1;
+		}
 
 	//	if (keys[SDL_SCANCODE_COMMA]) yaw -= 1.0f;
 	//	else if (keys[SDL_SCANCODE_PERIOD]) yaw += 1.0f;
@@ -264,12 +303,13 @@ namespace SceneManager {
 		testCubes[0] = new Object(testTransformation, cube);
 		transformation_Matrices test2 = { testMove, glm::vec3(0.5, 0.5, 0.5), nullTest };
 		//	transformation_Matrices(testMove, glm::vec3(0.5, 0.5, 0.5), nullTest)
-		testCubes[1] = new Object(test2, "studdedmetal.bmp", cube);
+		transformation_Matrices test0 = { glm::vec3(0.0, 2.0, -4.0), glm::vec3(0.5, 0.5, 0.5), nullTest };
+		testCubes[1] = new Object(test0, "studdedmetal.bmp", cube);
 		transformation_Matrices test3 = { glm::vec3(-3.0, 2.0, 0.0), glm::vec3(0.5, 1.5, 0.5), pitchTest, yawTest };
 		testCubes[2] = new Object(test3, cube);
 		transformation_Matrices test4 = { glm::vec3(2.0, 10.0, -2.0), glm::vec3(0.8, 0.8, 0.8), nullTest };
 		testCubes[3] = new Object(test4, cube);
-		transformation_Matrices test5 = { glm::vec3(2.0,4.0, 2.0), glm::vec3(1.5,1.5,1.5), nullTest };
+		transformation_Matrices test5 = { glm::vec3(6.0,4.0, 2.0), glm::vec3(1.5,1.5,1.5), nullTest };
 		testCubes[4] = new Object(test5, cube);
 		transformation_Matrices testScale = { glm::vec3(1.0,4.0,5.0),glm::vec3(0.8, 0.8, 0.8),nullTest };
 		transformation_Matrices testScale2 = { glm::vec3(0.5,4.5,3.0),glm::vec3(0.5,0.5,0.5),nullTest };
@@ -434,6 +474,13 @@ namespace SceneManager {
 		at.y -= pitch;
 		mvStack.top() = glm::lookAt(eye, at, up);
 
+		glm::vec4 tmp = mvStack.top()*lightPos;
+		testLight.position[0] = tmp.x;
+		testLight.position[1] = tmp.y;
+		testLight.position[2] = tmp.z;
+		MeshManager::setLightPos(shaderProgram, glm::value_ptr(tmp));
+
+
 	}
 
 	void draw(SDL_Window * window, float fps) {
@@ -458,7 +505,7 @@ namespace SceneManager {
 		mvStack = testCubes[2]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, theta, 0);
 	
 		mvStack = testCubes[3]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, 0, 0);
-
+		mvStack = testCubes[4]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, 0, 0);
 		mvStack = testCubes[5]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, 0, 0);
 		mvStack = testCubes[6]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, 0, 0);
 
