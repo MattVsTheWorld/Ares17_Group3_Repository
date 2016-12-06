@@ -19,7 +19,9 @@ namespace SceneManager {
 	Object *testCube4;*/ // cubes were starting to get out of hand
 	Object *testCubes[OBJECT_NO]; // arrays :D
 	//Object *bullet[BULLET_NO];
-	Bullet *bullet[BULLET_NO];
+	//Bullet *bullet[BULLET_NO];
+
+	vector<Bullet*> bullet;
 
 	Player *player;
 	bool shotsFired = false;
@@ -205,12 +207,20 @@ namespace SceneManager {
 		bulletSpawn = moveForward(player->getPosition(), yaw, 0.5f);
 		glm::mat4 model;
 		transformation_Matrices bulletTest = { bulletSpawn, glm::vec3(0.1, 0.1, 0.1),
-		  pitchTest, yawTest, rollTest };
-		bullet[noShotsFired] = new Bullet(bulletTest, cube);
+			pitchTest, yawTest, rollTest };
+
+		/*bullet[noShotsFired] = new Bullet(bulletTest, cube);
 		bullet[noShotsFired]->setYawAngle(yaw);
 		bullet[noShotsFired]->setPitchAngle(pitch);
-		bullet[noShotsFired]->setVelocity(glm::vec3(0.1, 0.1, 0.1));
+		bullet[noShotsFired]->setVelocity(glm::vec3(0.1, 0.1, 0.1));*/
+
+		Bullet newBullet(bulletTest, cube);
+
+		newBullet.setYawAngle(yaw);
+		newBullet.setPitchAngle(pitch);
+		newBullet.setVelocity(glm::vec3(0.1, 0.1, 0.1));
 		noShotsFired++;
+		bullet.push_back(new Bullet(newBullet)); //add at end		
 	}
 
 	/*
@@ -235,42 +245,54 @@ namespace SceneManager {
 
 	}
 	*/
-	void bulletFunction(Bullet *&bullet) {
-		glm::vec3 bulletPos = bullet->getPosition();
-		glm::vec3 bulletScale = bullet->getScale();
+	void bulletFunction(int bulletAt) {
 
 		glm::vec3 ObjectsPos[OBJECT_NO];
 		glm::vec3 ObjectsScale[OBJECT_NO];
-		for (int i = 0; i < OBJECT_NO; i++){
+		for (int i = 0; i < OBJECT_NO; i++) {
 			ObjectsPos[i] = testCubes[i]->getPosition();
 			ObjectsScale[i] = testCubes[i]->getScale();
 		}
-		for (int i = 0; i < OBJECT_NO; i++) {
+		bool stop = false;
 
+		for (int i = 1; i < OBJECT_NO; i++) {
+			if (!stop) {
+				if (collisionManager->doCollisions(ObjectsPos[i], ObjectsScale[i], bullet[bulletAt]->getPosition(), bullet[bulletAt]->getScale())) {
+					//	cout << "colliding" << endl;
+					bullet[bulletAt]->setVelocity(glm::vec3(0.0, 0.0, 0.0));
 
-		//	cout << bullet->getVelocity().y << "\n";
-
-
-			if (collisionManager->doCollisions(ObjectsPos[i], ObjectsScale[i], bulletPos, bulletScale)) {
-			//	cout << "colliding" << endl;
-				bullet->setVelocity(glm::vec3(0.0, bullet->getVelocity().y, 0.0));
-			//	bullet->~Object();
+					cout << "size " << bullet.size() << endl;
+					cout << "COLLISION" << endl;
+					// To delete 1 element and remove it.
+					cout << "at " << bulletAt << endl;
+					vector<Bullet*>::iterator iter = bullet.begin() + bulletAt;
+					//cout << bullet.begin() << endl;
+					cout << bulletAt << endl;
+					delete *iter;
+					bullet.erase(iter);
+					cout << "DELETED BULLET" << endl;
+					cout << "size " << bullet.size() << endl;
+					stop = true;
+				}
+				else {
+					float angleAtShot = bullet[bulletAt]->getYawAngle();
+					glm::vec3 newPos = glm::vec3(bullet[bulletAt]->getPosition().x + bullet[bulletAt]->getVelocity().x*std::sin(angleAtShot*DEG_TO_RADIAN),
+						bullet[bulletAt]->getPosition().y - bullet[bulletAt]->getVelocity().y*sin(std::atan(bullet[bulletAt]->getPitchAngle())),
+						bullet[bulletAt]->getPosition().z - bullet[bulletAt]->getVelocity().z*std::cos(angleAtShot*DEG_TO_RADIAN));
+					bullet[bulletAt]->setPosition(newPos);
+				}
 			}
-			else {
-				float angleAtShot = bullet->getYawAngle();
-				glm::vec3 newPos = glm::vec3(bulletPos.x + bullet->getVelocity().x*std::sin(angleAtShot*DEG_TO_RADIAN),
-										     bulletPos.y - bullet->getVelocity().y*sin(std::atan(bullet->getPitchAngle())),
-											 bulletPos.z - bullet->getVelocity().z*std::cos(angleAtShot*DEG_TO_RADIAN));
-				bullet->setPosition(newPos);
-			}		
-		}		
+		}
+	}
+
+	
 
 	//	vectorPair currentProperties = make_pair(bullet->getPosition(), bullet->getVelocity());
 	//	glm::vec3 gravity = glm::vec3(0.0, -2.0, 0.0);
 	//	currentProperties = physicsManager->applyGravity(currentProperties.first, currentProperties.second, gravity, gameTime());
 	//	bullet->setPosition(currentProperties.first);
 	//	bullet->setVelocity(currentProperties.second);
-	}
+	//}
 /*
 	bool shovePhysics(glm::vec3 eye, glm::vec3 playerScale) {
 		bool p_coll = false;
@@ -314,6 +336,7 @@ namespace SceneManager {
 	}
 
 
+	float coolDownOfGun = 0.1; //wait between shots
 
 	void controls(SDL_Window * window, SDL_Event sdlEvent) {
 		int MidX = SCREENWIDTH / 2;
@@ -336,21 +359,21 @@ namespace SceneManager {
 			if (sdlEvent.button.button == SDL_BUTTON_LEFT) leftClick = true;
 			if (sdlEvent.button.button == SDL_BUTTON_RIGHT) rightClick = true;
 		}
-		
+
 		if (leftClick == true) {
-			if (noShotsFired >= BULLET_NO)
-				cout << "no more ammo";
-			else {
-				shotsFired = true;
+			//if (noShotsFired >= BULLET_NO)
+			//cout << "no more ammo";
+			if (coolDownOfGun <= 0.0f) {
 				bulletCreation();
+				coolDownOfGun = 0.1f;
+				shotsFired = true;
 			}
 		}
-		
+
 		if (sdlEvent.type == SDL_MOUSEBUTTONUP) {
 			leftClick = false;
 			rightClick = false;
 		}
-		
 		//KEYBOARD
 	
 		
@@ -409,6 +432,10 @@ namespace SceneManager {
 		}
 		if (keys[SDL_SCANCODE_ESCAPE]) {
 			exit(0);
+		}
+		if (keys[SDL_SCANCODE_3])
+		{
+			cout << bullet.size() << endl;
 		}
 	}
 
@@ -564,6 +591,8 @@ namespace SceneManager {
 	void moveObjects() {
 		float dt_secs = gameTime();
 		// eye
+		cout << dt_secs <<"\n";
+		coolDownOfGun -= dt_secs;
 
 		movePlayer(dt_secs);
 		vectorPair currentProperties;
@@ -696,11 +725,17 @@ namespace SceneManager {
 		mvStack = testCubes[9]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, 0, 0);
 
 		if (shotsFired) {
-			for (int i = 0; i < noShotsFired; i++) {
-			//	moveBullets(i);
+			//int i = 0;
+			//for (vector<Bullet*>::iterator it = bullet.begin(); it != bullet.end(); it++, i++) {
+			/*for (int i = 0; i < bullet.size(); i++) {
+			mvStack = bullet[i]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, bullet[i]->getPitchAngle(), bullet[i]->getYawAngle(), 0);
+			}*/for (int i = 0; i < bullet.size(); i++) {
+			//	cout << "\nI'm before";
 				mvStack = bullet[i]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, bullet[i]->getPitchAngle(), bullet[i]->getYawAngle(), 0);
-				bulletFunction(bullet[i]);
+				bulletFunction(i);
+				//	cout << "\nI'm after";
 			}
+
 		}
 		// RENDERING MODELS
 //		renderTest(projection);
@@ -709,8 +744,11 @@ namespace SceneManager {
 		renderWep(projection, ourModel2);
 		//:thinking:
 
+	
+
 		mvStack.pop();
 		// h_manager->renderFPS(texturedProgram, testLight, glm::mat4(1.0), testCube->object_getMesh(), testCube->object_getIndex(), fps);
+
 
 		glDepthMask(GL_TRUE);
 		SDL_GL_SwapWindow(window); // swap buffers
