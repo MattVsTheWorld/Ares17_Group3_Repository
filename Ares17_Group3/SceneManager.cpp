@@ -3,7 +3,7 @@
 //#include "Shader.h"
 using namespace std;
 
-#define OBJECT_NO 9
+#define OBJECT_NO 10
 #define BULLET_NO 30
 #define TEST_VELOCITY 0.5
 
@@ -45,6 +45,7 @@ namespace SceneManager {
 	glm::vec3 yawTest = glm::vec3(0.0f, 1.0f, 0.0f);
 	glm::vec3 rollTest = glm::vec3(0.0f, 0.0f, 1.0f);
 	glm::vec3 testMove = glm::vec3(0.0, 2.0, -2.0);
+	glm::vec3 collisionPosition;
 
 	//transformation_Matrices testTransformation = { transTest, scaleTest, pitchTest, yawTest, rollTest };
 	transformation_Matrices testTransformation = { transTest, scaleTest, nullTest, nullTest, nullTest };
@@ -124,6 +125,9 @@ namespace SceneManager {
 		transformation_Matrices testScale2 = { glm::vec3(0.5,4.5,3.0),glm::vec3(0.5,0.5,0.5),nullTest };
 		testCubes[5] = new Object(testScale, cube);
 		testCubes[6] = new Object(testScale2, cube);
+
+		transformation_Matrices test9 = { glm::vec3(-4.0, 1.0, -8.0), glm::vec3(0.5, 0.5, 0.5), nullTest };
+		testCubes[9] = new Object(test9, "move.bmp", cube);
 	}
 
 	void initPlayer() {
@@ -296,6 +300,17 @@ namespace SceneManager {
 		return p_coll;
 	}
 
+	void exampleShove() {
+		bool test_coll = collisionManager->doCollisions(collisionPosition, player->getScale(), testCubes[9]->getPosition(), testCubes[9]->getScale());
+		if (test_coll) {
+			testCubes[9]->setPosition(glm::vec3(testCubes[9]->getPosition().x + (collisionPosition.x - player->getPosition().x),
+				testCubes[9]->getPosition().y, // + (collisionPosition.y - player->getPosition().y),
+				testCubes[9]->getPosition().z + (collisionPosition.z - player->getPosition().z)));
+		//	cout << "\n" << player->Position().x;
+	//		cout << "TEST";
+		}
+	}
+
 
 
 	void controls(SDL_Window * window, SDL_Event sdlEvent) {
@@ -335,19 +350,22 @@ namespace SceneManager {
 		}
 		
 		//KEYBOARD
-		glm::vec3 collisionPosition;
+	
+		
 		glm::vec3 playerScale(0.5, 1.5, 0.5);
 		const Uint8 *keys = SDL_GetKeyboardState(NULL);
 		if (keys[SDL_SCANCODE_W]) {
+		//	player->setVelocity(glm::vec3(1.0, player->getVelocity().y, player->getVelocity().z));
 			collisionPosition = moveForward(player->getPosition(), yaw, 0.1f);
 			if(!playerCollision(collisionPosition, playerScale))
 				player->setPosition(moveForward(player->getPosition(), yaw, 0.1f));
 		}
 		else if (keys[SDL_SCANCODE_S]) {
+		//	player->setVelocity(glm::vec3(-1.0, player->getVelocity().y, player->getVelocity().z));
 			collisionPosition = moveForward(player->getPosition(), yaw, -0.1f);
 			if (!playerCollision(collisionPosition, playerScale))
 				player->setPosition(moveForward(player->getPosition(), yaw, -0.1f));
-		}
+		} //else player->setVelocity(glm::vec3(0.0, player->getVelocity().y, player->getVelocity().z));
 		if (keys[SDL_SCANCODE_A]) {
 			collisionPosition = moveRight(player->getPosition(), yaw, -0.1f);
 			if (!playerCollision(collisionPosition, playerScale))
@@ -514,10 +532,10 @@ namespace SceneManager {
 			if (i != current) {
 				o_coll = collisionManager->doCollisions(objectPos, objectScale, testCubes[i]->getPosition(), testCubes[i]->getScale());
 				if (o_coll) {
-					cout << "detected " << i << endl;
+				//	cout << "detected " << i << endl;
 					if (testCubes[i]->getVelocity() != nullTest){ //&& testCubes[i]->getVelocity() != object->getVelocity()) {
 						object->setVelocity(testCubes[i]->getVelocity());
-						cout << "\nsetting to speed of " << i << endl;
+				//		cout << "\nsetting to speed of " << i << endl;
 					}
 					//		cout << "v: " << player->getVelocity().x << " " << player->getVelocity().y << " " << player->getVelocity().z << endl;
 					return o_coll;
@@ -533,6 +551,8 @@ namespace SceneManager {
 	void shoveCubes() {
 		
 		objectCollision(testCubes[8], testCubes[8]->getPosition(), testCubes[8]->getScale(), 8);
+
+
 	//	for (int i = 0; i < OBJECT_NO; i++) {
 		//	if (objectCollision(testCubes[i], testCubes[i]->getPosition(), testCubes[i]->getScale(), i))
 	//	//		cout << "Detector " << i << "\n---------------\n";
@@ -547,6 +567,7 @@ namespace SceneManager {
 		vectorPair currentProperties;
 
 		shoveCubes();
+		exampleShove();
 		// MOVEMENT TESTING (testcube 2)
 
 		// green moving
@@ -660,8 +681,7 @@ namespace SceneManager {
 		mvStack = testCubes[0]->renderObject(projection, mvStack, shaderProgram, testLight, greenMaterial, 0, 0, 0);
 
 		mvStack = testCubes[1]->renderObject(projection, mvStack, shaderProgram, testLight, greenMaterial, 0, 0, 0);
-		mvStack = testCubes[7]->renderObject(projection, mvStack, shaderProgram, testLight, redMaterial, 0, 0, 0);
-		mvStack = testCubes[8]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, 0, 0);
+	
 
 		mvStack = testCubes[2]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, theta, 0);
 	
@@ -669,6 +689,9 @@ namespace SceneManager {
 		mvStack = testCubes[4]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, 0, 0);
 		mvStack = testCubes[5]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, 0, 0);
 		mvStack = testCubes[6]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, 0, 0);
+		mvStack = testCubes[7]->renderObject(projection, mvStack, shaderProgram, testLight, redMaterial, 0, 0, 0);
+		mvStack = testCubes[8]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, 0, 0);
+		mvStack = testCubes[9]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, 0, 0);
 
 		if (shotsFired) {
 			for (int i = 0; i < noShotsFired; i++) {
