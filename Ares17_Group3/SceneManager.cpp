@@ -32,6 +32,7 @@ namespace SceneManager {
 	hudManager *h_manager;
 	Skybox *skybox;
 	Physics *physicsManager;
+	Collisions *collisionManager;
 
 	float SCREENWIDTH = 800.0f;
 	float SCREENHEIGHT = 600.0f;
@@ -101,6 +102,62 @@ namespace SceneManager {
 		2.0f  // shininess
 	};
 
+	void initObjects() {
+		testCubes[0] = new Object(testTransformation, cube);
+		transformation_Matrices test2 = { testMove, glm::vec3(0.5, 0.5, 0.5), nullTest };
+		//	transformation_Matrices(testMove, glm::vec3(0.5, 0.5, 0.5), nullTest)
+		transformation_Matrices test0 = { glm::vec3(0.0, 2.0, -4.0), glm::vec3(0.5, 0.5, 0.5), nullTest };
+		testCubes[1] = new Object(test0, "studdedmetal.bmp", cube);
+		testCubes[1]->setVelocity(glm::vec3(TEST_VELOCITY, 0.0, 0.0));
+		transformation_Matrices test7 = { glm::vec3(-2.0, 2.0, -4.0), glm::vec3(0.5, 0.5, 0.5), nullTest };
+		testCubes[7] = new Object(test7, "studdedmetal.bmp", cube);
+		testCubes[7]->setVelocity(glm::vec3(TEST_VELOCITY, 0.0, 0.0));
+		transformation_Matrices test8 = { glm::vec3(-1.0, 2.0, -4.0), glm::vec3(0.25, 0.25, 0.25), nullTest };
+		testCubes[8] = new Object(test8, cube);
+		transformation_Matrices test3 = { glm::vec3(-3.0, 2.0, 0.0), glm::vec3(0.5, 1.5, 0.5), pitchTest, yawTest };
+		testCubes[2] = new Object(test3, cube);
+		transformation_Matrices test4 = { glm::vec3(2.0, 10.0, -2.0), glm::vec3(0.8, 0.8, 0.8), nullTest };
+		testCubes[3] = new Object(test4, cube);
+		transformation_Matrices test5 = { glm::vec3(6.0,4.0, 2.0), glm::vec3(1.5,1.5,1.5), nullTest };
+		testCubes[4] = new Object(test5, cube);
+		transformation_Matrices testScale = { glm::vec3(1.0,4.0,5.0),glm::vec3(0.8, 0.8, 0.8),nullTest };
+		transformation_Matrices testScale2 = { glm::vec3(0.5,4.5,3.0),glm::vec3(0.5,0.5,0.5),nullTest };
+		testCubes[5] = new Object(testScale, cube);
+		testCubes[6] = new Object(testScale2, cube);
+	}
+
+	void initPlayer() {
+		glm::vec3 playerScale(0.5, 1.5, 0.5);
+		transformation_Matrices playerTrans = { eye, playerScale, nullTest , nullTest , nullTest };
+		player = new Player(playerTrans);
+	}
+
+
+	void init(void) {
+		shaderProgram = ShaderManager::initShaders("phong-tex.vert", "phong-tex.frag");
+		texturedProgram = ShaderManager::initShaders("textured.vert", "textured.frag");
+		modelProgram = ShaderManager::initShaders("modelLoading.vert", "modelLoading.frag");
+		ourModel = new Model("Nanosuit/nanosuit.obj");
+		//	ourModel2 = new Model("gun/wep.obj");
+		ourModel2 = new Model("CHOO/Socom pistol.obj");
+		//shader = new Shader("modelLoading.vert", "modelLoading.frag");
+		MeshManager::setLight(shaderProgram, testLight);
+		MeshManager::setMaterial(shaderProgram, greenMaterial);
+		cube = testCubes[0]->initializeObject("cube.obj");
+
+		initObjects();
+
+		initPlayer();
+		h_manager = new hudManager();
+		skybox = new Skybox(testTexFiles);
+		physicsManager = new Physics();
+		collisionManager = new Collisions();
+
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	}
+
 	glm::vec3 moveForward(glm::vec3 pos, GLfloat angle, GLfloat d) {
 		return glm::vec3(pos.x + d*std::sin(yaw*DEG_TO_RADIAN), pos.y, pos.z - d*std::cos(yaw*DEG_TO_RADIAN));
 	}
@@ -152,6 +209,7 @@ namespace SceneManager {
 		noShotsFired++;
 	}
 
+	/*
 	bool collision(glm::vec3 position_A, glm::vec3 scale_A, glm::vec3 position_B, glm::vec3 scale_B) {
 
 		bool collision = false;
@@ -172,7 +230,7 @@ namespace SceneManager {
 		return collision;
 
 	}
-
+	*/
 	void bulletFunction(Bullet *&bullet) {
 		glm::vec3 bulletPos = bullet->getPosition();
 		glm::vec3 bulletScale = bullet->getScale();
@@ -189,7 +247,7 @@ namespace SceneManager {
 		//	cout << bullet->getVelocity().y << "\n";
 
 
-			if (collision(ObjectsPos[i], ObjectsScale[i], bulletPos, bulletScale)) {
+			if (collisionManager->doCollisions(ObjectsPos[i], ObjectsScale[i], bulletPos, bulletScale)) {
 			//	cout << "colliding" << endl;
 				bullet->setVelocity(glm::vec3(0.0, bullet->getVelocity().y, 0.0));
 			//	bullet->~Object();
@@ -227,7 +285,7 @@ namespace SceneManager {
 	bool playerCollision(glm::vec3 eye, glm::vec3 playerScale) {
 		bool p_coll = false;
 		for (int i = 0; i < OBJECT_NO; i++) {
-			p_coll = collision(eye, playerScale, testCubes[i]->getPosition(), testCubes[i]->getScale());
+			p_coll = collisionManager->doCollisions(eye, playerScale, testCubes[i]->getPosition(), testCubes[i]->getScale());
 			if (p_coll) {
 				player->setVelocity(testCubes[i]->getVelocity());
 		//		cout << "v: " << player->getVelocity().x << " " << player->getVelocity().y << " " << player->getVelocity().z << endl;
@@ -334,61 +392,10 @@ namespace SceneManager {
 		}
 	}
 
-	void initObjects() {
-		testCubes[0] = new Object(testTransformation, cube);
-		transformation_Matrices test2 = { testMove, glm::vec3(0.5, 0.5, 0.5), nullTest };
-		//	transformation_Matrices(testMove, glm::vec3(0.5, 0.5, 0.5), nullTest)
-		transformation_Matrices test0 = { glm::vec3(0.0, 2.0, -4.0), glm::vec3(0.5, 0.5, 0.5), nullTest };
-		testCubes[1] = new Object(test0, "studdedmetal.bmp", cube);
-		testCubes[1]->setVelocity(glm::vec3(TEST_VELOCITY, 0.0, 0.0));
-		transformation_Matrices test7 = { glm::vec3(-2.0, 2.0, -4.0), glm::vec3(0.5, 0.5, 0.5), nullTest };
-		testCubes[7] = new Object(test7, "studdedmetal.bmp", cube);
-		testCubes[7]->setVelocity(glm::vec3(TEST_VELOCITY, 0.0, 0.0));
-		transformation_Matrices test8 = { glm::vec3(-1.0, 2.0, -4.0), glm::vec3(0.25, 0.25, 0.25), nullTest };
-		testCubes[8] = new Object(test8, cube);
-		transformation_Matrices test3 = { glm::vec3(-3.0, 2.0, 0.0), glm::vec3(0.5, 1.5, 0.5), pitchTest, yawTest };
-		testCubes[2] = new Object(test3, cube);
-		transformation_Matrices test4 = { glm::vec3(2.0, 10.0, -2.0), glm::vec3(0.8, 0.8, 0.8), nullTest };
-		testCubes[3] = new Object(test4, cube);
-		transformation_Matrices test5 = { glm::vec3(6.0,4.0, 2.0), glm::vec3(1.5,1.5,1.5), nullTest };
-		testCubes[4] = new Object(test5, cube);
-		transformation_Matrices testScale = { glm::vec3(1.0,4.0,5.0),glm::vec3(0.8, 0.8, 0.8),nullTest };
-		transformation_Matrices testScale2 = { glm::vec3(0.5,4.5,3.0),glm::vec3(0.5,0.5,0.5),nullTest };
-		testCubes[5] = new Object(testScale, cube);
-		testCubes[6] = new Object(testScale2, cube);
-	}
-
-	void initPlayer() {
-		glm::vec3 playerScale(0.5, 1.5, 0.5);
-		transformation_Matrices playerTrans = { eye, playerScale, nullTest , nullTest , nullTest };
-		player = new Player(playerTrans);
-	}
+	
 
 
-
-	void init(void) {
-		shaderProgram = ShaderManager::initShaders("phong-tex.vert", "phong-tex.frag");
-		texturedProgram = ShaderManager::initShaders("textured.vert", "textured.frag");
-		modelProgram = ShaderManager::initShaders("modelLoading.vert", "modelLoading.frag");
-		ourModel = new Model("Nanosuit/nanosuit.obj");
-	//	ourModel2 = new Model("gun/wep.obj");
-		ourModel2 = new Model("CHOO/Socom pistol.obj");
-		//shader = new Shader("modelLoading.vert", "modelLoading.frag");
-		MeshManager::setLight(shaderProgram, testLight);
-		MeshManager::setMaterial(shaderProgram, greenMaterial);
-		cube = testCubes[0]->initializeObject("cube.obj");
-		
-		initObjects();
-		
-		initPlayer();
-		h_manager = new hudManager();
-		skybox = new Skybox(testTexFiles);
-		physicsManager = new Physics();
-
-		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	}
+	
 
 	void renderObject(glm::mat4 proj, Model *modelData) {
 		glUseProgram(modelProgram);
@@ -505,24 +512,31 @@ namespace SceneManager {
 		bool o_coll = false;
 		for (int i = 0; i < OBJECT_NO; i++) {
 			if (i != current) {
-				o_coll = collision(objectPos, objectScale, testCubes[i]->getPosition(), testCubes[i]->getScale());
+				o_coll = collisionManager->doCollisions(objectPos, objectScale, testCubes[i]->getPosition(), testCubes[i]->getScale());
 				if (o_coll) {
-					if(testCubes[i]->getVelocity() != nullTest)
+					cout << "detected " << i << endl;
+					if (testCubes[i]->getVelocity() != nullTest){ //&& testCubes[i]->getVelocity() != object->getVelocity()) {
 						object->setVelocity(testCubes[i]->getVelocity());
+						cout << "\nsetting to speed of " << i << endl;
+					}
 					//		cout << "v: " << player->getVelocity().x << " " << player->getVelocity().y << " " << player->getVelocity().z << endl;
 					return o_coll;
 					//	cout << "COLLIDING MAH MAN\n";
-				}
+				} //else object->setVelocity(nullTest);
 			}
 		}
 			return o_coll;
 		
 	}
 
+	// over simplified; collision reaction is still not well implemented
 	void shoveCubes() {
-		for (int i = 0; i < OBJECT_NO; i++) {
-			objectCollision(testCubes[i], testCubes[i]->getPosition(), testCubes[i]->getScale(), i);
-		}
+		
+		objectCollision(testCubes[8], testCubes[8]->getPosition(), testCubes[8]->getScale(), 8);
+	//	for (int i = 0; i < OBJECT_NO; i++) {
+		//	if (objectCollision(testCubes[i], testCubes[i]->getPosition(), testCubes[i]->getScale(), i))
+	//	//		cout << "Detector " << i << "\n---------------\n";
+		//}
 	}
 
 	void moveObjects() {
