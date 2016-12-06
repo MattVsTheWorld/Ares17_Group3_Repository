@@ -435,6 +435,7 @@ namespace SceneManager {
 		MeshManager::setUniformMatrix4fv(modelProgram, "view", glm::value_ptr(mvStack.top()));
 		//	mvStack.top() = glm::translate(mvStack.top(), glm::vec3(-10.0f, -0.1f, -10.0f));
 		// Draw the loaded model
+		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, testCubes[0]->object_getTexture());
 		glm::mat4 model;
 		if (rightClick) {
@@ -664,9 +665,9 @@ namespace SceneManager {
 		}
 		// RENDERING MODELS
 //		renderTest(projection);
-		renderWep(projection, ourModel2);
+		
 		renderObject(projection,ourModel);
-
+		renderWep(projection, ourModel2);
 		//:thinking:
 
 		mvStack.pop();
