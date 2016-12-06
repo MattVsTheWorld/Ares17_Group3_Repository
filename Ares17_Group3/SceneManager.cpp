@@ -39,6 +39,8 @@ namespace SceneManager {
 	float SCREENWIDTH = 800.0f;
 	float SCREENHEIGHT = 600.0f;
 	unsigned int lastTime = 0, currentTime;
+	enum pov { FIRST_PERSON, THIRD_PERSON };
+	pov pointOfView = FIRST_PERSON;
 
 	glm::vec3 transTest = glm::vec3(-10.0f, -0.1f, -10.0f);		
 	glm::vec3 scaleTest = glm::vec3(20.0f, 0.1f, 20.0f);
@@ -261,17 +263,18 @@ namespace SceneManager {
 					//	cout << "colliding" << endl;
 					bullet[bulletAt]->setVelocity(glm::vec3(0.0, 0.0, 0.0));
 
-					cout << "size " << bullet.size() << endl;
-					cout << "COLLISION" << endl;
+					//cout << "size " << bullet.size() << endl;
+					//cout << "COLLISION" << endl;
 					// To delete 1 element and remove it.
-					cout << "at " << bulletAt << endl;
+					//cout << "at " << bulletAt << endl;
 					vector<Bullet*>::iterator iter = bullet.begin() + bulletAt;
 					//cout << bullet.begin() << endl;
-					cout << bulletAt << endl;
+				//	cout << bulletAt << endl;
 					delete *iter;
 					bullet.erase(iter);
-					cout << "DELETED BULLET" << endl;
-					cout << "size " << bullet.size() << endl;
+					//cout << "DELETED BULLET" << endl;
+					//cout << "size " << bullet.size() << endl;
+					cout << "Cube " << i << " hit. Bullet deleted.\n";
 					stop = true;
 				}
 				else {
@@ -355,12 +358,12 @@ namespace SceneManager {
 		SDL_WarpMouseInWindow(window, MidX, MidY);
 		
 		//MOUSECLICK
-		if (sdlEvent.type == SDL_MOUSEBUTTONDOWN) {
+		if (sdlEvent.type == SDL_MOUSEBUTTONDOWN && pointOfView == FIRST_PERSON) {
 			if (sdlEvent.button.button == SDL_BUTTON_LEFT) leftClick = true;
 			if (sdlEvent.button.button == SDL_BUTTON_RIGHT) rightClick = true;
 		}
 
-		if (leftClick == true) {
+		if (leftClick == true && pointOfView == FIRST_PERSON) {
 			//if (noShotsFired >= BULLET_NO)
 			//cout << "no more ammo";
 			if (coolDownOfGun <= 0.0f) {
@@ -370,7 +373,7 @@ namespace SceneManager {
 			}
 		}
 
-		if (sdlEvent.type == SDL_MOUSEBUTTONUP) {
+		if (sdlEvent.type == SDL_MOUSEBUTTONUP  && pointOfView == FIRST_PERSON) {
 			leftClick = false;
 			rightClick = false;
 		}
@@ -422,6 +425,11 @@ namespace SceneManager {
 	//	if (keys[SDL_SCANCODE_COMMA]) yaw -= 1.0f;
 	//	else if (keys[SDL_SCANCODE_PERIOD]) yaw += 1.0f;
 
+		if (keys[SDL_SCANCODE_K]) {
+			if (pointOfView == FIRST_PERSON) pointOfView = THIRD_PERSON;
+			else pointOfView = FIRST_PERSON;
+		}
+
 		if (keys[SDL_SCANCODE_1]) {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 			glDisable(GL_CULL_FACE);
@@ -444,7 +452,7 @@ namespace SceneManager {
 
 	
 
-	void renderObject(glm::mat4 proj, Model *modelData) {
+	void renderObject(glm::mat4 proj, Model *modelData, glm::vec3 pos) {
 		glUseProgram(modelProgram);
 		mvStack.push(mvStack.top());// push modelview to stack
 		MeshManager::setUniformMatrix4fv(modelProgram, "projection", glm::value_ptr(proj));
@@ -453,7 +461,11 @@ namespace SceneManager {
 		// Draw the loaded model
 
 		glm::mat4 model;
-	//	model = glm::translate(model, glm::vec3(0.0f, 0.5f, 0.0f));
+		model = glm::translate(model, pos);
+		model = glm::rotate(model, float(-yaw*DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, float(180*DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
+//		model = glm::rotate(model, float(90.0f*DEG_TO_RADIAN), glm::vec3(-1.0f, 0.0f, 0.0f));
+	//	model = glm::rotate(model, float(90.0f*DEG_TO_RADIAN), glm::vec3(0.0f, 0.0f, 1.0f));
 		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));	// It's a bit too big for our scene, so scale it down
 		glUniformMatrix4fv(glGetUniformLocation(modelProgram, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(model));
 		modelData->Draw(modelProgram);
@@ -681,9 +693,19 @@ namespace SceneManager {
 	}
 
 	void camera() {
-		at = moveForward(player->getPosition(), yaw, 1.0f);
-		at.y -= pitch;
-		mvStack.top() = glm::lookAt(player->getPosition(), at, up);
+		if (pointOfView == FIRST_PERSON) {
+			at = moveForward(player->getPosition(), yaw, 1.0f);
+			at.y -= pitch;
+			mvStack.top() = glm::lookAt(player->getPosition(), at, up);
+		}
+
+		else {
+			at = player->getPosition(); // look at player position
+			eye = moveForward(at, pitch, -6.0f); // move behind him
+			eye.y += pitch; // displacement determined by user interaction
+		//	pitch += eye.y; // - terrainCollision(eye, eye.y - 1.5f, 0, false); // makes it so the camera can't fall below the heightmap
+			mvStack.top() = glm::lookAt(eye, at, up);
+		}
 
 		glm::vec4 tmp = mvStack.top()*lightPos;
 		testLight.position[0] = tmp.x;
@@ -739,9 +761,10 @@ namespace SceneManager {
 		}
 		// RENDERING MODELS
 //		renderTest(projection);
-		
-		renderObject(projection,ourModel);
-		renderWep(projection, ourModel2);
+		if (pointOfView == THIRD_PERSON)
+			renderObject(projection,ourModel, glm::vec3(player->getPosition().x, player->getPosition().y-1.5, player->getPosition().z));
+		if (pointOfView == FIRST_PERSON)
+			renderWep(projection, ourModel2);
 		//:thinking:
 
 	
