@@ -336,7 +336,7 @@ namespace SceneManager {
 	}
 
 
-	float coolDownOfGun = 0.1; //wait between shots
+	float coolDownOfGun = 0.4; //wait between shots
 
 	void controls(SDL_Window * window, SDL_Event sdlEvent) {
 		int MidX = SCREENWIDTH / 2;
@@ -365,7 +365,7 @@ namespace SceneManager {
 			//cout << "no more ammo";
 			if (coolDownOfGun <= 0.0f) {
 				bulletCreation();
-				coolDownOfGun = 0.1f;
+				coolDownOfGun = 0.4f;
 				shotsFired = true;
 			}
 		}
@@ -591,7 +591,7 @@ namespace SceneManager {
 	void moveObjects() {
 		float dt_secs = gameTime();
 		// eye
-		cout << dt_secs <<"\n";
+		// cout << dt_secs <<"\n";
 		coolDownOfGun -= dt_secs;
 
 		movePlayer(dt_secs);
