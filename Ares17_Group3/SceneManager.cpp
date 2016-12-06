@@ -300,6 +300,8 @@ namespace SceneManager {
 		return p_coll;
 	}
 
+	// just an example of how shoving might work
+	// actual method would probably account for velocities instead of positions
 	void exampleShove() {
 		bool test_coll = collisionManager->doCollisions(collisionPosition, player->getScale(), testCubes[9]->getPosition(), testCubes[9]->getScale());
 		if (test_coll) {
