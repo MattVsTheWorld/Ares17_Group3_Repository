@@ -644,7 +644,7 @@ namespace SceneManager {
 		// rotate rotating cube (testcube 3 ([2]))
 		theta += 0.1f;
 
-		glm::vec3 speed = glm::vec3(1.0, 0.0, 3.0);
+		glm::vec3 speed = glm::vec3(-2.0, 0.0, -4.0);
 		glm::vec3 friction = glm::vec3(speed.x / 7, 0.0, speed.z / 7);
 		if (once) {
 			testCubes[2]->setVelocity(speed);
