@@ -12,14 +12,8 @@ typedef stack<glm::mat4> mvstack;
 
 // this class still needs a lot of work
 namespace SceneManager {
-	/*
-	Object *testCube;
-	Object *testCube2;
-	Object *testCube3;
-	Object *testCube4;*/ // cubes were starting to get out of hand
+
 	Object *testCubes[OBJECT_NO]; // arrays :D
-	//Object *bullet[BULLET_NO];
-	//Bullet *bullet[BULLET_NO];
 
 	vector<Bullet*> bullet;
 
@@ -51,7 +45,6 @@ namespace SceneManager {
 	glm::vec3 testMove = glm::vec3(0.0, 2.0, -2.0);
 	glm::vec3 collisionPosition;
 
-	//transformation_Matrices testTransformation = { transTest, scaleTest, pitchTest, yawTest, rollTest };
 	transformation_Matrices testTransformation = { transTest, scaleTest, nullTest, nullTest, nullTest };
 	object_Properties cube;
 
@@ -60,9 +53,6 @@ namespace SceneManager {
 	const char *testTexFiles[6] = {
 		"Town-skybox/Town_bk.bmp", "Town-skybox/Town_ft.bmp", "Town-skybox/Town_rt.bmp", "Town-skybox/Town_lf.bmp", "Town-skybox/Town_up.bmp", "Town-skybox/Town_dn.bmp"
 	};
-
-	// Setup and compile our shaders
-//	Shader *shader;
 
 	// Load models
 	Model *ourModel;
@@ -146,9 +136,7 @@ namespace SceneManager {
 		texturedProgram = ShaderManager::initShaders("textured.vert", "textured.frag");
 		modelProgram = ShaderManager::initShaders("modelLoading.vert", "modelLoading.frag");
 		ourModel = new Model("Nanosuit/nanosuit.obj");
-		//	ourModel2 = new Model("gun/wep.obj");
 		ourModel2 = new Model("CHOO/Socom pistol.obj");
-		//shader = new Shader("modelLoading.vert", "modelLoading.frag");
 		MeshManager::setLight(shaderProgram, testLight);
 		MeshManager::setMaterial(shaderProgram, greenMaterial);
 		cube = testCubes[0]->initializeObject("cube.obj");
@@ -176,13 +164,11 @@ namespace SceneManager {
 
 	float gameTime() {
 		currentTime = clock();
-		//	if (currentTime > lastTime + DT_MILLISECONDS) { // operations done every ~33ms
-		//	printf("Diff: %d\n", currentTime - lastTime);
 
 		unsigned int dt = currentTime - lastTime;
 		float dt_secs = (float)dt / 1000;
 		if (dt_secs > 0.017) dt_secs = 0.017; // first value is off ( 5.5~)
-											  //	std::cout << dt_secs << std::endl;
+											  
 		lastTime = currentTime;
 
 		return dt_secs;
@@ -202,7 +188,7 @@ namespace SceneManager {
 
 	bool leftClick = false;
 	bool rightClick = false;
-	//
+
 	void bulletCreation() {
 		//position, scale, rotation
 		glm::vec3 bulletSpawn = player->getPosition();
@@ -210,11 +196,6 @@ namespace SceneManager {
 		glm::mat4 model;
 		transformation_Matrices bulletTest = { bulletSpawn, glm::vec3(0.1, 0.1, 0.1),
 			pitchTest, yawTest, rollTest };
-
-		/*bullet[noShotsFired] = new Bullet(bulletTest, cube);
-		bullet[noShotsFired]->setYawAngle(yaw);
-		bullet[noShotsFired]->setPitchAngle(pitch);
-		bullet[noShotsFired]->setVelocity(glm::vec3(0.1, 0.1, 0.1));*/
 
 		Bullet newBullet(bulletTest, cube);
 
@@ -260,20 +241,10 @@ namespace SceneManager {
 		for (int i = 1; i < OBJECT_NO; i++) {
 			if (!stop) {
 				if (collisionManager->doCollisions(ObjectsPos[i], ObjectsScale[i], bullet[bulletAt]->getPosition(), bullet[bulletAt]->getScale())) {
-					//	cout << "colliding" << endl;
 					bullet[bulletAt]->setVelocity(glm::vec3(0.0, 0.0, 0.0));
-
-					//cout << "size " << bullet.size() << endl;
-					//cout << "COLLISION" << endl;
-					// To delete 1 element and remove it.
-					//cout << "at " << bulletAt << endl;
 					vector<Bullet*>::iterator iter = bullet.begin() + bulletAt;
-					//cout << bullet.begin() << endl;
-				//	cout << bulletAt << endl;
 					delete *iter;
 					bullet.erase(iter);
-					//cout << "DELETED BULLET" << endl;
-					//cout << "size " << bullet.size() << endl;
 					cout << "Cube " << i << " hit. Bullet deleted.\n";
 					stop = true;
 				}
@@ -288,38 +259,14 @@ namespace SceneManager {
 		}
 	}
 
-	
-
-	//	vectorPair currentProperties = make_pair(bullet->getPosition(), bullet->getVelocity());
-	//	glm::vec3 gravity = glm::vec3(0.0, -2.0, 0.0);
-	//	currentProperties = physicsManager->applyGravity(currentProperties.first, currentProperties.second, gravity, gameTime());
-	//	bullet->setPosition(currentProperties.first);
-	//	bullet->setVelocity(currentProperties.second);
-	//}
-/*
-	bool shovePhysics(glm::vec3 eye, glm::vec3 playerScale) {
-		bool p_coll = false;
-		for (int i = 0; i < OBJECT_NO; i++) {
-			p_coll = collision(eye, playerScale, testCubes[i]->getPosition(), testCubes[i]->getScale());
-			if (p_coll) {
-				player->setVelocity(testCubes[i]->getVelocity());
-				cout << "v: " << player->getVelocity().x << " " << player->getVelocity().y << " " << player->getVelocity().z << endl;
-				return p_coll;
-				//	cout << "COLLIDING MAH MAN\n";
-			}
-		}
-		return p_coll;
-	}
-	*/
+	// will update for a more generalized and reliable method
 	bool playerCollision(glm::vec3 eye, glm::vec3 playerScale) {
 		bool p_coll = false;
 		for (int i = 0; i < OBJECT_NO; i++) {
 			p_coll = collisionManager->doCollisions(eye, playerScale, testCubes[i]->getPosition(), testCubes[i]->getScale());
 			if (p_coll) {
 				player->setVelocity(testCubes[i]->getVelocity());
-		//		cout << "v: " << player->getVelocity().x << " " << player->getVelocity().y << " " << player->getVelocity().z << endl;
 				return p_coll;
-			//	cout << "COLLIDING MAH MAN\n";
 			}
 		}
 		return p_coll;
@@ -333,8 +280,6 @@ namespace SceneManager {
 			testCubes[9]->setPosition(glm::vec3(testCubes[9]->getPosition().x + (collisionPosition.x - player->getPosition().x),
 				testCubes[9]->getPosition().y, // + (collisionPosition.y - player->getPosition().y),
 				testCubes[9]->getPosition().z + (collisionPosition.z - player->getPosition().z)));
-		//	cout << "\n" << player->Position().x;
-	//		cout << "TEST";
 		}
 	}
 
@@ -364,8 +309,6 @@ namespace SceneManager {
 		}
 
 		if (leftClick == true && pointOfView == FIRST_PERSON) {
-			//if (noShotsFired >= BULLET_NO)
-			//cout << "no more ammo";
 			if (coolDownOfGun <= 0.0f) {
 				bulletCreation();
 				coolDownOfGun = 0.4f;
@@ -421,10 +364,6 @@ namespace SceneManager {
 			player->setVelocity(glm::vec3(player->getVelocity().x, 6.0f, player->getVelocity().z));
 			player->setState(JUMPING);
 		}
-
-	//	if (keys[SDL_SCANCODE_COMMA]) yaw -= 1.0f;
-	//	else if (keys[SDL_SCANCODE_PERIOD]) yaw += 1.0f;
-
 		if (keys[SDL_SCANCODE_K]) {
 			if (pointOfView == FIRST_PERSON) pointOfView = THIRD_PERSON;
 			else pointOfView = FIRST_PERSON;
@@ -447,11 +386,6 @@ namespace SceneManager {
 		}
 	}
 
-	
-
-
-	
-
 	void renderObject(glm::mat4 proj, Model *modelData, glm::vec3 pos) {
 		glUseProgram(modelProgram);
 		mvStack.push(mvStack.top());// push modelview to stack
@@ -464,8 +398,6 @@ namespace SceneManager {
 		model = glm::translate(model, pos);
 		model = glm::rotate(model, float(-yaw*DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::rotate(model, float(180*DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
-//		model = glm::rotate(model, float(90.0f*DEG_TO_RADIAN), glm::vec3(-1.0f, 0.0f, 0.0f));
-	//	model = glm::rotate(model, float(90.0f*DEG_TO_RADIAN), glm::vec3(0.0f, 0.0f, 1.0f));
 		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));	// It's a bit too big for our scene, so scale it down
 		glUniformMatrix4fv(glGetUniformLocation(modelProgram, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(model));
 		modelData->Draw(modelProgram);
@@ -535,7 +467,7 @@ namespace SceneManager {
 	bool once = true;
 
 	void movePlayer(float dt_secs) {
-		// gravity-y-y-y-y
+		// gravity-y-y-y-y (https://www.youtube.com/watch?v=uQpclIzUwLk)
 		glm::vec3 collisionPosition;
 		glm::vec3 playerScale(0.5, 1.5, 0.5);
 		vectorPair currentProperties = make_pair(player->getPosition(), player->getVelocity());
@@ -556,14 +488,10 @@ namespace SceneManager {
 		if(player->getState() == JUMPING)
 			player->setVelocity(glm::vec3(player->getVelocity().x, currentProperties.second.y, player->getVelocity().z));
 
-
-		//PLAYAH
-		//currentProperties = make_pair(player->getPosition(), player->getVelocity());
+		//PLAYER
 		currentProperties = physicsManager->applyPhysics(player->getPosition(), player->getVelocity(), nullTest, dt_secs);
 		player->setPosition(currentProperties.first);
 		player->setVelocity(currentProperties.second);
-
-	//cout << "\n" << player->getVelocity().y << "\n";
 
 	}
 
@@ -573,14 +501,10 @@ namespace SceneManager {
 			if (i != current) {
 				o_coll = collisionManager->doCollisions(objectPos, objectScale, testCubes[i]->getPosition(), testCubes[i]->getScale());
 				if (o_coll) {
-				//	cout << "detected " << i << endl;
 					if (testCubes[i]->getVelocity() != nullTest){ //&& testCubes[i]->getVelocity() != object->getVelocity()) {
 						object->setVelocity(testCubes[i]->getVelocity());
-				//		cout << "\nsetting to speed of " << i << endl;
 					}
-					//		cout << "v: " << player->getVelocity().x << " " << player->getVelocity().y << " " << player->getVelocity().z << endl;
 					return o_coll;
-					//	cout << "COLLIDING MAH MAN\n";
 				} //else object->setVelocity(nullTest);
 			}
 		}
@@ -590,19 +514,11 @@ namespace SceneManager {
 
 	// over simplified; collision reaction is still not well implemented
 	void shoveCubes() {
-		
 		objectCollision(testCubes[8], testCubes[8]->getPosition(), testCubes[8]->getScale(), 8);
-
-
-	//	for (int i = 0; i < OBJECT_NO; i++) {
-		//	if (objectCollision(testCubes[i], testCubes[i]->getPosition(), testCubes[i]->getScale(), i))
-	//	//		cout << "Detector " << i << "\n---------------\n";
-		//}
 	}
 
 	void moveObjects() {
 		float dt_secs = gameTime();
-		// eye
 		// cout << dt_secs <<"\n";
 		coolDownOfGun -= dt_secs;
 
@@ -637,10 +553,6 @@ namespace SceneManager {
 		testCubes[8]->setPosition(currentProperties.first);
 		testCubes[8]->setVelocity(currentProperties.second);
 		
-
-	//	testMove.x += movement;
-	//	testCubes[1]->setPosition(testMove);
-
 		// rotate rotating cube (testcube 3 ([2]))
 		theta += 0.1f;
 
@@ -657,7 +569,6 @@ namespace SceneManager {
 			currentProperties = physicsManager->applyPhysics(testCubes[2]->getPosition(), testCubes[2]->getVelocity(), friction, dt_secs);
 			testCubes[2]->setPosition(currentProperties.first);
 			testCubes[2]->setVelocity(currentProperties.second);
-		//	cout << "\n" << testCubes[2]->getVelocity().x << "<- x , z -> " << testCubes[2]->getVelocity().z << "\n";
 		}
 		
 		// move testcube 4
@@ -667,14 +578,11 @@ namespace SceneManager {
 		testCubes[3]->setPosition(currentProperties.first);
 		testCubes[3]->setVelocity(currentProperties.second);
 
-//		if (bullet[0])
-//			cout << "vel " <<  bullet[0]->getVelocity().y << " pos " << bullet[0]->getPosition().y << endl;
 		for (int i = 0; i < OBJECT_NO; i++) {
 			if (testCubes[i]->getVelocity() == glm::vec3(0.0, 0.0, 0.0))
 				testCubes[i]->setState(STILL);
 			else testCubes[i]->setState(MOVING);
 
-		//	cout << i << " " << testCubes[i]->getState() << endl;
 		}
 
 	}
@@ -703,7 +611,6 @@ namespace SceneManager {
 			at = player->getPosition(); // look at player position
 			eye = moveForward(at, pitch, -6.0f); // move behind him
 			eye.y += pitch; // displacement determined by user interaction
-		//	pitch += eye.y; // - terrainCollision(eye, eye.y - 1.5f, 0, false); // makes it so the camera can't fall below the heightmap
 			mvStack.top() = glm::lookAt(eye, at, up);
 		}
 
@@ -730,14 +637,10 @@ namespace SceneManager {
 
 		mvStack = skybox->renderSkybox(projection, mvStack, testCubes[0]->object_getMesh(), testCubes[0]->object_getIndex());
 																								
-																										//pitch, yaw, roll
+		//pitch, yaw, roll
 		mvStack = testCubes[0]->renderObject(projection, mvStack, shaderProgram, testLight, greenMaterial, 0, 0, 0);
-
 		mvStack = testCubes[1]->renderObject(projection, mvStack, shaderProgram, testLight, greenMaterial, 0, 0, 0);
-	
-
 		mvStack = testCubes[2]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, theta, 0);
-	
 		mvStack = testCubes[3]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, 0, 0);
 		mvStack = testCubes[4]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, 0, 0);
 		mvStack = testCubes[5]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, 0, 0);
@@ -747,31 +650,18 @@ namespace SceneManager {
 		mvStack = testCubes[9]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, 0, 0);
 
 		if (shotsFired) {
-			//int i = 0;
-			//for (vector<Bullet*>::iterator it = bullet.begin(); it != bullet.end(); it++, i++) {
-			/*for (int i = 0; i < bullet.size(); i++) {
-			mvStack = bullet[i]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, bullet[i]->getPitchAngle(), bullet[i]->getYawAngle(), 0);
-			}*/for (int i = 0; i < bullet.size(); i++) {
-			//	cout << "\nI'm before";
+		for (int i = 0; i < bullet.size(); i++) {	
 				mvStack = bullet[i]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, bullet[i]->getPitchAngle(), bullet[i]->getYawAngle(), 0);
-				bulletFunction(i);
-				//	cout << "\nI'm after";
+				bulletFunction(i);		
 			}
-
 		}
 		// RENDERING MODELS
-//		renderTest(projection);
 		if (pointOfView == THIRD_PERSON)
 			renderObject(projection,ourModel, glm::vec3(player->getPosition().x, player->getPosition().y-1.5, player->getPosition().z));
 		if (pointOfView == FIRST_PERSON)
 			renderWep(projection, ourModel2);
 		//:thinking:
-
-	
-
 		mvStack.pop();
-		// h_manager->renderFPS(texturedProgram, testLight, glm::mat4(1.0), testCube->object_getMesh(), testCube->object_getIndex(), fps);
-
 
 		glDepthMask(GL_TRUE);
 		SDL_GL_SwapWindow(window); // swap buffers

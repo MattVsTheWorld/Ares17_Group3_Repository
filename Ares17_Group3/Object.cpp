@@ -9,7 +9,7 @@ Object::Object(transformation_Matrices transformation) {
 	trans_m.roll = transformation.roll;
 }
 
-// probably get rid of this constructor
+// default texture constructor
 Object::Object(transformation_Matrices transformation, object_Properties obj_p) {
 	GLuint size = obj_p.indices.size();
 	meshIndexCount = size;
@@ -39,9 +39,8 @@ Object::Object(transformation_Matrices transformation, char *texturePath, object
 }
 
 Object::~Object() {
-//	delete this;
+//	deletion, to be added
 }
-
 
 object_Properties Object::initializeObject(char *objectPath) {
 	vector<GLfloat> verts; // contains vertices of loaded object

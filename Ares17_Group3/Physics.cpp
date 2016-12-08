@@ -4,49 +4,19 @@ Physics::Physics() {
 
 }
 
-// EXTREMELY simplistic gravity; will modify it once I get home
-/*
-float Physics::applyGravity(glm::vec3 pos) {
-	if (pos.y > GROUND_POSITION) pos.y -= gravity;
-		currentTime = clock();
-	if (currentTime > lastTime + DT_MILLISECONDS) { // operations done every ~33ms
-	//	printf("Diff: %d\n", currentTime - lastTime);
-
-	unsigned int dt = currentTime - lastTime;
-	float dt_secs = (float)dt / 1000;
-	std::cout << dt_secs << std::endl;
-	lastTime = currentTime;
-	//printf()
-	} 
-	return pos.y;
-} */
-
 // this needs to return a pair
 vectorPair Physics::applyGravity(glm::vec3 pos, glm::vec3 vel, glm::vec3 acc, float dt_secs) {
-	if (pos.y > GROUND_POSITION) { //pos.y -= gravity;
+	if (pos.y > GROUND_POSITION) { //needs improving
 
 		glm::vec3 vel2(0.0, 0.0, 0.0);
 		glm::vec3 pos2(0.0, 0.0, 0.0);
 		glm::vec3 avg_vel(0.0, 0.0, 0.0);
-//		currentTime = clock();
-	//	if (currentTime > lastTime + DT_MILLISECONDS) { // operations done every ~33ms
-														//	printf("Diff: %d\n", currentTime - lastTime);
 
-		//	unsigned int dt = currentTime - lastTime;
-		//	float dt_secs = (float)dt / 1000;
-		//	if (dt_secs > 0.017) dt_secs = 0.017; // first value is off ( 5.5~)
-		//	std::cout << dt_secs << std::endl;
-		//	lastTime = currentTime;
-			//acc.y = GRAVITY_VALUE;
 			// euler's method 
 			vel2.y = vel.y + acc.y * dt_secs; // next velocity
 			avg_vel.y = (vel.y + vel2.y) / 2; // average velocoiy
 			pos2.y = pos.y + avg_vel.y * dt_secs; // new position
-		//	cout << "vel " << vel.y << " vel2 " << vel2.y << " avg " << avg_vel.y << " dt " << dt_secs << " pos " << pos.y << " pos2 " << pos2.y << endl;
-			
-			// same for x component
-			//	cout << avg_vel.y << endl;
-			//	bodies[i]->moveTo(pos2.x, pos2.y); // move to new position
+	
 			// update values
 			pos.y = pos2.y;
 			vel.y = vel2.y;
