@@ -27,6 +27,7 @@ bool Collisions::doCollisions(glm::vec3 position_A, glm::vec3 scale_A, glm::vec3
 
 }
 
+
 // elastic rebound
 /** [2d] velocity, parallel velocity, perpendicular velocity, surface normal
 	vel = vel.par + vel.perp

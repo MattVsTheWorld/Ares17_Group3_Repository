@@ -25,7 +25,8 @@ namespace SceneManager {
 	int noShotsFired = 0;
 	float theta = 0.0f;
 	float adjustable_Angle = 0.0f;
-	float movement = 0.05;
+	bool viewBoxes = false;
+	float movement = 0.05f;
 	GLuint shaderProgram;
 	GLuint texturedProgram;
 	GLuint modelProgram;
@@ -179,7 +180,7 @@ namespace SceneManager {
 
 		unsigned int dt = currentTime - lastTime;
 		float dt_secs = (float)dt / 1000;
-		if (dt_secs > 0.017) dt_secs = 0.017; // first value is off ( 5.5~)
+		if (dt_secs > 0.017f) dt_secs = 0.017f; // first value is off ( 5.5~)
 											  
 		lastTime = currentTime;
 
@@ -296,7 +297,7 @@ namespace SceneManager {
 	}
 
 
-	float coolDownOfGun = 0.4; //wait between shots
+	float coolDownOfGun = 0.4f; //wait between shots
 
 	void controls(SDL_Window * window, SDL_Event sdlEvent) {
 		int MidX = SCREENWIDTH / 2;
@@ -392,10 +393,17 @@ namespace SceneManager {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 			glEnable(GL_CULL_FACE);
 		}
+
+		if (keys[SDL_SCANCODE_3]) {
+			viewBoxes = true;
+		}
+		if (keys[SDL_SCANCODE_4]) {
+			viewBoxes = false;
+		}
 		if (keys[SDL_SCANCODE_ESCAPE]) {
 			exit(0);
 		}
-		if (keys[SDL_SCANCODE_3])
+		if (keys[SDL_SCANCODE_5])
 		{
 			cout << bullet.size() << endl;
 		}
@@ -673,14 +681,16 @@ namespace SceneManager {
 		// Collision testing
 		mvStack = testCubes[10]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, adjustable_Angle, 0);
 	
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		glDisable(GL_CULL_FACE);
-		for (int i = 0; i < OBJECT_NO; i++)
-			mvStack = boundingBoxes[i]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, 0, 0);
-		mvStack = playerBox->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, 0, 0);
+		if (viewBoxes) {
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			glDisable(GL_CULL_FACE);
+			for (int i = 0; i < OBJECT_NO; i++)
+				mvStack = boundingBoxes[i]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, 0, 0);
+			mvStack = playerBox->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, 0, 0);
 
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		glEnable(GL_CULL_FACE);
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+			glEnable(GL_CULL_FACE);
+		}
 		// +++++++++++++++
 
 		if (shotsFired) {
