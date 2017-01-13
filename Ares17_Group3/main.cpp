@@ -15,6 +15,7 @@ int main(int argc, char *argv[]) {
 	glewExperimental = GL_TRUE;
 	GLenum err = glewInit();
 
+
 	if (GLEW_OK != err) { // glewInit failed, something is seriously wrong
 		std::cout << "glewInit failed, aborting." << endl;
 		exit(1);
@@ -31,6 +32,7 @@ int main(int argc, char *argv[]) {
 		}
 		SceneManager::update(hWindow, sdlEvent);	// update function
 		SceneManager::draw(hWindow, 0); // draw function
+
 	}
 
 	SDL_GL_DeleteContext(glContext);

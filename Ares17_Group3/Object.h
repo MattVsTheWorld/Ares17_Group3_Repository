@@ -80,5 +80,4 @@ public:
 	void setState(objectState state);
 };
 
-
 #endif
