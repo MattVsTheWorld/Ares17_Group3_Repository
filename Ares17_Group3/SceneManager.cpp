@@ -3,7 +3,7 @@
 //#include "Shader.h"
 using namespace std;
 
-#define OBJECT_NO 10
+#define OBJECT_NO 11
 #define BULLET_NO 30
 #define TEST_VELOCITY 0.5
 
@@ -21,6 +21,7 @@ namespace SceneManager {
 	bool shotsFired = false;
 	int noShotsFired = 0;
 	float theta = 0.0f;
+	float adjustable_Angle = 0.0f;
 	float movement = 0.05;
 	GLuint shaderProgram;
 	GLuint texturedProgram;
@@ -122,6 +123,9 @@ namespace SceneManager {
 
 		transformation_Matrices test9 = { glm::vec3(-4.0, 1.0, -8.0), glm::vec3(0.5, 0.5, 0.5), nullTest };
 		testCubes[9] = new Object(test9, "move.bmp", cube);
+
+		transformation_Matrices testCollidable = { glm::vec3(-5.0,5.0,-5.0), glm::vec3(1.3,0.5,0.8), pitchTest, yawTest };
+		testCubes[10] = new Object(testCollidable, cube);
 	}
 
 	void initPlayer() {
@@ -368,6 +372,9 @@ namespace SceneManager {
 			if (pointOfView == FIRST_PERSON) pointOfView = THIRD_PERSON;
 			else pointOfView = FIRST_PERSON;
 		}
+
+		if (keys[SDL_SCANCODE_O]) adjustable_Angle += 0.1;
+		if (keys[SDL_SCANCODE_P]) adjustable_Angle -= 0.1;
 
 		if (keys[SDL_SCANCODE_1]) {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -648,6 +655,9 @@ namespace SceneManager {
 		mvStack = testCubes[7]->renderObject(projection, mvStack, shaderProgram, testLight, redMaterial, 0, 0, 0);
 		mvStack = testCubes[8]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, 0, 0);
 		mvStack = testCubes[9]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, 0, 0);
+		
+		// Collision testing
+		mvStack = testCubes[10]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, adjustable_Angle, 0);
 
 		if (shotsFired) {
 		for (int i = 0; i < bullet.size(); i++) {	

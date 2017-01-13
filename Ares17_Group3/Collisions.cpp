@@ -3,6 +3,9 @@
 
 Collisions::Collisions(){}
 
+// axis aligned
+// do Oriented bounding boxes?
+
 bool Collisions::doCollisions(glm::vec3 position_A, glm::vec3 scale_A, glm::vec3 position_B, glm::vec3 scale_B) {
 
 	bool collision = false;
@@ -23,3 +26,16 @@ bool Collisions::doCollisions(glm::vec3 position_A, glm::vec3 scale_A, glm::vec3
 	return collision;
 
 }
+
+// elastic rebound
+/** [2d] velocity, parallel velocity, perpendicular velocity, surface normal
+	vel = vel.par + vel.perp
+	vel.perp = (vel.par)normal
+	vel.par = vel - v.perp
+	~~
+	elastic rebound
+	newVel = v.par - v.perp
+	~~
+	[3d] same but use x and z and keep y (??) (or dampen)
+	[slide] newVel = v.par
+*/
