@@ -121,3 +121,8 @@ objectState Object::getState() {
 void Object::setState(objectState state) {
 	obj_s = state;
 }
+
+/*
+Object Object::copy(Object toCopy) {
+	return toCopy;
+} */

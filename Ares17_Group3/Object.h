@@ -78,6 +78,9 @@ public:
 
 	objectState getState();
 	void setState(objectState state);
+	
+	// NEW +++ (unnecessary)
+	//Object copy(Object toCopy);
 };
 
 #endif

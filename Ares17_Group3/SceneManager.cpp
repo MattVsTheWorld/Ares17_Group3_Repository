@@ -14,6 +14,7 @@ typedef stack<glm::mat4> mvstack;
 namespace SceneManager {
 
 	Object *testCubes[OBJECT_NO]; // arrays :D
+	Object *boundingBoxes[OBJECT_NO];
 
 	vector<Bullet*> bullet;
 
@@ -124,8 +125,13 @@ namespace SceneManager {
 		transformation_Matrices test9 = { glm::vec3(-4.0, 1.0, -8.0), glm::vec3(0.5, 0.5, 0.5), nullTest };
 		testCubes[9] = new Object(test9, "move.bmp", cube);
 
-		transformation_Matrices testCollidable = { glm::vec3(-5.0,5.0,-5.0), glm::vec3(1.3,0.5,0.8), pitchTest, yawTest };
+		transformation_Matrices testCollidable = { glm::vec3(-5.0,5.0,-5.0), glm::vec3(0.8,0.5,0.8), pitchTest, yawTest };
 		testCubes[10] = new Object(testCollidable, cube);
+
+		for (int i = 0; i < OBJECT_NO; i++)
+			boundingBoxes[i] = testCubes[i];
+
+
 	}
 
 	void initPlayer() {
@@ -592,6 +598,10 @@ namespace SceneManager {
 
 		}
 
+		// NEW +++
+		for (int i = 0; i < OBJECT_NO; i++)
+			boundingBoxes[i]->setPosition((testCubes[i]->getPosition()));
+
 	}
 	/*
 	void moveBullets(int i) {
@@ -656,8 +666,18 @@ namespace SceneManager {
 		mvStack = testCubes[8]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, 0, 0);
 		mvStack = testCubes[9]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, 0, 0);
 		
+		// NEW +++++++++
 		// Collision testing
 		mvStack = testCubes[10]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, adjustable_Angle, 0);
+	
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glDisable(GL_CULL_FACE);
+		for (int i = 0; i < OBJECT_NO; i++)
+			mvStack = boundingBoxes[i]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, 0, 0);
+
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		glEnable(GL_CULL_FACE);
+		// +++++++++++++++
 
 		if (shotsFired) {
 		for (int i = 0; i < bullet.size(); i++) {	
