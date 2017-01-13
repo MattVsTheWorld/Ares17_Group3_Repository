@@ -11,10 +11,14 @@
 
 using namespace std;
 
+enum objectState { STILL, MOVING };
+
 struct transformation_Matrices {
 	glm::vec3 position;
 	glm::vec3 scale;
-	glm::vec3 rotation;
+	glm::vec3 pitch;
+	glm::vec3 yaw;
+	glm::vec3 roll;
 };
 
 struct physics_Properties {
@@ -25,34 +29,44 @@ struct physics_Properties {
 	bool isOnGround = false;
 };
 
-class Object {
-private:
-	// cube is used for the walls and the skybox
+struct object_Properties {
 	vector<GLfloat> verts; // contains vertices of loaded object
 	vector<GLfloat> norms; // contains normal of loaded object
 	vector<GLfloat> tex_coords; // contains texture coordinates of loaded object
 	vector<GLuint> indices; // contains indices of loaded object
+
+};
+
+class Object {
+private:
+	// cube is used for the walls and the skybox
+//	object_Properties obj_p;
 	GLuint meshIndexCount = 0;
 	GLuint texture;
 	GLuint meshObject;
 	
-	float rotationAngle;
+	//current pitch,yaw,angle, of object
+	float pitchAngle;
+	float yawAngle;
+	float rollAngle;
+
 	transformation_Matrices trans_m;
 	physics_Properties phys_p;
 
-	float angleAtShot;
-	glm::vec3 at;
-	glm::vec3 initialPos;
+	objectState obj_s = STILL;
 
 protected:
 
 public:
 	// deprecated constructor
 	Object(transformation_Matrices transformation);
-	Object(transformation_Matrices transformation, char *texturePath);
+	Object(transformation_Matrices transformation, object_Properties obj_p);
+	Object(transformation_Matrices transformation, char *texturePath, object_Properties obj_p);
 	~Object();
+
+	object_Properties initializeObject(char *objectPath);
 	std::stack<glm::mat4> Object::renderObject(glm::mat4 projection, std::stack<glm::mat4> mvStack, GLuint shader,
-		MeshManager::lightStruct light, MeshManager::materialStruct material, float rot);
+		MeshManager::lightStruct light, MeshManager::materialStruct material, float pitch, float yaw, float roll);
 	GLuint object_getIndex();
 	GLuint object_getTexture();
 	GLuint object_getMesh();
@@ -62,15 +76,8 @@ public:
 	glm::vec3 getVelocity();
 	glm::vec3 getScale();
 
-	float getAngle();
-	void setAngle(float angle);
-
-	////EXPERIMENTING
-	void setAt(glm::vec3 newAt);
-	glm::vec3 getAt();
-
-	void setInitialPosition(glm::vec3 newPos);
-	glm::vec3 getInitialPosition();
+	objectState getState();
+	void setState(objectState state);
 };
 
 #endif

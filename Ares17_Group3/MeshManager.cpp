@@ -1,11 +1,9 @@
 #include "MeshManager.h"
 #include <map>
 
-
 /*
 Based on rt3d.cpp from Real Time 3d graphics module
 */
-
 
 namespace MeshManager {
 

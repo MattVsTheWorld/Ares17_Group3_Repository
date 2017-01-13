@@ -1,48 +1,78 @@
 #include "Object.h"
 
-// probably get rid of this constructor
+
 Object::Object(transformation_Matrices transformation) {
-	rt3d::loadObj("cube.obj", verts, norms, tex_coords, indices);
-	GLuint size = indices.size();
-	meshIndexCount = size;
-	texture = loadBitmap::loadBitmap("wall.bmp"); // load a texture
-	meshObject = MeshManager::createMesh(verts.size() / 3, verts.data(), nullptr,
-		norms.data(), tex_coords.data(), size, indices.data()); // create a mesh
 	trans_m.position = transformation.position;
 	trans_m.scale = transformation.scale;
-	trans_m.rotation = transformation.rotation;
-//	scale = scal;
-//	rotation = rot;
+	trans_m.pitch = transformation.pitch;
+	trans_m.yaw = transformation.yaw;
+	trans_m.roll = transformation.roll;
 }
 
-Object::Object(transformation_Matrices transformation, char *texturePath) {
-	rt3d::loadObj("cube.obj", verts, norms, tex_coords, indices);
-	GLuint size = indices.size();
+// default texture constructor
+Object::Object(transformation_Matrices transformation, object_Properties obj_p) {
+	GLuint size = obj_p.indices.size();
 	meshIndexCount = size;
-	texture = loadBitmap::loadBitmap(texturePath); // load a texture
-	meshObject = MeshManager::createMesh(verts.size() / 3, verts.data(), nullptr,
-		norms.data(), tex_coords.data(), size, indices.data()); // create a mesh
+	texture = loadBitmap::loadBitmap("wall.bmp"); // load a texture
+	meshObject = MeshManager::createMesh(obj_p.verts.size() / 3, obj_p.verts.data(), nullptr,
+		obj_p.norms.data(), obj_p.tex_coords.data(), size, obj_p.indices.data()); // create a mesh
 	trans_m.position = transformation.position;
 	trans_m.scale = transformation.scale;
-	trans_m.rotation = transformation.rotation;
+	trans_m.pitch = transformation.pitch;
+	trans_m.yaw = transformation.yaw;
+	trans_m.roll = transformation.roll;
+//	scale = scal;
+}
+
+
+Object::Object(transformation_Matrices transformation, char *texturePath, object_Properties obj_p) {
+	GLuint size = obj_p.indices.size();
+	meshIndexCount = size;
+	texture = loadBitmap::loadBitmap(texturePath); // load a texture
+	meshObject = MeshManager::createMesh(obj_p.verts.size() / 3, obj_p.verts.data(), nullptr,
+		obj_p.norms.data(), obj_p.tex_coords.data(), size, obj_p.indices.data()); // create a mesh
+	trans_m.position = transformation.position;
+	trans_m.scale = transformation.scale;
+	trans_m.pitch = transformation.pitch;
+	trans_m.yaw = transformation.yaw;
+	trans_m.roll = transformation.roll;
 }
 
 Object::~Object() {
-//	delete this;
+//	deletion, to be added
+}
+
+object_Properties Object::initializeObject(char *objectPath) {
+	vector<GLfloat> verts; // contains vertices of loaded object
+	vector<GLfloat> norms; // contains normal of loaded object
+	vector<GLfloat> tex_coords; // contains texture coordinates of loaded object
+	vector<GLuint> indices; // contains indices of loaded object
+	rt3d::loadObj(objectPath, verts, norms, tex_coords, indices);
+
+	return{ verts, norms, tex_coords, indices };
 }
 
 std::stack<glm::mat4> Object::renderObject(glm::mat4 projection, std::stack<glm::mat4> mvStack, GLuint shader,
-	MeshManager::lightStruct light, MeshManager::materialStruct material, float rot) {
+	MeshManager::lightStruct light, MeshManager::materialStruct material, float pitch, float yaw, float roll) {
 
 	glUseProgram(shader);
 	MeshManager::setLight(shader, light);
 	mvStack.push(mvStack.top());// push modelview to stack
 	if (trans_m.position != glm::vec3(0.0f, 0.0f, 0.0f))
 		mvStack.top() = glm::translate(mvStack.top(), trans_m.position);
-	if (trans_m.rotation != glm::vec3(0.0f, 0.0f, 0.0f)){
-		rotationAngle = rot;
-		mvStack.top() = glm::rotate(mvStack.top(), rotationAngle, trans_m.rotation);
+	if (trans_m.pitch != glm::vec3(0.0f, 0.0f, 0.0f)) {
+		pitchAngle = pitch;
+		mvStack.top() = glm::rotate(mvStack.top(), pitchAngle, trans_m.pitch);
 	}
+	if (trans_m.yaw != glm::vec3(0.0f, 0.0f, 0.0f)){
+		yawAngle = yaw;
+		mvStack.top() = glm::rotate(mvStack.top(), yawAngle, trans_m.yaw);
+	}
+	if (trans_m.roll != glm::vec3(0.0f, 0.0f, 0.0f)) {
+		rollAngle = roll;
+		mvStack.top() = glm::rotate(mvStack.top(), rollAngle, trans_m.roll);
+	}
+	
 	if (trans_m.scale != glm::vec3(0.0f, 0.0f, 0.0f))
 		mvStack.top() = glm::scale(mvStack.top(), trans_m.scale);
 	glActiveTexture(GL_TEXTURE0);
@@ -70,7 +100,6 @@ GLuint Object::object_getMesh() {
 void Object::setPosition(glm::vec3 newPos) {
 	trans_m.position = newPos;
 }
-
 glm::vec3 Object::getPosition() {
 	return trans_m.position;
 }
@@ -78,7 +107,6 @@ glm::vec3 Object::getPosition() {
 void Object::setVelocity(glm::vec3 newVel) {
 	phys_p.velocity = newVel;
 }
-
 glm::vec3 Object::getVelocity() {
 	return phys_p.velocity;
 }
@@ -87,25 +115,9 @@ glm::vec3 Object::getScale() {
 	return trans_m.scale;
 }
 
-float Object::getAngle() {
-	return angleAtShot;
+objectState Object::getState() {
+	return obj_s;
 }
-void Object::setAngle(float angle) {
-	angleAtShot = angle;
-}
-
-////EXPERIMENTING
-void Object::setAt(glm::vec3 newAt) {
-	at = newAt;
-}
-glm::vec3 Object::getAt() {
-	return at;
-}
-
-void Object::setInitialPosition(glm::vec3 newPos) {
-	initialPos = newPos;
-}
-
-glm::vec3 Object::getInitialPosition() {
-	return initialPos;
+void Object::setState(objectState state) {
+	obj_s = state;
 }

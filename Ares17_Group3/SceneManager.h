@@ -11,6 +11,10 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "Skybox.h"
 #include "Physics.h"
+
+#include "Bullet.h"
+#include "Player.h"
+#include "Collisions.h"
 #define DEG_TO_RADIAN 0.017453293
 
 namespace SceneManager {
