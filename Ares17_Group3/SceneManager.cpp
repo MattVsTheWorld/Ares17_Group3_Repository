@@ -19,6 +19,8 @@ namespace SceneManager {
 	vector<Bullet*> bullet;
 
 	Player *player;
+	glm::vec3 playerScale(0.5, 1.5, 0.5);
+	Object *playerBox;
 	bool shotsFired = false;
 	int noShotsFired = 0;
 	float theta = 0.0f;
@@ -135,9 +137,9 @@ namespace SceneManager {
 	}
 
 	void initPlayer() {
-		glm::vec3 playerScale(0.5, 1.5, 0.5);
 		transformation_Matrices playerTrans = { eye, playerScale, nullTest , nullTest , nullTest };
 		player = new Player(playerTrans);
+		playerBox = new Object (playerTrans, cube);
 	}
 
 
@@ -333,7 +335,7 @@ namespace SceneManager {
 		//KEYBOARD
 	
 		
-		glm::vec3 playerScale(0.5, 1.5, 0.5);
+		
 		const Uint8 *keys = SDL_GetKeyboardState(NULL);
 		if (keys[SDL_SCANCODE_W]) {
 		//	player->setVelocity(glm::vec3(1.0, player->getVelocity().y, player->getVelocity().z));
@@ -600,7 +602,8 @@ namespace SceneManager {
 
 		// NEW +++
 		for (int i = 0; i < OBJECT_NO; i++)
-			boundingBoxes[i]->setPosition((testCubes[i]->getPosition()));
+			boundingBoxes[i]->setPosition(testCubes[i]->getPosition());
+		playerBox->setPosition(player->getPosition());
 
 	}
 	/*
@@ -674,6 +677,7 @@ namespace SceneManager {
 		glDisable(GL_CULL_FACE);
 		for (int i = 0; i < OBJECT_NO; i++)
 			mvStack = boundingBoxes[i]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, 0, 0);
+		mvStack = playerBox->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, 0, 0);
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		glEnable(GL_CULL_FACE);
