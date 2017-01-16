@@ -3,7 +3,7 @@
 //#include "Shader.h"
 using namespace std;
 
-#define OBJECT_NO 11
+#define OBJECT_NO 14
 #define BULLET_NO 30
 #define TEST_VELOCITY 0.5
 
@@ -131,9 +131,19 @@ namespace SceneManager {
 		transformation_Matrices testCollidable = { glm::vec3(-5.0,5.0,-5.0), glm::vec3(0.8,0.5,0.8), pitchTest, yawTest };
 		testCubes[10] = new Object(testCollidable, cube);
 
+		transformation_Matrices collisionTests[3] = {
+			{ glm::vec3(-7.0,1.0,-8.0), glm::vec3(0.5,0.5,0.5), pitchTest, yawTest },
+			{ glm::vec3(-10.0,1.0,-7.0), glm::vec3(0.5,0.5,0.5), pitchTest, yawTest },
+			{ glm::vec3(-9.0,1.0,-9.0), glm::vec3(0.5,0.5,0.5), pitchTest, yawTest }
+		};
+
+		testCubes[11] = new Object(collisionTests[0], "11.bmp", cube);
+		testCubes[12] = new Object(collisionTests[1], "12.bmp", cube);
+		testCubes[13] = new Object(collisionTests[2], "13.bmp", cube);
+
+
 		for (int i = 0; i < OBJECT_NO; i++)
 			boundingBoxes[i] = testCubes[i];
-
 
 	}
 
@@ -651,7 +661,7 @@ namespace SceneManager {
 
 	}
 
-	void draw(SDL_Window * window, float fps) {
+	void draw(SDL_Window * window) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear window
 		glEnable(GL_CULL_FACE);
 		glClearColor(0.5f, 0.7f, 0.8f, 1.0f);
@@ -680,7 +690,17 @@ namespace SceneManager {
 		// NEW +++++++++
 		// Collision testing
 		mvStack = testCubes[10]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, adjustable_Angle, 0);
-	
+
+		///
+		// +++++++++++++++++++
+		///
+		mvStack = testCubes[11]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, 0, 0);
+		mvStack = testCubes[12]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, 0, 0);
+		mvStack = testCubes[13]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, 0, 0);
+		
+		///
+		// +++++++++++++++++++
+		///
 		if (viewBoxes) {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 			glDisable(GL_CULL_FACE);
@@ -705,7 +725,18 @@ namespace SceneManager {
 		if (pointOfView == FIRST_PERSON)
 			renderWep(projection, ourModel2);
 		//:thinking:
+
+
+
+		///
+		h_manager->renderToHud(11, texturedProgram, testLight, testCubes[0]->object_getMesh(), testCubes[0]->object_getIndex(), glm::vec3(-0.85f, 0.9f, 0.9f), testCubes[11]->getVelocity().x, testCubes[11]->getVelocity().y, testCubes[11]->getVelocity().z);
+		h_manager->renderToHud(12, texturedProgram, testLight, testCubes[0]->object_getMesh(), testCubes[0]->object_getIndex(), glm::vec3(-0.85f, 0.7f, 0.9f), testCubes[12]->getVelocity().x, testCubes[12]->getVelocity().y, testCubes[12]->getVelocity().z);
+		h_manager->renderToHud(13, texturedProgram, testLight, testCubes[0]->object_getMesh(), testCubes[0]->object_getIndex(), glm::vec3(-0.85f, 0.5f, 0.9f), testCubes[13]->getVelocity().x, testCubes[13]->getVelocity().y, testCubes[13]->getVelocity().z);
+		///
+
+
 		mvStack.pop();
+
 
 		glDepthMask(GL_TRUE);
 		SDL_GL_SwapWindow(window); // swap buffers

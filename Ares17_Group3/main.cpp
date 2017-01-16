@@ -31,7 +31,7 @@ int main(int argc, char *argv[]) {
 				running = false;
 		}
 		SceneManager::update(hWindow, sdlEvent);	// update function
-		SceneManager::draw(hWindow, 0); // draw function
+		SceneManager::draw(hWindow); // draw function
 
 	}
 
