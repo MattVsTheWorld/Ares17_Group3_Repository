@@ -568,21 +568,66 @@ namespace SceneManager {
 		objectCollision(testCubes[8], testCubes[8]->getPosition(), testCubes[8]->getScale(), 8);
 	}
 
+	///++++++++++++++++++
+
+	enum Direction {
+		PLUS_Z,
+		PLUS_X,
+		MINUS_Z,
+		MINUS_X
+	};
+
+	Direction VectorDirection(glm::vec3 target) {
+		glm::vec3 compass[] = {
+			glm::vec3(0.0f, 0.0f, 1.0f),	// PLUS_Z
+			glm::vec3(1.0f, 0.0f, 0.0f),	// PLUS_X
+			glm::vec3(0.0f, 0.0f, -1.0f),	// MINUS_Z
+			glm::vec3(-1.0f, 0.0f, 0.0f)	// MINUS_X
+		};
+		GLfloat max = 0.0f;
+		GLuint best_match = -1;
+		for (GLuint i = 0; i < 4; i++)
+		{
+			GLfloat dot_product = glm::dot(glm::normalize(target), compass[i]);
+			if (dot_product > max)
+			{
+				max = dot_product;
+				best_match = i;
+			}
+		}
+		return (Direction)best_match;
+	}
+
+	string textualize(Direction in) {
+		if (in == 0)
+			return "PLUS_Z";
+		else if (in == 1)
+			return "PLUS_X";
+		else if (in == 2)
+			return "MINUS_Z";
+		else if (in == 3)
+			return "MINUS_X";
+		else return "~";
+	}
+
 	glm::vec3 nullVec(0.0, 0.0, 0.0);
 	void collide_test(float dt_secs) {
 
 		glm::vec3 friction_2 = glm::vec3(0.75, 0.75, 0.75);
 		vectorPair currentProperties = make_pair(testCubes[11]->getPosition(), testCubes[11]->getVelocity());
-		
 		currentProperties = physicsManager->applyPhysics(testCubes[11]->getPosition(), testCubes[11]->getVelocity(), friction_2, dt_secs);
 		testCubes[11]->setPosition(currentProperties.first);
 		testCubes[11]->setVelocity(currentProperties.second);
 
 		currentProperties = make_pair(testCubes[12]->getPosition(), testCubes[12]->getVelocity());
-
 		currentProperties = physicsManager->applyPhysics(testCubes[12]->getPosition(), testCubes[12]->getVelocity(), friction_2, dt_secs);
 		testCubes[12]->setPosition(currentProperties.first);
 		testCubes[12]->setVelocity(currentProperties.second);
+
+		currentProperties = make_pair(testCubes[12]->getPosition(), testCubes[13]->getVelocity());
+		currentProperties = physicsManager->applyPhysics(testCubes[13]->getPosition(), testCubes[13]->getVelocity(), friction_2, dt_secs);
+		testCubes[13]->setPosition(currentProperties.first);
+		testCubes[13]->setVelocity(currentProperties.second);
 
 		bool coll = false;
 		for (int current = 11; current < 14; current++)
@@ -590,10 +635,19 @@ namespace SceneManager {
 			for (int i = 11; i < 14; i++)
 			{
 				if (i != current) {
-					coll = collisionManager->doCollisions(testCubes[current]->getPosition(), testCubes[current]->getScale(), testCubes[i]->getPosition(), testCubes[i]->getScale());
-					if (coll){
-						testCubes[current]->setVelocity(nullVec);
-						testCubes[i]->setVelocity(nullVec);
+					coll = collisionManager->doCollisions((testCubes[current]->getPosition() + testCubes[current]->getVelocity()*dt_secs), testCubes[current]->getScale(), (testCubes[i]->getPosition() + testCubes[i]->getVelocity()*dt_secs), testCubes[i]->getScale());
+					if (coll){						
+					//	cout << textualize(VectorDirection((testCubes[current]->getVelocity()))) << " || ";
+						if (VectorDirection((testCubes[current]->getVelocity())) == PLUS_Z || VectorDirection((testCubes[current]->getVelocity())) == MINUS_Z)
+							testCubes[current]->setVelocity(glm::vec3(testCubes[current]->getVelocity().x, testCubes[current]->getVelocity().y, - (testCubes[current]->getVelocity().z)));
+						if (VectorDirection((testCubes[current]->getVelocity())) == PLUS_X || VectorDirection((testCubes[current]->getVelocity())) == MINUS_X)
+							testCubes[current]->setVelocity(glm::vec3(-(testCubes[current]->getVelocity().x), testCubes[current]->getVelocity().y, testCubes[current]->getVelocity().z));
+		
+						if (VectorDirection((testCubes[i]->getVelocity())) == PLUS_Z || VectorDirection((testCubes[i]->getVelocity())) == MINUS_Z)
+							testCubes[i]->setVelocity(glm::vec3(testCubes[i]->getVelocity().x, testCubes[i]->getVelocity().y, - (testCubes[i]->getVelocity().z)));
+						if (VectorDirection((testCubes[i]->getVelocity())) == PLUS_X || VectorDirection((testCubes[i]->getVelocity())) == MINUS_X)
+							testCubes[i]->setVelocity(glm::vec3(-(testCubes[i]->getVelocity().x), testCubes[i]->getVelocity().y, testCubes[i]->getVelocity().z));
+						//testCubes[i]->setVelocity(nullVec);
 					}
 
 				}
@@ -605,6 +659,9 @@ namespace SceneManager {
 		//	testCubes[12];
 		//	testCubes[13];
 	}
+
+	
+	///++++++++++++++++++
 
 	void moveObjects() {
 		float dt_secs = gameTime();
