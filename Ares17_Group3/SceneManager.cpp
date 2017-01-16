@@ -729,9 +729,9 @@ namespace SceneManager {
 
 
 		///
-		h_manager->renderToHud(11, texturedProgram, testLight, testCubes[0]->object_getMesh(), testCubes[0]->object_getIndex(), glm::vec3(-0.85f, 0.9f, 0.9f), testCubes[11]->getVelocity().x, testCubes[11]->getVelocity().y, testCubes[11]->getVelocity().z);
-		h_manager->renderToHud(12, texturedProgram, testLight, testCubes[0]->object_getMesh(), testCubes[0]->object_getIndex(), glm::vec3(-0.85f, 0.7f, 0.9f), testCubes[12]->getVelocity().x, testCubes[12]->getVelocity().y, testCubes[12]->getVelocity().z);
-		h_manager->renderToHud(13, texturedProgram, testLight, testCubes[0]->object_getMesh(), testCubes[0]->object_getIndex(), glm::vec3(-0.85f, 0.5f, 0.9f), testCubes[13]->getVelocity().x, testCubes[13]->getVelocity().y, testCubes[13]->getVelocity().z);
+		h_manager->renderToHud(11, texturedProgram, testLight, testCubes[0]->object_getMesh(), testCubes[0]->object_getIndex(), glm::vec3(-0.25f, 0.9f, 0.9f), testCubes[11]->getVelocity().x, testCubes[11]->getVelocity().y, testCubes[11]->getVelocity().z);
+		h_manager->renderToHud(12, texturedProgram, testLight, testCubes[0]->object_getMesh(), testCubes[0]->object_getIndex(), glm::vec3(-0.25f, 0.7f, 0.9f), testCubes[12]->getVelocity().x, testCubes[12]->getVelocity().y, testCubes[12]->getVelocity().z);
+		h_manager->renderToHud(13, texturedProgram, testLight, testCubes[0]->object_getMesh(), testCubes[0]->object_getIndex(), glm::vec3(-0.25f, 0.5f, 0.9f), testCubes[13]->getVelocity().x, testCubes[13]->getVelocity().y, testCubes[13]->getVelocity().z);
 		///
 
 
