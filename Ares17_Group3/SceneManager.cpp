@@ -417,6 +417,24 @@ namespace SceneManager {
 		{
 			cout << bullet.size() << endl;
 		}
+
+		if (keys[SDL_SCANCODE_KP_8])
+			testCubes[11]->setVelocity(glm::vec3(testCubes[11]->getVelocity().x, testCubes[11]->getVelocity().y, testCubes[11]->getVelocity().z - 0.2));
+		if (keys[SDL_SCANCODE_KP_4])
+			testCubes[11]->setVelocity(glm::vec3(testCubes[11]->getVelocity().x + 0.2, testCubes[11]->getVelocity().y, testCubes[11]->getVelocity().z));
+		if (keys[SDL_SCANCODE_KP_6])
+			testCubes[11]->setVelocity(glm::vec3(testCubes[11]->getVelocity().x - 0.2, testCubes[11]->getVelocity().y, testCubes[11]->getVelocity().z));
+		if (keys[SDL_SCANCODE_KP_2])
+			testCubes[11]->setVelocity(glm::vec3(testCubes[11]->getVelocity().x, testCubes[11]->getVelocity().y, testCubes[11]->getVelocity().z + 0.2));
+
+		if (keys[SDL_SCANCODE_KP_7])
+			testCubes[12]->setVelocity(glm::vec3(testCubes[12]->getVelocity().x, testCubes[12]->getVelocity().y, testCubes[12]->getVelocity().z - 0.2));
+		if (keys[SDL_SCANCODE_KP_9])
+			testCubes[12]->setVelocity(glm::vec3(testCubes[12]->getVelocity().x + 0.2, testCubes[12]->getVelocity().y, testCubes[12]->getVelocity().z));
+		if (keys[SDL_SCANCODE_KP_1])
+			testCubes[12]->setVelocity(glm::vec3(testCubes[12]->getVelocity().x - 0.2, testCubes[12]->getVelocity().y, testCubes[12]->getVelocity().z));
+		if (keys[SDL_SCANCODE_KP_3])
+			testCubes[12]->setVelocity(glm::vec3(testCubes[12]->getVelocity().x, testCubes[12]->getVelocity().y, testCubes[12]->getVelocity().z + 0.2));
 	}
 
 	void renderObject(glm::mat4 proj, Model *modelData, glm::vec3 pos) {
@@ -550,6 +568,44 @@ namespace SceneManager {
 		objectCollision(testCubes[8], testCubes[8]->getPosition(), testCubes[8]->getScale(), 8);
 	}
 
+	glm::vec3 nullVec(0.0, 0.0, 0.0);
+	void collide_test(float dt_secs) {
+
+		glm::vec3 friction_2 = glm::vec3(0.75, 0.75, 0.75);
+		vectorPair currentProperties = make_pair(testCubes[11]->getPosition(), testCubes[11]->getVelocity());
+		
+		currentProperties = physicsManager->applyPhysics(testCubes[11]->getPosition(), testCubes[11]->getVelocity(), friction_2, dt_secs);
+		testCubes[11]->setPosition(currentProperties.first);
+		testCubes[11]->setVelocity(currentProperties.second);
+
+		currentProperties = make_pair(testCubes[12]->getPosition(), testCubes[12]->getVelocity());
+
+		currentProperties = physicsManager->applyPhysics(testCubes[12]->getPosition(), testCubes[12]->getVelocity(), friction_2, dt_secs);
+		testCubes[12]->setPosition(currentProperties.first);
+		testCubes[12]->setVelocity(currentProperties.second);
+
+		bool coll = false;
+		for (int current = 11; current < 14; current++)
+		{
+			for (int i = 11; i < 14; i++)
+			{
+				if (i != current) {
+					coll = collisionManager->doCollisions(testCubes[current]->getPosition(), testCubes[current]->getScale(), testCubes[i]->getPosition(), testCubes[i]->getScale());
+					if (coll){
+						testCubes[current]->setVelocity(nullVec);
+						testCubes[i]->setVelocity(nullVec);
+					}
+
+				}
+			}
+		}
+		
+
+		//	testCubes[11];
+		//	testCubes[12];
+		//	testCubes[13];
+	}
+
 	void moveObjects() {
 		float dt_secs = gameTime();
 		// cout << dt_secs <<"\n";
@@ -557,7 +613,10 @@ namespace SceneManager {
 
 		movePlayer(dt_secs);
 		vectorPair currentProperties;
-
+		
+		//++
+		collide_test(dt_secs);
+		//++
 		shoveCubes();
 		exampleShove();
 		// MOVEMENT TESTING (testcube 2)
@@ -623,6 +682,8 @@ namespace SceneManager {
 			boundingBoxes[i]->setPosition(testCubes[i]->getPosition());
 		playerBox->setPosition(player->getPosition());
 
+
+
 	}
 	/*
 	void moveBullets(int i) {
@@ -660,6 +721,8 @@ namespace SceneManager {
 
 
 	}
+
+
 
 	void draw(SDL_Window * window) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear window

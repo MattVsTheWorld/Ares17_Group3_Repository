@@ -57,11 +57,11 @@ void hudManager::renderToHud(int N, GLuint shader, MeshManager::lightStruct ligh
 	std::string str = "Cube num ";	
 	str.append(std::to_string(N));	
 	str.append("- Vel_x: ");
-	str.append(std::to_string((int)value_x));
+	str.append(std::to_string(value_x));
 	str.append("- Vel_y: ");
-	str.append(std::to_string((int)value_y));
+	str.append(std::to_string(value_y));
 	str.append("- Vel_z: ");
-	str.append(std::to_string((int)value_z));
+	str.append(std::to_string(value_z));
 
 	const char *cstr = str.c_str();
 	glm::mat4 id = glm::mat4();

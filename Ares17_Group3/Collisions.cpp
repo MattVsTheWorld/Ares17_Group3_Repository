@@ -40,3 +40,7 @@ bool Collisions::doCollisions(glm::vec3 position_A, glm::vec3 scale_A, glm::vec3
 	[3d] same but use x and z and keep y (??) (or dampen)
 	[slide] newVel = v.par
 */
+
+vectorPair Collisions::elastic() {
+	return std::make_pair(glm::vec3(), glm::vec3());
+}
