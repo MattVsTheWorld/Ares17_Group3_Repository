@@ -5,14 +5,14 @@
 using namespace std;
 
 
-
+/*
 btDynamicsWorld* world;	//every physical object go to the world
 btDispatcher* dispatcher;	//what collision algorithm to use?
 btCollisionConfiguration* collisionConfig;	//what collision algorithm to use?
 btBroadphaseInterface* broadphase;	//should Bullet examine every object, or just what close to each other
 btConstraintSolver* solver;					//solve collisions, apply forces, impulses
 std::vector<btRigidBody*> bodies;
-
+*/
 
 #if _DEBUG
 #pragma comment(linker, "/subsystem:\"console\" /entry:\"WinMainCRTStartup\"")
