@@ -1,8 +1,6 @@
 #include "SceneManager.h"
 #include "Model.h"
-#include <btBulletDynamicsCommon.h>
 
-btDynamicsWorld* world;
 
 //#include "Shader.h"
 using namespace std;
@@ -16,6 +14,8 @@ typedef stack<glm::mat4> mvstack;
 
 // this class still needs a lot of work
 namespace SceneManager {
+
+
 
 	Object *testCubes[OBJECT_NO]; // arrays :D
 	Object *boundingBoxes[OBJECT_NO];

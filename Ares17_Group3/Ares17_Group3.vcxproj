@@ -90,6 +90,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>C:\dev\Simple OpenGL Image Library\src;C:\dev\Assimp\include;C:\dev\SDL2 plugins\include;C:\dev\glm-0.9.8.0\glm;C:\dev\glew-2.0.0\include\;C:\dev\SDL2-2.0.4\include;C:\dev\bullet3-2.82\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
