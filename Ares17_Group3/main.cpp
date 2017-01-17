@@ -1,4 +1,6 @@
 #include "main.h"
+
+
 #if _DEBUG
 #pragma comment(linker, "/subsystem:\"console\" /entry:\"WinMainCRTStartup\"")
 #endif

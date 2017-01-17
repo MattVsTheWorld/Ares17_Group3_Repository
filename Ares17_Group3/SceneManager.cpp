@@ -1,5 +1,9 @@
 #include "SceneManager.h"
 #include "Model.h"
+#include <btBulletDynamicsCommon.h>
+
+btDynamicsWorld* world;
+
 //#include "Shader.h"
 using namespace std;
 
