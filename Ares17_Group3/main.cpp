@@ -1,5 +1,5 @@
 #include "main.h"
-#include <btBulletDynamicsCommon.h>
+
 
 
 using namespace std;
@@ -20,7 +20,7 @@ std::vector<btRigidBody*> bodies;
 
 // Program entry point - SDL manages the actual WinMain entry point for us
 int main(int argc, char *argv[]) {
-/*
+
 	SDL_Window * hWindow; // window handle
 	SDL_GLContext glContext; // OpenGL context handle
 	hWindow = SDLmanager::setupRC(glContext); // Create window and render context 
@@ -28,12 +28,12 @@ int main(int argc, char *argv[]) {
 											  // Required on Windows *only* init GLEW to access OpenGL beyond 1.1
 	glewExperimental = GL_TRUE;
 	GLenum err = glewInit();
-	*/
+	
 	///+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	///+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	///+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	///-----includes_end-----
-
+	/*
 	int i;
 	///-----initialization_start-----
 
@@ -185,19 +185,20 @@ int main(int argc, char *argv[]) {
 
 	//next line is optional: it will be cleared by the destructor when the array goes out of scope
 	collisionShapes.clear();
-
+	*/
 	///-----cleanup_end-----
 	///+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	///+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	///+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-	/*
+	
 	if (GLEW_OK != err) { // glewInit failed, something is seriously wrong
 		std::cout << "glewInit failed, aborting." << endl;
 		exit(1);
 	}
 	cout << glGetString(GL_VERSION) << endl;
-//	SceneManager::init();
-*/
+	
+	SceneManager::init();
+
 	bool running = true; // set running to true
 	SDL_Event sdlEvent;  // variable to detect SDL events
 	while (running) {	// the event loop
@@ -205,14 +206,14 @@ int main(int argc, char *argv[]) {
 			if (sdlEvent.type == SDL_QUIT)
 				running = false;
 		}
-//		SceneManager::update(hWindow, sdlEvent);	// update function
-	//	SceneManager::draw(hWindow); // draw function
+		SceneManager::update(hWindow, sdlEvent);	// update function
+		SceneManager::draw(hWindow); // draw function
 
 	}
 
-//	SDL_GL_DeleteContext(glContext);
-//	SDL_DestroyWindow(hWindow);
-//	SDL_Quit();
+	SDL_GL_DeleteContext(glContext);
+	SDL_DestroyWindow(hWindow);
+	SDL_Quit();
 	return 0;
 
 	

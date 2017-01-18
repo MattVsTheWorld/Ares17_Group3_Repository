@@ -12,6 +12,8 @@
 #include "Skybox.h"
 #include "Physics.h"
 
+#include <btBulletDynamicsCommon.h>
+
 #include "Bullet.h"
 #include "Player.h"
 #include "Collisions.h"
