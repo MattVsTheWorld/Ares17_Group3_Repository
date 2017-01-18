@@ -204,7 +204,7 @@ namespace SceneManager {
 		
 		//bunch of outdated matrix stuff
 
-		// https://www.youtube.com/watch?v=1CEI2pOym1Y || 
+		// https://www.youtube.com/watch?v=1CEI2pOym1Y || 48 min ~~~
 
 		//mvStack.top() = glm::scale(mvStack.top(), );
 		glActiveTexture(GL_TEXTURE0);
