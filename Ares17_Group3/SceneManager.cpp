@@ -14,9 +14,6 @@ typedef stack<glm::mat4> mvstack;
 
 // this class still needs a lot of work
 namespace SceneManager {
-
-
-
 	Object *testCubes[OBJECT_NO]; // arrays :D
 	Object *boundingBoxes[OBJECT_NO];
 
@@ -194,47 +191,66 @@ namespace SceneManager {
 		}
 		glUseProgram(shaderProgram);
 		MeshManager::setLight(shaderProgram, testLight);
+		MeshManager::setMaterial(shaderProgram, defaultMaterial);
 		mvStack.push(mvStack.top());// push modelview to stack
 		
 		btVector3 extent = ((btBoxShape*)box->getCollisionShape())->getHalfExtentsWithoutMargin();
 		btTransform t;
 		box->getMotionState()->getWorldTransform(t);
 		//float mat[16];
-		t.getOpenGLMatrix(glm::value_ptr(mvStack.top()));
+		
 		//cout<< "DOIN SOMETHING";
 		//bunch of outdated matrix stuff
 
 		// https://www.youtube.com/watch?v=1CEI2pOym1Y || 48 min ~~~
 		//mvStack.top() = glm::translate(mvStack.top(), box->getMotionState()->getWorldTransform(t));
 		//mvStack.top() = glm::scale(mvStack.top(), glm::vec3(extent.getX,extent.getY,extent.getZ));
+		glm::mat4 mat;
+		t.getOpenGLMatrix(glm::value_ptr(mat));
+
+		mvStack.top() *= mat; // trans, rot?
+
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, testCubes[0]->object_getTexture());
 		MeshManager::setUniformMatrix4fv(shaderProgram, "modelview", glm::value_ptr(mvStack.top()));
 		MeshManager::setUniformMatrix4fv(shaderProgram, "projection", glm::value_ptr(projection));
-		MeshManager::setMaterial(shaderProgram, defaultMaterial);
+		
 		MeshManager::drawIndexedMesh(testCubes[0]->object_getMesh(), testCubes[0]->object_getIndex(), GL_TRIANGLES);
 		glBindTexture(GL_TEXTURE_2D, 0);
 		mvStack.pop();
 	}
 
-	void renderPlane(btRigidBody* plane)
+	void renderPlane(btRigidBody* plane, glm::mat4 projection)
 	{
 		if (plane->getCollisionShape()->getShapeType() != STATIC_PLANE_PROXYTYPE)
+		{
 			return;
+			cout << "Wrong collision shape (?)";
+		}
 		//glColor3f(0.8, 0.8, 0.8);
+		glUseProgram(shaderProgram);
+		MeshManager::setLight(shaderProgram, testLight);
+		MeshManager::setMaterial(shaderProgram, defaultMaterial);
+		mvStack.push(mvStack.top());// push modelview to stack
+
 		btTransform t;
 		plane->getMotionState()->getWorldTransform(t);
-		/*float mat[16];
-		t.getOpenGLMatrix(mat);
-		glPushMatrix();
-		glMultMatrixf(mat);     //translation,rotation
-		glBegin(GL_QUADS);
-		glVertex3f(-1000, 0, 1000);
-		glVertex3f(-1000, 0, -1000);
-		glVertex3f(1000, 0, -1000);
-		glVertex3f(1000, 0, 1000);
-		glEnd();
-		glPopMatrix(); */
+		
+		t.getOpenGLMatrix(glm::value_ptr(mvStack.top()));
+
+		/*
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, testCubes[0]->object_getTexture());
+		mvStack.top() = glm::scale(mvStack.top(), glm::vec3(10, 0.5, 10));
+		MeshManager::setUniformMatrix4fv(shaderProgram, "modelview", glm::value_ptr(mvStack.top()));
+		MeshManager::setUniformMatrix4fv(shaderProgram, "projection", glm::value_ptr(projection));
+		//cout << "GASGHDJ";
+
+		MeshManager::drawIndexedMesh(testCubes[0]->object_getMesh(), testCubes[0]->object_getIndex(), GL_TRIANGLES);
+		glBindTexture(GL_TEXTURE_2D, 0);
+		*/
+		mvStack.pop();
+
 	}
 	// +++++
 	void init(void) {
@@ -263,7 +279,7 @@ namespace SceneManager {
 		world->addRigidBody(body);
 		bodies.push_back(body);
 		
-		addBox(1.0f, 1.0f, 1.0f, 0, 5, -10, 1.0);
+		addBox(1.0f, 1.0f, 1.0f, 0, 10, -10, 1.0);
 
 
 		// +++++
@@ -908,6 +924,7 @@ namespace SceneManager {
 		glm::mat4 modelview(1.0); // set base position for scene
 		mvStack.push(modelview);
 		glDepthMask(GL_TRUE);
+		
 		camera();
 		projection = glm::perspective(float(60.0f*DEG_TO_RADIAN), SCREENWIDTH / SCREENHEIGHT, 0.1f, 100.0f);
 
@@ -916,7 +933,8 @@ namespace SceneManager {
 		
 	
 		//pitch, yaw, roll
-		mvStack = testCubes[0]->renderObject(projection, mvStack, shaderProgram, testLight, greenMaterial, 0, 0, 0); 	/*
+		mvStack = testCubes[0]->renderObject(projection, mvStack, shaderProgram, testLight, greenMaterial, 0, 0, 0); 
+	/*	
 		mvStack = testCubes[1]->renderObject(projection, mvStack, shaderProgram, testLight, greenMaterial, 0, 0, 0);
 		mvStack = testCubes[2]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, theta, 0);
 		mvStack = testCubes[3]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, 0, 0);
@@ -928,6 +946,7 @@ namespace SceneManager {
 		mvStack = testCubes[9]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, 0, 0);
 		*/
 		///+++++++++++++++
+		//renderPlane(bodies[0], projection);
 		renderBox(bodies[1],projection);
 		///+++++++++++++++
 		/*
