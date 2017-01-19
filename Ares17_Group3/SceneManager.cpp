@@ -165,17 +165,17 @@ namespace SceneManager {
 	btConstraintSolver* solver;
 	std::vector<btRigidBody*> bodies;
 
-	btRigidBody* addCube(btVector3 &scale, btVector3 &pos, float mass)
+	btRigidBody* addBox(float width, float height, float depth,float x, float y, float z, float mass)
 	{
-		btTransform t; // orientation and position // quaternion :))))) """SIMPLE VARIABLE"""
-		t.setIdentity(); // 0 position, 0 rotation
-		t.setOrigin(pos);
-		btBoxShape* box = new btBoxShape(scale);
+		btTransform t; 
+		t.setIdentity();
+		t.setOrigin(btVector3(x,y,z));
+		btBoxShape* box = new btBoxShape(btVector3(width/2,height/2,depth/2));
 		btVector3 inertia(0, 0, 0);
 		if (mass != 0.0)
 			box->calculateLocalInertia(mass, inertia);
 		btMotionState* motion = new btDefaultMotionState(t);
-		// mass = 0 == static, mass > 0 == dinamic ( < 0 no sense)
+	
 		btRigidBody::btRigidBodyConstructionInfo info(mass, motion, box, inertia); 
 																		 
 		btRigidBody* body = new btRigidBody(info);
@@ -185,7 +185,7 @@ namespace SceneManager {
 		return body;
 	}
 
-	void renderBox(btRigidBody* box, glm::vec3 pos, glm::mat4 projection) {
+	void renderBox(btRigidBody* box, glm::mat4 projection) {
 
 		if (box->getCollisionShape()->getShapeType() != BOX_SHAPE_PROXYTYPE)
 		{
@@ -195,18 +195,18 @@ namespace SceneManager {
 		glUseProgram(shaderProgram);
 		MeshManager::setLight(shaderProgram, testLight);
 		mvStack.push(mvStack.top());// push modelview to stack
-		mvStack.top() = glm::translate(mvStack.top(), pos);
-		//btVector3 scale = (btBoxShape*)box->getCollisionShape()->getMargin();
-		//btTransform t;
-		//box->getMotionState()->getWorldTransform(t);
-		//float mat[16];
-		//t.getOpenGLMatrix(mat);
 		
+		btVector3 extent = ((btBoxShape*)box->getCollisionShape())->getHalfExtentsWithoutMargin();
+		btTransform t;
+		box->getMotionState()->getWorldTransform(t);
+		//float mat[16];
+		t.getOpenGLMatrix(glm::value_ptr(mvStack.top()));
+		//cout<< "DOIN SOMETHING";
 		//bunch of outdated matrix stuff
 
 		// https://www.youtube.com/watch?v=1CEI2pOym1Y || 48 min ~~~
-
-		//mvStack.top() = glm::scale(mvStack.top(), );
+		//mvStack.top() = glm::translate(mvStack.top(), box->getMotionState()->getWorldTransform(t));
+		//mvStack.top() = glm::scale(mvStack.top(), glm::vec3(extent.getX,extent.getY,extent.getZ));
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, testCubes[0]->object_getTexture());
 		MeshManager::setUniformMatrix4fv(shaderProgram, "modelview", glm::value_ptr(mvStack.top()));
@@ -215,6 +215,26 @@ namespace SceneManager {
 		MeshManager::drawIndexedMesh(testCubes[0]->object_getMesh(), testCubes[0]->object_getIndex(), GL_TRIANGLES);
 		glBindTexture(GL_TEXTURE_2D, 0);
 		mvStack.pop();
+	}
+
+	void renderPlane(btRigidBody* plane)
+	{
+		if (plane->getCollisionShape()->getShapeType() != STATIC_PLANE_PROXYTYPE)
+			return;
+		//glColor3f(0.8, 0.8, 0.8);
+		btTransform t;
+		plane->getMotionState()->getWorldTransform(t);
+		/*float mat[16];
+		t.getOpenGLMatrix(mat);
+		glPushMatrix();
+		glMultMatrixf(mat);     //translation,rotation
+		glBegin(GL_QUADS);
+		glVertex3f(-1000, 0, 1000);
+		glVertex3f(-1000, 0, -1000);
+		glVertex3f(1000, 0, -1000);
+		glVertex3f(1000, 0, 1000);
+		glEnd();
+		glPopMatrix(); */
 	}
 	// +++++
 	void init(void) {
@@ -242,8 +262,8 @@ namespace SceneManager {
 		btRigidBody* body = new btRigidBody(info);
 		world->addRigidBody(body);
 		bodies.push_back(body);
-
-		addCube(btVector3(1.0,1.0,1.0), btVector3(-10,3.0,-10), 1.0);
+		
+		addBox(1.0f, 1.0f, 1.0f, 0, 5, -10, 1.0);
 
 
 		// +++++
@@ -479,6 +499,9 @@ namespace SceneManager {
 			player->setVelocity(glm::vec3(player->getVelocity().x, 6.0f, player->getVelocity().z));
 			player->setState(JUMPING);
 		}
+		//++++
+		if (keys[SDL_SCANCODE_M]) bodies[1]->setLinearVelocity(btVector3 (0.0, 5.0, 0.0));
+		//++++
 		if (keys[SDL_SCANCODE_K]) {
 			if (pointOfView == FIRST_PERSON) pointOfView = THIRD_PERSON;
 			else pointOfView = FIRST_PERSON;
@@ -889,9 +912,11 @@ namespace SceneManager {
 		projection = glm::perspective(float(60.0f*DEG_TO_RADIAN), SCREENWIDTH / SCREENHEIGHT, 0.1f, 100.0f);
 
 		mvStack = skybox->renderSkybox(projection, mvStack, testCubes[0]->object_getMesh(), testCubes[0]->object_getIndex());
-																								
+		
+		
+	
 		//pitch, yaw, roll
-		mvStack = testCubes[0]->renderObject(projection, mvStack, shaderProgram, testLight, greenMaterial, 0, 0, 0);
+		mvStack = testCubes[0]->renderObject(projection, mvStack, shaderProgram, testLight, greenMaterial, 0, 0, 0); 	/*
 		mvStack = testCubes[1]->renderObject(projection, mvStack, shaderProgram, testLight, greenMaterial, 0, 0, 0);
 		mvStack = testCubes[2]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, theta, 0);
 		mvStack = testCubes[3]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, 0, 0);
@@ -901,7 +926,11 @@ namespace SceneManager {
 		mvStack = testCubes[7]->renderObject(projection, mvStack, shaderProgram, testLight, redMaterial, 0, 0, 0);
 		mvStack = testCubes[8]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, 0, 0);
 		mvStack = testCubes[9]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, 0, 0);
-		
+		*/
+		///+++++++++++++++
+		renderBox(bodies[1],projection);
+		///+++++++++++++++
+		/*
 		// NEW +++++++++
 		// Collision testing
 		mvStack = testCubes[10]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, adjustable_Angle, 0);
@@ -949,7 +978,7 @@ namespace SceneManager {
 		h_manager->renderToHud(13, texturedProgram, testLight, testCubes[0]->object_getMesh(), testCubes[0]->object_getIndex(), glm::vec3(-0.25f, 0.5f, 0.9f), testCubes[13]->getVelocity().x, testCubes[13]->getVelocity().y, testCubes[13]->getVelocity().z);
 		///
 
-
+		*/
 		mvStack.pop();
 
 
