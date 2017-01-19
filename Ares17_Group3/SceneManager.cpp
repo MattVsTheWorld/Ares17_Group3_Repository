@@ -208,6 +208,7 @@ namespace SceneManager {
 		glm::mat4 mat;
 		t.getOpenGLMatrix(glm::value_ptr(mat));
 
+		// https://www.youtube.com/watch?v=1CEI2pOym1Y  41~
 		mvStack.top() *= mat; // trans, rot?
 
 		glActiveTexture(GL_TEXTURE0);
