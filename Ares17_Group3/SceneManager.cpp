@@ -263,6 +263,7 @@ namespace SceneManager {
 
 		// ground as a plane
 		// only used for debug (?)
+		/*
 		btTransform t; // orientation and position // quaternion :))))) """SIMPLE VARIABLE"""
 		t.setIdentity(); // 0 position, 0 rotation
 		t.setOrigin(btVector3(0, 0, 0));
@@ -275,7 +276,8 @@ namespace SceneManager {
 		btRigidBody* body = new btRigidBody(info);
 		world->addRigidBody(body);
 		bodies.push_back(body);
-		
+		*/
+		addBox(50, 0.1, 50, 0, 0, 0, 0.0);
 		addBox(1.0f, 1.0f, 1.0f, 0, 10, -10, 1.0);
 		bodies[1]->setActivationState(DISABLE_DEACTIVATION); // disable deactivation of physics on an object
 		// objects become static after ~2(?) seconds otherwise
@@ -412,6 +414,7 @@ namespace SceneManager {
 	}
 
 	// will update for a more generalized and reliable method
+	/*
 	bool playerCollision(glm::vec3 eye, glm::vec3 playerScale) {
 		bool p_coll = false;
 		for (int i = 0; i < OBJECT_NO; i++) {
@@ -435,7 +438,7 @@ namespace SceneManager {
 		}
 	}
 
-
+	*/
 	float coolDownOfGun = 0.4f; //wait between shots
 
 	void controls(SDL_Window * window, SDL_Event sdlEvent) {
@@ -563,7 +566,7 @@ namespace SceneManager {
 		}
 
 		if (keys[SDL_SCANCODE_M]) {
-			cout << "Curiously cinnamon\n";
+			//cout << "Curiously cinnamon\n";
 			bodies[1]->setLinearVelocity(btVector3(0.0, 5.0, 0.0));
 		}
 		if (keys[SDL_SCANCODE_KP_8])
@@ -671,10 +674,8 @@ namespace SceneManager {
 		glDepthMask(GL_TRUE);
 	}
 
-	
-
+/*
 	bool once = true;
-
 	void movePlayer(float dt_secs) {
 		// gravity-y-y-y-y (https://www.youtube.com/watch?v=uQpclIzUwLk)
 		glm::vec3 collisionPosition;
@@ -703,7 +704,8 @@ namespace SceneManager {
 		player->setVelocity(currentProperties.second);
 
 	}
-
+	*/
+/*
 	bool objectCollision(Object*& object, glm::vec3 objectPos, glm::vec3 objectScale, int current) {
 		bool o_coll = false;
 		for (int i = 0; i < OBJECT_NO; i++) {
@@ -720,14 +722,14 @@ namespace SceneManager {
 			return o_coll;
 		
 	}
-
+	
 	// over simplified; collision reaction is still not well implemented
 	void shoveCubes() {
 		objectCollision(testCubes[8], testCubes[8]->getPosition(), testCubes[8]->getScale(), 8);
 	}
-
+	*/
 	///++++++++++++++++++
-
+	/*
 	enum Direction {
 		PLUS_Z,
 		PLUS_X,
@@ -916,7 +918,7 @@ namespace SceneManager {
 		world->stepSimulation(1/60.0); // 1 divided by frames per second
 		// would need to delete dispatcher, collisionconfig, solver, world, broadphase in main
 		// +++++
-		moveObjects();
+		//moveObjects();
 	}
 
 	void camera() {
@@ -956,11 +958,9 @@ namespace SceneManager {
 		projection = glm::perspective(float(60.0f*DEG_TO_RADIAN), SCREENWIDTH / SCREENHEIGHT, 0.1f, 100.0f);
 
 		mvStack = skybox->renderSkybox(projection, mvStack, testCubes[0]->object_getMesh(), testCubes[0]->object_getIndex());
-		
-		
 	
 		//pitch, yaw, roll
-		mvStack = testCubes[0]->renderObject(projection, mvStack, shaderProgram, testLight, greenMaterial, 0, 0, 0); 
+//		mvStack = testCubes[0]->renderObject(projection, mvStack, shaderProgram, testLight, greenMaterial, 0, 0, 0); 
 		/*
 		mvStack = testCubes[1]->renderObject(projection, mvStack, shaderProgram, testLight, greenMaterial, 0, 0, 0);
 		mvStack = testCubes[2]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, theta, 0);
@@ -974,6 +974,7 @@ namespace SceneManager {
 		*/
 		///+++++++++++++++
 		//renderPlane(bodies[0], projection);
+		renderBox(bodies[0], projection);
 		renderBox(bodies[1],projection);
 		renderBox(bodies[2], projection);
 		///+++++++++++++++
@@ -986,7 +987,7 @@ namespace SceneManager {
 		// +++++++++++++++++++
 		///
 		*/
-		mvStack = testCubes[11]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, 0, 0);
+		//mvStack = testCubes[11]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, 0, 0);
 		/*
 		mvStack = testCubes[12]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, 0, 0);
 		mvStack = testCubes[13]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, 0, 0);
@@ -1012,13 +1013,14 @@ namespace SceneManager {
 				bulletFunction(i);		
 			}
 		}
+		*/
 		// RENDERING MODELS
 		if (pointOfView == THIRD_PERSON)
 			renderObject(projection,ourModel, glm::vec3(player->getPosition().x, player->getPosition().y-1.5, player->getPosition().z));
 		if (pointOfView == FIRST_PERSON)
 			renderWep(projection, ourModel2);
 		//:thinking:
-
+		/*
 
 
 		///
