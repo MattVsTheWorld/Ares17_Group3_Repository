@@ -42,8 +42,8 @@ namespace SceneManager {
 	enum pov { FIRST_PERSON, THIRD_PERSON };
 	pov pointOfView = FIRST_PERSON;
 
-	glm::vec3 transTest = glm::vec3(-10.0f, -0.1f, -10.0f);		
-	glm::vec3 scaleTest = glm::vec3(20.0f, 0.1f, 20.0f);
+	glm::vec3 transTest = glm::vec3(-10.0f, -1.5f, -10.0f);		
+	glm::vec3 scaleTest = glm::vec3(20.0f, 0.5f, 20.0f);
 	glm::vec3 nullTest = glm::vec3(0.0f, 0.0f, 0.0f);
 	glm::vec3 pitchTest = glm::vec3(1.0f, 0.0f, 0.0f);
 	glm::vec3 yawTest = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -198,13 +198,14 @@ namespace SceneManager {
 		btTransform t;
 		box->getMotionState()->getWorldTransform(t);
 		//float mat[16];
+		//cout << extent.absolute.x;
 		
 		//cout<< "DOIN SOMETHING";
 		//bunch of outdated matrix stuff
 
 		// https://www.youtube.com/watch?v=1CEI2pOym1Y || 48 min ~~~
 		//mvStack.top() = glm::translate(mvStack.top(), box->getMotionState()->getWorldTransform(t));
-		//mvStack.top() = glm::scale(mvStack.top(), glm::vec3(extent.getX,extent.getY,extent.getZ));
+		mvStack.top() = glm::scale(mvStack.top(), glm::vec3(extent.x(),extent.y(),extent.z()));
 		glm::mat4 mat;
 		t.getOpenGLMatrix(glm::value_ptr(mat));
 
@@ -281,6 +282,10 @@ namespace SceneManager {
 		bodies.push_back(body);
 		
 		addBox(1.0f, 1.0f, 1.0f, 0, 10, -10, 1.0);
+		bodies[1]->setActivationState(DISABLE_DEACTIVATION); // disable deactivation of physics on an object
+		// objects become static after ~2 seconds(?)
+		addBox(1.0f, 1.0f, 1.0f, 0, 10, 0, 1.0);
+		bodies[2]->setActivationState(DISABLE_DEACTIVATION);
 
 
 		// +++++
@@ -517,7 +522,19 @@ namespace SceneManager {
 			player->setState(JUMPING);
 		}
 		//++++
-		if (keys[SDL_SCANCODE_M]) bodies[1]->setLinearVelocity(btVector3 (0.0, 5.0, 0.0));
+		if (keys[SDL_SCANCODE_M]) {
+			cout << "Curiously cinnamon\n";
+			bodies[1]->setLinearVelocity(btVector3(0.0, 5.0, 0.0));
+		}
+		if (keys[SDL_SCANCODE_N]) {
+			
+			btTransform t;
+			t.setIdentity();
+			t.setOrigin(btVector3(0, 10, -10));
+			btMotionState* motion = new btDefaultMotionState(t);
+			cout << "Setting y\n";
+			bodies[1]->setMotionState(motion);
+		}
 		//++++
 		if (keys[SDL_SCANCODE_K]) {
 			if (pointOfView == FIRST_PERSON) pointOfView = THIRD_PERSON;
@@ -550,6 +567,19 @@ namespace SceneManager {
 			cout << bullet.size() << endl;
 		}
 
+		if (keys[SDL_SCANCODE_M]) {
+			cout << "Curiously cinnamon\n";
+			bodies[1]->setLinearVelocity(btVector3(0.0, 5.0, 0.0));
+		}
+		if (keys[SDL_SCANCODE_KP_8])
+			bodies[1]->setLinearVelocity(btVector3(5.0, 0.0, 0.0));
+		if (keys[SDL_SCANCODE_KP_4])
+			bodies[1]->setLinearVelocity(btVector3(0.0, 0.0, 5.0));
+		if (keys[SDL_SCANCODE_KP_6])
+			bodies[1]->setLinearVelocity(btVector3(0.0, 0.0, -5.0));
+		if (keys[SDL_SCANCODE_KP_5])
+			bodies[1]->setLinearVelocity(btVector3(-5.0, 0.0, 0.0));
+		/*
 		if (keys[SDL_SCANCODE_KP_8])
 			testCubes[11]->setVelocity(glm::vec3(testCubes[11]->getVelocity().x, testCubes[11]->getVelocity().y, testCubes[11]->getVelocity().z - 0.2));
 		if (keys[SDL_SCANCODE_KP_4])
@@ -567,6 +597,7 @@ namespace SceneManager {
 			testCubes[12]->setVelocity(glm::vec3(testCubes[12]->getVelocity().x - 0.2, testCubes[12]->getVelocity().y, testCubes[12]->getVelocity().z));
 		if (keys[SDL_SCANCODE_KP_3])
 			testCubes[12]->setVelocity(glm::vec3(testCubes[12]->getVelocity().x, testCubes[12]->getVelocity().y, testCubes[12]->getVelocity().z + 0.2));
+			*/
 	}
 
 	void renderObject(glm::mat4 proj, Model *modelData, glm::vec3 pos) {
@@ -935,7 +966,7 @@ namespace SceneManager {
 	
 		//pitch, yaw, roll
 		mvStack = testCubes[0]->renderObject(projection, mvStack, shaderProgram, testLight, greenMaterial, 0, 0, 0); 
-	/*	
+		/*
 		mvStack = testCubes[1]->renderObject(projection, mvStack, shaderProgram, testLight, greenMaterial, 0, 0, 0);
 		mvStack = testCubes[2]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, theta, 0);
 		mvStack = testCubes[3]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, 0, 0);
@@ -949,6 +980,7 @@ namespace SceneManager {
 		///+++++++++++++++
 		//renderPlane(bodies[0], projection);
 		renderBox(bodies[1],projection);
+		renderBox(bodies[2], projection);
 		///+++++++++++++++
 		/*
 		// NEW +++++++++
