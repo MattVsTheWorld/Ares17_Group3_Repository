@@ -6,7 +6,7 @@ Physics::Physics() {
 
 // this needs to return a pair
 vectorPair Physics::applyGravity(glm::vec3 pos, glm::vec3 vel, glm::vec3 acc, float dt_secs) {
-	//if (pos.y > GROUND_POSITION) { //needs improving
+	if (pos.y > GROUND_POSITION) { //needs improving
 
 		glm::vec3 vel2(0.0, 0.0, 0.0);
 		glm::vec3 pos2(0.0, 0.0, 0.0);
@@ -22,8 +22,8 @@ vectorPair Physics::applyGravity(glm::vec3 pos, glm::vec3 vel, glm::vec3 acc, fl
 			vel.y = vel2.y;
 			//		cout << vel.y << endl;
 	//	}
-//	}
-	//else vel.y = 0;
+	}
+	else vel.y = 0;
 	/*
 	else {
 	pos.y += 0.05;

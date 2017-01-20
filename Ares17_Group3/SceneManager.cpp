@@ -133,7 +133,7 @@ namespace SceneManager {
 		testCubes[10] = new Object(testCollidable, cube);
 
 		transformation_Matrices collisionTests[3] = {
-			{ glm::vec3(-7.0,1.0,-8.0), glm::vec3(0.5,0.5,0.5), pitchTest, yawTest },
+			{ glm::vec3(0.0,0.0, -10.0), glm::vec3(0.5,0.5,0.5), pitchTest, yawTest },
 			{ glm::vec3(-10.0,1.0,-7.0), glm::vec3(0.5,0.5,0.5), pitchTest, yawTest },
 			{ glm::vec3(-9.0,1.0,-9.0), glm::vec3(0.5,0.5,0.5), pitchTest, yawTest }
 		};
@@ -194,23 +194,18 @@ namespace SceneManager {
 		MeshManager::setMaterial(shaderProgram, defaultMaterial);
 		mvStack.push(mvStack.top());// push modelview to stack
 		
-		btVector3 extent = ((btBoxShape*)box->getCollisionShape())->getHalfExtentsWithoutMargin();
+		btVector3 extent = ((btBoxShape*)box->getCollisionShape())->getHalfExtentsWithMargin();
 		btTransform t;
 		box->getMotionState()->getWorldTransform(t);
-		//float mat[16];
-		//cout << extent.absolute.x;
-		
-		//cout<< "DOIN SOMETHING";
-		//bunch of outdated matrix stuff
 
-		// https://www.youtube.com/watch?v=1CEI2pOym1Y || 48 min ~~~
-		//mvStack.top() = glm::translate(mvStack.top(), box->getMotionState()->getWorldTransform(t));
-		mvStack.top() = glm::scale(mvStack.top(), glm::vec3(extent.x(),extent.y(),extent.z()));
+		//https://www.youtube.com/watch?v=1CEI2pOym1Y || 48 min ~~~
+
 		glm::mat4 mat;
 		t.getOpenGLMatrix(glm::value_ptr(mat));
 
 		// https://www.youtube.com/watch?v=1CEI2pOym1Y  41~
 		mvStack.top() *= mat; // trans, rot?
+		mvStack.top() = glm::scale(mvStack.top(), glm::vec3(extent.x(), extent.y(), extent.z())); //DEFINITELY goes after
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, testCubes[0]->object_getTexture());
@@ -283,8 +278,8 @@ namespace SceneManager {
 		
 		addBox(1.0f, 1.0f, 1.0f, 0, 10, -10, 1.0);
 		bodies[1]->setActivationState(DISABLE_DEACTIVATION); // disable deactivation of physics on an object
-		// objects become static after ~2 seconds(?)
-		addBox(1.0f, 1.0f, 1.0f, 0, 10, 0, 1.0);
+		// objects become static after ~2(?) seconds otherwise
+		addBox(3.0f, 1.0f, 3.0f, 0, 0, -5, 1.0);
 		bodies[2]->setActivationState(DISABLE_DEACTIVATION);
 
 
@@ -990,7 +985,9 @@ namespace SceneManager {
 		///
 		// +++++++++++++++++++
 		///
+		*/
 		mvStack = testCubes[11]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, 0, 0);
+		/*
 		mvStack = testCubes[12]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, 0, 0);
 		mvStack = testCubes[13]->renderObject(projection, mvStack, shaderProgram, testLight, defaultMaterial, 0, 0, 0);
 		
