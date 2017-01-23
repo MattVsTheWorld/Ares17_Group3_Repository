@@ -5,36 +5,36 @@
 //#include "Shader.h"
 using namespace std;
 
-#define OBJECT_NO 14
-#define BULLET_NO 30
-#define TEST_VELOCITY 0.5
+//#define OBJECT_NO 14
+//#define BULLET_NO 30
+//#define TEST_VELOCITY 0.5
 
 typedef std::pair < glm::vec3, glm::vec3 > vectorPair;
 typedef stack<glm::mat4> mvstack;
 
 // this class still needs a lot of work
 namespace SceneManager {
-	Object *testCubes[OBJECT_NO]; // arrays :D
-	Object *boundingBoxes[OBJECT_NO];
+	Object *testCube; // arrays :D
+	//Object *boundingBoxes[OBJECT_NO];
 
 	vector<Bullet*> bullet;
 
 	Player *player;
 	glm::vec3 playerScale(0.5, 1.5, 0.5);
-	Object *playerBox;
-	bool shotsFired = false;
-	int noShotsFired = 0;
-	float theta = 0.0f;
-	float adjustable_Angle = 0.0f;
-	bool viewBoxes = false;
-	float movement = 0.05f;
+	//Object *playerBox;
+	//bool shotsFired = false;
+	//int noShotsFired = 0;
+	//float theta = 0.0f;
+	//float adjustable_Angle = 0.0f;
+	//bool viewBoxes = false;
+	//float movement = 0.05f;
 	GLuint shaderProgram;
 	GLuint texturedProgram;
 	GLuint modelProgram;
 	hudManager *h_manager;
 	Skybox *skybox;
-	Physics *physicsManager;
-	Collisions *collisionManager;
+//	Physics *physicsManager;
+//	Collisions *collisionManager;
 
 	float SCREENWIDTH = 800.0f;
 	float SCREENHEIGHT = 600.0f;
@@ -45,16 +45,16 @@ namespace SceneManager {
 	glm::vec3 transTest = glm::vec3(-10.0f, -1.5f, -10.0f);		
 	glm::vec3 scaleTest = glm::vec3(20.0f, 0.5f, 20.0f);
 	glm::vec3 nullTest = glm::vec3(0.0f, 0.0f, 0.0f);
-	glm::vec3 pitchTest = glm::vec3(1.0f, 0.0f, 0.0f);
-	glm::vec3 yawTest = glm::vec3(0.0f, 1.0f, 0.0f);
-	glm::vec3 rollTest = glm::vec3(0.0f, 0.0f, 1.0f);
-	glm::vec3 testMove = glm::vec3(0.0, 2.0, -2.0);
-	glm::vec3 collisionPosition;
+//	glm::vec3 pitchTest = glm::vec3(1.0f, 0.0f, 0.0f);
+//	glm::vec3 yawTest = glm::vec3(0.0f, 1.0f, 0.0f);
+//	glm::vec3 rollTest = glm::vec3(0.0f, 0.0f, 1.0f);
+//	glm::vec3 testMove = glm::vec3(0.0, 2.0, -2.0);
+//	glm::vec3 collisionPosition;
 
 	transformation_Matrices testTransformation = { transTest, scaleTest, nullTest, nullTest, nullTest };
 	object_Properties cube;
 
-	float angleTest;
+//	float angleTest;
 
 	const char *testTexFiles[6] = {
 		"Town-skybox/Town_bk.bmp", "Town-skybox/Town_ft.bmp", "Town-skybox/Town_rt.bmp", "Town-skybox/Town_lf.bmp", "Town-skybox/Town_up.bmp", "Town-skybox/Town_dn.bmp"
@@ -102,9 +102,10 @@ namespace SceneManager {
 		{ 0.5f, 0.5f, 0.5f, 1.0f }, // specular
 		2.0f  // shininess
 	};
-
+	/*
 	void initObjects() {
-		testCubes[0] = new Object(testTransformation, cube);
+		
+		/*
 		transformation_Matrices test2 = { testMove, glm::vec3(0.5, 0.5, 0.5), nullTest };
 		//	transformation_Matrices(testMove, glm::vec3(0.5, 0.5, 0.5), nullTest)
 		transformation_Matrices test0 = { glm::vec3(0.0, 2.0, -4.0), glm::vec3(0.5, 0.5, 0.5), nullTest };
@@ -143,15 +144,15 @@ namespace SceneManager {
 		testCubes[13] = new Object(collisionTests[2], "13.bmp", cube);
 
 
-		for (int i = 0; i < OBJECT_NO; i++)
-			boundingBoxes[i] = testCubes[i];
-
+	//	for (int i = 0; i < OBJECT_NO; i++)
+	//		boundingBoxes[i] = testCubes[i];
+	
 	}
-
+	*/
 	void initPlayer() {
 		transformation_Matrices playerTrans = { eye, playerScale, nullTest , nullTest , nullTest };
 		player = new Player(playerTrans);
-		playerBox = new Object (playerTrans, cube);
+	//	playerBox = new Object (playerTrans, cube);
 	}
 
 	// 18/01
@@ -208,11 +209,11 @@ namespace SceneManager {
 		mvStack.top() = glm::scale(mvStack.top(), glm::vec3(extent.x(), extent.y(), extent.z())); //DEFINITELY goes after
 
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, testCubes[0]->object_getTexture());
+		glBindTexture(GL_TEXTURE_2D, testCube->object_getTexture());
 		MeshManager::setUniformMatrix4fv(shaderProgram, "modelview", glm::value_ptr(mvStack.top()));
 		MeshManager::setUniformMatrix4fv(shaderProgram, "projection", glm::value_ptr(projection));
 		
-		MeshManager::drawIndexedMesh(testCubes[0]->object_getMesh(), testCubes[0]->object_getIndex(), GL_TRIANGLES);
+		MeshManager::drawIndexedMesh(testCube->object_getMesh(), testCube->object_getIndex(), GL_TRIANGLES);
 		glBindTexture(GL_TEXTURE_2D, 0);
 		mvStack.pop();
 	}
@@ -293,15 +294,15 @@ namespace SceneManager {
 		ourModel2 = new Model("CHOO/Socom pistol.obj");
 		MeshManager::setLight(shaderProgram, testLight);
 		MeshManager::setMaterial(shaderProgram, greenMaterial);
-		cube = testCubes[0]->initializeObject("cube.obj");
+		cube = testCube->initializeObject("cube.obj");
 
-		initObjects();
-
+		//initObjects();
+		testCube = new Object(testTransformation, cube);
 		initPlayer();
 		h_manager = new hudManager();
 		skybox = new Skybox(testTexFiles);
-		physicsManager = new Physics();
-		collisionManager = new Collisions();
+	//	physicsManager = new Physics();
+	//	collisionManager = new Collisions();
 
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_BLEND);
@@ -340,9 +341,9 @@ namespace SceneManager {
 			yaw -= 360;
 	}
 
-	bool leftClick = false;
-	bool rightClick = false;
-
+//	bool leftClick = false;
+//	bool rightClick = false;
+/*
 	void bulletCreation() {
 		//position, scale, rotation
 		glm::vec3 bulletSpawn = player->getPosition();
@@ -359,7 +360,7 @@ namespace SceneManager {
 		noShotsFired++;
 		bullet.push_back(new Bullet(newBullet)); //add at end		
 	}
-
+	*/
 	/*
 	bool collision(glm::vec3 position_A, glm::vec3 scale_A, glm::vec3 position_B, glm::vec3 scale_B) {
 
@@ -382,6 +383,7 @@ namespace SceneManager {
 
 	}
 	*/
+	/*
 	void bulletFunction(int bulletAt) {
 
 		glm::vec3 ObjectsPos[OBJECT_NO];
@@ -412,7 +414,7 @@ namespace SceneManager {
 			}
 		}
 	}
-
+	*/
 	// will update for a more generalized and reliable method
 	/*
 	bool playerCollision(glm::vec3 eye, glm::vec3 playerScale) {
@@ -439,7 +441,7 @@ namespace SceneManager {
 	}
 
 	*/
-	float coolDownOfGun = 0.4f; //wait between shots
+//	float coolDownOfGun = 0.4f; //wait between shots
 
 	void controls(SDL_Window * window, SDL_Event sdlEvent) {
 		int MidX = SCREENWIDTH / 2;
@@ -458,6 +460,7 @@ namespace SceneManager {
 		SDL_WarpMouseInWindow(window, MidX, MidY);
 		
 		//MOUSECLICK
+		/*
 		if (sdlEvent.type == SDL_MOUSEBUTTONDOWN && pointOfView == FIRST_PERSON) {
 			if (sdlEvent.button.button == SDL_BUTTON_LEFT) leftClick = true;
 			if (sdlEvent.button.button == SDL_BUTTON_RIGHT) rightClick = true;
@@ -475,6 +478,7 @@ namespace SceneManager {
 			leftClick = false;
 			rightClick = false;
 		}
+		*/
 		//KEYBOARD
 	
 		
@@ -482,36 +486,36 @@ namespace SceneManager {
 		const Uint8 *keys = SDL_GetKeyboardState(NULL);
 		if (keys[SDL_SCANCODE_W]) {
 		//	player->setVelocity(glm::vec3(1.0, player->getVelocity().y, player->getVelocity().z));
-			collisionPosition = moveForward(player->getPosition(), yaw, 0.1f);
-			if(!playerCollision(collisionPosition, playerScale))
+			//collisionPosition = moveForward(player->getPosition(), yaw, 0.1f);
+			//if(!playerCollision(collisionPosition, playerScale))
 				player->setPosition(moveForward(player->getPosition(), yaw, 0.1f));
 		}
 		else if (keys[SDL_SCANCODE_S]) {
 		//	player->setVelocity(glm::vec3(-1.0, player->getVelocity().y, player->getVelocity().z));
-			collisionPosition = moveForward(player->getPosition(), yaw, -0.1f);
-			if (!playerCollision(collisionPosition, playerScale))
+		//	collisionPosition = moveForward(player->getPosition(), yaw, -0.1f);
+		//	if (!playerCollision(collisionPosition, playerScale))
 				player->setPosition(moveForward(player->getPosition(), yaw, -0.1f));
 		} //else player->setVelocity(glm::vec3(0.0, player->getVelocity().y, player->getVelocity().z));
 		if (keys[SDL_SCANCODE_A]) {
-			collisionPosition = moveRight(player->getPosition(), yaw, -0.1f);
-			if (!playerCollision(collisionPosition, playerScale))
+			//collisionPosition = moveRight(player->getPosition(), yaw, -0.1f);
+			//if (!playerCollision(collisionPosition, playerScale))
 				player->setPosition(moveRight(player->getPosition(), yaw, -0.1f));
 		}
 		else if (keys[SDL_SCANCODE_D]) {
-			collisionPosition = moveRight(player->getPosition(), yaw, 0.1f);
-			if (!playerCollision(collisionPosition, playerScale))
+		//	collisionPosition = moveRight(player->getPosition(), yaw, 0.1f);
+		//	if (!playerCollision(collisionPosition, playerScale))
 				player->setPosition(moveRight(player->getPosition(), yaw, 0.1f));
 		}
 		if (keys[SDL_SCANCODE_R]) {
-			collisionPosition = player->getPosition();
-			collisionPosition.y += 0.1;
-			if (!playerCollision(collisionPosition, playerScale))
+			//collisionPosition = player->getPosition();
+			//collisionPosition.y += 0.1;
+			//if (!playerCollision(collisionPosition, playerScale))
 				player->setPosition(glm::vec3(player->getPosition().x, player->getPosition().y + 0.1, player->getPosition().z));
 		}
 		else if (keys[SDL_SCANCODE_F]) {
-			collisionPosition = player->getPosition();
-			collisionPosition.y -= 0.1;
-			if (!playerCollision(collisionPosition, playerScale))
+		//	collisionPosition = player->getPosition();
+		//	collisionPosition.y -= 0.1;
+		//	if (!playerCollision(collisionPosition, playerScale))
 				player->setPosition(glm::vec3(player->getPosition().x, player->getPosition().y - 0.1, player->getPosition().z));
 		}
 
@@ -539,8 +543,8 @@ namespace SceneManager {
 			else pointOfView = FIRST_PERSON;
 		}
 
-		if (keys[SDL_SCANCODE_O]) adjustable_Angle += 0.1;
-		if (keys[SDL_SCANCODE_P]) adjustable_Angle -= 0.1;
+		//if (keys[SDL_SCANCODE_O]) adjustable_Angle += 0.1;
+		//if (keys[SDL_SCANCODE_P]) adjustable_Angle -= 0.1;
 
 		if (keys[SDL_SCANCODE_1]) {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -551,12 +555,9 @@ namespace SceneManager {
 			glEnable(GL_CULL_FACE);
 		}
 
-		if (keys[SDL_SCANCODE_3]) {
-			viewBoxes = true;
-		}
-		if (keys[SDL_SCANCODE_4]) {
-			viewBoxes = false;
-		}
+	//	if (keys[SDL_SCANCODE_3])	viewBoxes = true;
+	//	if (keys[SDL_SCANCODE_4])   viewBoxes = false;
+		
 		if (keys[SDL_SCANCODE_ESCAPE]) {
 			exit(0);
 		}
@@ -646,8 +647,9 @@ namespace SceneManager {
 		//	mvStack.top() = glm::translate(mvStack.top(), glm::vec3(-10.0f, -0.1f, -10.0f));
 		// Draw the loaded model
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, testCubes[0]->object_getTexture());
+		glBindTexture(GL_TEXTURE_2D, testCube->object_getTexture());
 		glm::mat4 model;
+		/*
 		if (rightClick) {
 			glm::vec3 gun_pos(0.0f, -2.0f, -5.0f);
 			float Y_axisRotation = -85.0f*DEG_TO_RADIAN;
@@ -655,15 +657,15 @@ namespace SceneManager {
 			model = glm::translate(model, gun_pos); 
 			model = glm::rotate(model, Y_axisRotation, glm::vec3(0.0f, 1.0f, 0.0f)); // Rotate in y axis
 		//	model = glm::rotate(model, Z_axisRotation, glm::vec3(0.0f, 0.0f, 1.0f)); // Rotate in z axis
-		}
-		else {
+		} */
+	 //	else {
 			glm::vec3 gun_pos(2.5f, -2.5f, -5.0f);
 			float Y_axisRotation = -50.0f*DEG_TO_RADIAN;
 			float Z_axisRotation = -25.0f*DEG_TO_RADIAN;
 			model = glm::translate(model, gun_pos); 
 			model = glm::rotate(model, Y_axisRotation, glm::vec3(0.0f, 1.0f, 0.0f)); // Rotate in y axis
 			model = glm::rotate(model, Z_axisRotation, glm::vec3(0.0f, 0.0f, 1.0f)); // Rotate in z axis
-		}
+	//	}
 		model = glm::scale(model, glm::vec3(0.005f, 0.005f, 0.005f));	// It's a bit too big for our scene, so scale it down
 		glUniformMatrix4fv(glGetUniformLocation(modelProgram, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(model));
 		modelData->Draw(modelProgram);
@@ -940,8 +942,6 @@ namespace SceneManager {
 		testLight.position[1] = tmp.y;
 		testLight.position[2] = tmp.z;
 		MeshManager::setLightPos(shaderProgram, glm::value_ptr(tmp));
-
-
 	}
 
 	void draw(SDL_Window * window) {
@@ -957,7 +957,7 @@ namespace SceneManager {
 		camera();
 		projection = glm::perspective(float(60.0f*DEG_TO_RADIAN), SCREENWIDTH / SCREENHEIGHT, 0.1f, 100.0f);
 
-		mvStack = skybox->renderSkybox(projection, mvStack, testCubes[0]->object_getMesh(), testCubes[0]->object_getIndex());
+		mvStack = skybox->renderSkybox(projection, mvStack, testCube->object_getMesh(), testCube->object_getIndex());
 	
 		//pitch, yaw, roll
 //		mvStack = testCubes[0]->renderObject(projection, mvStack, shaderProgram, testLight, greenMaterial, 0, 0, 0); 
@@ -1031,7 +1031,6 @@ namespace SceneManager {
 
 		*/
 		mvStack.pop();
-
 
 		glDepthMask(GL_TRUE);
 		SDL_GL_SwapWindow(window); // swap buffers

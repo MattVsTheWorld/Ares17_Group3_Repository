@@ -10,13 +10,14 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "Skybox.h"
-#include "Physics.h"
+//#include "Physics.h"
+#include <time.h>
 
 #include <btBulletDynamicsCommon.h>
 
 #include "Bullet.h"
 #include "Player.h"
-#include "Collisions.h"
+//#include "Collisions.h"
 #define DEG_TO_RADIAN 0.017453293
 
 namespace SceneManager {
