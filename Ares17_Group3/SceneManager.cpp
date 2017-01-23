@@ -138,9 +138,11 @@ namespace SceneManager {
 
 		glUseProgram(modelProgram);
 		mvStack.push(mvStack.top());// push modelview to stack
-		
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, testCube->object_getTexture());
 		//	mvStack.top() = glm::translate(mvStack.top(), glm::vec3(-10.0f, -0.1f, -10.0f));
 		// Draw the loaded model
+		//MeshManager::setLight(modelProgram, testLight);
 		MeshManager::setUniformMatrix4fv(modelProgram, "projection", glm::value_ptr(proj));
 		MeshManager::setUniformMatrix4fv(modelProgram, "view", glm::value_ptr(mvStack.top()));
 
@@ -154,15 +156,12 @@ namespace SceneManager {
 		
 		glm::mat4 model;
 		model *= mat;
-				
 	//	model = glm::translate(model, pos);
 	//	model = glm::rotate(model, float(-yaw*DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
 	//	model = glm::rotate(model, float(180 * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(r, r, r));
-		
 		glUniformMatrix4fv(glGetUniformLocation(modelProgram, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(model));
 		modelData->Draw(modelProgram);
-
 		mvStack.pop();
 	}
 
@@ -448,6 +447,7 @@ namespace SceneManager {
 			glEnable(GL_CULL_FACE);
 		}
 
+	//	if (keys[SDL_SCANCODE_3]) bodies[4]->setLinearVelocity(btVector3(0.0, 0.0, 4.0));
 		if (keys[SDL_SCANCODE_ESCAPE]) {
 			exit(0);
 		}
@@ -486,8 +486,6 @@ namespace SceneManager {
 		
 		mvStack.pop();
 	}
-
-	
 
 	void renderWep(glm::mat4 proj, Model *modelData) {
 		glUseProgram(modelProgram);
@@ -576,9 +574,18 @@ namespace SceneManager {
 	
 		///+++++++++++++++
 		//renderPlane(bodies[0], projection);
-		renderBox(bodies[0], projection);
-		renderBox(bodies[1], projection);
-		renderBox(bodies[2], projection);
+
+		for (int i = 0;i<bodies.size();i++)
+		{
+			 if (bodies[i]->getCollisionShape()->getShapeType() == SPHERE_SHAPE_PROXYTYPE)
+				renderSphere(bodies[i], projection, sphere);
+			else if (bodies[i]->getCollisionShape()->getShapeType() == BOX_SHAPE_PROXYTYPE)
+				renderBox(bodies[i], projection);
+		}
+
+	//	renderBox(bodies[0], projection);
+	//	renderBox(bodies[1], projection);
+	//	renderBox(bodies[2], projection);
 		//renderBox(bodies[3], projection);
 		///+++++++++++++++
 
@@ -587,10 +594,11 @@ namespace SceneManager {
 		// RENDERING MODELS
 		if (pointOfView == THIRD_PERSON)
 			renderObject(projection,ourModel, glm::vec3(player->getPosition().x, player->getPosition().y-1.5, player->getPosition().z));
+
 		if (pointOfView == FIRST_PERSON)
 			renderWep(projection, ourModel2);
-
 		renderSphere(bodies[4], projection, sphere);
+		//renderSphere(bodies[4], projection, sphere);
 		//:thinking:
 		///
 		//h_manager->renderToHud(11, texturedProgram, testLight, testCube->object_getMesh(), testCubes[0]->object_getIndex(), glm::vec3(-0.25f, 0.9f, 0.9f), testCubes[11]->getVelocity().x, testCubes[11]->getVelocity().y, testCubes[11]->getVelocity().z);
