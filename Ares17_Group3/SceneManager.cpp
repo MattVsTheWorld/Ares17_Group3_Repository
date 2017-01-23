@@ -10,7 +10,7 @@ namespace SceneManager {
 	Object *testCube; 
 	vector<Bullet*> bullet;
 	Player *player;
-	glm::vec3 playerScale(0.5, 1.5, 0.5);
+	glm::vec3 playerScale(1.0, 3.0, 1.0);
 	
 	// Shaders
 	GLuint shaderProgram;
@@ -19,7 +19,6 @@ namespace SceneManager {
 	
 	hudManager *h_manager;
 	Skybox *skybox;
-
 
 	float SCREENWIDTH = 800.0f;
 	float SCREENHEIGHT = 600.0f;
@@ -81,10 +80,7 @@ namespace SceneManager {
 		2.0f  // shininess
 	};
 	
-	void initPlayer() {
-		transformation_Matrices playerTrans = { eye, playerScale, nullTest , nullTest , nullTest };
-		player = new Player(playerTrans);
-	}
+
 
 	// 18/01
 	btDynamicsWorld* world;
@@ -182,8 +178,26 @@ namespace SceneManager {
 
 	}
 	// +++++
-	void init(void) {
 
+	void initBoxes() {
+		addBox(50, 0.1, 50, 0, 0, 0, 0.0);
+		addBox(1.0f, 1.0f, 1.0f, 0, 10, -10, 1.0);
+		bodies[1]->setActivationState(DISABLE_DEACTIVATION); // disable deactivation of physics on an object
+															 // objects become static after ~2(?) seconds otherwise
+		addBox(3.0f, 1.0f, 3.0f, 0, 0, -5, 1.0);
+		bodies[2]->setActivationState(DISABLE_DEACTIVATION);
+
+		addBox(playerScale.x, playerScale.y, playerScale.z, eye.x, eye.y, eye.z, 0);
+		bodies[3]->setActivationState(DISABLE_DEACTIVATION);
+	}
+
+	void initPlayer() {
+		transformation_Matrices playerTrans = { eye, playerScale, nullTest , nullTest , nullTest };
+		player = new Player(playerTrans);
+		
+	}
+
+	void init(void) {
 		// 18/01
 		collisionConfig = new btDefaultCollisionConfiguration();
 		dispatcher = new btCollisionDispatcher(collisionConfig); //base algorithm good (?)
@@ -209,14 +223,8 @@ namespace SceneManager {
 		world->addRigidBody(body);
 		bodies.push_back(body);
 		*/
-		addBox(50, 0.1, 50, 0, 0, 0, 0.0);
-		addBox(1.0f, 1.0f, 1.0f, 0, 10, -10, 1.0);
-		bodies[1]->setActivationState(DISABLE_DEACTIVATION); // disable deactivation of physics on an object
-		// objects become static after ~2(?) seconds otherwise
-		addBox(3.0f, 1.0f, 3.0f, 0, 0, -5, 1.0);
-		bodies[2]->setActivationState(DISABLE_DEACTIVATION);
-
-
+	
+		initBoxes();
 		// +++++
 		shaderProgram = ShaderManager::initShaders("phong-tex.vert", "phong-tex.frag");
 		texturedProgram = ShaderManager::initShaders("textured.vert", "textured.frag");
@@ -352,7 +360,6 @@ namespace SceneManager {
 			if (pointOfView == FIRST_PERSON) pointOfView = THIRD_PERSON;
 			else pointOfView = FIRST_PERSON;
 		}
-	
 
 		if (keys[SDL_SCANCODE_1]) {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -367,10 +374,7 @@ namespace SceneManager {
 			exit(0);
 		}
 
-	//	if (keys[SDL_SCANCODE_5])
-	//	{
-	//		cout << bullet.size() << endl;
-	//	}
+	//	if (keys[SDL_SCANCODE_5])cout << bullet.size() << endl;
 
 		if (keys[SDL_SCANCODE_M]) {
 			//cout << "Curiously cinnamon\n";
@@ -493,8 +497,9 @@ namespace SceneManager {
 		///+++++++++++++++
 		//renderPlane(bodies[0], projection);
 		renderBox(bodies[0], projection);
-		renderBox(bodies[1],projection);
+		renderBox(bodies[1], projection);
 		renderBox(bodies[2], projection);
+		renderBox(bodies[3], projection);
 		///+++++++++++++++
 
 		// RENDERING MODELS
