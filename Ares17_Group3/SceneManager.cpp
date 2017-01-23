@@ -341,8 +341,8 @@ namespace SceneManager {
 			yaw -= 360;
 	}
 
-//	bool leftClick = false;
-//	bool rightClick = false;
+	bool leftClick = false;
+	bool rightClick = false;
 /*
 	void bulletCreation() {
 		//position, scale, rotation
@@ -460,25 +460,25 @@ namespace SceneManager {
 		SDL_WarpMouseInWindow(window, MidX, MidY);
 		
 		//MOUSECLICK
-		/*
+		
 		if (sdlEvent.type == SDL_MOUSEBUTTONDOWN && pointOfView == FIRST_PERSON) {
 			if (sdlEvent.button.button == SDL_BUTTON_LEFT) leftClick = true;
 			if (sdlEvent.button.button == SDL_BUTTON_RIGHT) rightClick = true;
 		}
 
 		if (leftClick == true && pointOfView == FIRST_PERSON) {
-			if (coolDownOfGun <= 0.0f) {
-				bulletCreation();
-				coolDownOfGun = 0.4f;
-				shotsFired = true;
-			}
+			//if (coolDownOfGun <= 0.0f) {
+			//	bulletCreation();
+			//	coolDownOfGun = 0.4f;
+			//	shotsFired = true;
+			//}
 		}
 
 		if (sdlEvent.type == SDL_MOUSEBUTTONUP  && pointOfView == FIRST_PERSON) {
 			leftClick = false;
 			rightClick = false;
 		}
-		*/
+		
 		//KEYBOARD
 	
 		
