@@ -40,7 +40,7 @@ namespace SceneManager {
 	// Load models
 	Model *ourModel;
 	Model *ourModel2;
-
+	Model *sphere;
 	mvstack mvStack;
 
 	GLfloat pitch = 0.0f;
@@ -110,6 +110,62 @@ namespace SceneManager {
 		return body;
 	}
 
+	btRigidBody* addSphere(float rad, float x, float y, float z, float mass)
+	{
+		btTransform t;
+		t.setIdentity();
+		t.setOrigin(btVector3(x, y, z));
+		btSphereShape* sphere = new btSphereShape(rad);
+		btVector3 inertia(0, 0, 0);
+		if (mass != 0.0)
+			sphere->calculateLocalInertia(mass, inertia);
+
+		btMotionState* motion = new btDefaultMotionState(t);
+		btRigidBody::btRigidBodyConstructionInfo info(mass, motion, sphere, inertia);
+		btRigidBody* body = new btRigidBody(info);
+		world->addRigidBody(body);
+		bodies.push_back(body);
+		return body;
+	}
+
+	void renderSphere(btRigidBody* sphere, glm::mat4 proj, Model *modelData) {
+
+		if (sphere->getCollisionShape()->getShapeType() != SPHERE_SHAPE_PROXYTYPE)
+		{
+			cout << "Wrong collision shape (?)";
+			return;
+		}
+
+		glUseProgram(modelProgram);
+		mvStack.push(mvStack.top());// push modelview to stack
+		
+		//	mvStack.top() = glm::translate(mvStack.top(), glm::vec3(-10.0f, -0.1f, -10.0f));
+		// Draw the loaded model
+		MeshManager::setUniformMatrix4fv(modelProgram, "projection", glm::value_ptr(proj));
+		MeshManager::setUniformMatrix4fv(modelProgram, "view", glm::value_ptr(mvStack.top()));
+
+		float r =((btSphereShape*)sphere->getCollisionShape())->getRadius();
+
+		btTransform t;
+		sphere->getMotionState()->getWorldTransform(t);
+		glm::mat4 mat;
+		t.getOpenGLMatrix(glm::value_ptr(mat));
+		
+		
+		glm::mat4 model;
+		model *= mat;
+				
+	//	model = glm::translate(model, pos);
+	//	model = glm::rotate(model, float(-yaw*DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
+	//	model = glm::rotate(model, float(180 * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(r, r, r));
+		
+		glUniformMatrix4fv(glGetUniformLocation(modelProgram, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(model));
+		modelData->Draw(modelProgram);
+
+		mvStack.pop();
+	}
+
 	void renderBox(btRigidBody* box, glm::mat4 projection) {
 
 		if (box->getCollisionShape()->getShapeType() != BOX_SHAPE_PROXYTYPE)
@@ -144,6 +200,8 @@ namespace SceneManager {
 		glBindTexture(GL_TEXTURE_2D, 0);
 		mvStack.pop();
 	}
+
+
 
 	void renderPlane(btRigidBody* plane, glm::mat4 projection)
 	{
@@ -189,6 +247,9 @@ namespace SceneManager {
 
 		addBox(playerScale.x, playerScale.y, playerScale.z, eye.x, eye.y, eye.z, 0);
 		bodies[3]->setActivationState(DISABLE_DEACTIVATION);
+
+		addSphere(0.5, 0, 3, 0, 0.2);
+		bodies[4]->setActivationState(DISABLE_DEACTIVATION);
 	}
 
 	void initPlayer() {
@@ -231,6 +292,7 @@ namespace SceneManager {
 		modelProgram = ShaderManager::initShaders("modelLoading.vert", "modelLoading.frag");
 		ourModel = new Model("Nanosuit/nanosuit.obj");
 		ourModel2 = new Model("CHOO/Socom pistol.obj");
+		sphere = new Model("sphere.obj"); // THIS MODEL IS TERRIBLE
 		MeshManager::setLight(shaderProgram, testLight);
 		MeshManager::setMaterial(shaderProgram, greenMaterial);
 		cube = testCube->initializeObject("cube.obj");
@@ -317,9 +379,17 @@ namespace SceneManager {
 		
 		//KEYBOARD
 		// To be changed ****
+
+		btTransform t;
+		t.setIdentity();
+		t.setOrigin(btVector3(0, 10, -10));
+		btMotionState* motion = new btDefaultMotionState(t);
+		motion->setWorldTransform(t);
+
 		const Uint8 *keys = SDL_GetKeyboardState(NULL);
 		if (keys[SDL_SCANCODE_W]) {
 			player->setPosition(moveForward(player->getPosition(), yaw, 0.1f));
+		
 		}
 		else if (keys[SDL_SCANCODE_S]) {
 			player->setPosition(moveForward(player->getPosition(), yaw, -0.1f));
@@ -337,6 +407,13 @@ namespace SceneManager {
 			player->setPosition(glm::vec3(player->getPosition().x, player->getPosition().y - 0.1, player->getPosition().z));
 		}
 
+		//update box
+		// Simplistic; change
+		t.setIdentity();
+		t.setOrigin(btVector3(player->getPosition().x, player->getPosition().y, player->getPosition().z));
+		motion->setWorldTransform(t);
+		bodies[3]->setMotionState(motion);
+
 		if (keys[SDL_SCANCODE_SPACE] && player->getState() != JUMPING) {
 			player->setVelocity(glm::vec3(player->getVelocity().x, 6.0f, player->getVelocity().z));
 			player->setState(JUMPING);
@@ -348,11 +425,12 @@ namespace SceneManager {
 		}
 		if (keys[SDL_SCANCODE_N]) {
 			
-			btTransform t;
+			//btTransform t;
 			t.setIdentity();
 			t.setOrigin(btVector3(0, 10, -10));
-			btMotionState* motion = new btDefaultMotionState(t);
+			//btMotionState* motion = new btDefaultMotionState(t);
 			cout << "Setting y\n";
+			motion->setWorldTransform(t);
 			bodies[1]->setMotionState(motion);
 		}
 		//++++
@@ -408,6 +486,8 @@ namespace SceneManager {
 		
 		mvStack.pop();
 	}
+
+	
 
 	void renderWep(glm::mat4 proj, Model *modelData) {
 		glUseProgram(modelProgram);
@@ -499,14 +579,18 @@ namespace SceneManager {
 		renderBox(bodies[0], projection);
 		renderBox(bodies[1], projection);
 		renderBox(bodies[2], projection);
-		renderBox(bodies[3], projection);
+		//renderBox(bodies[3], projection);
 		///+++++++++++++++
 
+		//renderSphere(projection, sphere, glm::vec3(0, 2, 0));
+		
 		// RENDERING MODELS
 		if (pointOfView == THIRD_PERSON)
 			renderObject(projection,ourModel, glm::vec3(player->getPosition().x, player->getPosition().y-1.5, player->getPosition().z));
 		if (pointOfView == FIRST_PERSON)
 			renderWep(projection, ourModel2);
+
+		renderSphere(bodies[4], projection, sphere);
 		//:thinking:
 		///
 		//h_manager->renderToHud(11, texturedProgram, testLight, testCube->object_getMesh(), testCubes[0]->object_getIndex(), glm::vec3(-0.25f, 0.9f, 0.9f), testCubes[11]->getVelocity().x, testCubes[11]->getVelocity().y, testCubes[11]->getVelocity().z);
