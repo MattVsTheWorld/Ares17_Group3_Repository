@@ -1,4 +1,5 @@
 #include "Skybox.h"
+//
 
 Skybox::Skybox(const char *cubeTexFiles[6]) {
 	skyboxProgram = ShaderManager::initShaders("cubeMap.vert", "cubeMap.frag");
@@ -46,7 +47,7 @@ GLuint Skybox::loadCubeMap(const char *fname[6], GLuint *texID) {
 }
 
 
-std::stack<glm::mat4> Skybox::renderSkybox(glm::mat4 projection, std::stack<glm::mat4> mvStack, GLuint meshObject, GLuint meshIndexCount) {
+std::stack<glm::mat4> Skybox::renderSkybox(glm::mat4 projection, std::stack<glm::mat4> mvStack, Model *modelData) {
 	// skybox as single cube using cube map
 
 	glUseProgram(skyboxProgram);
@@ -54,11 +55,14 @@ std::stack<glm::mat4> Skybox::renderSkybox(glm::mat4 projection, std::stack<glm:
 	glDepthMask(GL_FALSE); // make sure writing to update depth test is off
 	glm::mat3 mvRotOnlyMat3 = glm::mat3(mvStack.top());
 	mvStack.push(glm::mat4(mvRotOnlyMat3));
+	MeshManager::setUniformMatrix4fv(skyboxProgram, "view", glm::value_ptr(mvStack.top()));
 	glCullFace(GL_FRONT); // drawing inside of cube!
 	glBindTexture(GL_TEXTURE_CUBE_MAP, textures);
-	mvStack.top() = glm::scale(mvStack.top(), glm::vec3(1.5f, 1.5f, 1.5f));
-	MeshManager::setUniformMatrix4fv(skyboxProgram, "modelview", glm::value_ptr(mvStack.top()));
-	MeshManager::drawIndexedMesh(meshObject, meshIndexCount, GL_TRIANGLES);
+	glm::mat4 model;
+	model = glm::scale(model, glm::vec3(1.5f, 1.5f, 1.5f));
+	MeshManager::setUniformMatrix4fv(skyboxProgram, "modelMatrix", glm::value_ptr(model));
+	modelData->Draw(skyboxProgram);
+	
 	mvStack.pop();
 	glCullFace(GL_BACK); // drawing inside of cube!
 						 // back to remainder of rendering

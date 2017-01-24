@@ -1,5 +1,5 @@
 #include "SceneManager.h"
-#include "Model.h"
+
 using namespace std;
 
 //typedef std::pair < glm::vec3, glm::vec3 > vectorPair;
@@ -7,7 +7,7 @@ typedef stack<glm::mat4> mvstack;
 
 // this class still needs a lot of work
 namespace SceneManager {
-	Object *testCube; 
+	//Object *testCube; 
 	vector<Bullet*> bullet;
 	Player *player;
 	glm::vec3 playerScale(1.0, 3.0, 1.0);
@@ -31,7 +31,7 @@ namespace SceneManager {
 	glm::vec3 nullTest = glm::vec3(0.0f, 0.0f, 0.0f);
 
 	transformation_Matrices testTransformation = { transTest, scaleTest, nullTest, nullTest, nullTest };
-	object_Properties cube;
+//	object_Properties cube;
 
 	const char *testTexFiles[6] = {
 		"Town-skybox/Town_bk.bmp", "Town-skybox/Town_ft.bmp", "Town-skybox/Town_rt.bmp", "Town-skybox/Town_lf.bmp", "Town-skybox/Town_up.bmp", "Town-skybox/Town_dn.bmp"
@@ -41,6 +41,8 @@ namespace SceneManager {
 	Model *ourModel;
 	Model *ourModel2;
 	Model *sphere;
+	Model *cube;
+	GLuint defaultTexture;
 	mvstack mvStack;
 
 	GLfloat pitch = 0.0f;
@@ -128,18 +130,20 @@ namespace SceneManager {
 		return body;
 	}
 
-	void renderSphere(btRigidBody* sphere, glm::mat4 proj, Model *modelData) {
+	void renderSphere(btRigidBody* sphere, glm::mat4 proj, Model *modelData, MeshManager::materialStruct material) {
 
 		if (sphere->getCollisionShape()->getShapeType() != SPHERE_SHAPE_PROXYTYPE) //cout << "Wrong collision shape ";	
 			return;
 
 		glUseProgram(modelProgram);
 		mvStack.push(mvStack.top());// push modelview to stack
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, testCube->object_getTexture());
+		
 		//	mvStack.top() = glm::translate(mvStack.top(), glm::vec3(-10.0f, -0.1f, -10.0f));
 		// Draw the loaded model
 		//MeshManager::setLight(modelProgram, testLight);
+		MeshManager::setLight(shaderProgram, testLight);
+		MeshManager::setMaterial(modelProgram, material);
+
 		MeshManager::setUniformMatrix4fv(modelProgram, "projection", glm::value_ptr(proj));
 		MeshManager::setUniformMatrix4fv(modelProgram, "view", glm::value_ptr(mvStack.top()));
 
@@ -156,40 +160,54 @@ namespace SceneManager {
 	//	model = glm::translate(model, pos);
 	//	model = glm::rotate(model, float(-yaw*DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
 	//	model = glm::rotate(model, float(180 * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, defaultTexture);
+
 		model = glm::scale(model, glm::vec3(r, r, r));
 		glUniformMatrix4fv(glGetUniformLocation(modelProgram, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(model));
 		modelData->Draw(modelProgram);
+
+		glBindTexture(GL_TEXTURE_2D, 0);
 		mvStack.pop();
 	}
 
-	void renderBox(btRigidBody* box, glm::mat4 projection) {
+	// Just move it after
+	void renderBox(btRigidBody* box, glm::mat4 proj, Model *modelData, MeshManager::materialStruct material) {
 
 		if (box->getCollisionShape()->getShapeType() != BOX_SHAPE_PROXYTYPE) 			//cout << "Wrong collision shape";
 			return;
-		glUseProgram(shaderProgram);
-		MeshManager::setLight(shaderProgram, testLight);
-		MeshManager::setMaterial(shaderProgram, defaultMaterial);
+		
+		glUseProgram(modelProgram);
+		//MeshManager::setLight(shaderProgram, testLight);
+		//MeshManager::setMaterial(shaderProgram, defaultMaterial);
 		mvStack.push(mvStack.top());// push modelview to stack
+		MeshManager::setLight(modelProgram, testLight);
+		MeshManager::setMaterial(modelProgram, material);
+		MeshManager::setUniformMatrix4fv(modelProgram, "projection", glm::value_ptr(proj));
+		MeshManager::setUniformMatrix4fv(modelProgram, "view", glm::value_ptr(mvStack.top()));
 		
 		btVector3 extent = ((btBoxShape*)box->getCollisionShape())->getHalfExtentsWithMargin();
 		btTransform t;
 		box->getMotionState()->getWorldTransform(t);
 
-		//https://www.youtube.com/watch?v=1CEI2pOym1Y || 48 min ~~~
 
 		glm::mat4 mat;
 		t.getOpenGLMatrix(glm::value_ptr(mat));
 
-		// https://www.youtube.com/watch?v=1CEI2pOym1Y  41~
-		mvStack.top() *= mat; // trans, rot?
-		mvStack.top() = glm::scale(mvStack.top(), glm::vec3(extent.x(), extent.y(), extent.z())); //DEFINITELY goes after
+		glm::mat4 model;
+
+		model *= mat; // trans, rot?
+		model = glm::scale(model, glm::vec3(extent.x(), extent.y(), extent.z())); //DEFINITELY goes after
 
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, testCube->object_getTexture());
-		MeshManager::setUniformMatrix4fv(shaderProgram, "modelview", glm::value_ptr(mvStack.top()));
-		MeshManager::setUniformMatrix4fv(shaderProgram, "projection", glm::value_ptr(projection));
-		
-		MeshManager::drawIndexedMesh(testCube->object_getMesh(), testCube->object_getIndex(), GL_TRIANGLES);
+		glBindTexture(GL_TEXTURE_2D, defaultTexture);
+		//MeshManager::setUniformMatrix4fv(shaderProgram, "modelview", glm::value_ptr(mvStack.top()));
+		//MeshManager::setUniformMatrix4fv(shaderProgram, "projection", glm::value_ptr(projection));		
+		//MeshManager::drawIndexedMesh(testCube->object_getMesh(), testCube->object_getIndex(), GL_TRIANGLES);
+
+		glUniformMatrix4fv(glGetUniformLocation(modelProgram, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(model));
+		modelData->Draw(modelProgram);
+
 		glBindTexture(GL_TEXTURE_2D, 0);
 		mvStack.pop();
 	}
@@ -285,13 +303,15 @@ namespace SceneManager {
 		modelProgram = ShaderManager::initShaders("modelLoading.vert", "modelLoading.frag");
 		ourModel = new Model("Nanosuit/nanosuit.obj");
 		ourModel2 = new Model("CHOO/Socom pistol.obj");
+		cube = new Model("cube.obj");
+		defaultTexture = loadBitmap::loadBitmap("wall.bmp");
 		sphere = new Model("sphere.obj"); // THIS MODEL IS TERRIBLE
 		MeshManager::setLight(shaderProgram, testLight);
 		MeshManager::setMaterial(shaderProgram, greenMaterial);
-		cube = testCube->initializeObject("cube.obj");
+		//cube = testCube->initializeObject("cube.obj");
 
 		//initObjects();
-		testCube = new Object(testTransformation, cube);
+		//testCube = new Object(testTransformation, cube);
 		
 		initPlayer();
 		h_manager = new hudManager();
@@ -413,7 +433,7 @@ namespace SceneManager {
 		}
 		//++++
 		if (keys[SDL_SCANCODE_M]) {
-			cout << "Curiously cinnamon\n";
+		//	cout << "Curiously cinnamon\n";
 			bodies[1]->setLinearVelocity(btVector3(0.0, 5.0, 0.0));
 		}
 		if (keys[SDL_SCANCODE_N]) {
@@ -465,6 +485,8 @@ namespace SceneManager {
 	void renderObject(glm::mat4 proj, Model *modelData, glm::vec3 pos) {
 		glUseProgram(modelProgram);
 		mvStack.push(mvStack.top());// push modelview to stack
+		MeshManager::setLight(modelProgram, testLight);
+		MeshManager::setMaterial(modelProgram, defaultMaterial);
 		MeshManager::setUniformMatrix4fv(modelProgram, "projection", glm::value_ptr(proj));
 		MeshManager::setUniformMatrix4fv(modelProgram, "view", glm::value_ptr(mvStack.top()));
 	//	mvStack.top() = glm::translate(mvStack.top(), glm::vec3(-10.0f, -0.1f, -10.0f));
@@ -487,12 +509,13 @@ namespace SceneManager {
 		mvStack.push(glm::mat4(1.0));// push modelview to stack
 									//		glCullFace(GL_BACK);
 		MeshManager::setLight(modelProgram, testLight);
+		MeshManager::setMaterial(modelProgram, redMaterial);
 		MeshManager::setUniformMatrix4fv(modelProgram, "projection", glm::value_ptr(proj));
 		MeshManager::setUniformMatrix4fv(modelProgram, "view", glm::value_ptr(mvStack.top()));
 		//	mvStack.top() = glm::translate(mvStack.top(), glm::vec3(-10.0f, -0.1f, -10.0f));
 		// Draw the loaded model
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, testCube->object_getTexture());
+		glBindTexture(GL_TEXTURE_2D, defaultTexture);
 		glm::mat4 model;
 		/*
 		if (rightClick) {
@@ -564,25 +587,27 @@ namespace SceneManager {
 		camera();
 		projection = glm::perspective(float(60.0f*DEG_TO_RADIAN), SCREENWIDTH / SCREENHEIGHT, 0.1f, 100.0f);
 
-		mvStack = skybox->renderSkybox(projection, mvStack, testCube->object_getMesh(), testCube->object_getIndex());
+		mvStack = skybox->renderSkybox(projection, mvStack, cube);
 	
 		///+++++++++++++++
 		//renderPlane(bodies[0], projection);
-
+/*
 		for (int i = 0;i<bodies.size();i++)
 		{
-			 if (bodies[i]->getCollisionShape()->getShapeType() == SPHERE_SHAPE_PROXYTYPE)
-				renderSphere(bodies[i], projection, sphere);
+			if (bodies[i]->getCollisionShape()->getShapeType() == SPHERE_SHAPE_PROXYTYPE)
+				renderSphere(bodies[i], projection, sphere, greenMaterial);
 			else if (bodies[i]->getCollisionShape()->getShapeType() == BOX_SHAPE_PROXYTYPE)
-				renderBox(bodies[i], projection);
+				renderBox(bodies[i], projection, cube, defaultMaterial);
 		}
 
-	//	renderBox(bodies[0], projection);
-	//	renderBox(bodies[1], projection);
-	//	renderBox(bodies[2], projection);
-		//renderBox(bodies[3], projection);
+		*/
+		renderBox(bodies[0], projection, cube, greenMaterial);
+		renderBox(bodies[1], projection, cube, redMaterial);
+		renderBox(bodies[2], projection, cube, defaultMaterial);
+	//	renderBox(bodies[3], projection, cube);
+		renderSphere(bodies[4], projection, sphere, redMaterial);
 		///+++++++++++++++
-
+	
 		//renderSphere(projection, sphere, glm::vec3(0, 2, 0));
 		
 		// RENDERING MODELS
@@ -591,7 +616,7 @@ namespace SceneManager {
 
 		if (pointOfView == FIRST_PERSON)
 			renderWep(projection, ourModel2);
-		renderSphere(bodies[4], projection, sphere);
+		//renderSphere(bodies[4], projection, sphere);
 		//renderSphere(bodies[4], projection, sphere);
 		//:thinking:
 		///

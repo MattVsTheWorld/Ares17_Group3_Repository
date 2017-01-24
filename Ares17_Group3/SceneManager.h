@@ -3,7 +3,7 @@
 
 #include "MeshManager.h"
 #include "SDL.h"
-#include "Object.h"
+//#include "Object.h"
 #include "hudManager.h"
 #include <stack>
 #include <glm/glm.hpp>
@@ -14,6 +14,8 @@
 #include <time.h>
 
 #include <btBulletDynamicsCommon.h>
+
+#include "Model.h"
 
 #include "Bullet.h"
 #include "Player.h"

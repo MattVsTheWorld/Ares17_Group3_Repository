@@ -1,9 +1,5 @@
 #include "main.h"
-
-
-
 using namespace std;
-
 
 /*
 btDynamicsWorld* world;	//every physical object go to the world
