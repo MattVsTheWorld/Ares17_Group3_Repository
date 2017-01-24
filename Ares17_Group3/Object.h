@@ -1,7 +1,7 @@
 #ifndef OBJECT
 #define OBJECT
 #include "MeshManager.h"
-#include "rt3dObjLoader.h"
+//#include "rt3dObjLoader.h"
 #include "loadBitmap.h"
 #include <vector>
 #include <stack>

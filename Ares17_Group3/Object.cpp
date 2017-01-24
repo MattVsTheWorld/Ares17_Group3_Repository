@@ -47,7 +47,7 @@ object_Properties Object::initializeObject(char *objectPath) {
 	vector<GLfloat> norms; // contains normal of loaded object
 	vector<GLfloat> tex_coords; // contains texture coordinates of loaded object
 	vector<GLuint> indices; // contains indices of loaded object
-	rt3d::loadObj(objectPath, verts, norms, tex_coords, indices);
+	//rt3d::loadObj(objectPath, verts, norms, tex_coords, indices);
 
 	return{ verts, norms, tex_coords, indices };
 }

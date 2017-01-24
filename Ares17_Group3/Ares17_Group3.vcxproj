@@ -162,7 +162,6 @@
     <ClCompile Include="MeshManager.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="Player.cpp" />
-    <ClCompile Include="rt3dObjLoader.cpp" />
     <ClCompile Include="SceneManager.cpp" />
     <ClCompile Include="SDLmanager.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
@@ -178,7 +177,6 @@
     <ClInclude Include="Model.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="Player.h" />
-    <ClInclude Include="rt3dObjLoader.h" />
     <ClInclude Include="SceneManager.h" />
     <ClInclude Include="SDLmanager.h" />
     <ClInclude Include="ShaderManager.h" />

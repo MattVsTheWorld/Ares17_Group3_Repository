@@ -57,9 +57,6 @@
     <ClCompile Include="Bullet.cpp">
       <Filter>To be deleted / redone</Filter>
     </ClCompile>
-    <ClCompile Include="rt3dObjLoader.cpp">
-      <Filter>To be deleted / redone</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SDLmanager.h">
@@ -93,9 +90,6 @@
       <Filter>To be deleted / redone</Filter>
     </ClInclude>
     <ClInclude Include="Bullet.h">
-      <Filter>To be deleted / redone</Filter>
-    </ClInclude>
-    <ClInclude Include="rt3dObjLoader.h">
       <Filter>To be deleted / redone</Filter>
     </ClInclude>
     <ClInclude Include="main.h">

@@ -75,6 +75,14 @@ namespace SceneManager {
 		2.0f  // shininess
 	};
 
+	MeshManager::materialStruct purpleMaterial = {
+		{ 0.6f, 0.4f, 1.0f, 1.0f }, // ambient
+		{ 0.6f, 0.4f, 1.0f, 1.0f }, // diffuse
+		{ 0.6f, 0.4f, 1.0f, 1.0f }, // specular
+		2.0f  // shininess
+	};
+
+
 	MeshManager::materialStruct defaultMaterial = {
 		{ 0.5f, 0.5f, 0.5f, 1.0f }, // ambient
 		{ 0.5f, 0.5f, 0.5f, 1.0f }, // diffuse
@@ -605,7 +613,7 @@ namespace SceneManager {
 		renderBox(bodies[1], projection, cube, redMaterial);
 		renderBox(bodies[2], projection, cube, defaultMaterial);
 	//	renderBox(bodies[3], projection, cube);
-		renderSphere(bodies[4], projection, sphere, redMaterial);
+		renderSphere(bodies[4], projection, sphere, purpleMaterial);
 		///+++++++++++++++
 	
 		//renderSphere(projection, sphere, glm::vec3(0, 2, 0));
