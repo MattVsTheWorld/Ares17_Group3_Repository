@@ -130,11 +130,8 @@ namespace SceneManager {
 
 	void renderSphere(btRigidBody* sphere, glm::mat4 proj, Model *modelData) {
 
-		if (sphere->getCollisionShape()->getShapeType() != SPHERE_SHAPE_PROXYTYPE)
-		{
-			cout << "Wrong collision shape (?)";
+		if (sphere->getCollisionShape()->getShapeType() != SPHERE_SHAPE_PROXYTYPE) //cout << "Wrong collision shape ";	
 			return;
-		}
 
 		glUseProgram(modelProgram);
 		mvStack.push(mvStack.top());// push modelview to stack
@@ -167,11 +164,8 @@ namespace SceneManager {
 
 	void renderBox(btRigidBody* box, glm::mat4 projection) {
 
-		if (box->getCollisionShape()->getShapeType() != BOX_SHAPE_PROXYTYPE)
-		{
-			cout << "Wrong collision shape (?)";
+		if (box->getCollisionShape()->getShapeType() != BOX_SHAPE_PROXYTYPE) 			//cout << "Wrong collision shape";
 			return;
-		}
 		glUseProgram(shaderProgram);
 		MeshManager::setLight(shaderProgram, testLight);
 		MeshManager::setMaterial(shaderProgram, defaultMaterial);
@@ -201,7 +195,7 @@ namespace SceneManager {
 	}
 
 
-
+	/*
 	void renderPlane(btRigidBody* plane, glm::mat4 projection)
 	{
 		if (plane->getCollisionShape()->getShapeType() != STATIC_PLANE_PROXYTYPE)
@@ -230,10 +224,10 @@ namespace SceneManager {
 
 		MeshManager::drawIndexedMesh(testCubes[0]->object_getMesh(), testCubes[0]->object_getIndex(), GL_TRIANGLES);
 		glBindTexture(GL_TEXTURE_2D, 0);
-		*/
+		
 		mvStack.pop();
 
-	}
+	} */
 	// +++++
 
 	void initBoxes() {

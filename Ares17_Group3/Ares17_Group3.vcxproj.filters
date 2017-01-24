@@ -19,12 +19,12 @@
     <Filter Include="Being worked on">
       <UniqueIdentifier>{d6406d72-4a65-4021-8bdf-075a39d54a7a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="To be deleted / redone">
+      <UniqueIdentifier>{1caede58-4bd3-4b03-b024-ef6f6ff1167b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SceneManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="hudManager.cpp">
@@ -48,20 +48,17 @@
     <ClCompile Include="Skybox.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
-    <ClCompile Include="Physics.cpp">
-      <Filter>Being worked on</Filter>
+    <ClCompile Include="Player.cpp">
+      <Filter>To be deleted / redone</Filter>
     </ClCompile>
     <ClCompile Include="Object.cpp">
-      <Filter>Being worked on</Filter>
+      <Filter>To be deleted / redone</Filter>
     </ClCompile>
-    <ClCompile Include="Player.cpp">
+    <ClCompile Include="SceneManager.cpp">
       <Filter>Being worked on</Filter>
     </ClCompile>
     <ClCompile Include="Bullet.cpp">
-      <Filter>Being worked on</Filter>
-    </ClCompile>
-    <ClCompile Include="Collisions.cpp">
-      <Filter>Being worked on</Filter>
+      <Filter>To be deleted / redone</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -95,23 +92,17 @@
     <ClInclude Include="Mesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Physics.h">
-      <Filter>Being worked on</Filter>
-    </ClInclude>
     <ClInclude Include="SceneManager.h">
       <Filter>Being worked on</Filter>
     </ClInclude>
-    <ClInclude Include="Object.h">
-      <Filter>Being worked on</Filter>
-    </ClInclude>
     <ClInclude Include="Player.h">
-      <Filter>Being worked on</Filter>
+      <Filter>To be deleted / redone</Filter>
+    </ClInclude>
+    <ClInclude Include="Object.h">
+      <Filter>To be deleted / redone</Filter>
     </ClInclude>
     <ClInclude Include="Bullet.h">
-      <Filter>Being worked on</Filter>
-    </ClInclude>
-    <ClInclude Include="Collisions.h">
-      <Filter>Being worked on</Filter>
+      <Filter>To be deleted / redone</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
