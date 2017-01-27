@@ -1,10 +1,18 @@
 #include "Player.h"
 
-Player::Player(transformation_Matrices transformation, object_Properties obj_p) : Object(transformation, obj_p) {}
-Player::Player(transformation_Matrices transformation, char *texturePath, object_Properties obj_p) : Object(transformation, texturePath, obj_p) {}
 
-Player::Player(transformation_Matrices transformation) : Object(transformation) {}
+Player::Player(glm::vec3 _eye) {
+		eye = _eye;
+}
 
+void Player::setPosition(glm::vec3 newEye) {
+	eye = newEye;
+}
+glm::vec3 Player::getPosition() {
+	return eye;
+}
+
+/*
 States Player::getState() {
 	return player_state;
 }
@@ -13,3 +21,5 @@ void Player::setState(States state) {
 	player_state = state;
 }
 	//	scale = scal;
+
+	*/

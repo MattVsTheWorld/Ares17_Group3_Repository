@@ -8,7 +8,7 @@ typedef stack<glm::mat4> mvstack;
 // this class still needs a lot of work
 namespace SceneManager {
 	//Object *testCube; 
-	vector<Bullet*> bullet;
+	//vector<Bullet*> bullet;
 	Player *player;
 	glm::vec3 playerScale(1.0, 3.0, 1.0);
 	
@@ -30,7 +30,7 @@ namespace SceneManager {
 	glm::vec3 scaleTest = glm::vec3(20.0f, 0.5f, 20.0f);
 	glm::vec3 nullTest = glm::vec3(0.0f, 0.0f, 0.0f);
 
-	transformation_Matrices testTransformation = { transTest, scaleTest, nullTest, nullTest, nullTest };
+//	transformation_Matrices testTransformation = { transTest, scaleTest, nullTest, nullTest, nullTest };
 //	object_Properties cube;
 
 	const char *testTexFiles[6] = {
@@ -159,15 +159,9 @@ namespace SceneManager {
 
 		btTransform t;
 		sphere->getMotionState()->getWorldTransform(t);
-		glm::mat4 mat;
-		t.getOpenGLMatrix(glm::value_ptr(mat));
-		
-		
 		glm::mat4 model;
-		model *= mat;
-	//	model = glm::translate(model, pos);
-	//	model = glm::rotate(model, float(-yaw*DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
-	//	model = glm::rotate(model, float(180 * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
+		t.getOpenGLMatrix(glm::value_ptr(model));
+
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, defaultTexture);
 
@@ -199,12 +193,9 @@ namespace SceneManager {
 		box->getMotionState()->getWorldTransform(t);
 
 
-		glm::mat4 mat;
-		t.getOpenGLMatrix(glm::value_ptr(mat));
-
 		glm::mat4 model;
+		t.getOpenGLMatrix(glm::value_ptr(model));
 
-		model *= mat; // trans, rot?
 		model = glm::scale(model, glm::vec3(extent.x(), extent.y(), extent.z())); //DEFINITELY goes after
 
 		glActiveTexture(GL_TEXTURE0);
@@ -272,8 +263,8 @@ namespace SceneManager {
 	}
 
 	void initPlayer() {
-		transformation_Matrices playerTrans = { eye, playerScale, nullTest , nullTest , nullTest };
-		player = new Player(playerTrans);
+	//	transformation_Matrices playerTrans = { eye, playerScale, nullTest , nullTest , nullTest };
+		player = new Player(eye);
 		
 	}
 
@@ -339,8 +330,9 @@ namespace SceneManager {
 		return glm::vec3(pos.x + d*std::cos(yaw*DEG_TO_RADIAN), pos.y, pos.z + d*std::sin(yaw*DEG_TO_RADIAN));
 	}
 
+	/*
 	float gameTime() {
-		currentTime = clock();
+	//	currentTime = clock();
 
 		unsigned int dt = currentTime - lastTime;
 		float dt_secs = (float)dt / 1000;
@@ -350,7 +342,7 @@ namespace SceneManager {
 
 		return dt_secs;
 	}
-
+	*/
 	void lockCamera()
 	{
 		if (pitch > 70)
@@ -434,11 +426,11 @@ namespace SceneManager {
 		t.setOrigin(btVector3(player->getPosition().x, player->getPosition().y, player->getPosition().z));
 		motion->setWorldTransform(t);
 		bodies[3]->setMotionState(motion);
-
+/*
 		if (keys[SDL_SCANCODE_SPACE] && player->getState() != JUMPING) {
 			player->setVelocity(glm::vec3(player->getVelocity().x, 6.0f, player->getVelocity().z));
 			player->setState(JUMPING);
-		}
+		} */
 		//++++
 		if (keys[SDL_SCANCODE_M]) {
 		//	cout << "Curiously cinnamon\n";
