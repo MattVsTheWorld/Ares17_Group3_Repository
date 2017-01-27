@@ -57,6 +57,9 @@
     <ClCompile Include="Bullet.cpp">
       <Filter>To be deleted / redone</Filter>
     </ClCompile>
+    <ClCompile Include="btShapeManager.cpp">
+      <Filter>Being worked on</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SDLmanager.h">
@@ -97,6 +100,9 @@
     </ClInclude>
     <ClInclude Include="Model.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="btShapeManager.h">
+      <Filter>Being worked on</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

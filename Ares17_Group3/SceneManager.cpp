@@ -3,7 +3,7 @@
 using namespace std;
 
 //typedef std::pair < glm::vec3, glm::vec3 > vectorPair;
-typedef stack<glm::mat4> mvstack;
+//typedef stack<glm::mat4> mvstack;
 
 // this class still needs a lot of work
 namespace SceneManager {
@@ -43,7 +43,9 @@ namespace SceneManager {
 	Model *sphere;
 	Model *cube;
 	GLuint defaultTexture;
-	mvstack mvStack;
+	//mvstack mvStack;
+
+	glm::mat4 view;
 
 	GLfloat pitch = 0.0f;
 	GLfloat yaw = 0.0f;
@@ -90,8 +92,6 @@ namespace SceneManager {
 		2.0f  // shininess
 	};
 	
-
-
 	// 18/01
 	btDynamicsWorld* world;
 	btDispatcher* dispatcher;
@@ -99,6 +99,7 @@ namespace SceneManager {
 	btBroadphaseInterface* broadphase; //improves collision check (?) // can improve by know world size (?)
 	btConstraintSolver* solver;
 	std::vector<btRigidBody*> bodies;
+//	std::map<std::string, btRigidBody*> bodiess;
 
 	btRigidBody* addBox(float width, float height, float depth,float x, float y, float z, float mass)
 	{
@@ -144,16 +145,16 @@ namespace SceneManager {
 			return;
 
 		glUseProgram(modelProgram);
-		mvStack.push(mvStack.top());// push modelview to stack
+		//mvStack.push(mvStack.top());// push modelview to stack
 		
 		//	mvStack.top() = glm::translate(mvStack.top(), glm::vec3(-10.0f, -0.1f, -10.0f));
 		// Draw the loaded model
 		//MeshManager::setLight(modelProgram, testLight);
-		MeshManager::setLight(shaderProgram, testLight);
+		MeshManager::setLight(modelProgram, testLight);
 		MeshManager::setMaterial(modelProgram, material);
 
 		MeshManager::setUniformMatrix4fv(modelProgram, "projection", glm::value_ptr(proj));
-		MeshManager::setUniformMatrix4fv(modelProgram, "view", glm::value_ptr(mvStack.top()));
+		MeshManager::setUniformMatrix4fv(modelProgram, "view", glm::value_ptr(view));
 
 		float r =((btSphereShape*)sphere->getCollisionShape())->getRadius();
 
@@ -170,7 +171,7 @@ namespace SceneManager {
 		modelData->Draw(modelProgram);
 
 		glBindTexture(GL_TEXTURE_2D, 0);
-		mvStack.pop();
+	//	mvStack.pop();
 	}
 
 	// Just move it after
@@ -182,11 +183,11 @@ namespace SceneManager {
 		glUseProgram(modelProgram);
 		//MeshManager::setLight(shaderProgram, testLight);
 		//MeshManager::setMaterial(shaderProgram, defaultMaterial);
-		mvStack.push(mvStack.top());// push modelview to stack
+	//	mvStack.push(mvStack.top());// push modelview to stack
 		MeshManager::setLight(modelProgram, testLight);
 		MeshManager::setMaterial(modelProgram, material);
 		MeshManager::setUniformMatrix4fv(modelProgram, "projection", glm::value_ptr(proj));
-		MeshManager::setUniformMatrix4fv(modelProgram, "view", glm::value_ptr(mvStack.top()));
+		MeshManager::setUniformMatrix4fv(modelProgram, "view", glm::value_ptr(view));
 		
 		btVector3 extent = ((btBoxShape*)box->getCollisionShape())->getHalfExtentsWithMargin();
 		btTransform t;
@@ -208,7 +209,7 @@ namespace SceneManager {
 		modelData->Draw(modelProgram);
 
 		glBindTexture(GL_TEXTURE_2D, 0);
-		mvStack.pop();
+	//	mvStack.pop();
 	}
 
 
@@ -484,11 +485,11 @@ namespace SceneManager {
 
 	void renderObject(glm::mat4 proj, Model *modelData, glm::vec3 pos) {
 		glUseProgram(modelProgram);
-		mvStack.push(mvStack.top());// push modelview to stack
+		//mvStack.push(mvStack.top());// push modelview to stack
 		MeshManager::setLight(modelProgram, testLight);
 		MeshManager::setMaterial(modelProgram, defaultMaterial);
 		MeshManager::setUniformMatrix4fv(modelProgram, "projection", glm::value_ptr(proj));
-		MeshManager::setUniformMatrix4fv(modelProgram, "view", glm::value_ptr(mvStack.top()));
+		MeshManager::setUniformMatrix4fv(modelProgram, "view", glm::value_ptr(view));
 	//	mvStack.top() = glm::translate(mvStack.top(), glm::vec3(-10.0f, -0.1f, -10.0f));
 		// Draw the loaded model
 
@@ -500,18 +501,18 @@ namespace SceneManager {
 		glUniformMatrix4fv(glGetUniformLocation(modelProgram, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(model));
 		modelData->Draw(modelProgram);
 		
-		mvStack.pop();
+		//mvStack.pop();
 	}
 
 	void renderWep(glm::mat4 proj, Model *modelData) {
 		glUseProgram(modelProgram);
 		glDisable(GL_DEPTH_TEST);//Disable depth test for HUD label
-		mvStack.push(glm::mat4(1.0));// push modelview to stack
+		//mvStack.push(glm::mat4(1.0));// push modelview to stack
 									//		glCullFace(GL_BACK);
 		MeshManager::setLight(modelProgram, testLight);
 		MeshManager::setMaterial(modelProgram, redMaterial);
 		MeshManager::setUniformMatrix4fv(modelProgram, "projection", glm::value_ptr(proj));
-		MeshManager::setUniformMatrix4fv(modelProgram, "view", glm::value_ptr(mvStack.top()));
+		MeshManager::setUniformMatrix4fv(modelProgram, "view", glm::value_ptr(glm::mat4(1.0)));
 		//	mvStack.top() = glm::translate(mvStack.top(), glm::vec3(-10.0f, -0.1f, -10.0f));
 		// Draw the loaded model
 		glActiveTexture(GL_TEXTURE0);
@@ -538,7 +539,7 @@ namespace SceneManager {
 		glUniformMatrix4fv(glGetUniformLocation(modelProgram, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(model));
 		modelData->Draw(modelProgram);
 
-		mvStack.pop();
+	//	mvStack.pop();
 		//	glCullFace(GL_BACK);
 		glEnable(GL_DEPTH_TEST);//Re-enable depth test after HUD label 
 		glDepthMask(GL_TRUE);
@@ -557,17 +558,20 @@ namespace SceneManager {
 		if (pointOfView == FIRST_PERSON) {
 			at = moveForward(player->getPosition(), yaw, 1.0f);
 			at.y -= pitch;
-			mvStack.top() = glm::lookAt(player->getPosition(), at, up);
+			view = glm::lookAt(player->getPosition(), at, up);
+			//mvStack.top() = glm::lookAt(player->getPosition(), at, up);
 		}
 
 		else {
 			at = player->getPosition(); // look at player position
 			eye = moveForward(at, pitch, -6.0f); // move behind him
 			eye.y += pitch; // displacement determined by user interaction
-			mvStack.top() = glm::lookAt(eye, at, up);
+			view = glm::lookAt(eye, at, up);
+			//mvStack.top() = glm::lookAt(eye, at, up);
 		}
 
-		glm::vec4 tmp = mvStack.top()*lightPos;
+		glm::vec4 tmp = view*lightPos;
+		//glm::vec4 tmp = mvStack.top()*lightPos;
 		testLight.position[0] = tmp.x;
 		testLight.position[1] = tmp.y;
 		testLight.position[2] = tmp.z;
@@ -580,14 +584,15 @@ namespace SceneManager {
 		glClearColor(0.5f, 0.7f, 0.8f, 1.0f);
 		glm::mat4 projection(1.0);
 		GLfloat scale(1.0f); // just to allow easy scaling of complete scene
-		glm::mat4 modelview(1.0); // set base position for scene
-		mvStack.push(modelview);
+		//glm::mat4 modelview(1.0); // set base position for scene
+		//mvStack.push(modelview);
 		glDepthMask(GL_TRUE);
+		view = glm::mat4(1.0);
 		
 		camera();
 		projection = glm::perspective(float(60.0f*DEG_TO_RADIAN), SCREENWIDTH / SCREENHEIGHT, 0.1f, 100.0f);
 
-		mvStack = skybox->renderSkybox(projection, mvStack, cube);
+		skybox->renderSkybox(projection, view, cube);
 	
 		///+++++++++++++++
 		//renderPlane(bodies[0], projection);
@@ -622,7 +627,7 @@ namespace SceneManager {
 		///
 		//h_manager->renderToHud(11, texturedProgram, testLight, testCube->object_getMesh(), testCubes[0]->object_getIndex(), glm::vec3(-0.25f, 0.9f, 0.9f), testCubes[11]->getVelocity().x, testCubes[11]->getVelocity().y, testCubes[11]->getVelocity().z);
 		///
-		mvStack.pop();
+		//mvStack.pop();
 
 		glDepthMask(GL_TRUE);
 		SDL_GL_SwapWindow(window); // swap buffers

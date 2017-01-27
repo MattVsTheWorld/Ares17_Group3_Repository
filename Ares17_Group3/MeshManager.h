@@ -3,9 +3,7 @@
 
 #include <GL/glew.h>
 #include "ShaderManager.h"
-
-
-
+#include "Model.h"
 namespace MeshManager {
 
 	struct lightStruct {

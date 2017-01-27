@@ -1,7 +1,7 @@
 #ifndef SCENEMANAGER
 #define SCENEMANAGER
 
-#include "MeshManager.h"
+//#include "MeshManager.h"
 #include "SDL.h"
 //#include "Object.h"
 #include "hudManager.h"
@@ -12,10 +12,11 @@
 #include "Skybox.h"
 //#include <time.h>
 
-#include <btBulletDynamicsCommon.h>
-
+//#include <btBulletDynamicsCommon.h>
+#include "btShapeManager.h"
 // TEMPORARY
 #include "loadBitmap.h"
+//#include <map>
 
 //#include "Bullet.h"
 #include "Player.h"

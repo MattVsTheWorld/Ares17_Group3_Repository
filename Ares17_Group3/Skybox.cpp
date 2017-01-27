@@ -46,9 +46,12 @@ GLuint Skybox::loadCubeMap(const char *fname[6], GLuint *texID) {
 }
 
 
-std::stack<glm::mat4> Skybox::renderSkybox(glm::mat4 projection, std::stack<glm::mat4> mvStack, Model *modelData) {
+void Skybox::renderSkybox(glm::mat4 projection, glm::mat4 view, Model *modelData) {
 	// skybox as single cube using cube map
 
+	std::stack<glm::mat4> mvStack;
+	mvStack.push(view); // I can't make it use the matrix straight out
+						// probably something stupid but ain't nobody got time
 	glUseProgram(skyboxProgram);
 	MeshManager::setUniformMatrix4fv(skyboxProgram, "projection", glm::value_ptr(projection));
 	glDepthMask(GL_FALSE); // make sure writing to update depth test is off
@@ -63,10 +66,9 @@ std::stack<glm::mat4> Skybox::renderSkybox(glm::mat4 projection, std::stack<glm:
 	modelData->Draw(skyboxProgram);
 	
 	mvStack.pop();
+	mvStack.pop(); // :(
 	glCullFace(GL_BACK); // drawing inside of cube!
 						 // back to remainder of rendering
 	glDepthMask(GL_TRUE); // make sure depth test is on
-
-	return mvStack;
 
 }

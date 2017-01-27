@@ -1,7 +1,6 @@
 #ifndef SKYBOX
 #define SKYBOX
 #include "MeshManager.h"
-#include "Model.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -17,7 +16,7 @@ public:
 	// Make more general for different levels!
 	GLuint loadCubeMap(const char *fname[6], GLuint *texID);
 
-	std::stack<glm::mat4> renderSkybox(glm::mat4 projection, std::stack<glm::mat4> mvStack, Model* modelData);
+	void renderSkybox(glm::mat4 projection, glm::mat4 view, Model* modelData);
 
 protected:
 private:

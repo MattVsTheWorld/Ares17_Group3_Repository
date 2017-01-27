@@ -155,6 +155,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="btShapeManager.cpp" />
     <ClCompile Include="Bullet.cpp" />
     <ClCompile Include="hudManager.cpp" />
     <ClCompile Include="loadBitmap.cpp" />
@@ -168,6 +169,7 @@
     <ClCompile Include="Skybox.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="btShapeManager.h" />
     <ClInclude Include="Bullet.h" />
     <ClInclude Include="hudManager.h" />
     <ClInclude Include="loadBitmap.h" />
