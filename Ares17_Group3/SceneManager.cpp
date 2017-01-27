@@ -2,13 +2,9 @@
 
 using namespace std;
 
-//typedef std::pair < glm::vec3, glm::vec3 > vectorPair;
-//typedef stack<glm::mat4> mvstack;
-
 // this class still needs a lot of work
 namespace SceneManager {
-	//Object *testCube; 
-	//vector<Bullet*> bullet;
+
 	Player *player;
 	glm::vec3 playerScale(1.0, 3.0, 1.0);
 	
@@ -19,6 +15,7 @@ namespace SceneManager {
 	
 	hudManager *h_manager;
 	Skybox *skybox;
+	btShapeManager *bt_manager;
 
 	float SCREENWIDTH = 800.0f;
 	float SCREENHEIGHT = 600.0f;
@@ -30,9 +27,6 @@ namespace SceneManager {
 	glm::vec3 scaleTest = glm::vec3(20.0f, 0.5f, 20.0f);
 	glm::vec3 nullTest = glm::vec3(0.0f, 0.0f, 0.0f);
 
-//	transformation_Matrices testTransformation = { transTest, scaleTest, nullTest, nullTest, nullTest };
-//	object_Properties cube;
-
 	const char *testTexFiles[6] = {
 		"Town-skybox/Town_bk.bmp", "Town-skybox/Town_ft.bmp", "Town-skybox/Town_rt.bmp", "Town-skybox/Town_lf.bmp", "Town-skybox/Town_up.bmp", "Town-skybox/Town_dn.bmp"
 	};
@@ -43,7 +37,6 @@ namespace SceneManager {
 	Model *sphere;
 	Model *cube;
 	GLuint defaultTexture;
-	//mvstack mvStack;
 
 	glm::mat4 view;
 
@@ -91,216 +84,36 @@ namespace SceneManager {
 		{ 0.5f, 0.5f, 0.5f, 1.0f }, // specular
 		2.0f  // shininess
 	};
-	
-	// 18/01
-	btDynamicsWorld* world;
-	btDispatcher* dispatcher;
-	btCollisionConfiguration* collisionConfig;
-	btBroadphaseInterface* broadphase; //improves collision check (?) // can improve by know world size (?)
-	btConstraintSolver* solver;
 	std::vector<btRigidBody*> bodies;
-//	std::map<std::string, btRigidBody*> bodiess;
-
-	btRigidBody* addBox(float width, float height, float depth,float x, float y, float z, float mass)
-	{
-		btTransform t; 
-		t.setIdentity();
-		t.setOrigin(btVector3(x,y,z));
-		btBoxShape* box = new btBoxShape(btVector3(width/2,height/2,depth/2));
-		btVector3 inertia(0, 0, 0);
-		if (mass != 0.0)
-			box->calculateLocalInertia(mass, inertia);
-		btMotionState* motion = new btDefaultMotionState(t);
 	
-		btRigidBody::btRigidBodyConstructionInfo info(mass, motion, box, inertia); 
-																		 
-		btRigidBody* body = new btRigidBody(info);
-		world->addRigidBody(body);
-		bodies.push_back(body);
-
-		return body;
-	}
-
-	btRigidBody* addSphere(float rad, float x, float y, float z, float mass)
-	{
-		btTransform t;
-		t.setIdentity();
-		t.setOrigin(btVector3(x, y, z));
-		btSphereShape* sphere = new btSphereShape(rad);
-		btVector3 inertia(0, 0, 0);
-		if (mass != 0.0)
-			sphere->calculateLocalInertia(mass, inertia);
-
-		btMotionState* motion = new btDefaultMotionState(t);
-		btRigidBody::btRigidBodyConstructionInfo info(mass, motion, sphere, inertia);
-		btRigidBody* body = new btRigidBody(info);
-		world->addRigidBody(body);
-		bodies.push_back(body);
-		return body;
-	}
-
-	void renderSphere(btRigidBody* sphere, glm::mat4 proj, Model *modelData, MeshManager::materialStruct material) {
-
-		if (sphere->getCollisionShape()->getShapeType() != SPHERE_SHAPE_PROXYTYPE) //cout << "Wrong collision shape ";	
-			return;
-
-		glUseProgram(modelProgram);
-		//mvStack.push(mvStack.top());// push modelview to stack
-		
-		//	mvStack.top() = glm::translate(mvStack.top(), glm::vec3(-10.0f, -0.1f, -10.0f));
-		// Draw the loaded model
-		//MeshManager::setLight(modelProgram, testLight);
-		MeshManager::setLight(modelProgram, testLight);
-		MeshManager::setMaterial(modelProgram, material);
-
-		MeshManager::setUniformMatrix4fv(modelProgram, "projection", glm::value_ptr(proj));
-		MeshManager::setUniformMatrix4fv(modelProgram, "view", glm::value_ptr(view));
-
-		float r =((btSphereShape*)sphere->getCollisionShape())->getRadius();
-
-		btTransform t;
-		sphere->getMotionState()->getWorldTransform(t);
-		glm::mat4 model;
-		t.getOpenGLMatrix(glm::value_ptr(model));
-
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, defaultTexture);
-
-		model = glm::scale(model, glm::vec3(r, r, r));
-		glUniformMatrix4fv(glGetUniformLocation(modelProgram, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(model));
-		modelData->Draw(modelProgram);
-
-		glBindTexture(GL_TEXTURE_2D, 0);
-	//	mvStack.pop();
-	}
-
-	// Just move it after
-	void renderBox(btRigidBody* box, glm::mat4 proj, Model *modelData, MeshManager::materialStruct material) {
-
-		if (box->getCollisionShape()->getShapeType() != BOX_SHAPE_PROXYTYPE) 			//cout << "Wrong collision shape";
-			return;
-		
-		glUseProgram(modelProgram);
-		//MeshManager::setLight(shaderProgram, testLight);
-		//MeshManager::setMaterial(shaderProgram, defaultMaterial);
-	//	mvStack.push(mvStack.top());// push modelview to stack
-		MeshManager::setLight(modelProgram, testLight);
-		MeshManager::setMaterial(modelProgram, material);
-		MeshManager::setUniformMatrix4fv(modelProgram, "projection", glm::value_ptr(proj));
-		MeshManager::setUniformMatrix4fv(modelProgram, "view", glm::value_ptr(view));
-		
-		btVector3 extent = ((btBoxShape*)box->getCollisionShape())->getHalfExtentsWithMargin();
-		btTransform t;
-		box->getMotionState()->getWorldTransform(t);
-
-
-		glm::mat4 model;
-		t.getOpenGLMatrix(glm::value_ptr(model));
-
-		model = glm::scale(model, glm::vec3(extent.x(), extent.y(), extent.z())); //DEFINITELY goes after
-
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, defaultTexture);
-		//MeshManager::setUniformMatrix4fv(shaderProgram, "modelview", glm::value_ptr(mvStack.top()));
-		//MeshManager::setUniformMatrix4fv(shaderProgram, "projection", glm::value_ptr(projection));		
-		//MeshManager::drawIndexedMesh(testCube->object_getMesh(), testCube->object_getIndex(), GL_TRIANGLES);
-
-		glUniformMatrix4fv(glGetUniformLocation(modelProgram, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(model));
-		modelData->Draw(modelProgram);
-
-		glBindTexture(GL_TEXTURE_2D, 0);
-	//	mvStack.pop();
-	}
-
-
-	/*
-	void renderPlane(btRigidBody* plane, glm::mat4 projection)
-	{
-		if (plane->getCollisionShape()->getShapeType() != STATIC_PLANE_PROXYTYPE)
-		{
-			return;
-			cout << "Wrong collision shape (?)";
-		}
-		//glColor3f(0.8, 0.8, 0.8);
-		glUseProgram(shaderProgram);
-		MeshManager::setLight(shaderProgram, testLight);
-		MeshManager::setMaterial(shaderProgram, defaultMaterial);
-		mvStack.push(mvStack.top());// push modelview to stack
-
-		btTransform t;
-		plane->getMotionState()->getWorldTransform(t);
-		
-		t.getOpenGLMatrix(glm::value_ptr(mvStack.top()));
-
-		/*
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, testCubes[0]->object_getTexture());
-		mvStack.top() = glm::scale(mvStack.top(), glm::vec3(10, 0.5, 10));
-		MeshManager::setUniformMatrix4fv(shaderProgram, "modelview", glm::value_ptr(mvStack.top()));
-		MeshManager::setUniformMatrix4fv(shaderProgram, "projection", glm::value_ptr(projection));
-		//cout << "GASGHDJ";
-
-		MeshManager::drawIndexedMesh(testCubes[0]->object_getMesh(), testCubes[0]->object_getIndex(), GL_TRIANGLES);
-		glBindTexture(GL_TEXTURE_2D, 0);
-		
-		mvStack.pop();
-
-	} */
-	// +++++
-
 	void initBoxes() {
-		addBox(50, 0.1, 50, 0, 0, 0, 0.0);
-		addBox(1.0f, 1.0f, 1.0f, 0, 10, -10, 1.0);
+		
+		bodies.push_back(bt_manager->addBox(50, 0.1, 50, 0, 0, 0, 0.0));
+		bodies.push_back(bt_manager->addBox(1.0f, 1.0f, 1.0f, 0, 10, -10, 1.0));
 		bodies[1]->setActivationState(DISABLE_DEACTIVATION); // disable deactivation of physics on an object
 															 // objects become static after ~2(?) seconds otherwise
-		addBox(3.0f, 1.0f, 3.0f, 0, 0, -5, 1.0);
+		bodies.push_back(bt_manager->addBox(3.0f, 1.0f, 3.0f, 0, 0, -5, 1.0));
 		bodies[2]->setActivationState(DISABLE_DEACTIVATION);
 
-		addBox(playerScale.x, playerScale.y, playerScale.z, eye.x, eye.y, eye.z, 0);
+		bodies.push_back(bt_manager->addBox(playerScale.x, playerScale.y, playerScale.z, eye.x, eye.y, eye.z, 0));
 		bodies[3]->setActivationState(DISABLE_DEACTIVATION);
 
-		addSphere(0.5, 0, 3, 0, 0.2);
+		bodies.push_back(bt_manager->addSphere(0.5, 0, 3, 0, 0.2));
 		bodies[4]->setActivationState(DISABLE_DEACTIVATION);
 	}
 
-	void initPlayer() {
-	//	transformation_Matrices playerTrans = { eye, playerScale, nullTest , nullTest , nullTest };
-		player = new Player(eye);
-		
-	}
+	void initPlayer() {	player = new Player(eye); }
 
 	void init(void) {
-		// 18/01
-		collisionConfig = new btDefaultCollisionConfiguration();
-		dispatcher = new btCollisionDispatcher(collisionConfig); //base algorithm good (?)
-		broadphase = new btDbvtBroadphase(); //divide space into different spaces // can use a more performancy ones // axis sweep?
-		solver = new btSequentialImpulseConstraintSolver(); // can use OpenCL, multithreading (?)
 
-		world = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfig);
-		world->setGravity(btVector3(0, -10, 0)); // x y z as usual
-
-		// ground as a plane
-		// only used for debug (?)
-		/*
-		btTransform t; // orientation and position // quaternion :))))) """SIMPLE VARIABLE"""
-		t.setIdentity(); // 0 position, 0 rotation
-		t.setOrigin(btVector3(0, 0, 0));
-		btStaticPlaneShape* plane = new btStaticPlaneShape(btVector3(0,1,0),0); // 1st == normal (0,1,0) -> pointing upwards // second == distance from origin = 0 (AA) //infinite in every direction
-		//motion state, although position for this is already set
-		btMotionState* motion = new btDefaultMotionState(t);
-		// mass = 0 == static, mass > 0 == dinamic ( < 0 no sense)
-		btRigidBody::btRigidBodyConstructionInfo info(0,motion,plane); // no need to dynamically allocate
-		// for dinamic bodies will have to add inertia (?)
-		btRigidBody* body = new btRigidBody(info);
-		world->addRigidBody(body);
-		bodies.push_back(body);
-		*/
-	
-		initBoxes();
-		// +++++
 		shaderProgram = ShaderManager::initShaders("phong-tex.vert", "phong-tex.frag");
 		texturedProgram = ShaderManager::initShaders("textured.vert", "textured.frag");
 		modelProgram = ShaderManager::initShaders("modelLoading.vert", "modelLoading.frag");
+		
+		//+++
+		bt_manager = new btShapeManager(modelProgram, testLight);
+		//+++
+		
 		ourModel = new Model("Nanosuit/nanosuit.obj");
 		ourModel2 = new Model("CHOO/Socom pistol.obj");
 		cube = new Model("cube.obj");
@@ -308,15 +121,11 @@ namespace SceneManager {
 		sphere = new Model("sphere.obj"); // THIS MODEL IS TERRIBLE
 		MeshManager::setLight(shaderProgram, testLight);
 		MeshManager::setMaterial(shaderProgram, greenMaterial);
-		//cube = testCube->initializeObject("cube.obj");
-
-		//initObjects();
-		//testCube = new Object(testTransformation, cube);
 		
 		initPlayer();
+		initBoxes();
 		h_manager = new hudManager();
 		skybox = new Skybox(testTexFiles);
-
 
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_BLEND);
@@ -331,19 +140,6 @@ namespace SceneManager {
 		return glm::vec3(pos.x + d*std::cos(yaw*DEG_TO_RADIAN), pos.y, pos.z + d*std::sin(yaw*DEG_TO_RADIAN));
 	}
 
-	/*
-	float gameTime() {
-	//	currentTime = clock();
-
-		unsigned int dt = currentTime - lastTime;
-		float dt_secs = (float)dt / 1000;
-		if (dt_secs > 0.017f) dt_secs = 0.017f; // first value is off ( 5.5~)
-											  
-		lastTime = currentTime;
-
-		return dt_secs;
-	}
-	*/
 	void lockCamera()
 	{
 		if (pitch > 70)
@@ -469,6 +265,7 @@ namespace SceneManager {
 
 	//	if (keys[SDL_SCANCODE_5])cout << bullet.size() << endl;
 
+		
 		if (keys[SDL_SCANCODE_M]) {
 			//cout << "Curiously cinnamon\n";
 			bodies[1]->setLinearVelocity(btVector3(0.0, 5.0, 0.0));
@@ -481,6 +278,7 @@ namespace SceneManager {
 			bodies[1]->setLinearVelocity(btVector3(0.0, 0.0, -5.0));
 		if (keys[SDL_SCANCODE_KP_5])
 			bodies[1]->setLinearVelocity(btVector3(-5.0, 0.0, 0.0));
+			
 	}
 
 	void renderObject(glm::mat4 proj, Model *modelData, glm::vec3 pos) {
@@ -549,7 +347,8 @@ namespace SceneManager {
 		controls(window, sdlEvent);
 
 		// 18/01
-		world->stepSimulation(1/60.0); // 1 divided by frames per second
+		bt_manager->update();
+		//world->stepSimulation(1/60.0); // 1 divided by frames per second
 		// would need to delete dispatcher, collisionconfig, solver, world, broadphase in main
 		// +++++
 	}
@@ -606,11 +405,11 @@ namespace SceneManager {
 		}
 
 		*/
-		renderBox(bodies[0], projection, cube, greenMaterial);
-		renderBox(bodies[1], projection, cube, redMaterial);
-		renderBox(bodies[2], projection, cube, defaultMaterial);
-	//	renderBox(bodies[3], projection, cube);
-		renderSphere(bodies[4], projection, sphere, purpleMaterial);
+		bt_manager->renderBox(bodies[0], view, projection, cube, greenMaterial);
+		bt_manager->renderBox(bodies[1], view, projection, cube, redMaterial);
+		bt_manager->renderBox(bodies[2], view, projection, cube, defaultMaterial);
+	//	bt_manager->renderBox(bodies[3], view, projection, cube, defaultMaterial);
+		bt_manager->renderSphere(bodies[4], view, projection, sphere, purpleMaterial);
 		///+++++++++++++++
 	
 		//renderSphere(projection, sphere, glm::vec3(0, 2, 0));

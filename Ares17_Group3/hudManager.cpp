@@ -49,6 +49,7 @@ hudManager::hudManager() {
 }
 
 
+// Requires change ***
 
 // render normal hud text
 // uses shader program, light, modelview top of stack, mesh object and index count as parameters
