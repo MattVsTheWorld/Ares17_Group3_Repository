@@ -1,6 +1,6 @@
 #ifndef PLAYER
 #define PLAYER
-//http ://stackoverflow.com/questions/25605659/avoid-ground-collision-with-bullet/25725502#25725502
+//http://stackoverflow.com/questions/25605659/avoid-ground-collision-with-bullet/25725502#25725502
 // might be useful
 
 // Probably need bullet

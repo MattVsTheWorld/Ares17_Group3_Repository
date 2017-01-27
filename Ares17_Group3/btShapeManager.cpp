@@ -91,6 +91,42 @@ void btShapeManager::renderSphere(btRigidBody* sphere, glm::mat4 view, glm::mat4
 	//	mvStack.pop();
 }
 
+void btShapeManager::renderCapsule(btRigidBody* capsule, glm::mat4 view, glm::mat4 proj, Model *modelData, MeshManager::materialStruct material) {
+
+	if (capsule->getCollisionShape()->getShapeType() != CAPSULE_SHAPE_PROXYTYPE) //cout << "Wrong collision shape ";	
+		return;
+
+	glUseProgram(modelProgram);
+	//mvStack.push(mvStack.top());// push modelview to stack
+
+	//	mvStack.top() = glm::translate(mvStack.top(), glm::vec3(-10.0f, -0.1f, -10.0f));
+	// Draw the loaded model
+	//MeshManager::setLight(modelProgram, testLight);
+	MeshManager::setLight(modelProgram, light);
+	MeshManager::setMaterial(modelProgram, material);
+
+	MeshManager::setUniformMatrix4fv(modelProgram, "projection", glm::value_ptr(proj));
+	MeshManager::setUniformMatrix4fv(modelProgram, "view", glm::value_ptr(view));
+
+	float r = ((btCapsuleShape*)capsule->getCollisionShape())->getRadius();
+	float h = ((btCapsuleShape*)capsule->getCollisionShape())->getHalfHeight()*2;
+
+	btTransform t;
+	capsule->getMotionState()->getWorldTransform(t);
+	glm::mat4 model;
+	t.getOpenGLMatrix(glm::value_ptr(model));
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, defaultTexture);
+
+	model = glm::scale(model, glm::vec3(r, h, r));
+	glUniformMatrix4fv(glGetUniformLocation(modelProgram, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(model));
+	modelData->Draw(modelProgram);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+	//	mvStack.pop();
+}
+
 // Just move it after
 void btShapeManager::renderBox(btRigidBody* box, glm::mat4 view, glm::mat4 proj, Model *modelData, MeshManager::materialStruct material) {
 
@@ -127,6 +163,10 @@ void btShapeManager::renderBox(btRigidBody* box, glm::mat4 view, glm::mat4 proj,
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 	//	mvStack.pop();
+}
+
+void btShapeManager::addToWorld(btRigidBody* body) {
+	btSettings.world->addRigidBody(body);
 }
 
 // Create plane + info on bullet

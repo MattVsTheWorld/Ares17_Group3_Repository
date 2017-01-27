@@ -31,7 +31,8 @@ public:
 	btRigidBody* addSphere(float rad, float x, float y, float z, float mass);
 	void renderSphere(btRigidBody* sphere, glm::mat4 view, glm::mat4 proj, Model *modelData, MeshManager::materialStruct material);
 	void renderBox(btRigidBody* box, glm::mat4 view, glm::mat4 proj, Model *modelData, MeshManager::materialStruct material);
-
+	void renderCapsule(btRigidBody* capsule, glm::mat4 view, glm::mat4 proj, Model *modelData, MeshManager::materialStruct material);
+	void addToWorld(btRigidBody* body);
 
 private:	
 	btSettings btSettings;

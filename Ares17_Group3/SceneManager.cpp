@@ -85,13 +85,20 @@ namespace SceneManager {
 		2.0f  // shininess
 	};
 	std::vector<btRigidBody*> bodies;
-	
+
 	void initBoxes() {
 		
 		bodies.push_back(bt_manager->addBox(50, 0.1, 50, 0, 0, 0, 0.0));
 		bodies.push_back(bt_manager->addBox(1.0f, 1.0f, 1.0f, 0, 10, -10, 1.0));
 		bodies[1]->setActivationState(DISABLE_DEACTIVATION); // disable deactivation of physics on an object
 															 // objects become static after ~2(?) seconds otherwise
+
+		// NOTE : should probably use this
+		/*
+		body->setCollisionFlags( body->getCollisionFlags() |
+		btCollisionObject::CF_KINEMATIC_OBJECT);
+		*/
+
 		bodies.push_back(bt_manager->addBox(3.0f, 1.0f, 3.0f, 0, 0, -5, 1.0));
 		bodies[2]->setActivationState(DISABLE_DEACTIVATION);
 
@@ -102,8 +109,38 @@ namespace SceneManager {
 		bodies[4]->setActivationState(DISABLE_DEACTIVATION);
 	}
 
-	void initPlayer() {	player = new Player(eye); }
+	// TEST
+	btRigidBody* playerBody;
+	//
 
+	void initPlayer(float rad, float height, float mass) {	
+		player = new Player(eye); 
+		
+		btTransform t;
+		t.setIdentity();
+		t.setOrigin(btVector3(player->getPosition().x, player->getPosition().y, player->getPosition().z));
+		btCapsuleShape* playerShape = new btCapsuleShape(rad, height);
+		btVector3 inertia(0, 0, 0);
+		if (mass != 0.0)
+			playerShape->calculateLocalInertia(mass, inertia);
+		btMotionState* motion = new btDefaultMotionState(t);
+
+		btRigidBody::btRigidBodyConstructionInfo info(mass, motion, playerShape, inertia);
+
+		playerBody = new btRigidBody(info);
+		playerBody->setAngularFactor(0); // ? // Doesn't fall sideways
+		bt_manager->addToWorld(playerBody);
+	
+		// btRigidBody::setAngularFactor // to 0
+
+	}
+
+	void updatePlayer() {
+		btTransform t; 
+		playerBody->getMotionState()->getWorldTransform(t);
+		glm::vec3 pos(t.getOrigin().x(), t.getOrigin().y(), t.getOrigin().z());
+		player->setPosition(pos);
+	}
 	void init(void) {
 
 		shaderProgram = ShaderManager::initShaders("phong-tex.vert", "phong-tex.frag");
@@ -122,7 +159,7 @@ namespace SceneManager {
 		MeshManager::setLight(shaderProgram, testLight);
 		MeshManager::setMaterial(shaderProgram, greenMaterial);
 		
-		initPlayer();
+		initPlayer(1.0f,2.0f,20.0f);
 		initBoxes();
 		h_manager = new hudManager();
 		skybox = new Skybox(testTexFiles);
@@ -347,6 +384,8 @@ namespace SceneManager {
 		controls(window, sdlEvent);
 
 		// 18/01
+	//	updatePlayer();
+		
 		bt_manager->update();
 		//world->stepSimulation(1/60.0); // 1 divided by frames per second
 		// would need to delete dispatcher, collisionconfig, solver, world, broadphase in main
@@ -392,9 +431,10 @@ namespace SceneManager {
 		projection = glm::perspective(float(60.0f*DEG_TO_RADIAN), SCREENWIDTH / SCREENHEIGHT, 0.1f, 100.0f);
 
 		skybox->renderSkybox(projection, view, cube);
-	
+
+		bt_manager->renderCapsule(playerBody, view, projection, sphere, defaultMaterial);
 		///+++++++++++++++
-		//renderPlane(bodies[0], projection);
+		//renderPlane(bodies[0], projection);https://www.twitch.tv/directory/all
 /*
 		for (int i = 0;i<bodies.size();i++)
 		{
