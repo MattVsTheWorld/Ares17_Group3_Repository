@@ -1,8 +1,10 @@
 #ifndef PLAYER
 #define PLAYER
-//#include "Object.h"
+//http ://stackoverflow.com/questions/25605659/avoid-ground-collision-with-bullet/25725502#25725502
+// might be useful
 
-//enum States { ON_GROUND, JUMPING };
+// Probably need bullet
+
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -11,21 +13,13 @@
 
 class Player {
 public:
-//	Player(transformation_Matrices transformation, object_Properties obj_p);
-//	Player(transformation_Matrices transformation, char *texturePath, object_Properties obj_p);
 	Player(glm::vec3 _eye);
-
 	void setPosition(glm::vec3 newEye);
 	glm::vec3 getPosition();
-//	States getState();
-	//void setState(States state);
 protected:
 
 private:
 	glm::vec3 eye;
-//	transformation_Matrices trans_m;
-//	States player_state = JUMPING; // because of initial player pos
-
 };
 
 #endif

@@ -45,9 +45,6 @@
     <ClCompile Include="Skybox.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
-    <ClCompile Include="Player.cpp">
-      <Filter>To be deleted / redone</Filter>
-    </ClCompile>
     <ClCompile Include="Object.cpp">
       <Filter>To be deleted / redone</Filter>
     </ClCompile>
@@ -58,6 +55,9 @@
       <Filter>To be deleted / redone</Filter>
     </ClCompile>
     <ClCompile Include="btShapeManager.cpp">
+      <Filter>Being worked on</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
       <Filter>Being worked on</Filter>
     </ClCompile>
   </ItemGroup>
@@ -86,9 +86,6 @@
     <ClInclude Include="SceneManager.h">
       <Filter>Being worked on</Filter>
     </ClInclude>
-    <ClInclude Include="Player.h">
-      <Filter>To be deleted / redone</Filter>
-    </ClInclude>
     <ClInclude Include="Object.h">
       <Filter>To be deleted / redone</Filter>
     </ClInclude>
@@ -102,6 +99,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="btShapeManager.h">
+      <Filter>Being worked on</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
       <Filter>Being worked on</Filter>
     </ClInclude>
   </ItemGroup>
