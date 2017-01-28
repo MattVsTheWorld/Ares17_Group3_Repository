@@ -102,11 +102,11 @@ namespace SceneManager {
 		bodies.push_back(bt_manager->addBox(3.0f, 1.0f, 3.0f, 0, 0, -5, 1.0));
 		bodies[2]->setActivationState(DISABLE_DEACTIVATION);
 
-		bodies.push_back(bt_manager->addBox(playerScale.x, playerScale.y, playerScale.z, eye.x, eye.y, eye.z, 0));
-		bodies[3]->setActivationState(DISABLE_DEACTIVATION);
+	//	bodies.push_back(bt_manager->addBox(playerScale.x, playerScale.y, playerScale.z, eye.x, eye.y, eye.z, 0));
+	//	bodies[3]->setActivationState(DISABLE_DEACTIVATION);
 
 		bodies.push_back(bt_manager->addSphere(0.5, 0, 3, 0, 0.2));
-		bodies[4]->setActivationState(DISABLE_DEACTIVATION);
+		bodies[3]->setActivationState(DISABLE_DEACTIVATION);
 	}
 
 	// TEST
@@ -137,10 +137,13 @@ namespace SceneManager {
 
 	void updatePlayer() {
 		btTransform t; 
+		t.setIdentity();
 		playerBody->getMotionState()->getWorldTransform(t);
-		glm::vec3 pos(t.getOrigin().x(), t.getOrigin().y(), t.getOrigin().z());
-		player->setPosition(pos);
+	//	playerBody->getMotionState();
+		btVector3 pos = t.getOrigin();
+		player->setPosition(glm::vec3(pos.x(),pos.y(),pos.z()));
 	}
+
 	void init(void) {
 
 		shaderProgram = ShaderManager::initShaders("phong-tex.vert", "phong-tex.frag");
@@ -176,6 +179,34 @@ namespace SceneManager {
 	glm::vec3 moveRight(glm::vec3 pos, GLfloat angle, GLfloat d) {
 		return glm::vec3(pos.x + d*std::cos(yaw*DEG_TO_RADIAN), pos.y, pos.z + d*std::sin(yaw*DEG_TO_RADIAN));
 	}
+
+	static btVector3 getLinearVelocityInBodyFrame(btRigidBody* body)
+	{
+		return(body->getWorldTransform().getBasis().transpose() *
+			body->getLinearVelocity());
+	}
+
+	btVector3 speedForward(GLfloat _speed) {
+		//playerBody->getVelocityInLocalPoint();
+		btVector3 speed = getLinearVelocityInBodyFrame(playerBody);
+		speed = btVector3(speed.x() + _speed*std::sin(yaw*DEG_TO_RADIAN), speed.y(), speed.z() - _speed*std::cos(yaw*DEG_TO_RADIAN));
+		return speed;
+	}
+	/* Might be useful http://bulletphysics.org/Bullet/phpBB3/viewtopic.php?f=9&t=2069
+	btVector3 getVelocityAtWorldPosition(btRigidBody* body, const btVector3& worldposition, bool local)
+	{
+		/* That's the 'localpoint' 
+		const btVector3 relpos = worldposition - body->getCenterOfMassPosition();
+		/* That's velocity in world space 
+		const btVector3 wvel = body->getVelocityInLocalPoint(relpos);
+		/* Now you can transform it in body local frame 
+		if (local) return(body->getWorldTransform().getBasis().transpose()*wvel);
+		/* Or keep it in world frame 
+		return(wvel);
+
+	} */
+
+	//playerBody->setLinearVelocity(btVector3(0.0, 0.0, 0.0));
 
 	void lockCamera()
 	{
@@ -235,11 +266,14 @@ namespace SceneManager {
 
 		const Uint8 *keys = SDL_GetKeyboardState(NULL);
 		if (keys[SDL_SCANCODE_W]) {
-			player->setPosition(moveForward(player->getPosition(), yaw, 0.1f));
-		
+		//	player->setPosition(moveForward(player->getPosition(), yaw, 0.1f));
+			playerBody->setLinearVelocity(speedForward(1.0f)); // work in progres
 		}
+
 		else if (keys[SDL_SCANCODE_S]) {
-			player->setPosition(moveForward(player->getPosition(), yaw, -0.1f));
+			//player->setPosition(moveForward(player->getPosition(), yaw, -0.1f));
+			//bodies[1]->setLinearVelocity(btVector3(0.0, 5.0, 0.0));
+			playerBody->setLinearVelocity(speedForward(-1.0f));
 		} //else player->setVelocity(glm::vec3(0.0, player->getVelocity().y, player->getVelocity().z));
 		if (keys[SDL_SCANCODE_A]) {
 			player->setPosition(moveRight(player->getPosition(), yaw, -0.1f));
@@ -248,6 +282,7 @@ namespace SceneManager {
 			player->setPosition(moveRight(player->getPosition(), yaw, 0.1f));
 		}
 		if (keys[SDL_SCANCODE_R]) {
+			//cout << getLinearVelocityInBodyFrame(playerBody).x() << " " << getLinearVelocityInBodyFrame(playerBody).y() << " " << getLinearVelocityInBodyFrame(playerBody).z() << "\n";
 			player->setPosition(glm::vec3(player->getPosition().x, player->getPosition().y + 0.1, player->getPosition().z));
 		}
 		else if (keys[SDL_SCANCODE_F]) {
@@ -256,10 +291,10 @@ namespace SceneManager {
 
 		//update box
 		// Simplistic; change
-		t.setIdentity();
-		t.setOrigin(btVector3(player->getPosition().x, player->getPosition().y, player->getPosition().z));
-		motion->setWorldTransform(t);
-		bodies[3]->setMotionState(motion);
+		//t.setIdentity();
+		//t.setOrigin(btVector3(player->getPosition().x, player->getPosition().y, player->getPosition().z));
+		//motion->setWorldTransform(t);
+		//bodies[3]->setMotionState(motion);
 /*
 		if (keys[SDL_SCANCODE_SPACE] && player->getState() != JUMPING) {
 			player->setVelocity(glm::vec3(player->getVelocity().x, 6.0f, player->getVelocity().z));
@@ -384,7 +419,7 @@ namespace SceneManager {
 		controls(window, sdlEvent);
 
 		// 18/01
-	//	updatePlayer();
+		updatePlayer();
 		
 		bt_manager->update();
 		//world->stepSimulation(1/60.0); // 1 divided by frames per second
@@ -449,7 +484,7 @@ namespace SceneManager {
 		bt_manager->renderBox(bodies[1], view, projection, cube, redMaterial);
 		bt_manager->renderBox(bodies[2], view, projection, cube, defaultMaterial);
 	//	bt_manager->renderBox(bodies[3], view, projection, cube, defaultMaterial);
-		bt_manager->renderSphere(bodies[4], view, projection, sphere, purpleMaterial);
+		bt_manager->renderSphere(bodies[3], view, projection, sphere, purpleMaterial);
 		///+++++++++++++++
 	
 		//renderSphere(projection, sphere, glm::vec3(0, 2, 0));
