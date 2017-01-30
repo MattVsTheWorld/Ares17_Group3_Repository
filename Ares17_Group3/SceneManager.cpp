@@ -3,7 +3,7 @@
 using namespace std;
 
 #define SPEED_CAP_XZ 10.0
-#define SPEED_CAP_Y 5.0
+#define SPEED_CAP_Y 10.0
 
 typedef std::pair<string, btRigidBody*> bodyID;
 
@@ -276,7 +276,7 @@ namespace SceneManager {
 		playerBody->setAngularFactor(0); // ? // Doesn't fall sideways
 		bt_manager->addToWorld(playerBody);
 		playerBody->setActivationState(DISABLE_DEACTIVATION);
-		playerBody->setFriction(5);
+		playerBody->setFriction(8);
 	
 		// btRigidBody::setAngularFactor // to 0
 	}
@@ -324,18 +324,24 @@ namespace SceneManager {
 	}
 
 
-	btVector3 speedForward(GLfloat _speed, GLfloat angle) {
+	btVector3 speedForward(GLfloat _speed, GLfloat angle, bool concurrent) {
 		btVector3 speed = getLinearVelocityInBodyFrame(playerBody);
-		if (speed.absolute().x() <= SPEED_CAP_XZ && speed.absolute().z() <= SPEED_CAP_XZ)
+
+		if (!concurrent && speed.absolute().x() <= SPEED_CAP_XZ && speed.absolute().z() <= SPEED_CAP_XZ)
 			speed = btVector3(speed.x() + _speed*std::sin(angle*DEG_TO_RADIAN), speed.y(), speed.z() - _speed*std::cos(angle*DEG_TO_RADIAN));
+		else if (concurrent)
+			speed = btVector3(speed.x() + (speed.absolute().x() > SPEED_CAP_XZ ? 0 : _speed*std::sin(angle*DEG_TO_RADIAN)), speed.y(), speed.z() - (speed.absolute().z() > SPEED_CAP_XZ ? 0 : _speed*std::cos(angle*DEG_TO_RADIAN)));
 		return speed;
 	}
 
-	btVector3 speedRight(GLfloat _speed, GLfloat angle) {
+	btVector3 speedRight(GLfloat _speed, GLfloat angle, bool concurrent) {
+
 		//playerBody->getVelocityInLocalPoint();
 		btVector3 speed = getLinearVelocityInBodyFrame(playerBody);
-		if (speed.absolute().x() <= SPEED_CAP_XZ && speed.absolute().z() <= SPEED_CAP_XZ)
+		if (!concurrent && speed.absolute().x() <= SPEED_CAP_XZ && speed.absolute().z() <= SPEED_CAP_XZ)
 			speed = btVector3(speed.x() + _speed*std::cos(angle*DEG_TO_RADIAN), speed.y(), speed.z() + _speed*std::sin(angle*DEG_TO_RADIAN));
+		else if (concurrent)
+			speed = btVector3(speed.x() + (speed.absolute().x() > SPEED_CAP_XZ ? 0 : _speed*std::cos(angle*DEG_TO_RADIAN)), speed.y(), speed.z() + (speed.absolute().z() > SPEED_CAP_XZ ? 0 : _speed*std::sin(angle*DEG_TO_RADIAN)));
 		return speed;
 	}
 
@@ -422,21 +428,21 @@ namespace SceneManager {
 		const Uint8 *keys = SDL_GetKeyboardState(NULL);
 		if (keys[SDL_SCANCODE_W]) {
 		//	player->setPosition(moveForward(player->getPosition(), yaw, 0.1f));
-			playerBody->setLinearVelocity(speedForward(1.0f, yaw)); // work in progres
+		playerBody->setLinearVelocity(speedForward(1.0f, yaw, (keys[SDL_SCANCODE_A] == SDL_PRESSED || keys[SDL_SCANCODE_D] == SDL_PRESSED))); // work in progress
 		}
 
 		else if (keys[SDL_SCANCODE_S]) {
 			//player->setPosition(moveForward(player->getPosition(), yaw, -0.1f));
 			//bodies[1]->setLinearVelocity(btVector3(0.0, 5.0, 0.0));
-			playerBody->setLinearVelocity(speedForward(-1.0f, yaw));
+			playerBody->setLinearVelocity(speedForward(-1.0f, yaw, (keys[SDL_SCANCODE_A] == SDL_PRESSED || keys[SDL_SCANCODE_D] == SDL_PRESSED))); // work in progress
 		} //else player->setVelocity(glm::vec3(0.0, player->getVelocity().y, player->getVelocity().z));
 		if (keys[SDL_SCANCODE_A]) {
 			//player->setPosition(moveRight(player->getPosition(), yaw, -0.1f));
-			playerBody->setLinearVelocity(speedRight(-1.0f, yaw)); // work in progres
+			playerBody->setLinearVelocity(speedRight(-1.0f, yaw, (keys[SDL_SCANCODE_W] == SDL_PRESSED || keys[SDL_SCANCODE_S] == SDL_PRESSED))); // work in progress
 		}
 		else if (keys[SDL_SCANCODE_D]) {
 			//player->setPosition(moveRight(player->getPosition(), yaw, 0.1f));
-			playerBody->setLinearVelocity(speedRight(1.0f, yaw)); // work in progres
+			playerBody->setLinearVelocity(speedRight(1.0f, yaw, (keys[SDL_SCANCODE_W] == SDL_PRESSED || keys[SDL_SCANCODE_S] == SDL_PRESSED))); // work in progress
 		}
 
 		if (keys[SDL_SCANCODE_SPACE]) {
