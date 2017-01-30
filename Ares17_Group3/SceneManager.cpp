@@ -37,8 +37,8 @@ namespace SceneManager {
 	};
 
 	// Load models
-	Model *ourModel;
-	Model *ourModel2;
+	Model *nanosuit;
+	Model *pistol;
 	Model *sphere;
 	Model *cube;
 	GLuint defaultTexture;
@@ -222,6 +222,7 @@ namespace SceneManager {
 		}
 		else cout << "\nMission failed. We'll get em next time. \n. Unable to open file";
 	}
+
 	void initBoxes() {
 		readFile();
 		
@@ -278,10 +279,8 @@ namespace SceneManager {
 		playerBody->setFriction(5);
 	
 		// btRigidBody::setAngularFactor // to 0
-
 	}
 
-	
 	void init(void) {
 
 		shaderProgram = ShaderManager::initShaders("phong-tex.vert", "phong-tex.frag");
@@ -292,8 +291,8 @@ namespace SceneManager {
 		bt_manager = new btShapeManager(modelProgram, testLight);
 		//+++
 		
-		ourModel = new Model("Nanosuit/nanosuit.obj");
-		ourModel2 = new Model("CHOO/Socom pistol.obj");
+		nanosuit = new Model("Nanosuit/nanosuit.obj");
+		pistol = new Model("CHOO/Socom pistol.obj");
 		cube = new Model("cube.obj");
 		defaultTexture = loadBitmap::loadBitmap("wall.bmp");
 		sphere = new Model("sphere.obj"); // THIS MODEL IS TERRIBLE
@@ -681,10 +680,10 @@ namespace SceneManager {
 		
 		// RENDERING MODELS
 		if (pointOfView == THIRD_PERSON)
-			renderObject(projection,ourModel, glm::vec3(player->getPosition().x, player->getPosition().y-1.5, player->getPosition().z));
+			renderObject(projection,nanosuit, glm::vec3(player->getPosition().x, player->getPosition().y-1.5, player->getPosition().z));
 
 		if (pointOfView == FIRST_PERSON)
-			renderWep(projection, ourModel2);
+			renderWep(projection, pistol);
 		//renderSphere(bodies[4], projection, sphere);
 		//renderSphere(bodies[4], projection, sphere);
 		//:thinking:
