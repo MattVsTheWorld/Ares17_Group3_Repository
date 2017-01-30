@@ -2,8 +2,8 @@
 
 using namespace std;
 
-#define SPEED_CAP_XZ 2.0
-#define SPEED_CAP_Y 3.0
+#define SPEED_CAP_XZ 10.0
+#define SPEED_CAP_Y 5.0
 
 // this class still needs a lot of work
 namespace SceneManager {
@@ -134,6 +134,7 @@ namespace SceneManager {
 		playerBody->setAngularFactor(0); // ? // Doesn't fall sideways
 		bt_manager->addToWorld(playerBody);
 		playerBody->setActivationState(DISABLE_DEACTIVATION);
+		playerBody->setFriction(5);
 	
 		// btRigidBody::setAngularFactor // to 0
 
@@ -158,7 +159,7 @@ namespace SceneManager {
 		MeshManager::setLight(shaderProgram, testLight);
 		MeshManager::setMaterial(shaderProgram, greenMaterial);
 		
-		initPlayer(1.0f,2.0f,20.0f);
+		initPlayer(1.0f,2.0f,80.0f);
 		initBoxes();
 		h_manager = new hudManager();
 		skybox = new Skybox(testTexFiles);
@@ -184,21 +185,26 @@ namespace SceneManager {
 
 
 	btVector3 speedForward(GLfloat _speed, GLfloat angle) {
-		//playerBody->getVelocityInLocalPoint();
 		btVector3 speed = getLinearVelocityInBodyFrame(playerBody);
-		speed = btVector3(speed.x() + _speed*std::sin(angle*DEG_TO_RADIAN), speed.y(), speed.z() - _speed*std::cos(angle*DEG_TO_RADIAN));
-		return speed;
-	}
-	btVector3 jump(GLfloat _speed) {
-		btVector3 speed = getLinearVelocityInBodyFrame(playerBody);
-		speed = btVector3(speed.x(), speed.y()+_speed, speed.z());
+		if (speed.absolute().x() <= SPEED_CAP_XZ && speed.absolute().z() <= SPEED_CAP_XZ)
+			speed = btVector3(speed.x() + _speed*std::sin(angle*DEG_TO_RADIAN), speed.y(), speed.z() - _speed*std::cos(angle*DEG_TO_RADIAN));
 		return speed;
 	}
 
 	btVector3 speedRight(GLfloat _speed, GLfloat angle) {
 		//playerBody->getVelocityInLocalPoint();
 		btVector3 speed = getLinearVelocityInBodyFrame(playerBody);
-		speed = btVector3(speed.x() + _speed*std::cos(angle*DEG_TO_RADIAN), speed.y(), speed.z() + _speed*std::sin(angle*DEG_TO_RADIAN));
+		if (speed.absolute().x() <= SPEED_CAP_XZ && speed.absolute().z() <= SPEED_CAP_XZ)
+			speed = btVector3(speed.x() + _speed*std::cos(angle*DEG_TO_RADIAN), speed.y(), speed.z() + _speed*std::sin(angle*DEG_TO_RADIAN));
+		return speed;
+	}
+
+	btVector3 jump(GLfloat _speed) {
+		btVector3 speed = getLinearVelocityInBodyFrame(playerBody);
+		if (player->getState() != JUMPING) {
+			speed = btVector3(speed.x(), speed.y() + _speed, speed.z());
+			player->setState(JUMPING);
+		}
 		return speed;
 	}
 	/* Might be useful http://bulletphysics.org/Bullet/phpBB3/viewtopic.php?f=9&t=2069
@@ -438,21 +444,25 @@ namespace SceneManager {
 		//	playerBody->getMotionState();
 		btVector3 pos = t.getOrigin();
 		player->setPosition(glm::vec3(pos.x(), pos.y(), pos.z()));
-/*
+
+		//cout << getLinearVelocityInBodyFrame(playerBody).y();
+
+		/*
 		btVector3 speed = getLinearVelocityInBodyFrame(playerBody);
-		if (speed.x() > SPEED_CAP_XZ)
+		if (speed.x() >= SPEED_CAP_XZ)
 			speed.setX(SPEED_CAP_XZ);
-		if (speed.x() > SPEED_CAP_XZ)
-			speed.setX(SPEED_CAP_XZ);
-		if (speed.y() > SPEED_CAP_Y)
+		if (speed.x() <= -SPEED_CAP_XZ)
+			speed.setX(-SPEED_CAP_XZ);
+		if (speed.y() >= SPEED_CAP_Y)
 			speed.setY(SPEED_CAP_Y);
-		if (speed.y() > SPEED_CAP_Y)
-			speed.setY(SPEED_CAP_Y);
-		if (speed.z() > SPEED_CAP_XZ)
+		//if (speed.y() > SPEED_CAP_Y)
+		//	speed.setY(SPEED_CAP_Y);
+		if (speed.z() >= SPEED_CAP_XZ)
 			speed.setZ(SPEED_CAP_XZ);
-		if (speed.z() > SPEED_CAP_XZ)
-			speed.setZ(SPEED_CAP_XZ);
-		playerBody->setLinearVelocity(speed); */
+		if (speed.z() <= -SPEED_CAP_XZ)
+			speed.setZ(-SPEED_CAP_XZ);
+		playerBody->setLinearVelocity(speed); 
+		*/
 	}
 	void update(SDL_Window * window, SDL_Event sdlEvent) {
 		controls(window, sdlEvent);

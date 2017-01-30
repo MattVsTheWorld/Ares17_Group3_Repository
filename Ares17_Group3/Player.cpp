@@ -11,3 +11,11 @@ void Player::setPosition(glm::vec3 newEye) {
 glm::vec3 Player::getPosition() {
 	return eye;
 }
+
+playerState Player::getState(){
+	return currentState;
+}
+
+void Player::setState(playerState newState) {
+	currentState = newState;
+}
