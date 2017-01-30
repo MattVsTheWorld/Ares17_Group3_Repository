@@ -5,6 +5,8 @@ using namespace std;
 #define SPEED_CAP_XZ 10.0
 #define SPEED_CAP_Y 5.0
 
+typedef std::pair<string, btRigidBody*> bodyID;
+
 // this class still needs a lot of work
 namespace SceneManager {
 
@@ -87,29 +89,168 @@ namespace SceneManager {
 		{ 0.5f, 0.5f, 0.5f, 1.0f }, // specular
 		2.0f  // shininess
 	};
-	std::vector<btRigidBody*> bodies;
+	std::map<string, btRigidBody*> bodies;
 
+	void writeFile() {
+		// writing on a text file
+		ofstream myfile("bodies.txt");
+		if (myfile.is_open())
+		{
+			myfile << "Name | Positions | Scale\t//numberOfBodies on first line\n";
+			myfile << bodies.size() << "#\n";
+
+			bodyID id_pair;
+			int boxNo = 0;
+			int sphereNo = 0;
+			for (const auto& id_pair : bodies) {
+				// First = name / key
+				id_pair.first; // string
+
+							   // second = body
+				id_pair.second->getWorldTransform().getOrigin(); // rigidBody
+
+				std::string objType;
+				string modelName;
+				btVector3 position;
+				btVector3 scale;
+				float mass;
+				if (id_pair.second->getCollisionShape()->getShapeType() == BOX_SHAPE_PROXYTYPE) {
+					objType = "box";
+					objType.append(std::to_string(boxNo));
+					modelName = bodies.find(objType)->first;
+					position = bodies.find(objType)->second->getWorldTransform().getOrigin();
+					scale = (((btBoxShape*)bodies.find(objType)->second->getCollisionShape())->getHalfExtentsWithMargin()) * 2; //*2 as its half
+					mass = bodies.find(objType)->second->getInvMass();
+					myfile << modelName << ",";
+					myfile << scale.x() << ",";
+					myfile << scale.y() << ",";
+					myfile << scale.z() << ",";
+					myfile << position.x() << ",";
+					myfile << position.y() << ",";
+					myfile << position.z() << ",";
+					myfile << mass << ",";
+					myfile << "\n";
+					boxNo++;
+					cout << "Boxes Saved\n";
+				}
+				else if (id_pair.second->getCollisionShape()->getShapeType() == SPHERE_SHAPE_PROXYTYPE) {// SPHERE_SHAPE_PROXYTYPE
+					objType = "sphere";
+					objType.append(std::to_string(sphereNo));
+					modelName = bodies.find(objType)->first;
+					position = bodies.find(objType)->second->getWorldTransform().getOrigin();
+					float radius = ((btSphereShape*)bodies.find(objType)->second->getCollisionShape())->getRadius();
+					mass = bodies.find(objType)->second->getInvMass();
+					myfile << modelName << ",";
+					myfile << radius << ",";
+					myfile << position.x() << ",";
+					myfile << position.y() << ",";
+					myfile << position.z() << ",";
+					myfile << mass << ",";
+					myfile << "\n";
+					sphereNo++;
+					cout << "Spheres Saved\n";
+				}
+			}
+			myfile.close();
+		}
+		else cout << "Unable to open file";
+	}
+
+	void readFile() {
+		// reading a text file
+		string line;
+		ifstream myfile("bodies.txt");
+		if (myfile.is_open())
+		{
+			int numberOfBodies;
+			bool gotNumber = false;
+			int bodyNo = 0;
+			while (getline(myfile, line, '\n')) //delimiter is '\n' in this
+			{
+				glm::vec3 position;
+				glm::vec3 scale;
+				float radius;
+				float mass;
+				string key;
+				string asString;
+				string numAsString;
+				int variables = 1;
+				if (!gotNumber) {
+					getline(myfile, numAsString, '#');
+					numberOfBodies = stoi(numAsString);
+					gotNumber = true;
+				}
+				else if (bodyNo != numberOfBodies) {
+					for (int i = 0; i <= variables; i++) {
+						getline(myfile, asString, ',');
+						if (i == 0) key = asString;
+						else {
+							if (key.find("box") != std::string::npos) {
+								variables = 7;
+								float digit = stof(asString);
+								if (i == 1) scale.x = digit;
+								if (i == 2) scale.y = digit;
+								if (i == 3) scale.z = digit;
+								if (i == 4) position.x = digit;
+								if (i == 5) position.y = digit;
+								if (i == 6) position.z = digit;
+								if (i == 7) mass = digit;
+							}
+							else if (key.find("sphere") != std::string::npos) {
+								variables = 5;
+								float digit = stof(asString);
+								if (i == 1) radius = digit;
+								if (i == 2) position.x = digit;
+								if (i == 3) position.y = digit;
+								if (i == 4) position.z = digit;
+								if (i == 5) mass = digit;
+							}
+						}//else
+					}//for loop
+					bodyNo++;
+				}
+				if (key.find("box") != std::string::npos) {
+					bodies.insert(std::pair<string, btRigidBody*>(key, bt_manager->addBox(scale.x, scale.y, scale.z, position.x, position.y, position.z, mass)));
+					cout << "Box Added\n";
+				}
+				else if (key.find("sphere") != std::string::npos) {
+					bodies.insert(std::pair<string, btRigidBody*>(key, bt_manager->addSphere(radius, position.x, position.y, position.z, mass)));
+					cout << "Sphere Added\n";
+				}
+
+			}//while loop
+		}
+		else cout << "\nMission failed. We'll get em next time. \n. Unable to open file";
+	}
 	void initBoxes() {
+		readFile();
 		
-		bodies.push_back(bt_manager->addBox(50, 0.1, 50, 0, 0, 0, 0.0));
-		bodies.push_back(bt_manager->addBox(1.0f, 1.0f, 1.0f, 0, 10, -10, 1.0));
-		bodies[1]->setActivationState(DISABLE_DEACTIVATION); // disable deactivation of physics on an object
-															 // objects become static after ~2(?) seconds otherwise
+		bodyID id_pair;
+		int boxNo = 0;
+		int sphereNo = 0;
+		std::string key;
+		for (const auto& id_pair : bodies) {
+			id_pair.first; // string
+			id_pair.second->getWorldTransform().getOrigin(); // rigidBody
 
+			if (id_pair.second->getCollisionShape()->getShapeType() == BOX_SHAPE_PROXYTYPE) {
+				key = "box";
+				key.append(to_string(boxNo));
+				bodies[key]->setActivationState(DISABLE_DEACTIVATION);
+				boxNo++;
+			}
+			else if (id_pair.second->getCollisionShape()->getShapeType() == SPHERE_SHAPE_PROXYTYPE) {
+				key = "sphere";
+				key.append(to_string(sphereNo));
+				bodies[key]->setActivationState(DISABLE_DEACTIVATION);
+				sphereNo++;
+			}
+		}
 		// NOTE : should probably use this
 		/*
 		body->setCollisionFlags( body->getCollisionFlags() |
 		btCollisionObject::CF_KINEMATIC_OBJECT);
 		*/
-
-		bodies.push_back(bt_manager->addBox(3.0f, 1.0f, 3.0f, 0, 0, -5, 1.0));
-		bodies[2]->setActivationState(DISABLE_DEACTIVATION);
-
-	//	bodies.push_back(bt_manager->addBox(playerScale.x, playerScale.y, playerScale.z, eye.x, eye.y, eye.z, 0));
-	//	bodies[3]->setActivationState(DISABLE_DEACTIVATION);
-
-		bodies.push_back(bt_manager->addSphere(0.5, 0, 3, 0, 0.2));
-		bodies[3]->setActivationState(DISABLE_DEACTIVATION);
 	}
 
 	// TEST
@@ -325,7 +466,7 @@ namespace SceneManager {
 		//++++
 		if (keys[SDL_SCANCODE_M]) {
 		//	cout << "Curiously cinnamon\n";
-			bodies[1]->setLinearVelocity(btVector3(0.0, 5.0, 0.0));
+			bodies["box1"]->setLinearVelocity(btVector3(0.0, 5.0, 0.0));
 		}
 		if (keys[SDL_SCANCODE_N]) {
 			
@@ -335,7 +476,7 @@ namespace SceneManager {
 			//btMotionState* motion = new btDefaultMotionState(t);
 			cout << "Setting y\n";
 			motion->setWorldTransform(t);
-			bodies[1]->setMotionState(motion);
+			bodies["box1"]->setMotionState(motion);
 		}
 		//++++
 		if (keys[SDL_SCANCODE_K]) {
@@ -362,16 +503,16 @@ namespace SceneManager {
 		
 		if (keys[SDL_SCANCODE_M]) {
 			//cout << "Curiously cinnamon\n";
-			bodies[1]->setLinearVelocity(btVector3(0.0, 5.0, 0.0));
+			bodies["box1"]->setLinearVelocity(btVector3(0.0, 5.0, 0.0));
 		}
 		if (keys[SDL_SCANCODE_KP_8])
-			bodies[1]->setLinearVelocity(btVector3(5.0, 0.0, 0.0));
+			bodies["box1"]->setLinearVelocity(btVector3(5.0, 0.0, 0.0));
 		if (keys[SDL_SCANCODE_KP_4])
-			bodies[1]->setLinearVelocity(btVector3(0.0, 0.0, 5.0));
+			bodies["box1"]->setLinearVelocity(btVector3(0.0, 0.0, 5.0));
 		if (keys[SDL_SCANCODE_KP_6])
-			bodies[1]->setLinearVelocity(btVector3(0.0, 0.0, -5.0));
+			bodies["box1"]->setLinearVelocity(btVector3(0.0, 0.0, -5.0));
 		if (keys[SDL_SCANCODE_KP_5])
-			bodies[1]->setLinearVelocity(btVector3(-5.0, 0.0, 0.0));
+			bodies["box1"]->setLinearVelocity(btVector3(-5.0, 0.0, 0.0));
 			
 	}
 
@@ -447,7 +588,7 @@ namespace SceneManager {
 
 		//cout << getLinearVelocityInBodyFrame(playerBody).y();
 
-		/*
+/*
 		btVector3 speed = getLinearVelocityInBodyFrame(playerBody);
 		if (speed.x() >= SPEED_CAP_XZ)
 			speed.setX(SPEED_CAP_XZ);
@@ -529,11 +670,11 @@ namespace SceneManager {
 		}
 
 		*/
-		bt_manager->renderBox(bodies[0], view, projection, cube, greenMaterial);
-		bt_manager->renderBox(bodies[1], view, projection, cube, redMaterial);
-		bt_manager->renderBox(bodies[2], view, projection, cube, defaultMaterial);
+		bt_manager->renderBox(bodies["box0"], view, projection, cube, greenMaterial);
+		bt_manager->renderBox(bodies["box1"], view, projection, cube, redMaterial);
+		bt_manager->renderBox(bodies["box2"], view, projection, cube, defaultMaterial);
 	//	bt_manager->renderBox(bodies[3], view, projection, cube, defaultMaterial);
-		bt_manager->renderSphere(bodies[3], view, projection, sphere, purpleMaterial);
+		bt_manager->renderSphere(bodies["sphere0"], view, projection, sphere, purpleMaterial);
 		///+++++++++++++++
 	
 		//renderSphere(projection, sphere, glm::vec3(0, 2, 0));
