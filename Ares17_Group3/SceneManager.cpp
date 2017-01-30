@@ -11,7 +11,7 @@ typedef std::pair<string, btRigidBody*> bodyID;
 namespace SceneManager {
 
 	Player *player;
-	glm::vec3 playerScale(1.0, 3.0, 1.0);
+	glm::vec3 playerScale(1.0, 2.8, 1.0);
 	
 	// Shaders
 	GLuint shaderProgram;
@@ -299,7 +299,7 @@ namespace SceneManager {
 		MeshManager::setLight(shaderProgram, testLight);
 		MeshManager::setMaterial(shaderProgram, greenMaterial);
 		
-		initPlayer(1.0f,2.0f,80.0f);
+		initPlayer(1.0f,1.5f,80.0f);
 		initBoxes();
 		h_manager = new hudManager();
 		skybox = new Skybox(testTexFiles);
