@@ -10,16 +10,20 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+enum playerState { ON_GROUND, JUMPING };
 
 class Player {
 public:
 	Player(glm::vec3 _eye);
 	void setPosition(glm::vec3 newEye);
 	glm::vec3 getPosition();
+	playerState getState();
+	void setState(playerState newState);
 protected:
 
 private:
 	glm::vec3 eye;
+	playerState currentState;
 };
 
 #endif
