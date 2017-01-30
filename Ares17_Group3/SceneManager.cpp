@@ -2,6 +2,9 @@
 
 using namespace std;
 
+#define SPEED_CAP_XZ 2.0
+#define SPEED_CAP_Y 3.0
+
 // this class still needs a lot of work
 namespace SceneManager {
 
@@ -130,20 +133,13 @@ namespace SceneManager {
 		playerBody = new btRigidBody(info);
 		playerBody->setAngularFactor(0); // ? // Doesn't fall sideways
 		bt_manager->addToWorld(playerBody);
+		playerBody->setActivationState(DISABLE_DEACTIVATION);
 	
 		// btRigidBody::setAngularFactor // to 0
 
 	}
 
-	void updatePlayer() {
-		btTransform t; 
-		t.setIdentity();
-		playerBody->getMotionState()->getWorldTransform(t);
-	//	playerBody->getMotionState();
-		btVector3 pos = t.getOrigin();
-		player->setPosition(glm::vec3(pos.x(),pos.y(),pos.z()));
-	}
-
+	
 	void init(void) {
 
 		shaderProgram = ShaderManager::initShaders("phong-tex.vert", "phong-tex.frag");
@@ -186,10 +182,23 @@ namespace SceneManager {
 			body->getLinearVelocity());
 	}
 
-	btVector3 speedForward(GLfloat _speed) {
+
+	btVector3 speedForward(GLfloat _speed, GLfloat angle) {
 		//playerBody->getVelocityInLocalPoint();
 		btVector3 speed = getLinearVelocityInBodyFrame(playerBody);
-		speed = btVector3(speed.x() + _speed*std::sin(yaw*DEG_TO_RADIAN), speed.y(), speed.z() - _speed*std::cos(yaw*DEG_TO_RADIAN));
+		speed = btVector3(speed.x() + _speed*std::sin(angle*DEG_TO_RADIAN), speed.y(), speed.z() - _speed*std::cos(angle*DEG_TO_RADIAN));
+		return speed;
+	}
+	btVector3 jump(GLfloat _speed) {
+		btVector3 speed = getLinearVelocityInBodyFrame(playerBody);
+		speed = btVector3(speed.x(), speed.y()+_speed, speed.z());
+		return speed;
+	}
+
+	btVector3 speedRight(GLfloat _speed, GLfloat angle) {
+		//playerBody->getVelocityInLocalPoint();
+		btVector3 speed = getLinearVelocityInBodyFrame(playerBody);
+		speed = btVector3(speed.x() + _speed*std::cos(angle*DEG_TO_RADIAN), speed.y(), speed.z() + _speed*std::sin(angle*DEG_TO_RADIAN));
 		return speed;
 	}
 	/* Might be useful http://bulletphysics.org/Bullet/phpBB3/viewtopic.php?f=9&t=2069
@@ -267,20 +276,27 @@ namespace SceneManager {
 		const Uint8 *keys = SDL_GetKeyboardState(NULL);
 		if (keys[SDL_SCANCODE_W]) {
 		//	player->setPosition(moveForward(player->getPosition(), yaw, 0.1f));
-			playerBody->setLinearVelocity(speedForward(1.0f)); // work in progres
+			playerBody->setLinearVelocity(speedForward(1.0f, yaw)); // work in progres
 		}
 
 		else if (keys[SDL_SCANCODE_S]) {
 			//player->setPosition(moveForward(player->getPosition(), yaw, -0.1f));
 			//bodies[1]->setLinearVelocity(btVector3(0.0, 5.0, 0.0));
-			playerBody->setLinearVelocity(speedForward(-1.0f));
+			playerBody->setLinearVelocity(speedForward(-1.0f, yaw));
 		} //else player->setVelocity(glm::vec3(0.0, player->getVelocity().y, player->getVelocity().z));
 		if (keys[SDL_SCANCODE_A]) {
-			player->setPosition(moveRight(player->getPosition(), yaw, -0.1f));
+			//player->setPosition(moveRight(player->getPosition(), yaw, -0.1f));
+			playerBody->setLinearVelocity(speedRight(-1.0f, yaw)); // work in progres
 		}
 		else if (keys[SDL_SCANCODE_D]) {
-			player->setPosition(moveRight(player->getPosition(), yaw, 0.1f));
+			//player->setPosition(moveRight(player->getPosition(), yaw, 0.1f));
+			playerBody->setLinearVelocity(speedRight(1.0f, yaw)); // work in progres
 		}
+
+		if (keys[SDL_SCANCODE_SPACE]) {
+			playerBody->setLinearVelocity(jump(SPEED_CAP_Y));
+		}
+
 		if (keys[SDL_SCANCODE_R]) {
 			//cout << getLinearVelocityInBodyFrame(playerBody).x() << " " << getLinearVelocityInBodyFrame(playerBody).y() << " " << getLinearVelocityInBodyFrame(playerBody).z() << "\n";
 			player->setPosition(glm::vec3(player->getPosition().x, player->getPosition().y + 0.1, player->getPosition().z));
@@ -415,6 +431,29 @@ namespace SceneManager {
 		glDepthMask(GL_TRUE);
 	}
 
+	void updatePlayer() {
+		btTransform t;
+		t.setIdentity();
+		playerBody->getMotionState()->getWorldTransform(t);
+		//	playerBody->getMotionState();
+		btVector3 pos = t.getOrigin();
+		player->setPosition(glm::vec3(pos.x(), pos.y(), pos.z()));
+/*
+		btVector3 speed = getLinearVelocityInBodyFrame(playerBody);
+		if (speed.x() > SPEED_CAP_XZ)
+			speed.setX(SPEED_CAP_XZ);
+		if (speed.x() > SPEED_CAP_XZ)
+			speed.setX(SPEED_CAP_XZ);
+		if (speed.y() > SPEED_CAP_Y)
+			speed.setY(SPEED_CAP_Y);
+		if (speed.y() > SPEED_CAP_Y)
+			speed.setY(SPEED_CAP_Y);
+		if (speed.z() > SPEED_CAP_XZ)
+			speed.setZ(SPEED_CAP_XZ);
+		if (speed.z() > SPEED_CAP_XZ)
+			speed.setZ(SPEED_CAP_XZ);
+		playerBody->setLinearVelocity(speed); */
+	}
 	void update(SDL_Window * window, SDL_Event sdlEvent) {
 		controls(window, sdlEvent);
 
