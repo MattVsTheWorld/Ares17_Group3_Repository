@@ -28,9 +28,6 @@ namespace SceneManager {
 	enum pov { FIRST_PERSON, THIRD_PERSON };
 	pov pointOfView = FIRST_PERSON;
 
-	glm::vec3 transTest = glm::vec3(-10.0f, -1.5f, -10.0f);		
-	glm::vec3 scaleTest = glm::vec3(20.0f, 0.5f, 20.0f);
-	glm::vec3 nullTest = glm::vec3(0.0f, 0.0f, 0.0f);
 
 	const char *testTexFiles[6] = {
 		"Town-skybox/Town_bk.bmp", "Town-skybox/Town_ft.bmp", "Town-skybox/Town_rt.bmp", "Town-skybox/Town_lf.bmp", "Town-skybox/Town_up.bmp", "Town-skybox/Town_dn.bmp"
@@ -82,13 +79,13 @@ namespace SceneManager {
 		2.0f  // shininess
 	};
 
-
 	MeshManager::materialStruct defaultMaterial = {
 		{ 0.5f, 0.5f, 0.5f, 1.0f }, // ambient
 		{ 0.5f, 0.5f, 0.5f, 1.0f }, // diffuse
 		{ 0.5f, 0.5f, 0.5f, 1.0f }, // specular
 		2.0f  // shininess
 	};
+	
 	std::map<string, btRigidBody*> bodies;
 
 	void writeFile() {
@@ -279,7 +276,25 @@ namespace SceneManager {
 		playerBody->setFriction(8);
 	
 		// btRigidBody::setAngularFactor // to 0
+		// +++++
+		
 	}
+
+
+	//Collision callback
+	// id, index -> triangle mesh
+	// flag - 1 static, 2 kinematic - 4 no contact response (through object....)
+	// no contact response e.g. -> sphere of action of a lever (we know player is inside aka colliding, but we don't move him around)
+	// 8 material callback
+	bool callbackFunc(btManifoldPoint& cp, const btCollisionObject* obj1, int id1, int index1, const btCollisionObject* obj2, int id2, int index2)
+	{
+		// add collision flag to rest of flags
+		// playerBody->setCollisionFlags(playerBody->getCollisionFlags() | btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK); // add
+		// SEE GLOBAL ON TOP
+		std::cout << "collision" << std::endl;
+		return false;
+	}
+
 
 	void init(void) {
 
@@ -289,7 +304,6 @@ namespace SceneManager {
 		
 		//+++
 		bt_manager = new btShapeManager(modelProgram, testLight);
-		//+++
 		
 		nanosuit = new Model("Nanosuit/nanosuit.obj");
 		pistol = new Model("CHOO/Socom pistol.obj");
@@ -322,7 +336,6 @@ namespace SceneManager {
 		return(body->getWorldTransform().getBasis().transpose() *
 			body->getLinearVelocity());
 	}
-
 
 	btVector3 speedForward(GLfloat _speed, GLfloat angle, bool concurrent) {
 		btVector3 speed = getLinearVelocityInBodyFrame(playerBody);
@@ -645,7 +658,7 @@ namespace SceneManager {
 		testLight.position[2] = tmp.z;
 		MeshManager::setLightPos(shaderProgram, glm::value_ptr(tmp));
 	}
-
+	
 	void draw(SDL_Window * window) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear window
 		glEnable(GL_CULL_FACE);
@@ -658,7 +671,7 @@ namespace SceneManager {
 		view = glm::mat4(1.0);
 		
 		camera();
-		projection = glm::perspective(float(60.0f*DEG_TO_RADIAN), SCREENWIDTH / SCREENHEIGHT, 0.1f, 100.0f);
+		projection = glm::perspective(float(60.0f*DEG_TO_RADIAN), SCREENWIDTH / SCREENHEIGHT, 0.1f, 150.0f);
 
 		skybox->renderSkybox(projection, view, cube);
 
