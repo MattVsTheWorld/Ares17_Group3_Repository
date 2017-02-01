@@ -38,6 +38,7 @@ namespace SceneManager {
 	Model *pistol;
 	Model *sphere;
 	Model *cube;
+	//Model *storm;
 	GLuint defaultTexture;
 
 	glm::mat4 view;
@@ -308,6 +309,7 @@ namespace SceneManager {
 		nanosuit = new Model("Nanosuit/nanosuit.obj");
 		pistol = new Model("CHOO/Socom pistol.obj");
 		cube = new Model("cube.obj");
+		//storm = new Model("Car/Stormtrooper.obj");
 		defaultTexture = loadBitmap::loadBitmap("wall.bmp");
 		sphere = new Model("sphere.obj"); // THIS MODEL IS TERRIBLE
 		MeshManager::setLight(shaderProgram, testLight);
@@ -623,6 +625,7 @@ namespace SceneManager {
 		playerBody->setLinearVelocity(speed); 
 		*/
 	}
+
 	void update(SDL_Window * window, SDL_Event sdlEvent) {
 		controls(window, sdlEvent);
 
@@ -675,7 +678,12 @@ namespace SceneManager {
 
 		skybox->renderSkybox(projection, view, cube);
 
+		// PLAYER capsule
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glDisable(GL_CULL_FACE);
 		bt_manager->renderCapsule(playerBody, view, projection, sphere, defaultMaterial);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		glEnable(GL_CULL_FACE);
 		///+++++++++++++++
 		//renderPlane(bodies[0], projection);https://www.twitch.tv/directory/all
 /*
