@@ -1,7 +1,7 @@
 #ifndef OBJECT
 #define OBJECT
 #include "MeshManager.h"
-#include "rt3dObjLoader.h"
+//#include "rt3dObjLoader.h"
 #include "loadBitmap.h"
 #include <vector>
 #include <stack>
@@ -11,7 +11,7 @@
 
 using namespace std;
 
-enum objectState { STILL, MOVING };
+//enum objectState { STILL, MOVING };
 
 struct transformation_Matrices {
 	glm::vec3 position;
@@ -53,7 +53,7 @@ private:
 	transformation_Matrices trans_m;
 	physics_Properties phys_p;
 
-	objectState obj_s = STILL;
+//	objectState obj_s = STILL;
 
 protected:
 
@@ -76,8 +76,11 @@ public:
 	glm::vec3 getVelocity();
 	glm::vec3 getScale();
 
-	objectState getState();
-	void setState(objectState state);
+//	objectState getState();
+//	void setState(objectState state);
+	
+	// NEW +++ (unnecessary)
+	//Object copy(Object toCopy);
 };
 
 #endif

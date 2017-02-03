@@ -9,22 +9,22 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
     <Filter Include="Engine">
       <UniqueIdentifier>{f7566477-288d-478d-b7d0-c31cf8a5c67e}</UniqueIdentifier>
     </Filter>
     <Filter Include="Being worked on">
       <UniqueIdentifier>{d6406d72-4a65-4021-8bdf-075a39d54a7a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="To be deleted / redone">
+      <UniqueIdentifier>{1caede58-4bd3-4b03-b024-ef6f6ff1167b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SceneManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="hudManager.cpp">
@@ -36,9 +36,6 @@
     <ClCompile Include="MeshManager.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
-    <ClCompile Include="rt3dObjLoader.cpp">
-      <Filter>Engine</Filter>
-    </ClCompile>
     <ClCompile Include="SDLmanager.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
@@ -48,19 +45,19 @@
     <ClCompile Include="Skybox.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
-    <ClCompile Include="Physics.cpp">
-      <Filter>Being worked on</Filter>
-    </ClCompile>
     <ClCompile Include="Object.cpp">
-      <Filter>Being worked on</Filter>
+      <Filter>To be deleted / redone</Filter>
     </ClCompile>
-    <ClCompile Include="Player.cpp">
+    <ClCompile Include="SceneManager.cpp">
       <Filter>Being worked on</Filter>
     </ClCompile>
     <ClCompile Include="Bullet.cpp">
+      <Filter>To be deleted / redone</Filter>
+    </ClCompile>
+    <ClCompile Include="btShapeManager.cpp">
       <Filter>Being worked on</Filter>
     </ClCompile>
-    <ClCompile Include="Collisions.cpp">
+    <ClCompile Include="Player.cpp">
       <Filter>Being worked on</Filter>
     </ClCompile>
   </ItemGroup>
@@ -74,13 +71,7 @@
     <ClInclude Include="MeshManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="rt3dObjLoader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="loadBitmap.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="main.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="hudManager.h">
@@ -89,55 +80,55 @@
     <ClInclude Include="Skybox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Model.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Mesh.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Physics.h">
-      <Filter>Being worked on</Filter>
     </ClInclude>
     <ClInclude Include="SceneManager.h">
       <Filter>Being worked on</Filter>
     </ClInclude>
     <ClInclude Include="Object.h">
+      <Filter>To be deleted / redone</Filter>
+    </ClInclude>
+    <ClInclude Include="Bullet.h">
+      <Filter>To be deleted / redone</Filter>
+    </ClInclude>
+    <ClInclude Include="main.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="btShapeManager.h">
       <Filter>Being worked on</Filter>
     </ClInclude>
     <ClInclude Include="Player.h">
       <Filter>Being worked on</Filter>
     </ClInclude>
-    <ClInclude Include="Bullet.h">
-      <Filter>Being worked on</Filter>
-    </ClInclude>
-    <ClInclude Include="Collisions.h">
-      <Filter>Being worked on</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="phong-tex.frag">
-      <Filter>Resource Files</Filter>
+      <Filter>Shaders</Filter>
     </None>
     <None Include="phong-tex.vert">
-      <Filter>Resource Files</Filter>
+      <Filter>Shaders</Filter>
     </None>
     <None Include="textured.frag">
-      <Filter>Resource Files</Filter>
+      <Filter>Shaders</Filter>
     </None>
     <None Include="textured.vert">
-      <Filter>Resource Files</Filter>
+      <Filter>Shaders</Filter>
     </None>
     <None Include="cubeMap.frag">
-      <Filter>Resource Files</Filter>
+      <Filter>Shaders</Filter>
     </None>
     <None Include="cubeMap.vert">
-      <Filter>Resource Files</Filter>
+      <Filter>Shaders</Filter>
     </None>
     <None Include="modelLoading.vert">
-      <Filter>Resource Files</Filter>
+      <Filter>Shaders</Filter>
     </None>
     <None Include="modelLoading.frag">
-      <Filter>Resource Files</Filter>
+      <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
 </Project>

@@ -28,7 +28,7 @@ namespace SDLmanager {
 		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4); // Turn on x4 multisampling anti-aliasing (MSAA)
 
 														   // Create 800x600 window
-		window = SDL_CreateWindow("SDL/GLM/OpenGL Demo", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+		window = SDL_CreateWindow("Ares 17", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
 			800, 600, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
 		if (!window) // Check window was created OK
 			exitFatalError("Unable to create window");

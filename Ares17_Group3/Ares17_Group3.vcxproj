@@ -89,15 +89,20 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\dev\Simple OpenGL Image Library\src;C:\dev\Assimp\include;C:\dev\SDL2 plugins\include;C:\dev\glm-0.9.8.0\glm;C:\dev\glew-2.0.0\include\;C:\dev\SDL2-2.0.4\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\dev\Simple OpenGL Image Library\src;C:\dev\Assimp\include;C:\dev\SDL2 plugins\include;C:\dev\glm-0.9.8.0\glm;C:\dev\glew-2.0.0\include\;C:\dev\SDL2-2.0.4\include;C:\dev\bullet3-2.82\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <BrowseInformation>true</BrowseInformation>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\dev\SDL2 plugins\lib\x86;C:\dev\glew-2.0.0\lib\Release\Win32;C:\dev\SDL2-2.0.4\lib\x86;C:\dev\Simple OpenGL Image Library\lib;C:\dev\Assimp\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_ttf.lib;opengl32.lib;glew32.lib;SOIL.lib;assimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\dev\SDL2 plugins\lib\x86;C:\dev\glew-2.0.0\lib\Release\Win32;C:\dev\SDL2-2.0.4\lib\x86;C:\dev\Simple OpenGL Image Library\lib;C:\dev\Assimp\lib\x86;C:\dev\bullet3-2.82\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_ttf.lib;opengl32.lib;glew32.lib;SOIL.lib;assimp.lib;BulletSoftBody_vs2010_debug.lib;BulletDynamics_vs2010_debug.lib;BulletCollision_vs2010_debug.lib;LinearMath_vs2010_debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>msvcrt.lib</IgnoreSpecificDefaultLibraries>
     </Link>
+    <Bscmake>
+      <PreserveSbr>true</PreserveSbr>
+    </Bscmake>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -150,24 +155,22 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="btShapeManager.cpp" />
     <ClCompile Include="Bullet.cpp" />
-    <ClCompile Include="Collisions.cpp" />
     <ClCompile Include="hudManager.cpp" />
     <ClCompile Include="loadBitmap.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MeshManager.cpp" />
     <ClCompile Include="Object.cpp" />
-    <ClCompile Include="Physics.cpp" />
     <ClCompile Include="Player.cpp" />
-    <ClCompile Include="rt3dObjLoader.cpp" />
     <ClCompile Include="SceneManager.cpp" />
     <ClCompile Include="SDLmanager.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
     <ClCompile Include="Skybox.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="btShapeManager.h" />
     <ClInclude Include="Bullet.h" />
-    <ClInclude Include="Collisions.h" />
     <ClInclude Include="hudManager.h" />
     <ClInclude Include="loadBitmap.h" />
     <ClInclude Include="main.h" />
@@ -175,9 +178,7 @@
     <ClInclude Include="MeshManager.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="Object.h" />
-    <ClInclude Include="Physics.h" />
     <ClInclude Include="Player.h" />
-    <ClInclude Include="rt3dObjLoader.h" />
     <ClInclude Include="SceneManager.h" />
     <ClInclude Include="SDLmanager.h" />
     <ClInclude Include="ShaderManager.h" />

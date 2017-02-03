@@ -19,8 +19,8 @@ public:
 	hudManager(); // constructor, initializes values
 
 
-	void renderFPS(GLuint shader, MeshManager::lightStruct light,
-		glm::mat4 top, GLuint meshObject, GLuint meshIndexCount, float fps);
+	void renderToHud(int N, GLuint shader, MeshManager::lightStruct light,
+		GLuint meshObject, GLuint meshIndexCount, glm::vec3 pos, float value_x, float value_y, float value_z);
 
 
 private:
