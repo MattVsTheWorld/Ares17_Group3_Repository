@@ -26,7 +26,9 @@ in vec3 ex_L;
 uniform lightStruct light;
 uniform materialStruct material;
 
-uniform sampler2D texture_diffuse1;
+uniform sampler2D texture_diffuse[1];
+
+//uniform sampler2D texture_specular[1];
 
 void main()
 {    
@@ -40,9 +42,10 @@ void main()
 
 	// Specular intensity
 	vec3 R = normalize(reflect(normalize(-ex_L),normalize(ex_N)));
-	vec4 specularI = light.specular * material.specular;
+	// not even sure the texture specular is a good thing
+	vec4 specularI = light.specular * material.specular; // * vec4(texture(texture_specular[0], TexCoords));
 	specularI = specularI * pow(max(dot(R,ex_V),0), material.shininess);
 
 	// Fragment colour
-    color = (ambientI + diffuseI + specularI)*vec4(texture(texture_diffuse1, TexCoords));
+    color = (ambientI + diffuseI + specularI)*vec4(texture(texture_diffuse[0], TexCoords));
 }
