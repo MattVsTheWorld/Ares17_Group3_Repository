@@ -580,8 +580,8 @@ namespace SceneManager {
 
 	}
 
-	void renderObject(glm::mat4 proj, Model *modelData, glm::vec3 pos) {
-		glUseProgram(modelProgram);
+	void renderObject(glm::mat4 proj, Model *modelData, glm::vec3 pos, GLuint shader) {
+		//glUseProgram(modelProgram);
 		//mvStack.push(mvStack.top());// push modelview to stack
 	//	MeshManager::setLight(modelProgram, testLight);
 	//	MeshManager::setMaterial(modelProgram, defaultMaterial);
@@ -595,21 +595,21 @@ namespace SceneManager {
 		model = glm::rotate(model, float(-yaw*DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::rotate(model, float(180 * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));	// It's a bit too big for our scene, so scale it down
-		glUniformMatrix4fv(glGetUniformLocation(modelProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
-		modelData->Draw(modelProgram);
+		glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		modelData->Draw(shader);
 
 		//mvStack.pop();
 	}
 
-	void renderWep(glm::mat4 proj, Model *modelData) {
-		glUseProgram(modelProgram);
+	void renderWep(glm::mat4 proj, Model *modelData, GLuint shader) {
+		//glUseProgram(modelProgram);
 		glDisable(GL_DEPTH_TEST);//Disable depth test for HUD label
 		//mvStack.push(glm::mat4(1.0));// push modelview to stack
 									//		glCullFace(GL_BACK);
 	//	MeshManager::setLight(modelProgram, testLight);
 	//	MeshManager::setMaterial(modelProgram, redMaterial);
 	//	MeshManager::setUniformMatrix4fv(modelProgram, "projection", glm::value_ptr(proj));
-		MeshManager::setUniformMatrix4fv(modelProgram, "view", glm::value_ptr(glm::mat4(1.0)));
+		MeshManager::setUniformMatrix4fv(shader, "view", glm::value_ptr(glm::mat4(1.0)));
 		//	mvStack.top() = glm::translate(mvStack.top(), glm::vec3(-10.0f, -0.1f, -10.0f));
 		// Draw the loaded model
 		glActiveTexture(GL_TEXTURE0);
@@ -633,8 +633,8 @@ namespace SceneManager {
 		model = glm::rotate(model, Z_axisRotation, glm::vec3(0.0f, 0.0f, 1.0f)); // Rotate in z axis
 //	}
 		model = glm::scale(model, glm::vec3(0.005f, 0.005f, 0.005f));	// It's a bit too big for our scene, so scale it down
-		glUniformMatrix4fv(glGetUniformLocation(modelProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
-		modelData->Draw(modelProgram);
+		glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		modelData->Draw(shader);
 
 		//	mvStack.pop();
 			//	glCullFace(GL_BACK);
@@ -766,10 +766,10 @@ namespace SceneManager {
 		///+++++++++++++++
 		// RENDERING MODELS
 			if (pointOfView == THIRD_PERSON)
-				renderObject(projection,nanosuit, glm::vec3(player->getPosition().x, player->getPosition().y-1.5, player->getPosition().z));
+				renderObject(projection,nanosuit, glm::vec3(player->getPosition().x, player->getPosition().y-1.5, player->getPosition().z), shader);
 
 			if (pointOfView == FIRST_PERSON)
-				renderWep(projection, pistol);
+				renderWep(projection, pistol, shader);
 	}
 	// main render function, sets up the shaders and then calls all other functions
 	void renderShadowScene(glm::mat4 projection, glm::mat4 viewMatrix, GLuint shader, bool cubemap) {
