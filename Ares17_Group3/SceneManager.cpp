@@ -609,7 +609,7 @@ namespace SceneManager {
 	//	MeshManager::setLight(modelProgram, testLight);
 	//	MeshManager::setMaterial(modelProgram, redMaterial);
 	//	MeshManager::setUniformMatrix4fv(modelProgram, "projection", glm::value_ptr(proj));
-//		MeshManager::setUniformMatrix4fv(modelProgram, "view", glm::value_ptr(glm::mat4(1.0)));
+		MeshManager::setUniformMatrix4fv(modelProgram, "view", glm::value_ptr(glm::mat4(1.0)));
 		//	mvStack.top() = glm::translate(mvStack.top(), glm::vec3(-10.0f, -0.1f, -10.0f));
 		// Draw the loaded model
 		glActiveTexture(GL_TEXTURE0);
@@ -721,7 +721,7 @@ namespace SceneManager {
 		uniformIndex = glGetUniformLocation(shader, "pointLight.specular");
 		glUniform3f(uniformIndex, 1.0f, 1.0f, 1.0f);
 		uniformIndex = glGetUniformLocation(shader, "pointLight.constant");
-		glUniform1f(uniformIndex, 1.0f);
+		glUniform1f(uniformIndex, 0.5f);
 		uniformIndex = glGetUniformLocation(shader, "pointLight.linear");
 		glUniform1f(uniformIndex, 0.09);
 		uniformIndex = glGetUniformLocation(shader, "pointLight.quadratic");
@@ -856,7 +856,7 @@ namespace SceneManager {
 				glEnable(GL_CULL_FACE);
 				glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
 
-				skybox->renderSkybox(projection, view, cube);
+				skybox->renderSkybox(projection, view, cube, depthCubemap);
 				// normal rendering
 				renderShadowScene(projection, view, modelProgram, false); // render normal scene from normal point of view
 			}

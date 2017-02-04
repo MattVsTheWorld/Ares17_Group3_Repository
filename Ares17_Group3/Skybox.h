@@ -17,6 +17,7 @@ public:
 	GLuint loadCubeMap(const char *fname[6], GLuint *texID);
 
 	void renderSkybox(glm::mat4 projection, glm::mat4 view, Model* modelData);
+	void renderSkybox(glm::mat4 projection, glm::mat4 view, Model *modelData, GLuint texture);
 
 protected:
 private:
