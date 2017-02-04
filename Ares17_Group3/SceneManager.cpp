@@ -12,12 +12,12 @@ namespace SceneManager {
 
 	Player *player;
 	glm::vec3 playerScale(1.0, 2.8, 1.0);
-	
+
 	// Shaders
 	GLuint shaderProgram;
 	GLuint texturedProgram;
 	GLuint modelProgram;
-	
+
 	hudManager *h_manager;
 	Skybox *skybox;
 	btShapeManager *bt_manager;
@@ -27,7 +27,7 @@ namespace SceneManager {
 	unsigned int lastTime = 0, currentTime;
 	enum pov { FIRST_PERSON, THIRD_PERSON };
 	pov pointOfView = FIRST_PERSON;
-	
+
 	// SHADOWS
 	GLuint depthShaderProgram; //shader to create shadow cubemaps
 
@@ -63,7 +63,7 @@ namespace SceneManager {
 	GLfloat pitch = 0.0f;
 	GLfloat yaw = 0.0f;
 	GLfloat roll = 0.0f;
-	
+
 	glm::vec3 eye(2.0f, 3.0f, -6.0f);
 	glm::vec3 at(0.0f, 0.5f, -1.0f);
 	glm::vec3 up(0.0f, 1.0f, 0.0f);
@@ -104,7 +104,7 @@ namespace SceneManager {
 		{ 0.5f, 0.5f, 0.5f, 1.0f }, // specular
 		2.0f  // shininess
 	};
-	
+
 	std::map<string, btRigidBody*> bodies;
 
 	void writeFile() {
@@ -241,7 +241,7 @@ namespace SceneManager {
 
 	void initBoxes() {
 		readFile();
-		
+
 		bodyID id_pair;
 		int boxNo = 0;
 		int sphereNo = 0;
@@ -274,9 +274,9 @@ namespace SceneManager {
 	btRigidBody* playerBody;
 	//
 
-	void initPlayer(float rad, float height, float mass) {	
-		player = new Player(eye); 
-		
+	void initPlayer(float rad, float height, float mass) {
+		player = new Player(eye);
+
 		btTransform t;
 		t.setIdentity();
 		t.setOrigin(btVector3(player->getPosition().x, player->getPosition().y, player->getPosition().z));
@@ -293,10 +293,10 @@ namespace SceneManager {
 		bt_manager->addToWorld(playerBody);
 		playerBody->setActivationState(DISABLE_DEACTIVATION);
 		playerBody->setFriction(8);
-	
+
 		// btRigidBody::setAngularFactor // to 0
 		// +++++
-		
+
 	}
 
 
@@ -322,10 +322,10 @@ namespace SceneManager {
 		modelProgram = ShaderManager::initShaders("modelLoading.vert", "modelLoading.frag");
 		//+++
 		depthShaderProgram = ShaderManager::initShaders("simpleShadowMap.vert", "simpleShadowMap.frag", "simpleShadowMap.gs");
-		
+
 		//+++
-		bt_manager = new btShapeManager(modelProgram, testLight);
-		
+		bt_manager = new btShapeManager();
+
 		nanosuit = new Model("Nanosuit/nanosuit.obj");
 		pistol = new Model("CHOO/Socom pistol.obj");
 		cube = new Model("cube.obj");
@@ -334,8 +334,8 @@ namespace SceneManager {
 		sphere = new Model("sphere.obj"); // THIS MODEL IS TERRIBLE
 		MeshManager::setLight(shaderProgram, testLight);
 		MeshManager::setMaterial(shaderProgram, greenMaterial);
-		
-		initPlayer(1.0f,1.5f,80.0f);
+
+		initPlayer(1.0f, 1.5f, 80.0f);
 		initBoxes();
 		h_manager = new hudManager();
 		skybox = new Skybox(testTexFiles);
@@ -415,13 +415,13 @@ namespace SceneManager {
 	/* Might be useful http://bulletphysics.org/Bullet/phpBB3/viewtopic.php?f=9&t=2069
 	btVector3 getVelocityAtWorldPosition(btRigidBody* body, const btVector3& worldposition, bool local)
 	{
-		/* That's the 'localpoint' 
+		/* That's the 'localpoint'
 		const btVector3 relpos = worldposition - body->getCenterOfMassPosition();
-		/* That's velocity in world space 
+		/* That's velocity in world space
 		const btVector3 wvel = body->getVelocityInLocalPoint(relpos);
-		/* Now you can transform it in body local frame 
+		/* Now you can transform it in body local frame
 		if (local) return(body->getWorldTransform().getBasis().transpose()*wvel);
-		/* Or keep it in world frame 
+		/* Or keep it in world frame
 		return(wvel);
 
 	} */
@@ -458,9 +458,9 @@ namespace SceneManager {
 		glRotatef(-pitch, 1.0, 0.0, 0.0); //basically glm::rotate
 		glRotatef(-yaw, 0.0, 1.0, 0.0);
 		SDL_WarpMouseInWindow(window, MidX, MidY);
-		
+
 		//MOUSECLICK
-		
+
 		if (sdlEvent.type == SDL_MOUSEBUTTONDOWN && pointOfView == FIRST_PERSON) {
 			if (sdlEvent.button.button == SDL_BUTTON_LEFT) leftClick = true;
 			if (sdlEvent.button.button == SDL_BUTTON_RIGHT) rightClick = true;
@@ -474,7 +474,7 @@ namespace SceneManager {
 			leftClick = false;
 			rightClick = false;
 		}
-		
+
 		//KEYBOARD
 		// To be changed ****
 
@@ -486,8 +486,8 @@ namespace SceneManager {
 
 		const Uint8 *keys = SDL_GetKeyboardState(NULL);
 		if (keys[SDL_SCANCODE_W]) {
-		//	player->setPosition(moveForward(player->getPosition(), yaw, 0.1f));
-		playerBody->setLinearVelocity(speedForward(1.0f, yaw, (keys[SDL_SCANCODE_A] == SDL_PRESSED || keys[SDL_SCANCODE_D] == SDL_PRESSED))); // work in progress
+			//	player->setPosition(moveForward(player->getPosition(), yaw, 0.1f));
+			playerBody->setLinearVelocity(speedForward(1.0f, yaw, (keys[SDL_SCANCODE_A] == SDL_PRESSED || keys[SDL_SCANCODE_D] == SDL_PRESSED))); // work in progress
 		}
 
 		else if (keys[SDL_SCANCODE_S]) {
@@ -529,11 +529,11 @@ namespace SceneManager {
 		} */
 		//++++
 		if (keys[SDL_SCANCODE_M]) {
-		//	cout << "Curiously cinnamon\n";
+			//	cout << "Curiously cinnamon\n";
 			bodies["box1"]->setLinearVelocity(btVector3(0.0, 5.0, 0.0));
 		}
 		if (keys[SDL_SCANCODE_N]) {
-			
+
 			//btTransform t;
 			t.setIdentity();
 			t.setOrigin(btVector3(0, 10, -10));
@@ -557,14 +557,14 @@ namespace SceneManager {
 			glEnable(GL_CULL_FACE);
 		}
 
-	//	if (keys[SDL_SCANCODE_3]) bodies[4]->setLinearVelocity(btVector3(0.0, 0.0, 4.0));
+		//	if (keys[SDL_SCANCODE_3]) bodies[4]->setLinearVelocity(btVector3(0.0, 0.0, 4.0));
 		if (keys[SDL_SCANCODE_ESCAPE]) {
 			exit(0);
 		}
 
-	//	if (keys[SDL_SCANCODE_5])cout << bullet.size() << endl;
+		//	if (keys[SDL_SCANCODE_5])cout << bullet.size() << endl;
 
-		
+
 		if (keys[SDL_SCANCODE_M]) {
 			//cout << "Curiously cinnamon\n";
 			bodies["box1"]->setLinearVelocity(btVector3(0.0, 5.0, 0.0));
@@ -577,27 +577,27 @@ namespace SceneManager {
 			bodies["box1"]->setLinearVelocity(btVector3(0.0, 0.0, -5.0));
 		if (keys[SDL_SCANCODE_KP_5])
 			bodies["box1"]->setLinearVelocity(btVector3(-5.0, 0.0, 0.0));
-			
+
 	}
 
 	void renderObject(glm::mat4 proj, Model *modelData, glm::vec3 pos) {
 		glUseProgram(modelProgram);
 		//mvStack.push(mvStack.top());// push modelview to stack
-		MeshManager::setLight(modelProgram, testLight);
-		MeshManager::setMaterial(modelProgram, defaultMaterial);
-		MeshManager::setUniformMatrix4fv(modelProgram, "projection", glm::value_ptr(proj));
-		MeshManager::setUniformMatrix4fv(modelProgram, "view", glm::value_ptr(view));
-	//	mvStack.top() = glm::translate(mvStack.top(), glm::vec3(-10.0f, -0.1f, -10.0f));
-		// Draw the loaded model
+	//	MeshManager::setLight(modelProgram, testLight);
+	//	MeshManager::setMaterial(modelProgram, defaultMaterial);
+	//	MeshManager::setUniformMatrix4fv(modelProgram, "projection", glm::value_ptr(proj));
+	//	MeshManager::setUniformMatrix4fv(modelProgram, "view", glm::value_ptr(view));
+		//	mvStack.top() = glm::translate(mvStack.top(), glm::vec3(-10.0f, -0.1f, -10.0f));
+			// Draw the loaded model
 
 		glm::mat4 model;
 		model = glm::translate(model, pos);
 		model = glm::rotate(model, float(-yaw*DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
-		model = glm::rotate(model, float(180*DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, float(180 * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));	// It's a bit too big for our scene, so scale it down
 		glUniformMatrix4fv(glGetUniformLocation(modelProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
 		modelData->Draw(modelProgram);
-		
+
 		//mvStack.pop();
 	}
 
@@ -606,10 +606,10 @@ namespace SceneManager {
 		glDisable(GL_DEPTH_TEST);//Disable depth test for HUD label
 		//mvStack.push(glm::mat4(1.0));// push modelview to stack
 									//		glCullFace(GL_BACK);
-		MeshManager::setLight(modelProgram, testLight);
-		MeshManager::setMaterial(modelProgram, redMaterial);
-		MeshManager::setUniformMatrix4fv(modelProgram, "projection", glm::value_ptr(proj));
-		MeshManager::setUniformMatrix4fv(modelProgram, "view", glm::value_ptr(glm::mat4(1.0)));
+	//	MeshManager::setLight(modelProgram, testLight);
+	//	MeshManager::setMaterial(modelProgram, redMaterial);
+	//	MeshManager::setUniformMatrix4fv(modelProgram, "projection", glm::value_ptr(proj));
+//		MeshManager::setUniformMatrix4fv(modelProgram, "view", glm::value_ptr(glm::mat4(1.0)));
 		//	mvStack.top() = glm::translate(mvStack.top(), glm::vec3(-10.0f, -0.1f, -10.0f));
 		// Draw the loaded model
 		glActiveTexture(GL_TEXTURE0);
@@ -620,24 +620,24 @@ namespace SceneManager {
 			glm::vec3 gun_pos(0.0f, -2.0f, -5.0f);
 			float Y_axisRotation = -85.0f*DEG_TO_RADIAN;
 			float Z_axisRotation = -25.0f*DEG_TO_RADIAN;
-			model = glm::translate(model, gun_pos); 
+			model = glm::translate(model, gun_pos);
 			model = glm::rotate(model, Y_axisRotation, glm::vec3(0.0f, 1.0f, 0.0f)); // Rotate in y axis
 		//	model = glm::rotate(model, Z_axisRotation, glm::vec3(0.0f, 0.0f, 1.0f)); // Rotate in z axis
 		} */
-	 //	else {
-			glm::vec3 gun_pos(2.5f, -2.5f, -5.0f);
-			float Y_axisRotation = -50.0f*DEG_TO_RADIAN;
-			float Z_axisRotation = -25.0f*DEG_TO_RADIAN;
-			model = glm::translate(model, gun_pos); 
-			model = glm::rotate(model, Y_axisRotation, glm::vec3(0.0f, 1.0f, 0.0f)); // Rotate in y axis
-			model = glm::rotate(model, Z_axisRotation, glm::vec3(0.0f, 0.0f, 1.0f)); // Rotate in z axis
-	//	}
+		//	else {
+		glm::vec3 gun_pos(2.5f, -2.5f, -5.0f);
+		float Y_axisRotation = -50.0f*DEG_TO_RADIAN;
+		float Z_axisRotation = -25.0f*DEG_TO_RADIAN;
+		model = glm::translate(model, gun_pos);
+		model = glm::rotate(model, Y_axisRotation, glm::vec3(0.0f, 1.0f, 0.0f)); // Rotate in y axis
+		model = glm::rotate(model, Z_axisRotation, glm::vec3(0.0f, 0.0f, 1.0f)); // Rotate in z axis
+//	}
 		model = glm::scale(model, glm::vec3(0.005f, 0.005f, 0.005f));	// It's a bit too big for our scene, so scale it down
 		glUniformMatrix4fv(glGetUniformLocation(modelProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
 		modelData->Draw(modelProgram);
 
-	//	mvStack.pop();
-		//	glCullFace(GL_BACK);
+		//	mvStack.pop();
+			//	glCullFace(GL_BACK);
 		glEnable(GL_DEPTH_TEST);//Re-enable depth test after HUD label 
 		glDepthMask(GL_TRUE);
 	}
@@ -666,7 +666,7 @@ namespace SceneManager {
 			speed.setZ(SPEED_CAP_XZ);
 		if (speed.z() <= -SPEED_CAP_XZ)
 			speed.setZ(-SPEED_CAP_XZ);
-		playerBody->setLinearVelocity(speed); 
+		playerBody->setLinearVelocity(speed);
 		*/
 	}
 
@@ -675,7 +675,7 @@ namespace SceneManager {
 
 		// 18/01
 		updatePlayer();
-		
+
 		bt_manager->update();
 		//world->stepSimulation(1/60.0); // 1 divided by frames per second
 		// would need to delete dispatcher, collisionconfig, solver, world, broadphase in main
@@ -698,37 +698,125 @@ namespace SceneManager {
 			//mvStack.top() = glm::lookAt(eye, at, up);
 		}
 
-		glm::vec4 tmp = view*lightPos;
+		glm::vec4 tmp = view*glm::vec4(lightPos, 1.0f);
 		//glm::vec4 tmp = mvStack.top()*lightPos;
 		testLight.position[0] = tmp.x;
 		testLight.position[1] = tmp.y;
 		testLight.position[2] = tmp.z;
-		MeshManager::setLightPos(shaderProgram, glm::value_ptr(tmp));
+		MeshManager::setLightPos(modelProgram, glm::value_ptr(tmp));
 	}
 
 	//function that passes all light positions and properties to the shader
+#define AMBIENT_FACTOR 0.5f
 	void pointLight(GLuint shader) {
-
-		
 
 		GLuint uniformIndex = glGetUniformLocation(shader, "viewPos");
 		glUniform3fv(uniformIndex, 1, glm::value_ptr(player->getPosition()));
-		uniformIndex = glGetUniformLocation(shader, "pointLights.position");
+		uniformIndex = glGetUniformLocation(shader, "pointLight.position");
 		glUniform3f(uniformIndex, lightPos.x, lightPos.y, lightPos.z);
 		uniformIndex = glGetUniformLocation(shader, "pointLight.ambient");
-		glUniform3f(uniformIndex, 0.05f, 0.05f, 0.05f);
+		glUniform3f(uniformIndex, AMBIENT_FACTOR, AMBIENT_FACTOR, AMBIENT_FACTOR);
 		uniformIndex = glGetUniformLocation(shader, "pointLight.diffuse");
 		glUniform3f(uniformIndex, 0.8f, 0.8f, 0.8f);
 		uniformIndex = glGetUniformLocation(shader, "pointLight.specular");
 		glUniform3f(uniformIndex, 1.0f, 1.0f, 1.0f);
 		uniformIndex = glGetUniformLocation(shader, "pointLight.constant");
 		glUniform1f(uniformIndex, 1.0f);
-		uniformIndex = glGetUniformLocation(shader, "pointLights.linear");
+		uniformIndex = glGetUniformLocation(shader, "pointLight.linear");
 		glUniform1f(uniformIndex, 0.09);
 		uniformIndex = glGetUniformLocation(shader, "pointLight.quadratic");
 		glUniform1f(uniformIndex, 0.032);
 	}
-	
+
+	void pointShadow(GLuint shader) {
+		glm::mat4 shadowProj = glm::perspective(float(90.0f*DEG_TO_RADIAN), aspect, near, far); //perspective projection is the best suited for this
+		std::vector<glm::mat4> shadowTransforms;
+		shadowTransforms.push_back(shadowProj *
+			glm::lookAt(lightPos, lightPos + glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0)));
+		shadowTransforms.push_back(shadowProj *
+			glm::lookAt(lightPos, lightPos + glm::vec3(-1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0)));
+		shadowTransforms.push_back(shadowProj *
+			glm::lookAt(lightPos, lightPos + glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0, 0.0, 1.0)));
+		shadowTransforms.push_back(shadowProj *
+			glm::lookAt(lightPos, lightPos + glm::vec3(0.0, -1.0, 0.0), glm::vec3(0.0, 0.0, -1.0)));
+		shadowTransforms.push_back(shadowProj *
+			glm::lookAt(lightPos, lightPos + glm::vec3(0.0, 0.0, 1.0), glm::vec3(0.0, -1.0, 0.0)));
+		shadowTransforms.push_back(shadowProj *
+			glm::lookAt(lightPos, lightPos + glm::vec3(0.0, 0.0, -1.0), glm::vec3(0.0, -1.0, 0.0)));
+
+		for (int k = 0; k < 6; ++k)
+			glUniformMatrix4fv(glGetUniformLocation(shader, ("shadowMatrices[" + std::to_string(k) + "]").c_str()), 1, GL_FALSE, glm::value_ptr(shadowTransforms[k]));
+	}
+
+	void renderWorldObjects(GLuint shader, glm::mat4 projection) {
+
+		// PLAYER capsule
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glDisable(GL_CULL_FACE);
+		bt_manager->renderCapsule(playerBody, view, projection, sphere, shader);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		glEnable(GL_CULL_FACE);
+		///+++++++++++++++
+
+		bt_manager->renderBox(bodies["box0"], view, projection, cube, shader);
+		bt_manager->renderBox(bodies["box1"], view, projection, cube, shader);
+		bt_manager->renderBox(bodies["box2"], view, projection, cube, shader);
+		//	bt_manager->renderBox(bodies[3], view, projection, cube, defaultMaterial);
+		bt_manager->renderSphere(bodies["sphere0"], view, projection, sphere, shader);
+		///+++++++++++++++
+		// RENDERING MODELS
+			if (pointOfView == THIRD_PERSON)
+				renderObject(projection,nanosuit, glm::vec3(player->getPosition().x, player->getPosition().y-1.5, player->getPosition().z));
+
+			if (pointOfView == FIRST_PERSON)
+				renderWep(projection, pistol);
+	}
+	// main render function, sets up the shaders and then calls all other functions
+	void renderShadowScene(glm::mat4 projection, glm::mat4 viewMatrix, GLuint shader, bool cubemap) {
+
+		GLuint uniformIndex;
+		glUseProgram(shader);
+		pointLight(shader);
+		// if cubemap translates into "if rendering to the depthmap"
+		if (cubemap)
+			pointShadow(shader);
+
+
+		uniformIndex = glGetUniformLocation(shader, "far_plane");
+		glUniform1f(uniformIndex, far);
+		uniformIndex = glGetUniformLocation(shader, "viewPos");
+		glUniform3fv(uniformIndex, 1, glm::value_ptr(player->getPosition()));
+
+		//similarly, if (!cubemap) refers to normal rendering
+		if (!cubemap) {
+			MeshManager::setUniformMatrix4fv(shader, "projection", glm::value_ptr(projection));
+			MeshManager::setUniformMatrix4fv(shader, "view", glm::value_ptr(viewMatrix));
+			// material properties in this case roughly translate to textures
+			uniformIndex = glGetUniformLocation(shader, "material.diffuse");
+			glUniform1i(uniformIndex, 0);
+			uniformIndex = glGetUniformLocation(shader, "material.specular");
+			glUniform1i(uniformIndex, 0);
+			glUniform1f(glGetUniformLocation(shader, "material.shininess"), 32.0f); //??
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, defaultTexture);
+			// pass in the shadowmap
+			uniformIndex = glGetUniformLocation(shader, "depthMap");
+			glUniform1i(uniformIndex, 1);
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
+
+		}
+		//draw normal scene
+		renderWorldObjects(shader, projection);
+
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, 0);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+
+	}
+
+
 	void draw(SDL_Window * window) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear window
 		glEnable(GL_CULL_FACE);
@@ -739,54 +827,47 @@ namespace SceneManager {
 		//mvStack.push(modelview);
 		glDepthMask(GL_TRUE);
 		view = glm::mat4(1.0);
-		
-		camera();
+
+
 		projection = glm::perspective(float(60.0f*DEG_TO_RADIAN), SCREENWIDTH / SCREENHEIGHT, 0.1f, 150.0f);
 
-		skybox->renderSkybox(projection, view, cube);
+		for (int pass = 0; pass < 2; pass++) {
+			camera();
+			if (pass == 0) {
+				glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+				glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthCubemap, 0);
+				glDrawBuffer(GL_NONE);
+				glReadBuffer(GL_NONE);
+				glBindFramebuffer(GL_FRAMEBUFFER, 0);
+				glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+				glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear FBO
+				glClear(GL_DEPTH_BUFFER_BIT);
 
-		// PLAYER capsule
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		glDisable(GL_CULL_FACE);
-		bt_manager->renderCapsule(playerBody, view, projection, sphere, defaultMaterial);
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		glEnable(GL_CULL_FACE);
-		///+++++++++++++++
-		//renderPlane(bodies[0], projection);https://www.twitch.tv/directory/all
-/*
-		for (int i = 0;i<bodies.size();i++)
-		{
-			if (bodies[i]->getCollisionShape()->getShapeType() == SPHERE_SHAPE_PROXYTYPE)
-				renderSphere(bodies[i], projection, sphere, greenMaterial);
-			else if (bodies[i]->getCollisionShape()->getShapeType() == BOX_SHAPE_PROXYTYPE)
-				renderBox(bodies[i], projection, cube, defaultMaterial);
+				renderShadowScene(projection, view, depthShaderProgram, true); // render using light's point of view and simpler shader program
+
+				glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			} else {
+				//Render to frame buffer
+				glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+				glViewport(0, 0, SCREENWIDTH, SCREENHEIGHT);
+				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear window
+																	// clear the screen
+				glEnable(GL_CULL_FACE);
+				glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+
+				skybox->renderSkybox(projection, view, cube);
+				// normal rendering
+				renderShadowScene(projection, view, modelProgram, false); // render normal scene from normal point of view
+			}
+
+
+			//mvStack.pop();
+
+			glDepthMask(GL_TRUE);
+			
 		}
 
-		*/
-		bt_manager->renderBox(bodies["box0"], view, projection, cube, greenMaterial);
-		bt_manager->renderBox(bodies["box1"], view, projection, cube, redMaterial);
-		bt_manager->renderBox(bodies["box2"], view, projection, cube, defaultMaterial);
-	//	bt_manager->renderBox(bodies[3], view, projection, cube, defaultMaterial);
-		bt_manager->renderSphere(bodies["sphere0"], view, projection, sphere, purpleMaterial);
-		///+++++++++++++++
-	
-		//renderSphere(projection, sphere, glm::vec3(0, 2, 0));
-		
-		// RENDERING MODELS
-		if (pointOfView == THIRD_PERSON)
-			renderObject(projection,nanosuit, glm::vec3(player->getPosition().x, player->getPosition().y-1.5, player->getPosition().z));
-
-		if (pointOfView == FIRST_PERSON)
-			renderWep(projection, pistol);
-		//renderSphere(bodies[4], projection, sphere);
-		//renderSphere(bodies[4], projection, sphere);
-		//:thinking:
-		///
-		//h_manager->renderToHud(11, texturedProgram, testLight, testCube->object_getMesh(), testCubes[0]->object_getIndex(), glm::vec3(-0.25f, 0.9f, 0.9f), testCubes[11]->getVelocity().x, testCubes[11]->getVelocity().y, testCubes[11]->getVelocity().z);
-		///
-		//mvStack.pop();
-
-		glDepthMask(GL_TRUE);
 		SDL_GL_SwapWindow(window); // swap buffers
 	}
 }

@@ -93,14 +93,14 @@ GLuint initShaders(const char *vertFile, const char *fragFile) {
 	glCompileShader(v);
 	glGetShaderiv(v, GL_COMPILE_STATUS, &compiled);
 	if (!compiled) {
-		cout << "Vertex shader not compiled." << endl;
+		cout << vertFile << " : Vertex shader not compiled." << endl;
 		ShaderManager::printShaderError(v);
 	} 
 
 	glCompileShader(f);
 	glGetShaderiv(f, GL_COMPILE_STATUS, &compiled);
 	if (!compiled) {
-		cout << "Fragment shader not compiled." << endl;
+		cout << fragFile << " : Fragment shader not compiled." << endl;
 		ShaderManager::printShaderError(f);
 	} 
 	
@@ -148,22 +148,22 @@ GLuint initShaders(const char *vertFile, const char *fragFile, const char *geomF
 	glCompileShader(v);
 	glGetShaderiv(v, GL_COMPILE_STATUS, &compiled);
 	if (!compiled) {
-		cout << "Vertex shader not compiled." << endl;
-		rt3d::printShaderError(v);
+		cout << vertFile << " : Vertex shader not compiled." << endl;
+		ShaderManager::printShaderError(v);
 	}
 
 	glCompileShader(f);
 	glGetShaderiv(f, GL_COMPILE_STATUS, &compiled);
 	if (!compiled) {
-		cout << "Fragment shader not compiled." << endl;
-		rt3d::printShaderError(f);
+		cout << fragFile << " : Fragment shader not compiled." << endl;
+		ShaderManager::printShaderError(f);
 	}
 
 	glCompileShader(g);
 	glGetShaderiv(g, GL_COMPILE_STATUS, &compiled);
 	if (!compiled) {
-		cout << "Geometry shader not compiled." << endl;
-		rt3d::printShaderError(g);
+		cout << geomFile << " : Geometry shader not compiled." << endl;
+		ShaderManager::printShaderError(g);
 	}
 
 	p = glCreateProgram();
@@ -172,10 +172,10 @@ GLuint initShaders(const char *vertFile, const char *fragFile, const char *geomF
 	glAttachShader(p, f);
 	glAttachShader(p, g);
 
-	glBindAttribLocation(p, RT3D_VERTEX, "in_Position");
-	glBindAttribLocation(p, RT3D_COLOUR, "in_Color");
-	glBindAttribLocation(p, RT3D_NORMAL, "in_Normal");
-	glBindAttribLocation(p, RT3D_TEXCOORD, "in_TexCoord");
+	glBindAttribLocation(p, LOCATION_VERTEX, "in_Position");
+	glBindAttribLocation(p, LOCATION_COLOUR, "in_Color");
+	glBindAttribLocation(p, LOCATION_NORMAL, "in_Normal");
+	glBindAttribLocation(p, LOCATION_TEXCOORD, "in_TexCoord");
 
 	glLinkProgram(p);
 	glUseProgram(p);

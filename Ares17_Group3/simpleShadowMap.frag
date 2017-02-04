@@ -18,16 +18,13 @@ struct PointLight {
     vec3 specular;
 };
 
-#define NR_POINT_LIGHTS 4
-
-uniform PointLight pointLights[NR_POINT_LIGHTS];
-uniform int currentLight;
+uniform PointLight pointLight;
 uniform float far_plane;
 
 void main()
 {
     // get distance between fragment and light source
-    float lightDistance = length(FragPos.xyz - pointLights[currentLight].position);
+    float lightDistance = length(FragPos.xyz - pointLight.position);
     
     // map to [0;1] range by dividing by far_plane
     lightDistance = lightDistance / far_plane;

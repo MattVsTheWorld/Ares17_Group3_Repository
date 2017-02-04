@@ -1,9 +1,9 @@
 #version 330 core
-layout (location = 0) in vec3 in_Position;
-layout (location = 2) in vec3 in_Normal;
-layout (location = 3) in vec2 in_TexCoord;
+layout (location = 0) in vec3 position;
+layout (location = 2) in vec3 normal;
+layout (location = 3) in vec2 texCoords;
 
-out vec2 TexCoords;
+//out vec2 TexCoords;
 
 uniform mat4 model;
 uniform mat4 view;
