@@ -11,6 +11,12 @@ using namespace std;
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#define LOCATION_VERTEX		0
+#define LOCATION_COLOUR		1
+#define LOCATION_NORMAL		2
+#define LOCATION_TEXCOORD   3
+#define LOCATION_INDEX		4
+
 struct Vertex {
 	// Position
 	glm::vec3 Position;
@@ -111,14 +117,14 @@ private:
 
 		// Set the vertex attribute pointers
 		// Vertex Positions
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)0);
+		glEnableVertexAttribArray(LOCATION_VERTEX);
+		glVertexAttribPointer(LOCATION_VERTEX, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)0);
 		// Vertex Normals
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, Normal));
+		glEnableVertexAttribArray(LOCATION_NORMAL);
+		glVertexAttribPointer(LOCATION_NORMAL, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, Normal));
 		// Vertex Texture Coords
-		glEnableVertexAttribArray(2);
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, TexCoords));
+		glEnableVertexAttribArray(LOCATION_TEXCOORD);
+		glVertexAttribPointer(LOCATION_TEXCOORD, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, TexCoords));
 
 		glBindVertexArray(0);
 	}

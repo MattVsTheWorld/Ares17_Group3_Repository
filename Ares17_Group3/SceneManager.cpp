@@ -27,6 +27,23 @@ namespace SceneManager {
 	unsigned int lastTime = 0, currentTime;
 	enum pov { FIRST_PERSON, THIRD_PERSON };
 	pov pointOfView = FIRST_PERSON;
+	
+	// SHADOWS
+	GLuint depthShaderProgram; //shader to create shadow cubemaps
+
+	//////////////////
+	/// FBO globals
+	//////////////////
+	GLuint depthMapFBO; // FBO
+	GLuint depthCubemap;
+	//GLuint depthMap;	// FBO texture
+	const GLuint SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+	GLfloat aspect = (GLfloat)SHADOW_WIDTH / (GLfloat)SHADOW_HEIGHT;
+	GLfloat near = 0.01f;
+	GLfloat far = 25.0f;
+	//////////////////
+	/// End
+	//////////////////
 
 
 	const char *testTexFiles[6] = {
@@ -57,7 +74,8 @@ namespace SceneManager {
 		{ 1.0f, 1.0f, 1.0f, 1.0f }, // specular
 		{ 0.0f, 5.0f, 0.0f, 1.0f }  // position
 	};
-	glm::vec4 lightPos(0.0, 5.0, 0.0, 1.0);
+	//glm::vec4 lightPos(0.0, 5.0, 0.0, 1.0);
+	glm::vec3 lightPos(0.0, 5.0, 0.0);
 
 	MeshManager::materialStruct greenMaterial = {
 		{ 0.6f, 0.4f, 0.2f, 1.0f }, // ambient
@@ -302,6 +320,8 @@ namespace SceneManager {
 		shaderProgram = ShaderManager::initShaders("phong-tex.vert", "phong-tex.frag");
 		texturedProgram = ShaderManager::initShaders("textured.vert", "textured.frag");
 		modelProgram = ShaderManager::initShaders("modelLoading.vert", "modelLoading.frag");
+		//+++
+		depthShaderProgram = ShaderManager::initShaders("simpleShadowMap.vert", "simpleShadowMap.frag", "simpleShadowMap.gs");
 		
 		//+++
 		bt_manager = new btShapeManager(modelProgram, testLight);
@@ -323,6 +343,30 @@ namespace SceneManager {
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+		////////////////////
+		/// FBO for shadows
+		/////////////////////
+		glGenFramebuffers(1, &depthMapFBO);
+		// Create depth cubemap texture
+		//	GLuint depthCubemap;
+		glGenTextures(1, &depthCubemap);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
+		for (GLuint i = 0; i < 6; ++i)
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+		// Attach cubemap as depth map FBO's color buffer
+		glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+		glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthCubemap, 0);
+		glDrawBuffer(GL_NONE);
+		glReadBuffer(GL_NONE);
+		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+			std::cout << "Framebuffer not complete!" << std::endl;
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
 	glm::vec3 moveForward(glm::vec3 pos, GLfloat angle, GLfloat d) {
@@ -551,7 +595,7 @@ namespace SceneManager {
 		model = glm::rotate(model, float(-yaw*DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::rotate(model, float(180*DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));	// It's a bit too big for our scene, so scale it down
-		glUniformMatrix4fv(glGetUniformLocation(modelProgram, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(model));
+		glUniformMatrix4fv(glGetUniformLocation(modelProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
 		modelData->Draw(modelProgram);
 		
 		//mvStack.pop();
@@ -589,7 +633,7 @@ namespace SceneManager {
 			model = glm::rotate(model, Z_axisRotation, glm::vec3(0.0f, 0.0f, 1.0f)); // Rotate in z axis
 	//	}
 		model = glm::scale(model, glm::vec3(0.005f, 0.005f, 0.005f));	// It's a bit too big for our scene, so scale it down
-		glUniformMatrix4fv(glGetUniformLocation(modelProgram, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(model));
+		glUniformMatrix4fv(glGetUniformLocation(modelProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
 		modelData->Draw(modelProgram);
 
 	//	mvStack.pop();
@@ -660,6 +704,29 @@ namespace SceneManager {
 		testLight.position[1] = tmp.y;
 		testLight.position[2] = tmp.z;
 		MeshManager::setLightPos(shaderProgram, glm::value_ptr(tmp));
+	}
+
+	//function that passes all light positions and properties to the shader
+	void pointLight(GLuint shader) {
+
+		
+
+		GLuint uniformIndex = glGetUniformLocation(shader, "viewPos");
+		glUniform3fv(uniformIndex, 1, glm::value_ptr(player->getPosition()));
+		uniformIndex = glGetUniformLocation(shader, "pointLights.position");
+		glUniform3f(uniformIndex, lightPos.x, lightPos.y, lightPos.z);
+		uniformIndex = glGetUniformLocation(shader, "pointLight.ambient");
+		glUniform3f(uniformIndex, 0.05f, 0.05f, 0.05f);
+		uniformIndex = glGetUniformLocation(shader, "pointLight.diffuse");
+		glUniform3f(uniformIndex, 0.8f, 0.8f, 0.8f);
+		uniformIndex = glGetUniformLocation(shader, "pointLight.specular");
+		glUniform3f(uniformIndex, 1.0f, 1.0f, 1.0f);
+		uniformIndex = glGetUniformLocation(shader, "pointLight.constant");
+		glUniform1f(uniformIndex, 1.0f);
+		uniformIndex = glGetUniformLocation(shader, "pointLights.linear");
+		glUniform1f(uniformIndex, 0.09);
+		uniformIndex = glGetUniformLocation(shader, "pointLight.quadratic");
+		glUniform1f(uniformIndex, 0.032);
 	}
 	
 	void draw(SDL_Window * window) {

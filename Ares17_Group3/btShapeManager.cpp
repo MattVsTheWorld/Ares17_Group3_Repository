@@ -84,7 +84,7 @@ void btShapeManager::renderSphere(btRigidBody* sphere, glm::mat4 view, glm::mat4
 	glBindTexture(GL_TEXTURE_2D, defaultTexture);
 
 	model = glm::scale(model, glm::vec3(r, r, r));
-	glUniformMatrix4fv(glGetUniformLocation(modelProgram, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(model));
+	glUniformMatrix4fv(glGetUniformLocation(modelProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
 	modelData->Draw(modelProgram);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -120,7 +120,7 @@ void btShapeManager::renderCapsule(btRigidBody* capsule, glm::mat4 view, glm::ma
 	glBindTexture(GL_TEXTURE_2D, defaultTexture);
 
 	model = glm::scale(model, glm::vec3(r, h, r));
-	glUniformMatrix4fv(glGetUniformLocation(modelProgram, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(model));
+	glUniformMatrix4fv(glGetUniformLocation(modelProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
 	modelData->Draw(modelProgram);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -158,7 +158,7 @@ void btShapeManager::renderBox(btRigidBody* box, glm::mat4 view, glm::mat4 proj,
 	//MeshManager::setUniformMatrix4fv(shaderProgram, "projection", glm::value_ptr(projection));		
 	//MeshManager::drawIndexedMesh(testCube->object_getMesh(), testCube->object_getIndex(), GL_TRIANGLES);
 
-	glUniformMatrix4fv(glGetUniformLocation(modelProgram, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(model));
+	glUniformMatrix4fv(glGetUniformLocation(modelProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
 	modelData->Draw(modelProgram);
 
 	glBindTexture(GL_TEXTURE_2D, 0);

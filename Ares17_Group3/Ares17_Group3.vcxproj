@@ -191,6 +191,9 @@
     <None Include="modelLoading.vert" />
     <None Include="phong-tex.frag" />
     <None Include="phong-tex.vert" />
+    <None Include="simpleShadowMap.frag" />
+    <None Include="simpleShadowMap.gs" />
+    <None Include="simpleShadowMap.vert" />
     <None Include="textured.frag" />
     <None Include="textured.vert" />
   </ItemGroup>
