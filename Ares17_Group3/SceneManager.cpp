@@ -709,9 +709,14 @@ namespace SceneManager {
 	}
 
 	//function that passes all light positions and properties to the shader
-#define AMBIENT_FACTOR 0.5f
-	void pointLight(GLuint shader) {
+#define AMBIENT_FACTOR 0.8f
+#define DIFFUSE_FACTOR 0.8f
+#define SPECULAR_FACTOR 1.0f
+#define ATTENUATION_CONST 0.2f
+#define ATTENUATION_LINEAR 0.09f
+#define ATTENUATION_QUAD 0.032f
 
+	void pointLight(GLuint shader) {
 		GLuint uniformIndex = glGetUniformLocation(shader, "viewPos");
 		glUniform3fv(uniformIndex, 1, glm::value_ptr(player->getPosition()));
 		uniformIndex = glGetUniformLocation(shader, "pointLight.position");
@@ -719,15 +724,15 @@ namespace SceneManager {
 		uniformIndex = glGetUniformLocation(shader, "pointLight.ambient");
 		glUniform3f(uniformIndex, AMBIENT_FACTOR, AMBIENT_FACTOR, AMBIENT_FACTOR);
 		uniformIndex = glGetUniformLocation(shader, "pointLight.diffuse");
-		glUniform3f(uniformIndex, 0.8f, 0.8f, 0.8f);
+		glUniform3f(uniformIndex, DIFFUSE_FACTOR, DIFFUSE_FACTOR, DIFFUSE_FACTOR);
 		uniformIndex = glGetUniformLocation(shader, "pointLight.specular");
-		glUniform3f(uniformIndex, 1.0f, 1.0f, 1.0f);
+		glUniform3f(uniformIndex, SPECULAR_FACTOR, SPECULAR_FACTOR, SPECULAR_FACTOR);
 		uniformIndex = glGetUniformLocation(shader, "pointLight.constant");
-		glUniform1f(uniformIndex, 0.5f);
+		glUniform1f(uniformIndex, ATTENUATION_CONST);
 		uniformIndex = glGetUniformLocation(shader, "pointLight.linear");
-		glUniform1f(uniformIndex, 0.09);
+		glUniform1f(uniformIndex, ATTENUATION_LINEAR);
 		uniformIndex = glGetUniformLocation(shader, "pointLight.quadratic");
-		glUniform1f(uniformIndex, 0.032);
+		glUniform1f(uniformIndex, ATTENUATION_QUAD);
 	}
 
 	void pointShadow(GLuint shader) {
