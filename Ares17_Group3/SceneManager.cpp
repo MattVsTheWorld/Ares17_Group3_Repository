@@ -50,12 +50,15 @@ namespace SceneManager {
 		"Town-skybox/Town_bk.bmp", "Town-skybox/Town_ft.bmp", "Town-skybox/Town_rt.bmp", "Town-skybox/Town_lf.bmp", "Town-skybox/Town_up.bmp", "Town-skybox/Town_dn.bmp"
 	};
 
+	const char *skyTexFiles[6] = {
+		"star-skybox/sky_back.bmp", "star-skybox/sky_front.bmp", "star-skybox/sky_right.bmp", "star-skybox/sky_left.bmp", "star-skybox/sky_top.bmp", "star-skybox/sky_bot.bmp"
+	};
+
 	// Load models
 	Model *nanosuit;
 	Model *pistol;
 	Model *sphere;
 	Model *cube;
-	//Model *storm;
 	GLuint defaultTexture;
 
 	glm::mat4 view;
@@ -329,7 +332,6 @@ namespace SceneManager {
 		nanosuit = new Model("Nanosuit/nanosuit.obj");
 		pistol = new Model("CHOO/Socom pistol.obj");
 		cube = new Model("cube.obj");
-		//storm = new Model("Car/Stormtrooper.obj");
 		defaultTexture = loadBitmap::loadBitmap("wall.bmp");
 		sphere = new Model("sphere.obj"); // THIS MODEL IS TERRIBLE
 		MeshManager::setLight(shaderProgram, testLight);
@@ -338,7 +340,7 @@ namespace SceneManager {
 		initPlayer(1.0f, 1.5f, 80.0f);
 		initBoxes();
 		h_manager = new hudManager();
-		skybox = new Skybox(testTexFiles);
+		skybox = new Skybox(skyTexFiles);
 
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_BLEND);
@@ -856,7 +858,7 @@ namespace SceneManager {
 				glEnable(GL_CULL_FACE);
 				glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
 
-				skybox->renderSkybox(projection, view, cube, depthCubemap);
+				skybox->renderSkybox(projection, view, cube);
 				// normal rendering
 				renderShadowScene(projection, view, modelProgram, false); // render normal scene from normal point of view
 			}
