@@ -27,6 +27,9 @@ namespace SceneManager {
 	unsigned int lastTime = 0, currentTime;
 	enum pov { FIRST_PERSON, THIRD_PERSON };
 	pov pointOfView = FIRST_PERSON;
+	enum mode { PLAY_MODE, EDIT_MODE };
+	mode editmode = PLAY_MODE;
+
 
 	// SHADOWS
 	GLuint depthShaderProgram; //shader to create shadow cubemaps
@@ -108,7 +111,54 @@ namespace SceneManager {
 		2.0f  // shininess
 	};
 
-	std::map<string, btRigidBody*> bodies;
+	std::map<string, btRigidBody*> bodies;	
+	
+	glm::vec3 moveForward(glm::vec3 pos, GLfloat angle, GLfloat d) {
+		return glm::vec3(pos.x + d*std::sin(yaw*DEG_TO_RADIAN), pos.y, pos.z - d*std::cos(yaw*DEG_TO_RADIAN));
+	}
+
+	glm::vec3 moveRight(glm::vec3 pos, GLfloat angle, GLfloat d) {
+		return glm::vec3(pos.x + d*std::cos(yaw*DEG_TO_RADIAN), pos.y, pos.z + d*std::sin(yaw*DEG_TO_RADIAN));
+	}
+
+	static btVector3 getLinearVelocityInBodyFrame(btRigidBody* body)
+	{
+		return(body->getWorldTransform().getBasis().transpose() *
+			body->getLinearVelocity());
+	}
+
+	btVector3 speedForward(GLfloat _speed, GLfloat angle, bool concurrent) {
+		btVector3 speed = getLinearVelocityInBodyFrame(playerBody);
+
+		if (!concurrent && speed.absolute().x() <= SPEED_CAP_XZ && speed.absolute().z() <= SPEED_CAP_XZ)
+			speed = btVector3(speed.x() + _speed*std::sin(angle*DEG_TO_RADIAN), speed.y(), speed.z() - _speed*std::cos(angle*DEG_TO_RADIAN));
+		else if (concurrent)
+			speed = btVector3(speed.x() + (speed.absolute().x() > SPEED_CAP_XZ ? 0 : _speed*std::sin(angle*DEG_TO_RADIAN)), speed.y(), speed.z() - (speed.absolute().z() > SPEED_CAP_XZ ? 0 : _speed*std::cos(angle*DEG_TO_RADIAN)));
+		return speed;
+	}
+
+	btVector3 speedRight(GLfloat _speed, GLfloat angle, bool concurrent) {
+
+		//playerBody->getVelocityInLocalPoint();
+		btVector3 speed = getLinearVelocityInBodyFrame(playerBody);
+		if (!concurrent && speed.absolute().x() <= SPEED_CAP_XZ && speed.absolute().z() <= SPEED_CAP_XZ)
+			speed = btVector3(speed.x() + _speed*std::cos(angle*DEG_TO_RADIAN), speed.y(), speed.z() + _speed*std::sin(angle*DEG_TO_RADIAN));
+		else if (concurrent)
+			speed = btVector3(speed.x() + (speed.absolute().x() > SPEED_CAP_XZ ? 0 : _speed*std::cos(angle*DEG_TO_RADIAN)), speed.y(), speed.z() + (speed.absolute().z() > SPEED_CAP_XZ ? 0 : _speed*std::sin(angle*DEG_TO_RADIAN)));
+		return speed;
+	}
+
+	btVector3 jump(GLfloat _speed) {
+		btVector3 speed = getLinearVelocityInBodyFrame(playerBody);
+		if (player->getState() != JUMPING) {
+			speed = btVector3(speed.x(), speed.y() + _speed, speed.z());
+			player->setState(JUMPING);
+		}
+		return speed;
+	}
+	
+	int boxNo = 0;
+	int sphereNo = 0;
 
 	void writeFile() {
 		// writing on a text file
@@ -246,8 +296,7 @@ namespace SceneManager {
 		readFile();
 
 		bodyID id_pair;
-		int boxNo = 0;
-		int sphereNo = 0;
+
 		std::string key;
 		for (const auto& id_pair : bodies) {
 			id_pair.first; // string
@@ -271,6 +320,19 @@ namespace SceneManager {
 		body->setCollisionFlags( body->getCollisionFlags() |
 		btCollisionObject::CF_KINEMATIC_OBJECT);
 		*/
+	}
+
+	void insertBox() {
+		glm::vec3 position(moveForward(player->getPosition(), yaw, 0.5f));
+		glm::vec3 scale(0.5, 0.5, 0.5);
+		float mass = 0.5;
+		std::string key = "box";
+
+		key.append(to_string(boxNo));
+		bodies.insert(std::pair<string, btRigidBody*>(key, bt_manager->addBox(scale.x, scale.y, scale.z, position.x, position.y, position.z, mass)));
+		cout << "Box Added\n";
+		bodies[key]->setActivationState(DISABLE_DEACTIVATION);
+		boxNo++;
 	}
 
 	// TEST
@@ -302,7 +364,6 @@ namespace SceneManager {
 
 	}
 
-
 	//Collision callback
 	// id, index -> triangle mesh
 	// flag - 1 static, 2 kinematic - 4 no contact response (through object....)
@@ -316,7 +377,6 @@ namespace SceneManager {
 		std::cout << "collision" << std::endl;
 		return false;
 	}
-
 
 	void init(void) {
 
@@ -371,49 +431,6 @@ namespace SceneManager {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
-	glm::vec3 moveForward(glm::vec3 pos, GLfloat angle, GLfloat d) {
-		return glm::vec3(pos.x + d*std::sin(yaw*DEG_TO_RADIAN), pos.y, pos.z - d*std::cos(yaw*DEG_TO_RADIAN));
-	}
-
-	glm::vec3 moveRight(glm::vec3 pos, GLfloat angle, GLfloat d) {
-		return glm::vec3(pos.x + d*std::cos(yaw*DEG_TO_RADIAN), pos.y, pos.z + d*std::sin(yaw*DEG_TO_RADIAN));
-	}
-
-	static btVector3 getLinearVelocityInBodyFrame(btRigidBody* body)
-	{
-		return(body->getWorldTransform().getBasis().transpose() *
-			body->getLinearVelocity());
-	}
-
-	btVector3 speedForward(GLfloat _speed, GLfloat angle, bool concurrent) {
-		btVector3 speed = getLinearVelocityInBodyFrame(playerBody);
-
-		if (!concurrent && speed.absolute().x() <= SPEED_CAP_XZ && speed.absolute().z() <= SPEED_CAP_XZ)
-			speed = btVector3(speed.x() + _speed*std::sin(angle*DEG_TO_RADIAN), speed.y(), speed.z() - _speed*std::cos(angle*DEG_TO_RADIAN));
-		else if (concurrent)
-			speed = btVector3(speed.x() + (speed.absolute().x() > SPEED_CAP_XZ ? 0 : _speed*std::sin(angle*DEG_TO_RADIAN)), speed.y(), speed.z() - (speed.absolute().z() > SPEED_CAP_XZ ? 0 : _speed*std::cos(angle*DEG_TO_RADIAN)));
-		return speed;
-	}
-
-	btVector3 speedRight(GLfloat _speed, GLfloat angle, bool concurrent) {
-
-		//playerBody->getVelocityInLocalPoint();
-		btVector3 speed = getLinearVelocityInBodyFrame(playerBody);
-		if (!concurrent && speed.absolute().x() <= SPEED_CAP_XZ && speed.absolute().z() <= SPEED_CAP_XZ)
-			speed = btVector3(speed.x() + _speed*std::cos(angle*DEG_TO_RADIAN), speed.y(), speed.z() + _speed*std::sin(angle*DEG_TO_RADIAN));
-		else if (concurrent)
-			speed = btVector3(speed.x() + (speed.absolute().x() > SPEED_CAP_XZ ? 0 : _speed*std::cos(angle*DEG_TO_RADIAN)), speed.y(), speed.z() + (speed.absolute().z() > SPEED_CAP_XZ ? 0 : _speed*std::sin(angle*DEG_TO_RADIAN)));
-		return speed;
-	}
-
-	btVector3 jump(GLfloat _speed) {
-		btVector3 speed = getLinearVelocityInBodyFrame(playerBody);
-		if (player->getState() != JUMPING) {
-			speed = btVector3(speed.x(), speed.y() + _speed, speed.z());
-			player->setState(JUMPING);
-		}
-		return speed;
-	}
 	/* Might be useful http://bulletphysics.org/Bullet/phpBB3/viewtopic.php?f=9&t=2069
 	btVector3 getVelocityAtWorldPosition(btRigidBody* body, const btVector3& worldposition, bool local)
 	{
@@ -445,6 +462,9 @@ namespace SceneManager {
 	bool leftClick = false;
 	bool rightClick = false;
 
+	float coolDownOfGun = 0.5; //wait between shots
+	bool shiftPressed = true;
+	//*****************************CONTROLS********************
 	void controls(SDL_Window * window, SDL_Event sdlEvent) {
 		int MidX = SCREENWIDTH / 2;
 		int MidY = SCREENHEIGHT / 2;
@@ -469,7 +489,8 @@ namespace SceneManager {
 		}
 
 		if (leftClick == true && pointOfView == FIRST_PERSON) {
-			// Do something
+			insertBox();
+			leftClick = false;
 		}
 
 		if (sdlEvent.type == SDL_MOUSEBUTTONUP  && pointOfView == FIRST_PERSON) {
@@ -487,27 +508,115 @@ namespace SceneManager {
 		motion->setWorldTransform(t);
 
 		const Uint8 *keys = SDL_GetKeyboardState(NULL);
-		if (keys[SDL_SCANCODE_W]) {
-			//	player->setPosition(moveForward(player->getPosition(), yaw, 0.1f));
-			playerBody->setLinearVelocity(speedForward(1.0f, yaw, (keys[SDL_SCANCODE_A] == SDL_PRESSED || keys[SDL_SCANCODE_D] == SDL_PRESSED))); // work in progress
+		if (keys[SDL_SCANCODE_LEFTBRACKET]) {
+			editmode = PLAY_MODE;
+		}
+		else if (keys[SDL_SCANCODE_RIGHTBRACKET]) {
+			editmode = EDIT_MODE;
 		}
 
-		else if (keys[SDL_SCANCODE_S]) {
-			//player->setPosition(moveForward(player->getPosition(), yaw, -0.1f));
-			//bodies[1]->setLinearVelocity(btVector3(0.0, 5.0, 0.0));
-			playerBody->setLinearVelocity(speedForward(-1.0f, yaw, (keys[SDL_SCANCODE_A] == SDL_PRESSED || keys[SDL_SCANCODE_D] == SDL_PRESSED))); // work in progress
-		} //else player->setVelocity(glm::vec3(0.0, player->getVelocity().y, player->getVelocity().z));
-		if (keys[SDL_SCANCODE_A]) {
-			//player->setPosition(moveRight(player->getPosition(), yaw, -0.1f));
-			playerBody->setLinearVelocity(speedRight(-1.0f, yaw, (keys[SDL_SCANCODE_W] == SDL_PRESSED || keys[SDL_SCANCODE_S] == SDL_PRESSED))); // work in progress
-		}
-		else if (keys[SDL_SCANCODE_D]) {
-			//player->setPosition(moveRight(player->getPosition(), yaw, 0.1f));
-			playerBody->setLinearVelocity(speedRight(1.0f, yaw, (keys[SDL_SCANCODE_W] == SDL_PRESSED || keys[SDL_SCANCODE_S] == SDL_PRESSED))); // work in progress
-		}
+		if (editmode == PLAY_MODE) {
+			if (keys[SDL_SCANCODE_W]) {
+				//	player->setPosition(moveForward(player->getPosition(), yaw, 0.1f));
+				playerBody->setLinearVelocity(speedForward(1.0f, yaw, (keys[SDL_SCANCODE_A] == SDL_PRESSED || keys[SDL_SCANCODE_D] == SDL_PRESSED))); // work in progress
+			}
+			else if (keys[SDL_SCANCODE_S]) {
+				//player->setPosition(moveForward(player->getPosition(), yaw, -0.1f));
+				//bodies[1]->setLinearVelocity(btVector3(0.0, 5.0, 0.0));
+				playerBody->setLinearVelocity(speedForward(-1.0f, yaw, (keys[SDL_SCANCODE_A] == SDL_PRESSED || keys[SDL_SCANCODE_D] == SDL_PRESSED))); // work in progress
+			} //else player->setVelocity(glm::vec3(0.0, player->getVelocity().y, player->getVelocity().z));
+			if (keys[SDL_SCANCODE_A]) {
+				//player->setPosition(moveRight(player->getPosition(), yaw, -0.1f));
+				playerBody->setLinearVelocity(speedRight(-1.0f, yaw, (keys[SDL_SCANCODE_W] == SDL_PRESSED || keys[SDL_SCANCODE_S] == SDL_PRESSED))); // work in progress
+			}
+			else if (keys[SDL_SCANCODE_D]) {
+				//player->setPosition(moveRight(player->getPosition(), yaw, 0.1f));
+				playerBody->setLinearVelocity(speedRight(1.0f, yaw, (keys[SDL_SCANCODE_W] == SDL_PRESSED || keys[SDL_SCANCODE_S] == SDL_PRESSED))); // work in progress
+			}
 
-		if (keys[SDL_SCANCODE_SPACE]) {
-			playerBody->setLinearVelocity(jump(SPEED_CAP_Y));
+			if (keys[SDL_SCANCODE_SPACE]) {
+				playerBody->setLinearVelocity(jump(SPEED_CAP_Y));
+			}
+
+			if (keys[SDL_SCANCODE_KP_8])
+				bodies["box1"]->setLinearVelocity(btVector3(5.0, 0.0, 0.0));
+			if (keys[SDL_SCANCODE_KP_4])
+				bodies["box1"]->setLinearVelocity(btVector3(0.0, 0.0, 5.0));
+			if (keys[SDL_SCANCODE_KP_6])
+				bodies["box1"]->setLinearVelocity(btVector3(0.0, 0.0, -5.0));
+			if (keys[SDL_SCANCODE_KP_5])
+				bodies["box1"]->setLinearVelocity(btVector3(-5.0, 0.0, 0.0));
+		}
+		else if (editmode == EDIT_MODE) {
+			std::string lastKey;
+			for (const auto& id_pair : bodies) {
+				lastKey = id_pair.first;
+			}
+
+			btVector3 lastObject = bodies[lastKey]->getWorldTransform().getOrigin();
+			btVector3 lastObjectScale = (((btBoxShape*)bodies[lastKey]->getCollisionShape())->getHalfExtentsWithMargin()) * 2;
+
+			btVector3 playerPos = playerBody->getWorldTransform().getOrigin();
+
+			btTransform t;
+			t.setIdentity();
+
+			if (keys[SDL_SCANCODE_W]) {
+				player->setPosition(moveForward(player->getPosition(), yaw, 0.1f));
+				/*glm::vec3 move = glm::vec3(moveForward(glm::vec3(playerPos.x(), playerPos.y(), playerPos.z()), yaw, 0.1));
+				t.setOrigin(btVector3(move.x, move.y, move.z));
+				playerBody->setWorldTransform(t);*/
+			}
+			else if (keys[SDL_SCANCODE_S]) {
+				player->setPosition(moveForward(player->getPosition(), yaw, -0.1f));
+				/*glm::vec3 move = glm::vec3(moveForward(glm::vec3(playerPos.x(), playerPos.y(), playerPos.z()), yaw, -0.1));
+				t.setOrigin(btVector3(move.x, move.y, move.z));
+				playerBody->setWorldTransform(t);*/
+			}
+			if (keys[SDL_SCANCODE_A]) {
+				player->setPosition(moveRight(player->getPosition(), yaw, -0.1f));
+				/*glm::vec3 move = glm::vec3(moveRight(glm::vec3(playerPos.x(), playerPos.y(), playerPos.z()), yaw, -0.1));
+				t.setOrigin(btVector3(move.x, move.y, move.z));
+				playerBody->setWorldTransform(t);*/
+			}
+			else if (keys[SDL_SCANCODE_D]) {
+				player->setPosition(moveRight(player->getPosition(), yaw, 0.1f));
+				/*glm::vec3 move = glm::vec3(moveRight(glm::vec3(playerPos.x(), playerPos.y(), playerPos.z()), yaw, 0.1));
+				t.setOrigin(btVector3(move.x, move.y, move.z));
+				playerBody->setWorldTransform(t);*/
+			}
+
+			if (keys[SDL_SCANCODE_LSHIFT]) {
+				shiftPressed = false;
+			}
+			if (keys[SDL_SCANCODE_LCTRL]) {
+				shiftPressed = true;
+			}
+
+			if (keys[SDL_SCANCODE_O]) {
+				writeFile();
+			}
+
+			if (keys[SDL_SCANCODE_KP_8]) {
+				glm::vec3 moveLeft = glm::vec3(moveForward(glm::vec3(lastObject.x(), lastObject.y(), lastObject.z()), yaw, 0.1));
+				t.setOrigin(btVector3(moveLeft.x, moveLeft.y, moveLeft.z));
+				bodies[lastKey]->setWorldTransform(t);
+			}
+			if (keys[SDL_SCANCODE_KP_4]) {
+				glm::vec3 moveLeft = glm::vec3(moveRight(glm::vec3(lastObject.x(), lastObject.y(), lastObject.z()), yaw, -0.1));
+				t.setOrigin(btVector3(moveLeft.x, moveLeft.y, moveLeft.z));
+				bodies[lastKey]->setWorldTransform(t);
+			}
+			if (keys[SDL_SCANCODE_KP_6]) {
+				glm::vec3 moveLeft = glm::vec3(moveRight(glm::vec3(lastObject.x(), lastObject.y(), lastObject.z()), yaw, 0.1));
+				t.setOrigin(btVector3(moveLeft.x, moveLeft.y, moveLeft.z));
+				bodies[lastKey]->setWorldTransform(t);
+			}
+			if (keys[SDL_SCANCODE_KP_5]) {
+				glm::vec3 moveLeft = glm::vec3(moveForward(glm::vec3(lastObject.x(), lastObject.y(), lastObject.z()), yaw, -0.1));
+				t.setOrigin(btVector3(moveLeft.x, moveLeft.y, moveLeft.z));
+				bodies[lastKey]->setWorldTransform(t);
+			}
 		}
 
 		if (keys[SDL_SCANCODE_R]) {
@@ -565,21 +674,6 @@ namespace SceneManager {
 		}
 
 		//	if (keys[SDL_SCANCODE_5])cout << bullet.size() << endl;
-
-
-		if (keys[SDL_SCANCODE_M]) {
-			//cout << "Curiously cinnamon\n";
-			bodies["box1"]->setLinearVelocity(btVector3(0.0, 5.0, 0.0));
-		}
-		if (keys[SDL_SCANCODE_KP_8])
-			bodies["box1"]->setLinearVelocity(btVector3(5.0, 0.0, 0.0));
-		if (keys[SDL_SCANCODE_KP_4])
-			bodies["box1"]->setLinearVelocity(btVector3(0.0, 0.0, 5.0));
-		if (keys[SDL_SCANCODE_KP_6])
-			bodies["box1"]->setLinearVelocity(btVector3(0.0, 0.0, -5.0));
-		if (keys[SDL_SCANCODE_KP_5])
-			bodies["box1"]->setLinearVelocity(btVector3(-5.0, 0.0, 0.0));
-
 	}
 
 	void renderObject(glm::mat4 proj, Model *modelData, glm::vec3 pos, GLuint shader) {
@@ -765,11 +859,20 @@ namespace SceneManager {
 		glEnable(GL_CULL_FACE);
 		///+++++++++++++++
 
-		bt_manager->renderBox(bodies["box0"], view, projection, cube, shader);
-		bt_manager->renderBox(bodies["box1"], view, projection, cube, shader);
-		bt_manager->renderBox(bodies["box2"], view, projection, cube, shader);
-		//	bt_manager->renderBox(bodies[3], view, projection, cube, defaultMaterial);
-		bt_manager->renderSphere(bodies["sphere0"], view, projection, sphere, shader);
+		int i = 0;
+		for (const auto& id_pair : bodies) {
+			// First = name / key
+			id_pair.first; // string
+
+			if (id_pair.second->getCollisionShape()->getShapeType() == BOX_SHAPE_PROXYTYPE) {
+				bt_manager->renderBox(bodies[id_pair.first], view, projection, cube, shader);
+			}
+
+			if (id_pair.second->getCollisionShape()->getShapeType() == SPHERE_SHAPE_PROXYTYPE) {
+				bt_manager->renderSphere(bodies[id_pair.first], view, projection, sphere, shader);
+			}
+			i++;
+		}
 		///+++++++++++++++
 		// RENDERING MODELS
 			if (pointOfView == THIRD_PERSON)
