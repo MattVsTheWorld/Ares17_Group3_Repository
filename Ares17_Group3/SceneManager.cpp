@@ -58,11 +58,7 @@ namespace SceneManager {
 	};
 
 	// Load models
-	Model *nanosuit;
-	Model *pistol;
-	Model *plasmacutter;
-	Model *sphere;
-	Model *cube;
+	std::map<string, Model*> models;
 	GLuint defaultTexture;
 
 	glm::mat4 view;
@@ -326,6 +322,14 @@ namespace SceneManager {
 		*/
 	}
 
+	void initModels() {
+		models.insert(std::pair<string, Model*>("nanosuit", new Model("Nanosuit/nanosuit.obj")));
+		models.insert(std::pair<string, Model*>("pistol", new Model("CHOO/Socom pistol.obj")));
+		models.insert(std::pair<string, Model*>("plasmacutter", new Model("Model/Guns/Plasmacutter/DYIPlasmcutter.obj")));
+		models.insert(std::pair<string, Model*>("cube", new Model("cube.obj")));
+		models.insert(std::pair<string, Model*>("sphere", new Model("sphere.obj")));
+	}
+
 	void insertBox() {
 		glm::vec3 position(moveForward(player->getPosition(), yaw, 0.5f));
 		glm::vec3 scale(0.5, 0.5, 0.5);
@@ -381,7 +385,6 @@ namespace SceneManager {
 	//	return false;
 	//}
 
-
 	void init(void) {
 			
 		//gContactAddedCallback = callbackFunc;
@@ -395,12 +398,10 @@ namespace SceneManager {
 		//+++
 		bt_manager = new btShapeManager();
 
-		nanosuit = new Model("Nanosuit/nanosuit.obj");
-		pistol = new Model("CHOO/Socom pistol.obj");
-		plasmacutter = new Model("Model/Guns/Plasmacutter/DYIPlasmcutter.obj");
-		cube = new Model("cube.obj");
+		initModels();
+
 		defaultTexture = loadBitmap::loadBitmap("wall.bmp");
-		sphere = new Model("sphere.obj"); // THIS MODEL IS TERRIBLE
+
 		MeshManager::setLight(shaderProgram, testLight);
 		MeshManager::setMaterial(shaderProgram, greenMaterial);
 
@@ -468,7 +469,7 @@ namespace SceneManager {
 
 	bool leftClick = false;
 	bool rightClick = false;
-
+	
 	float coolDownOfGun = 0.5; //wait between shots
 	bool shiftPressed = true;
 	//*****************************CONTROLS********************
@@ -498,11 +499,6 @@ namespace SceneManager {
 				}
 			}
 			if (sdlEvent.button.button == SDL_BUTTON_RIGHT) rightClick = true;
-		}
-
-		if (leftClick == true && pointOfView == FIRST_PERSON) {
-			insertBox();
-			leftClick = false;
 		}
 
 		if (sdlEvent.type == SDL_MOUSEBUTTONUP  && pointOfView == FIRST_PERSON) {
@@ -572,6 +568,11 @@ namespace SceneManager {
 
 			btTransform t;
 			t.setIdentity();
+
+			if (leftClick == true && pointOfView == FIRST_PERSON) {
+				insertBox();
+				leftClick = false;
+			}
 
 			if (keys[SDL_SCANCODE_W]) {
 				player->setPosition(moveForward(player->getPosition(), yaw, 0.1f));
@@ -751,7 +752,7 @@ namespace SceneManager {
 		//	if (keys[SDL_SCANCODE_5])cout << bullet.size() << endl;
 	}
 
-	void renderObject(glm::mat4 proj, Model *modelData, glm::vec3 pos, GLuint shader) {
+	void renderObject(glm::mat4 proj, Model *modelData, glm::vec3 pos, glm::vec3 scale, GLuint shader) {
 		//glUseProgram(modelProgram);
 		//mvStack.push(mvStack.top());// push modelview to stack
 	//	MeshManager::setLight(modelProgram, testLight);
@@ -765,7 +766,7 @@ namespace SceneManager {
 		model = glm::translate(model, pos);
 		model = glm::rotate(model, float(-yaw*DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::rotate(model, float(180 * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));	// It's a bit too big for our scene, so scale it down
+		model = glm::scale(model, scale);	// It's a bit too big for our scene, so scale it down
 		//model = glm::scale(model, glm::vec3(0.05f, 0.05f, 0.05f));	// for gun
 		glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
 		modelData->Draw(shader);
@@ -966,7 +967,7 @@ namespace SceneManager {
 		// PLAYER capsule
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		glDisable(GL_CULL_FACE);
-		bt_manager->renderCapsule(playerBody, view, projection, sphere, shader);
+		bt_manager->renderCapsule(playerBody, view, projection, models["sphere"], shader);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		glEnable(GL_CULL_FACE);
 		///+++++++++++++++
@@ -977,21 +978,22 @@ namespace SceneManager {
 			id_pair.first; // string
 
 			if (id_pair.second->getCollisionShape()->getShapeType() == BOX_SHAPE_PROXYTYPE) {
-				bt_manager->renderBox(bodies[id_pair.first], view, projection, cube, shader);
+				bt_manager->renderBox(bodies[id_pair.first], view, projection, models["cube"], shader);
 			}
 
 			if (id_pair.second->getCollisionShape()->getShapeType() == SPHERE_SHAPE_PROXYTYPE) {
-				bt_manager->renderSphere(bodies[id_pair.first], view, projection, sphere, shader);
+				bt_manager->renderSphere(bodies[id_pair.first], view, projection, models["sphere"], shader);
 			}
 			i++;
 		}
 		///+++++++++++++++
 		// RENDERING MODELS
-			if (pointOfView == THIRD_PERSON)
-				renderObject(projection, nanosuit, glm::vec3(player->getPosition().x, player->getPosition().y-1.75, player->getPosition().z), shader);
 
-			if (pointOfView == FIRST_PERSON)
-				renderWep(projection, plasmacutter, shader);
+		if (pointOfView == THIRD_PERSON)
+			renderObject(projection, models["nanosuit"], glm::vec3(player->getPosition().x, player->getPosition().y-1.75, player->getPosition().z), glm::vec3(0.2,0.2,0.2), shader);
+
+		if (pointOfView == FIRST_PERSON)
+			renderWep(projection, models["plasmacutter"], shader);
 	}
 	// main render function, sets up the shaders and then calls all other functions
 	void renderShadowScene(glm::mat4 projection, glm::mat4 viewMatrix, GLuint shader, bool cubemap) {
@@ -1077,7 +1079,7 @@ namespace SceneManager {
 				glEnable(GL_CULL_FACE);
 				glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
 
-				skybox->renderSkybox(projection, view, cube);
+				skybox->renderSkybox(projection, view, models["cube"]);
 				// normal rendering
 				renderShadowScene(projection, view, modelProgram, false); // render normal scene from normal point of view
 			
