@@ -59,6 +59,7 @@ namespace SceneManager {
 	// Load models
 	Model *nanosuit;
 	Model *pistol;
+	Model *plasmacutter;
 	Model *sphere;
 	Model *cube;
 	GLuint defaultTexture;
@@ -114,7 +115,7 @@ namespace SceneManager {
 	// TEST
 	btRigidBody* playerBody;
 	//	
-	
+
 	glm::vec3 moveForward(glm::vec3 pos, GLfloat angle, GLfloat d) {
 		return glm::vec3(pos.x + d*std::sin(yaw*DEG_TO_RADIAN), pos.y, pos.z - d*std::cos(yaw*DEG_TO_RADIAN));
 	}
@@ -395,6 +396,7 @@ namespace SceneManager {
 
 		nanosuit = new Model("Nanosuit/nanosuit.obj");
 		pistol = new Model("CHOO/Socom pistol.obj");
+		plasmacutter = new Model("Model/Guns/Plasmacutter/DYIPlasmcutter.obj");
 		cube = new Model("cube.obj");
 		defaultTexture = loadBitmap::loadBitmap("wall.bmp");
 		sphere = new Model("sphere.obj"); // THIS MODEL IS TERRIBLE
@@ -758,13 +760,14 @@ namespace SceneManager {
 		model = glm::rotate(model, float(-yaw*DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::rotate(model, float(180 * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));	// It's a bit too big for our scene, so scale it down
+		//model = glm::scale(model, glm::vec3(0.05f, 0.05f, 0.05f));	// for gun
 		glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
 		modelData->Draw(shader);
 
 		//mvStack.pop();
 	}
 
-	void renderWep(glm::mat4 proj, Model *modelData, GLuint shader) {
+	/*void renderWep(glm::mat4 proj, Model *modelData, GLuint shader) {
 		//glUseProgram(modelProgram);
 		glDisable(GL_DEPTH_TEST);//Disable depth test for HUD label
 		//mvStack.push(glm::mat4(1.0));// push modelview to stack
@@ -778,7 +781,7 @@ namespace SceneManager {
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, defaultTexture);
 		glm::mat4 model;
-		/*
+		
 		if (rightClick) {
 			glm::vec3 gun_pos(0.0f, -2.0f, -5.0f);
 			float Y_axisRotation = -85.0f*DEG_TO_RADIAN;
@@ -786,16 +789,19 @@ namespace SceneManager {
 			model = glm::translate(model, gun_pos);
 			model = glm::rotate(model, Y_axisRotation, glm::vec3(0.0f, 1.0f, 0.0f)); // Rotate in y axis
 		//	model = glm::rotate(model, Z_axisRotation, glm::vec3(0.0f, 0.0f, 1.0f)); // Rotate in z axis
-		} */
+		} 
 		//	else {
 		glm::vec3 gun_pos(2.5f, -2.5f, -5.0f);
-		float Y_axisRotation = -50.0f*DEG_TO_RADIAN;
-		float Z_axisRotation = -25.0f*DEG_TO_RADIAN;
+		float Y_axisRotation = 30.0f*DEG_TO_RADIAN;
 		model = glm::translate(model, gun_pos);
+		//model = glm::rotate(model, float(-yaw*DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, float(180 * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::rotate(model, Y_axisRotation, glm::vec3(0.0f, 1.0f, 0.0f)); // Rotate in y axis
-		model = glm::rotate(model, Z_axisRotation, glm::vec3(0.0f, 0.0f, 1.0f)); // Rotate in z axis
+		//model = glm::rotate(model, Z_axisRotation, glm::vec3(0.0f, 0.0f, 1.0f)); // Rotate in z axis
+		model = glm::scale(model, glm::vec3(0.05f, 0.05f, 0.05f));
 //	}
-		model = glm::scale(model, glm::vec3(0.005f, 0.005f, 0.005f));	// It's a bit too big for our scene, so scale it down
+		//model = glm::scale(model, glm::vec3(0.005f, 0.005f, 0.005f));	// It's a bit too big for our scene, so scale it down
+
 		glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
 		modelData->Draw(shader);
 
@@ -803,6 +809,23 @@ namespace SceneManager {
 			//	glCullFace(GL_BACK);
 		glEnable(GL_DEPTH_TEST);//Re-enable depth test after HUD label 
 		glDepthMask(GL_TRUE);
+	}*/
+
+	void renderWep(glm::mat4 proj, Model *modelData, GLuint shader) {
+		glm::mat4 model;
+		glm::vec3 gunPos = moveForward(glm::vec3(player->getPosition().x, player->getPosition().y-0.15, player->getPosition().z), yaw, 0.2);
+		gunPos = moveRight(gunPos, yaw, 0.2);
+		model = glm::translate(model, gunPos);
+		float Y_axisRotation = 30.0f*DEG_TO_RADIAN;
+		model = glm::rotate(model, float(-yaw*DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, float(pitch*DEG_TO_RADIAN), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, float(180 * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, Y_axisRotation, glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, glm::vec3(0.005f, 0.005f, 0.005f));
+	//	model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));	// It's a bit too big for our scene, so scale it down
+																//model = glm::scale(model, glm::vec3(0.05f, 0.05f, 0.05f));	// for gun
+		glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		modelData->Draw(shader);
 	}
 
 	void updatePlayer() {
@@ -944,10 +967,10 @@ namespace SceneManager {
 		///+++++++++++++++
 		// RENDERING MODELS
 			if (pointOfView == THIRD_PERSON)
-				renderObject(projection,nanosuit, glm::vec3(player->getPosition().x, player->getPosition().y-1.5, player->getPosition().z), shader);
+				renderObject(projection, nanosuit, glm::vec3(player->getPosition().x, player->getPosition().y-1.0, player->getPosition().z), shader);
 
 			if (pointOfView == FIRST_PERSON)
-				renderWep(projection, pistol, shader);
+				renderWep(projection, plasmacutter, shader);
 	}
 	// main render function, sets up the shaders and then calls all other functions
 	void renderShadowScene(glm::mat4 projection, glm::mat4 viewMatrix, GLuint shader, bool cubemap) {
