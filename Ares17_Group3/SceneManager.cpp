@@ -989,8 +989,11 @@ namespace SceneManager {
 		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 
 	}
-
-
+	//void timer() {
+	//	GLint64 timer;
+	//	glGetInteger64v(GL_TIMESTAMP, &timer);
+//
+//	}
 	void draw(SDL_Window * window) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear window
 		glEnable(GL_CULL_FACE);
@@ -1033,8 +1036,8 @@ namespace SceneManager {
 				skybox->renderSkybox(projection, view, cube);
 				// normal rendering
 				renderShadowScene(projection, view, modelProgram, false); // render normal scene from normal point of view
-
-				h_manager->renderToHud(10, texturedProgram, cube, glm::vec3(-0.25f, 0.9f, 0.9f));
+			
+				h_manager->renderToHud(10, texturedProgram, cube, glm::vec3(-0.9f, 0.9f, 0.9f));
 			}
 
 

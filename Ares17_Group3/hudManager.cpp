@@ -55,19 +55,24 @@ hudManager::hudManager() {
 // uses shader program, light, modelview top of stack, mesh object and index count as parameters
 void hudManager::renderToHud(int value, GLuint shader, Model *modelData, glm::vec3 pos) {
 	glDisable(GL_DEPTH_TEST);//Disable depth test for HUD label
-	std::string str = "Cube num ";	
+	std::string str = "FPS: ";	
 	str.append(std::to_string(value));	
 
 	const char *cstr = str.c_str();
 	glm::mat4 id = glm::mat4();
 	glUseProgram(shader); //texture-only shader will be used for teture rendering
 	label = textToTexture(cstr, label);
+	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, label);
 	// transformations
 	id = glm::translate(id, pos);
-	id = glm::scale(id, glm::vec3(0.75f, 0.075f, 0.075f));
+	id = glm::scale(id, glm::vec3(0.075f, -0.075f, 0.075f));
+	MeshManager::setUniformMatrix4fv(shader, "view", glm::value_ptr(glm::mat4(1.0)));
 	MeshManager::setUniformMatrix4fv(shader, "projection", glm::value_ptr(glm::mat4(1.0)));
 	MeshManager::setUniformMatrix4fv(shader, "model", glm::value_ptr(id));
 	modelData->Draw(shader);
-	glEnable(GL_DEPTH_TEST);//Re-enable depth test after HUD label 
+	glEnable(GL_DEPTH_TEST);//Re-enable depth test after HUD label
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
