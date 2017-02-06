@@ -30,7 +30,6 @@ namespace SceneManager {
 	enum mode { PLAY_MODE, EDIT_MODE };
 	mode editmode = PLAY_MODE;
 
-
 	// SHADOWS
 	GLuint depthShaderProgram; //shader to create shadow cubemaps
 
@@ -340,7 +339,6 @@ namespace SceneManager {
 
 	void initPlayer(float rad, float height, float mass) {
 		player = new Player(eye);
-
 		btTransform t;
 		t.setIdentity();
 		t.setOrigin(btVector3(player->getPosition().x, player->getPosition().y, player->getPosition().z));
@@ -349,7 +347,6 @@ namespace SceneManager {
 		if (mass != 0.0)
 			playerShape->calculateLocalInertia(mass, inertia);
 		btMotionState* motion = new btDefaultMotionState(t);
-
 		btRigidBody::btRigidBodyConstructionInfo info(mass, motion, playerShape, inertia);
 
 		playerBody = new btRigidBody(info);
@@ -359,7 +356,9 @@ namespace SceneManager {
 		playerBody->setFriction(8);
 
 		// Now ghost
-
+	/*	btGhostObject* playerGhost = new btGhostObject();
+		playerGhost->setCollisionShape(playerShape);
+		playerGhost->setWorldTransform(t);*/
 		// btRigidBody::setAngularFactor // to 0
 		// +++++
 		/// NEWEST
