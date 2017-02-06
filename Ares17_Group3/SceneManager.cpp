@@ -358,9 +358,12 @@ namespace SceneManager {
 		playerBody->setActivationState(DISABLE_DEACTIVATION);
 		playerBody->setFriction(8);
 
+		// Now ghost
+
 		// btRigidBody::setAngularFactor // to 0
 		// +++++
-
+		/// NEWEST
+		//playerBody->setCollisionFlags(playerBody->getCollisionFlags() | btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK); // add
 	}
 
 	//Collision callback
@@ -368,16 +371,19 @@ namespace SceneManager {
 	// flag - 1 static, 2 kinematic - 4 no contact response (through object....)
 	// no contact response e.g. -> sphere of action of a lever (we know player is inside aka colliding, but we don't move him around)
 	// 8 material callback
-	bool callbackFunc(btManifoldPoint& cp, const btCollisionObject* obj1, int id1, int index1, const btCollisionObject* obj2, int id2, int index2)
-	{
-		// add collision flag to rest of flags
-		// playerBody->setCollisionFlags(playerBody->getCollisionFlags() | btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK); // add
-		// SEE GLOBAL ON TOP
-		std::cout << "collision" << std::endl;
-		return false;
-	}
+	//bool callbackFunc(btManifoldPoint& cp, const btCollisionObject* obj1, int id1, int index1, const btCollisionObject* obj2, int id2, int index2)
+	//{
+	//	// add collision flag to rest of flags
+	//	
+	//	// SEE GLOBAL ON TOP
+	//	std::cout << "collision" << std::endl;
+	//	return false;
+	//}
+
 
 	void init(void) {
+			
+		//gContactAddedCallback = callbackFunc;
 
 		shaderProgram = ShaderManager::initShaders("Shaders/phong-tex.vert", "Shaders/phong-tex.frag");
 		texturedProgram = ShaderManager::initShaders("Shaders/textured.vert", "Shaders/textured.frag");
@@ -835,6 +841,7 @@ namespace SceneManager {
 		updatePlayer();
 
 		bt_manager->update();
+
 		//world->stepSimulation(1/60.0); // 1 divided by frames per second
 		// would need to delete dispatcher, collisionconfig, solver, world, broadphase in main
 		// +++++
@@ -981,15 +988,12 @@ namespace SceneManager {
 		//draw normal scene
 		renderWorldObjects(shader, projection);
 
-		
-
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, 0);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 
 	}
-
 
 	void draw(SDL_Window * window) {//, int fps) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear window
@@ -1036,16 +1040,8 @@ namespace SceneManager {
 			
 				//h_manager->renderToHud(fps, texturedProgram, cube, glm::vec3(-0.9f, 0.9f, 0.9f));
 			}
-
-
-			//mvStack.pop();
-
 			glDepthMask(GL_TRUE);
-			
 		}
-
-		
-
 		SDL_GL_SwapWindow(window); // swap buffers
 	}
 }
