@@ -78,10 +78,10 @@ namespace SceneManager {
 		{ 0.6f, 0.4f, 0.6f, 1.0f }, // ambient
 		{ 1.0f, 1.0f, 1.0f, 1.0f }, // diffuse
 		{ 1.0f, 1.0f, 1.0f, 1.0f }, // specular
-		{ 0.0f, 5.0f, 0.0f, 1.0f }  // position
+		{ 0.0f, 6.0f, 0.0f, 1.0f }  // position
 	};
 	//glm::vec4 lightPos(0.0, 5.0, 0.0, 1.0);
-	glm::vec3 lightPos(0.0, 5.0, 0.0);
+	glm::vec3 lightPos(0.0, 6.0, 0.0);
 
 	MeshManager::materialStruct greenMaterial = {
 		{ 0.6f, 0.4f, 0.2f, 1.0f }, // ambient
@@ -379,11 +379,11 @@ namespace SceneManager {
 
 	void init(void) {
 
-		shaderProgram = ShaderManager::initShaders("phong-tex.vert", "phong-tex.frag");
-		texturedProgram = ShaderManager::initShaders("textured.vert", "textured.frag");
-		modelProgram = ShaderManager::initShaders("modelLoading.vert", "modelLoading.frag");
+		shaderProgram = ShaderManager::initShaders("Shaders/phong-tex.vert", "Shaders/phong-tex.frag");
+		texturedProgram = ShaderManager::initShaders("Shaders/textured.vert", "Shaders/textured.frag");
+		modelProgram = ShaderManager::initShaders("Shaders/modelLoading.vert", "Shaders/modelLoading.frag");
 		//+++
-		depthShaderProgram = ShaderManager::initShaders("simpleShadowMap.vert", "simpleShadowMap.frag", "simpleShadowMap.gs");
+		depthShaderProgram = ShaderManager::initShaders("Shaders/simpleShadowMap.vert", "Shaders/simpleShadowMap.frag", "Shaders/simpleShadowMap.gs");
 
 		//+++
 		bt_manager = new btShapeManager();
@@ -865,11 +865,11 @@ namespace SceneManager {
 	}
 
 	//function that passes all light positions and properties to the shader
-#define AMBIENT_FACTOR 0.8f
+#define AMBIENT_FACTOR 1.0f
 #define DIFFUSE_FACTOR 0.8f
 #define SPECULAR_FACTOR 1.0f
-#define ATTENUATION_CONST 0.2f
-#define ATTENUATION_LINEAR 0.09f
+#define ATTENUATION_CONST 0.05f
+#define ATTENUATION_LINEAR 0.009f
 #define ATTENUATION_QUAD 0.032f
 
 	void pointLight(GLuint shader) {
@@ -981,6 +981,8 @@ namespace SceneManager {
 		//draw normal scene
 		renderWorldObjects(shader, projection);
 
+		
+
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, 0);
 		glActiveTexture(GL_TEXTURE0);
@@ -1031,6 +1033,8 @@ namespace SceneManager {
 				skybox->renderSkybox(projection, view, cube);
 				// normal rendering
 				renderShadowScene(projection, view, modelProgram, false); // render normal scene from normal point of view
+
+				h_manager->renderToHud(10, texturedProgram, cube, glm::vec3(-0.25f, 0.9f, 0.9f));
 			}
 
 
@@ -1039,6 +1043,8 @@ namespace SceneManager {
 			glDepthMask(GL_TRUE);
 			
 		}
+
+		
 
 		SDL_GL_SwapWindow(window); // swap buffers
 	}
