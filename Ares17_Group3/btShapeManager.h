@@ -19,7 +19,7 @@ struct btSettings {
 	btDynamicsWorld* world;
 	btDispatcher* dispatcher;
 	btCollisionConfiguration* collisionConfig;
-	btBroadphaseInterface* broadphase; //improves collision check (?) // can improve by know world size (?)
+	btBroadphaseInterface* broadphase; //improves collision check (?) // can improve by knowing world size (?)
 	btConstraintSolver* solver;
 };
 

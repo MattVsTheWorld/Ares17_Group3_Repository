@@ -109,37 +109,37 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="phong-tex.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="phong-tex.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="textured.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="textured.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="cubeMap.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="cubeMap.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="modelLoading.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="modelLoading.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="simpleShadowMap.frag">
+    <None Include="Shaders\cubeMap.frag">
       <Filter>Shaders\New</Filter>
     </None>
-    <None Include="simpleShadowMap.gs">
+    <None Include="Shaders\cubeMap.vert">
       <Filter>Shaders\New</Filter>
     </None>
-    <None Include="simpleShadowMap.vert">
+    <None Include="Shaders\modelLoading.frag">
+      <Filter>Shaders\New</Filter>
+    </None>
+    <None Include="Shaders\modelLoading.vert">
+      <Filter>Shaders\New</Filter>
+    </None>
+    <None Include="Shaders\phong-tex.frag">
+      <Filter>Shaders\New</Filter>
+    </None>
+    <None Include="Shaders\phong-tex.vert">
+      <Filter>Shaders\New</Filter>
+    </None>
+    <None Include="Shaders\simpleShadowMap.frag">
+      <Filter>Shaders\New</Filter>
+    </None>
+    <None Include="Shaders\simpleShadowMap.gs">
+      <Filter>Shaders\New</Filter>
+    </None>
+    <None Include="Shaders\simpleShadowMap.vert">
+      <Filter>Shaders\New</Filter>
+    </None>
+    <None Include="Shaders\textured.frag">
+      <Filter>Shaders\New</Filter>
+    </None>
+    <None Include="Shaders\textured.vert">
       <Filter>Shaders\New</Filter>
     </None>
   </ItemGroup>

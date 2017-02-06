@@ -1,6 +1,14 @@
 #ifndef SCENEMANAGER
 #define SCENEMANAGER
 
+//////////////////////
+//+++ FPS EXPERIMENT
+//////////////////////
+
+//////////////////////
+//--- FPS EXPERIMENT
+//////////////////////
+
 //#include "MeshManager.h"
 #include "SDL.h"
 //#include "Object.h"
@@ -10,7 +18,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "Skybox.h"
-//#include <time.h>
+
 
 //#include <btBulletDynamicsCommon.h>
 #include "btShapeManager.h"
@@ -25,7 +33,7 @@
 namespace SceneManager {
 	void init(void);
 	void update(SDL_Window *window, SDL_Event sdlEvent);
-	void draw(SDL_Window *window);
+	void draw(SDL_Window *window);//, int fps);
 }
 
 #endif

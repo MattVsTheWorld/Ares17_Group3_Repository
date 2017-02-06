@@ -53,29 +53,26 @@ hudManager::hudManager() {
 
 // render normal hud text
 // uses shader program, light, modelview top of stack, mesh object and index count as parameters
-void hudManager::renderToHud(int N, GLuint shader, MeshManager::lightStruct light, GLuint meshObject, GLuint meshIndexCount, glm::vec3 pos, float value_x, float value_y, float value_z) {
+void hudManager::renderToHud(int value, GLuint shader, Model *modelData, glm::vec3 pos) {
 	glDisable(GL_DEPTH_TEST);//Disable depth test for HUD label
-	std::string str = "Cube num ";	
-	str.append(std::to_string(N));	
-	str.append("- Vel_x: ");
-	str.append(std::to_string(value_x));
-	str.append("- Vel_y: ");
-	str.append(std::to_string(value_y));
-	str.append("- Vel_z: ");
-	str.append(std::to_string(value_z));
+	std::string str = "FPS: ";	
+	str.append(std::to_string(value));	
 
 	const char *cstr = str.c_str();
 	glm::mat4 id = glm::mat4();
 	glUseProgram(shader); //texture-only shader will be used for teture rendering
-	MeshManager::setLight(shader, light);
 	label = textToTexture(cstr, label);
+	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, label);
 	// transformations
 	id = glm::translate(id, pos);
-	id = glm::scale(id, glm::vec3(0.75f, 0.075f, 0.075f));
+	id = glm::scale(id, glm::vec3(0.075f, -0.075f, 0.075f));
+	MeshManager::setUniformMatrix4fv(shader, "view", glm::value_ptr(glm::mat4(1.0)));
 	MeshManager::setUniformMatrix4fv(shader, "projection", glm::value_ptr(glm::mat4(1.0)));
-	MeshManager::setUniformMatrix4fv(shader, "modelview", glm::value_ptr(id));
+	MeshManager::setUniformMatrix4fv(shader, "model", glm::value_ptr(id));
+	modelData->Draw(shader);
+	glEnable(GL_DEPTH_TEST);//Re-enable depth test after HUD label
 
-	MeshManager::drawIndexedMesh(meshObject, meshIndexCount, GL_TRIANGLES);
-	glEnable(GL_DEPTH_TEST);//Re-enable depth test after HUD label 
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, 0);
 }

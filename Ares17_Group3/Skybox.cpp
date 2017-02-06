@@ -1,7 +1,7 @@
 #include "Skybox.h"
 
 Skybox::Skybox(const char *cubeTexFiles[6]) {
-	skyboxProgram = ShaderManager::initShaders("cubeMap.vert", "cubeMap.frag");
+	skyboxProgram = ShaderManager::initShaders("Shaders/cubeMap.vert", "Shaders/cubeMap.frag");
 		loadCubeMap(cubeTexFiles, &textures);
 }
 
@@ -62,7 +62,7 @@ void Skybox::renderSkybox(glm::mat4 projection, glm::mat4 view, Model *modelData
 	glBindTexture(GL_TEXTURE_CUBE_MAP, textures);
 	glm::mat4 model;
 	model = glm::scale(model, glm::vec3(1.5f, 1.5f, 1.5f));
-	MeshManager::setUniformMatrix4fv(skyboxProgram, "modelMatrix", glm::value_ptr(model));
+	MeshManager::setUniformMatrix4fv(skyboxProgram, "model", glm::value_ptr(model));
 	modelData->Draw(skyboxProgram);
 	
 	mvStack.pop();
@@ -89,7 +89,7 @@ void Skybox::renderSkybox(glm::mat4 projection, glm::mat4 view, Model *modelData
 	glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
 	glm::mat4 model;
 	model = glm::scale(model, glm::vec3(1.5f, 1.5f, 1.5f));
-	MeshManager::setUniformMatrix4fv(skyboxProgram, "modelMatrix", glm::value_ptr(model));
+	MeshManager::setUniformMatrix4fv(skyboxProgram, "model", glm::value_ptr(model));
 	modelData->Draw(skyboxProgram);
 
 	mvStack.pop();

@@ -79,10 +79,10 @@ namespace SceneManager {
 		{ 0.6f, 0.4f, 0.6f, 1.0f }, // ambient
 		{ 1.0f, 1.0f, 1.0f, 1.0f }, // diffuse
 		{ 1.0f, 1.0f, 1.0f, 1.0f }, // specular
-		{ 0.0f, 5.0f, 0.0f, 1.0f }  // position
+		{ 0.0f, 6.0f, 0.0f, 1.0f }  // position
 	};
 	//glm::vec4 lightPos(0.0, 5.0, 0.0, 1.0);
-	glm::vec3 lightPos(0.0, 5.0, 0.0);
+	glm::vec3 lightPos(0.0, 6.0, 0.0);
 
 	MeshManager::materialStruct greenMaterial = {
 		{ 0.6f, 0.4f, 0.2f, 1.0f }, // ambient
@@ -359,9 +359,12 @@ namespace SceneManager {
 		playerBody->setActivationState(DISABLE_DEACTIVATION);
 		playerBody->setFriction(8);
 
+		// Now ghost
+
 		// btRigidBody::setAngularFactor // to 0
 		// +++++
-
+		/// NEWEST
+		//playerBody->setCollisionFlags(playerBody->getCollisionFlags() | btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK); // add
 	}
 
 	//Collision callback
@@ -369,22 +372,25 @@ namespace SceneManager {
 	// flag - 1 static, 2 kinematic - 4 no contact response (through object....)
 	// no contact response e.g. -> sphere of action of a lever (we know player is inside aka colliding, but we don't move him around)
 	// 8 material callback
-	bool callbackFunc(btManifoldPoint& cp, const btCollisionObject* obj1, int id1, int index1, const btCollisionObject* obj2, int id2, int index2)
-	{
-		// add collision flag to rest of flags
-		// playerBody->setCollisionFlags(playerBody->getCollisionFlags() | btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK); // add
-		// SEE GLOBAL ON TOP
-		std::cout << "collision" << std::endl;
-		return false;
-	}
+	//bool callbackFunc(btManifoldPoint& cp, const btCollisionObject* obj1, int id1, int index1, const btCollisionObject* obj2, int id2, int index2)
+	//{
+	//	// add collision flag to rest of flags
+	//	
+	//	// SEE GLOBAL ON TOP
+	//	std::cout << "collision" << std::endl;
+	//	return false;
+	//}
+
 
 	void init(void) {
+			
+		//gContactAddedCallback = callbackFunc;
 
-		shaderProgram = ShaderManager::initShaders("phong-tex.vert", "phong-tex.frag");
-		texturedProgram = ShaderManager::initShaders("textured.vert", "textured.frag");
-		modelProgram = ShaderManager::initShaders("modelLoading.vert", "modelLoading.frag");
+		shaderProgram = ShaderManager::initShaders("Shaders/phong-tex.vert", "Shaders/phong-tex.frag");
+		texturedProgram = ShaderManager::initShaders("Shaders/textured.vert", "Shaders/textured.frag");
+		modelProgram = ShaderManager::initShaders("Shaders/modelLoading.vert", "Shaders/modelLoading.frag");
 		//+++
-		depthShaderProgram = ShaderManager::initShaders("simpleShadowMap.vert", "simpleShadowMap.frag", "simpleShadowMap.gs");
+		depthShaderProgram = ShaderManager::initShaders("Shaders/simpleShadowMap.vert", "Shaders/simpleShadowMap.frag", "Shaders/simpleShadowMap.gs");
 
 		//+++
 		bt_manager = new btShapeManager();
@@ -858,6 +864,7 @@ namespace SceneManager {
 		updatePlayer();
 
 		bt_manager->update();
+
 		//world->stepSimulation(1/60.0); // 1 divided by frames per second
 		// would need to delete dispatcher, collisionconfig, solver, world, broadphase in main
 		// +++++
@@ -888,11 +895,11 @@ namespace SceneManager {
 	}
 
 	//function that passes all light positions and properties to the shader
-#define AMBIENT_FACTOR 0.8f
+#define AMBIENT_FACTOR 1.0f
 #define DIFFUSE_FACTOR 0.8f
 #define SPECULAR_FACTOR 1.0f
-#define ATTENUATION_CONST 0.2f
-#define ATTENUATION_LINEAR 0.09f
+#define ATTENUATION_CONST 0.05f
+#define ATTENUATION_LINEAR 0.009f
 #define ATTENUATION_QUAD 0.032f
 
 	void pointLight(GLuint shader) {
@@ -1011,8 +1018,7 @@ namespace SceneManager {
 
 	}
 
-
-	void draw(SDL_Window * window) {
+	void draw(SDL_Window * window) {//, int fps) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear window
 		glEnable(GL_CULL_FACE);
 		glClearColor(0.5f, 0.7f, 0.8f, 1.0f);
@@ -1054,15 +1060,11 @@ namespace SceneManager {
 				skybox->renderSkybox(projection, view, cube);
 				// normal rendering
 				renderShadowScene(projection, view, modelProgram, false); // render normal scene from normal point of view
-			}
-
-
-			//mvStack.pop();
-
-			glDepthMask(GL_TRUE);
 			
+				//h_manager->renderToHud(fps, texturedProgram, cube, glm::vec3(-0.9f, 0.9f, 0.9f));
+			}
+			glDepthMask(GL_TRUE);
 		}
-
 		SDL_GL_SwapWindow(window); // swap buffers
 	}
 }
