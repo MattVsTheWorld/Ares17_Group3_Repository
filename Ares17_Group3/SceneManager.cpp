@@ -1,4 +1,5 @@
 #include "SceneManager.h"
+#include <time.h>
 
 using namespace std;
 
@@ -490,7 +491,12 @@ namespace SceneManager {
 		//MOUSECLICK
 
 		if (sdlEvent.type == SDL_MOUSEBUTTONDOWN && pointOfView == FIRST_PERSON) {
-			if (sdlEvent.button.button == SDL_BUTTON_LEFT) leftClick = true;
+			if (sdlEvent.button.button == SDL_BUTTON_LEFT) {
+				if (coolDownOfGun <= 0.0f) {
+					leftClick = true;
+					coolDownOfGun = 0.5f;
+				}
+			}
 			if (sdlEvent.button.button == SDL_BUTTON_RIGHT) rightClick = true;
 		}
 
@@ -856,8 +862,23 @@ namespace SceneManager {
 		*/
 	}
 
+	float gameTime() {
+		currentTime = clock();
+
+		unsigned int dt = currentTime - lastTime;
+		float dt_secs = (float)dt / 1000;
+		if (dt_secs > 0.017) dt_secs = 0.017; // first value is off ( 5.5~)
+
+		lastTime = currentTime;
+
+		return dt_secs;
+	}
+
 	void update(SDL_Window * window, SDL_Event sdlEvent) {
 		controls(window, sdlEvent);
+
+		float dt_secs = gameTime();
+		coolDownOfGun -= dt_secs;
 
 		// 18/01
 		updatePlayer();
