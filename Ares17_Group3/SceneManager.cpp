@@ -112,6 +112,9 @@ namespace SceneManager {
 	};
 
 	std::map<string, btRigidBody*> bodies;	
+	// TEST
+	btRigidBody* playerBody;
+	//	
 	
 	glm::vec3 moveForward(glm::vec3 pos, GLfloat angle, GLfloat d) {
 		return glm::vec3(pos.x + d*std::sin(yaw*DEG_TO_RADIAN), pos.y, pos.z - d*std::cos(yaw*DEG_TO_RADIAN));
@@ -335,9 +338,7 @@ namespace SceneManager {
 		boxNo++;
 	}
 
-	// TEST
-	btRigidBody* playerBody;
-	//
+
 
 	void initPlayer(float rad, float height, float mass) {
 		player = new Player(eye);
