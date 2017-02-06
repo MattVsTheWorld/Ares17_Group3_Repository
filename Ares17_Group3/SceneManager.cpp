@@ -989,12 +989,9 @@ namespace SceneManager {
 		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 
 	}
-	//void timer() {
-	//	GLint64 timer;
-	//	glGetInteger64v(GL_TIMESTAMP, &timer);
-//
-//	}
-	void draw(SDL_Window * window) {
+
+
+	void draw(SDL_Window * window) {//, int fps) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear window
 		glEnable(GL_CULL_FACE);
 		glClearColor(0.5f, 0.7f, 0.8f, 1.0f);
@@ -1037,7 +1034,7 @@ namespace SceneManager {
 				// normal rendering
 				renderShadowScene(projection, view, modelProgram, false); // render normal scene from normal point of view
 			
-				h_manager->renderToHud(10, texturedProgram, cube, glm::vec3(-0.9f, 0.9f, 0.9f));
+				//h_manager->renderToHud(fps, texturedProgram, cube, glm::vec3(-0.9f, 0.9f, 0.9f));
 			}
 
 
