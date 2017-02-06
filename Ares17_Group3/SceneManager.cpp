@@ -967,7 +967,7 @@ namespace SceneManager {
 		///+++++++++++++++
 		// RENDERING MODELS
 			if (pointOfView == THIRD_PERSON)
-				renderObject(projection, nanosuit, glm::vec3(player->getPosition().x, player->getPosition().y-1.0, player->getPosition().z), shader);
+				renderObject(projection, nanosuit, glm::vec3(player->getPosition().x, player->getPosition().y-1.75, player->getPosition().z), shader);
 
 			if (pointOfView == FIRST_PERSON)
 				renderWep(projection, plasmacutter, shader);
