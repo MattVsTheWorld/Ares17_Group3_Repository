@@ -338,8 +338,6 @@ namespace SceneManager {
 		boxNo++;
 	}
 
-
-
 	void initPlayer(float rad, float height, float mass) {
 		player = new Player(eye);
 
@@ -618,6 +616,69 @@ namespace SceneManager {
 				t.setOrigin(btVector3(moveLeft.x, moveLeft.y, moveLeft.z));
 				bodies[lastKey]->setWorldTransform(t);
 			}
+			
+			float scaling = 0.0005;
+			if (shiftPressed) {
+				if (keys[SDL_SCANCODE_KP_1]) {
+					float scale = lastObjectScale.x();
+					scale += scaling;
+					btBoxShape* box = new btBoxShape(btVector3(scale, lastObjectScale.y(), lastObjectScale.z()));
+					bodies[lastKey]->setCollisionShape(box);
+				}
+				if (keys[SDL_SCANCODE_KP_2]) {
+					float scale = lastObjectScale.y();
+					scale += scaling;
+					btBoxShape* box = new btBoxShape(btVector3(lastObjectScale.x(), scale, lastObjectScale.z()));
+					bodies[lastKey]->setCollisionShape(box);
+				}
+				if (keys[SDL_SCANCODE_KP_3]) {
+					float scale = lastObjectScale.z();
+					scale += scaling;
+					btBoxShape* box = new btBoxShape(btVector3(lastObjectScale.x(), lastObjectScale.y(), scale));
+					bodies[lastKey]->setCollisionShape(box);
+				}
+				if (keys[SDL_SCANCODE_KP_0]) {
+					float scaleX = lastObjectScale.x();
+					float scaleY = lastObjectScale.y();
+					float scaleZ = lastObjectScale.z();
+					scaleX += scaling;
+					scaleY += scaling;
+					scaleZ += scaling;
+					btBoxShape* box = new btBoxShape(btVector3(scaleX, scaleY, scaleZ));
+					bodies[lastKey]->setCollisionShape(box);
+				}
+			}
+			if (!shiftPressed) {
+				if (keys[SDL_SCANCODE_KP_1]) {
+					float scale = lastObjectScale.x();
+					scale -= scaling;
+					btBoxShape* box = new btBoxShape(btVector3(scale, lastObjectScale.y(), lastObjectScale.z()));
+					bodies[lastKey]->setCollisionShape(box);
+				}
+				if (keys[SDL_SCANCODE_KP_2]) {
+					float scale = lastObjectScale.y();
+					scale -= scaling;
+					btBoxShape* box = new btBoxShape(btVector3(lastObjectScale.x(), scale, lastObjectScale.z()));
+					bodies[lastKey]->setCollisionShape(box);
+				}
+				if (keys[SDL_SCANCODE_KP_3]) {
+					float scale = lastObjectScale.z();
+					scale -= scaling;
+					btBoxShape* box = new btBoxShape(btVector3(lastObjectScale.x(), lastObjectScale.y(), scale));
+					bodies[lastKey]->setCollisionShape(box);
+				}
+				if (keys[SDL_SCANCODE_KP_0]) {
+					float scaleX = lastObjectScale.x();
+					float scaleY = lastObjectScale.y();
+					float scaleZ = lastObjectScale.z();
+					scaleX -= scaling;
+					scaleY -= scaling;
+					scaleZ -= scaling;
+					btBoxShape* box = new btBoxShape(btVector3(scaleX, scaleY, scaleZ));
+					bodies[lastKey]->setCollisionShape(box);
+				}
+			}
+
 		}
 
 		if (keys[SDL_SCANCODE_R]) {
