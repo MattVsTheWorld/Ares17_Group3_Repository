@@ -30,17 +30,13 @@ public:
 	btRigidBody* addBox(float width, float height, float depth, float x, float y, float z, float mass);
 	btRigidBody* addSphere(float rad, float x, float y, float z, float mass);
 //	btRigid
-	void renderSphere(btRigidBody* sphere, glm::mat4 view, glm::mat4 proj, Model *modelData, GLuint shader);
-	void renderBox(btRigidBody* box, glm::mat4 view, glm::mat4 proj, Model *modelData, GLuint shader);
-	void renderCapsule(btRigidBody* capsule, glm::mat4 view, glm::mat4 proj, Model *modelData, GLuint shader);
+	void renderSphere(btRigidBody* sphere, glm::mat4 view, glm::mat4 proj, Model *modelData, GLuint shader, GLuint texture);
+	void renderBox(btRigidBody* box, glm::mat4 view, glm::mat4 proj, Model *modelData, GLuint shader, GLuint texture);
+	void renderCapsule(btRigidBody* capsule, glm::mat4 view, glm::mat4 proj, Model *modelData, GLuint shader, GLuint texture);
 	void addToWorld(btRigidBody* body);
 
 private:	
 	btSettings btSettings;
-	//std::vector<btRigidBody*> bodies;
-	//GLuint modelProgram;
-	//MeshManager::lightStruct light;
-	GLuint defaultTexture;
 
 };
 #endif

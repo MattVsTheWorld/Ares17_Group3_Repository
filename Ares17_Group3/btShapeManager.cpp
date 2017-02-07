@@ -11,7 +11,6 @@ btShapeManager::btShapeManager() {
 	//modelProgram = shader;
 	//light = _light;
 	//test
-	defaultTexture = loadBitmap::loadBitmap("wall.bmp");
 }
 
 void btShapeManager::update() {
@@ -56,7 +55,7 @@ btRigidBody* btShapeManager::addSphere(float rad, float x, float y, float z, flo
 	return body;
 }
 
-void btShapeManager::renderSphere(btRigidBody* sphere, glm::mat4 view, glm::mat4 proj, Model *modelData, GLuint shader) {
+void btShapeManager::renderSphere(btRigidBody* sphere, glm::mat4 view, glm::mat4 proj, Model *modelData, GLuint shader, GLuint texture) {
 
 	if (sphere->getCollisionShape()->getShapeType() != SPHERE_SHAPE_PROXYTYPE) //cout << "Wrong collision shape ";	
 		return;
@@ -81,7 +80,7 @@ void btShapeManager::renderSphere(btRigidBody* sphere, glm::mat4 view, glm::mat4
 	t.getOpenGLMatrix(glm::value_ptr(model));
 
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, defaultTexture);
+	glBindTexture(GL_TEXTURE_2D, texture);
 
 	model = glm::scale(model, glm::vec3(r, r, r));
 	glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
@@ -91,7 +90,7 @@ void btShapeManager::renderSphere(btRigidBody* sphere, glm::mat4 view, glm::mat4
 	//	mvStack.pop();
 }
 
-void btShapeManager::renderCapsule(btRigidBody* capsule, glm::mat4 view, glm::mat4 proj, Model *modelData, GLuint shader) {
+void btShapeManager::renderCapsule(btRigidBody* capsule, glm::mat4 view, glm::mat4 proj, Model *modelData, GLuint shader, GLuint texture) {
 
 	if (capsule->getCollisionShape()->getShapeType() != CAPSULE_SHAPE_PROXYTYPE) //cout << "Wrong collision shape ";	
 		return;
@@ -117,7 +116,7 @@ void btShapeManager::renderCapsule(btRigidBody* capsule, glm::mat4 view, glm::ma
 	t.getOpenGLMatrix(glm::value_ptr(model));
 
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, defaultTexture);
+	glBindTexture(GL_TEXTURE_2D, texture);
 
 	model = glm::scale(model, glm::vec3(r, h, r));
 	glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
@@ -128,7 +127,7 @@ void btShapeManager::renderCapsule(btRigidBody* capsule, glm::mat4 view, glm::ma
 }
 
 // Just move it after
-void btShapeManager::renderBox(btRigidBody* box, glm::mat4 view, glm::mat4 proj, Model *modelData, GLuint shader) {
+void btShapeManager::renderBox(btRigidBody* box, glm::mat4 view, glm::mat4 proj, Model *modelData, GLuint shader, GLuint texture) {
 
 	if (box->getCollisionShape()->getShapeType() != BOX_SHAPE_PROXYTYPE) 			//cout << "Wrong collision shape";
 		return;
@@ -153,7 +152,7 @@ void btShapeManager::renderBox(btRigidBody* box, glm::mat4 view, glm::mat4 proj,
 	model = glm::scale(model, glm::vec3(extent.x(), extent.y(), extent.z())); //DEFINITELY goes after
 
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, defaultTexture);
+	glBindTexture(GL_TEXTURE_2D, texture);
 	//MeshManager::setUniformMatrix4fv(shaderProgram, "modelview", glm::value_ptr(mvStack.top()));
 	//MeshManager::setUniformMatrix4fv(shaderProgram, "projection", glm::value_ptr(projection));		
 	//MeshManager::drawIndexedMesh(testCube->object_getMesh(), testCube->object_getIndex(), GL_TRIANGLES);
