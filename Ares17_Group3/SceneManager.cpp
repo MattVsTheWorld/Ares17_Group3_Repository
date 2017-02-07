@@ -4,7 +4,7 @@
 using namespace std;
 
 #define SPEED_CAP_XZ 10.0
-#define SPEED_CAP_Y 10.0
+#define SPEED_CAP_Y 3.0
 
 typedef std::pair<string, btRigidBody*> bodyID;
 
@@ -343,6 +343,9 @@ namespace SceneManager {
 		boxNo++;
 	}
 
+	// +++!
+	btPairCachingGhostObject* ghostObject;
+
 	void initPlayer(float rad, float height, float mass) {
 		player = new Player(eye);
 		btTransform t;
@@ -363,13 +366,13 @@ namespace SceneManager {
 
 		// Now ghost
 		//btGhostObject* ghostObject = new btGhostObject();
-		btPairCachingGhostObject* ghostObject = new btPairCachingGhostObject();
-		ghostObject->setCollisionShape(playerShape);
-		ghostObject->setWorldTransform(t);
-
+		ghostObject = new btPairCachingGhostObject();								// create object
+		ghostObject->setCollisionShape(playerShape);								// set shape
+		ghostObject->setWorldTransform(t);											// set world transform	
+		ghostObject->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);  // disable collision response
+																					// could also add CF_CHARACTER_OBJECT
 		bt_manager->addGhostToWorld(ghostObject);
 		//
-		
 	/*	btGhostObject* playerGhost = new btGhostObject();
 		playerGhost->setCollisionShape(playerShape);
 		playerGhost->setWorldTransform(t);*/
@@ -393,7 +396,7 @@ namespace SceneManager {
 	//	return false;
 	//}
 
-	void  findCollision(btPairCachingGhostObject* ghostObject) {
+	void  findCollision(btPairCachingGhostObject* ghostObject) { // ignore player?
 		btManifoldArray manifoldArray;
 		btBroadphasePairArray& pairArray =
 			ghostObject->getOverlappingPairCache()->getOverlappingPairArray();
@@ -417,6 +420,8 @@ namespace SceneManager {
 						const btVector3& ptB = pt.getPositionWorldOnB();
 						const btVector3& normalOnB = pt.m_normalWorldOnB;
 						// <START>  handle collisions here
+						cout << "Colliding with something";
+						player->setState(ON_GROUND);
 						//  <END>   handle collisions here
 					}
 				}
@@ -444,7 +449,7 @@ namespace SceneManager {
 		MeshManager::setLight(shaderProgram, testLight);
 		MeshManager::setMaterial(shaderProgram, greenMaterial);
 
-		initPlayer(1.0f, 1.5f, 80.0f);
+		initPlayer(1.0f, 1.5f, 40.0f);
 		initBoxes();
 		h_manager = new hudManager();
 		skybox = new Skybox(skyTexFiles);
@@ -563,23 +568,29 @@ namespace SceneManager {
 		}
 
 		if (editmode == PLAY_MODE) {
-			if (keys[SDL_SCANCODE_W]) {
-				//	player->setPosition(moveForward(player->getPosition(), yaw, 0.1f));
-				playerBody->setLinearVelocity(speedForward(1.0f, yaw, (keys[SDL_SCANCODE_A] == SDL_PRESSED || keys[SDL_SCANCODE_D] == SDL_PRESSED))); // work in progress
+			float increase = 1.0f;
+			if (player->getState() == ON_GROUND) { // Leaev? teaksassa
+				increase = 1.0f;
 			}
-			else if (keys[SDL_SCANCODE_S]) {
-				//player->setPosition(moveForward(player->getPosition(), yaw, -0.1f));
-				//bodies[1]->setLinearVelocity(btVector3(0.0, 5.0, 0.0));
-				playerBody->setLinearVelocity(speedForward(-1.0f, yaw, (keys[SDL_SCANCODE_A] == SDL_PRESSED || keys[SDL_SCANCODE_D] == SDL_PRESSED))); // work in progress
-			} //else player->setVelocity(glm::vec3(0.0, player->getVelocity().y, player->getVelocity().z));
-			if (keys[SDL_SCANCODE_A]) {
-				//player->setPosition(moveRight(player->getPosition(), yaw, -0.1f));
-				playerBody->setLinearVelocity(speedRight(-1.0f, yaw, (keys[SDL_SCANCODE_W] == SDL_PRESSED || keys[SDL_SCANCODE_S] == SDL_PRESSED))); // work in progress
-			}
-			else if (keys[SDL_SCANCODE_D]) {
-				//player->setPosition(moveRight(player->getPosition(), yaw, 0.1f));
-				playerBody->setLinearVelocity(speedRight(1.0f, yaw, (keys[SDL_SCANCODE_W] == SDL_PRESSED || keys[SDL_SCANCODE_S] == SDL_PRESSED))); // work in progress
-			}
+			else { increase = 0.3f; }
+				if (keys[SDL_SCANCODE_W]) {
+					//	player->setPosition(moveForward(player->getPosition(), yaw, 0.1f));
+					playerBody->setLinearVelocity(speedForward(increase, yaw, (keys[SDL_SCANCODE_A] == SDL_PRESSED || keys[SDL_SCANCODE_D] == SDL_PRESSED))); // work in progress
+				}
+				else if (keys[SDL_SCANCODE_S]) {
+					//player->setPosition(moveForward(player->getPosition(), yaw, -0.1f));
+					//bodies[1]->setLinearVelocity(btVector3(0.0, 5.0, 0.0));
+					playerBody->setLinearVelocity(speedForward(-increase, yaw, (keys[SDL_SCANCODE_A] == SDL_PRESSED || keys[SDL_SCANCODE_D] == SDL_PRESSED))); // work in progress
+				} //else player->setVelocity(glm::vec3(0.0, player->getVelocity().y, player->getVelocity().z));
+				if (keys[SDL_SCANCODE_A]) {
+					//player->setPosition(moveRight(player->getPosition(), yaw, -0.1f));
+					playerBody->setLinearVelocity(speedRight(-increase, yaw, (keys[SDL_SCANCODE_W] == SDL_PRESSED || keys[SDL_SCANCODE_S] == SDL_PRESSED))); // work in progress
+				}
+				else if (keys[SDL_SCANCODE_D]) {
+					//player->setPosition(moveRight(player->getPosition(), yaw, 0.1f));
+					playerBody->setLinearVelocity(speedRight(increase, yaw, (keys[SDL_SCANCODE_W] == SDL_PRESSED || keys[SDL_SCANCODE_S] == SDL_PRESSED))); // work in progress
+				}
+			
 
 			if (keys[SDL_SCANCODE_SPACE]) {
 				playerBody->setLinearVelocity(jump(SPEED_CAP_Y));
@@ -881,9 +892,8 @@ namespace SceneManager {
 		//	playerBody->getMotionState();
 		btVector3 pos = t.getOrigin();
 		player->setPosition(glm::vec3(pos.x(), pos.y(), pos.z()));
-
+		ghostObject->setWorldTransform(t);
 		//cout << getLinearVelocityInBodyFrame(playerBody).y();
-
 /*
 		btVector3 speed = getLinearVelocityInBodyFrame(playerBody);
 		if (speed.x() >= SPEED_CAP_XZ)
@@ -924,6 +934,8 @@ namespace SceneManager {
 		updatePlayer();
 
 		bt_manager->update();
+		if (player->getState() == JUMPING)
+			findCollision(ghostObject);
 
 		//world->stepSimulation(1/60.0); // 1 divided by frames per second
 		// would need to delete dispatcher, collisionconfig, solver, world, broadphase in main
