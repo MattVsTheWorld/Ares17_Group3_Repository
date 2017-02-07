@@ -362,6 +362,14 @@ namespace SceneManager {
 		playerBody->setFriction(8);
 
 		// Now ghost
+		//btGhostObject* ghostObject = new btGhostObject();
+		btPairCachingGhostObject* ghostObject = new btPairCachingGhostObject();
+		ghostObject->setCollisionShape(playerShape);
+		ghostObject->setWorldTransform(t);
+
+		bt_manager->addGhostToWorld(ghostObject);
+		//
+		
 	/*	btGhostObject* playerGhost = new btGhostObject();
 		playerGhost->setCollisionShape(playerShape);
 		playerGhost->setWorldTransform(t);*/
@@ -384,6 +392,37 @@ namespace SceneManager {
 	//	std::cout << "collision" << std::endl;
 	//	return false;
 	//}
+
+	void  findCollision(btPairCachingGhostObject* ghostObject) {
+		btManifoldArray manifoldArray;
+		btBroadphasePairArray& pairArray =
+			ghostObject->getOverlappingPairCache()->getOverlappingPairArray();
+		int numPairs = pairArray.size();
+
+		for (int i = 0; i < numPairs; ++i){
+			manifoldArray.clear();
+			const btBroadphasePair& pair = pairArray[i];
+			btBroadphasePair* collisionPair = bt_manager->findWorldPair(pair);
+			if (!collisionPair) continue;
+			if (collisionPair->m_algorithm)
+				collisionPair->m_algorithm->getAllContactManifolds(manifoldArray);
+			for (int j = 0; j < manifoldArray.size(); j++)	{
+				btPersistentManifold* manifold = manifoldArray[j];
+				bool isFirstBody = manifold->getBody0() == ghostObject;
+				btScalar direction = isFirstBody ? btScalar(-1.0) : btScalar(1.0);
+				for (int p = 0; p < manifold->getNumContacts(); ++p)	{
+					const btManifoldPoint& pt = manifold->getContactPoint(p);
+					if (pt.getDistance() < 0.f)	{
+						const btVector3& ptA = pt.getPositionWorldOnA();
+						const btVector3& ptB = pt.getPositionWorldOnB();
+						const btVector3& normalOnB = pt.m_normalWorldOnB;
+						// <START>  handle collisions here
+						//  <END>   handle collisions here
+					}
+				}
+			}
+		}
+	}
 
 	void init(void) {
 			

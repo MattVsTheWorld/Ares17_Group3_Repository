@@ -34,6 +34,8 @@ public:
 	void renderBox(btRigidBody* box, glm::mat4 view, glm::mat4 proj, Model *modelData, GLuint shader);
 	void renderCapsule(btRigidBody* capsule, glm::mat4 view, glm::mat4 proj, Model *modelData, GLuint shader);
 	void addToWorld(btRigidBody* body);
+	void addGhostToWorld(btPairCachingGhostObject* ghost);
+	btBroadphasePair* findWorldPair(const btBroadphasePair &pair);
 
 private:	
 	btSettings btSettings;

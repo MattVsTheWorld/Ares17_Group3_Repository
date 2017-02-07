@@ -169,6 +169,15 @@ void btShapeManager::addToWorld(btRigidBody* body) {
 	btSettings.world->addRigidBody(body);
 }
 
+void btShapeManager::addGhostToWorld(btPairCachingGhostObject* ghost) {
+	btSettings.world->addCollisionObject(ghost); // ?
+	btSettings.world->getPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());
+}
+
+btBroadphasePair* btShapeManager::findWorldPair(const btBroadphasePair &pair) {
+	return btSettings.world->getPairCache()->findPair(pair.m_pProxy0, pair.m_pProxy1);
+}
+
 // Create plane + info on bullet
 /*
 btTransform t; // orientation and position // quaternion :))))) """SIMPLE VARIABLE"""
