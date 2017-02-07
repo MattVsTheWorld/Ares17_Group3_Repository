@@ -1047,8 +1047,8 @@ namespace SceneManager {
 		///+++++++++++++++
 		// RENDERING modelTypes
 	/*	renderObject(projection, modelTypes["tree"], glm::vec3(10.0, 10.0, 10.0), glm::vec3(0.05, 0.05, 0.05), shader);*/
-		renderObject(projection, modelTypes["car"], glm::vec3(-10.0, 0.0, -10.0), glm::vec3(0.02, 0.02, 0.02), shader);
-		renderObject(projection, modelTypes["house"], glm::vec3(-10.0, 0.0, 0.0), glm::vec3(0.02, 0.02, 0.02), shader);
+		renderObject(projection, modelTypes["car"], glm::vec3(0.0, 0.0, -15.0), glm::vec3(0.02, 0.02, 0.02), shader);
+		renderObject(projection, modelTypes["house"], glm::vec3(-15.0, 0.0, -15.0), glm::vec3(0.02, 0.02, 0.02), shader);
 		if (pointOfView == THIRD_PERSON)
 			renderObject(projection, modelTypes["nanosuit"], glm::vec3(player->getPosition().x, player->getPosition().y-1.75, player->getPosition().z), glm::vec3(0.02,0.02,0.02), shader);
 
