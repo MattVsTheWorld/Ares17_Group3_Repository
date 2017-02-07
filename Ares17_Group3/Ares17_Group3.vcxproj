@@ -185,14 +185,17 @@
     <ClInclude Include="Skybox.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="cubeMap.frag" />
-    <None Include="cubeMap.vert" />
-    <None Include="modelLoading.frag" />
-    <None Include="modelLoading.vert" />
-    <None Include="phong-tex.frag" />
-    <None Include="phong-tex.vert" />
-    <None Include="textured.frag" />
-    <None Include="textured.vert" />
+    <None Include="Shaders\cubeMap.frag" />
+    <None Include="Shaders\cubeMap.vert" />
+    <None Include="Shaders\modelLoading.frag" />
+    <None Include="Shaders\modelLoading.vert" />
+    <None Include="Shaders\phong-tex.frag" />
+    <None Include="Shaders\phong-tex.vert" />
+    <None Include="Shaders\simpleShadowMap.frag" />
+    <None Include="Shaders\simpleShadowMap.gs" />
+    <None Include="Shaders\simpleShadowMap.vert" />
+    <None Include="Shaders\textured.frag" />
+    <None Include="Shaders\textured.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

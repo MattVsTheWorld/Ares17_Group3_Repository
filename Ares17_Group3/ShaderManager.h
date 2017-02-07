@@ -17,6 +17,7 @@ namespace ShaderManager {
 	char* loadFile(const char *fname, GLint &fSize);
 	void printShaderError(const GLint shader);
 	GLuint initShaders(const char *vertFile, const char *fragFile);
+	GLuint initShaders(const char *vertFile, const char *fragFile, const char *geomFile);
 
 }
 

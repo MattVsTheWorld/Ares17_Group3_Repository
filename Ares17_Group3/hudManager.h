@@ -15,12 +15,8 @@ public:
 	// functions provided in the labs
 	GLuint textToTexture(const char * str, GLuint textID);
 	void clearTextTexture(GLuint textID);
-	
 	hudManager(); // constructor, initializes values
-
-
-	void renderToHud(int N, GLuint shader, MeshManager::lightStruct light,
-		GLuint meshObject, GLuint meshIndexCount, glm::vec3 pos, float value_x, float value_y, float value_z);
+	void renderToHud(int value, GLuint shader, Model *modelData, glm::vec3 pos);
 
 
 private:

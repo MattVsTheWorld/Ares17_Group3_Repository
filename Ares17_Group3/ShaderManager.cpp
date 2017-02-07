@@ -93,14 +93,14 @@ GLuint initShaders(const char *vertFile, const char *fragFile) {
 	glCompileShader(v);
 	glGetShaderiv(v, GL_COMPILE_STATUS, &compiled);
 	if (!compiled) {
-		cout << "Vertex shader not compiled." << endl;
+		cout << vertFile << " : Vertex shader not compiled." << endl;
 		ShaderManager::printShaderError(v);
 	} 
 
 	glCompileShader(f);
 	glGetShaderiv(f, GL_COMPILE_STATUS, &compiled);
 	if (!compiled) {
-		cout << "Fragment shader not compiled." << endl;
+		cout << fragFile << " : Fragment shader not compiled." << endl;
 		ShaderManager::printShaderError(f);
 	} 
 	
@@ -109,16 +109,80 @@ GLuint initShaders(const char *vertFile, const char *fragFile) {
 	glAttachShader(p,v);
 	glAttachShader(p,f);
 
-	glBindAttribLocation(p, LOCATION_VERTEX,"in_Position");
-	glBindAttribLocation(p, LOCATION_COLOUR,"in_Color");
-	glBindAttribLocation(p, LOCATION_NORMAL,"in_Normal");
-	glBindAttribLocation(p, LOCATION_TEXCOORD,"in_TexCoord");
-
 	glLinkProgram(p);
 	glUseProgram(p);
 
 	delete [] vs; // dont forget to free allocated memory
 	delete [] fs; // we allocated this in the loadFile function...
+
+	return p;
+}
+
+GLuint initShaders(const char *vertFile, const char *fragFile, const char *geomFile) {
+	GLuint p, f, v, g;
+
+	char *vs, *fs, *gs;
+
+	v = glCreateShader(GL_VERTEX_SHADER);
+	f = glCreateShader(GL_FRAGMENT_SHADER);
+	g = glCreateShader(GL_GEOMETRY_SHADER);
+
+	// load shaders & get length of each
+	GLint vlen;
+	GLint flen;
+	GLint glen;
+	vs = loadFile(vertFile, vlen);
+	fs = loadFile(fragFile, flen);
+	gs = loadFile(geomFile, glen);
+
+	const char * vv = vs;
+	const char * ff = fs;
+	const char * gg = gs;
+
+	glShaderSource(v, 1, &vv, &vlen);
+	glShaderSource(f, 1, &ff, &flen);
+	glShaderSource(g, 1, &gg, &glen);
+
+	GLint compiled;
+
+	glCompileShader(v);
+	glGetShaderiv(v, GL_COMPILE_STATUS, &compiled);
+	if (!compiled) {
+		cout << vertFile << " : Vertex shader not compiled." << endl;
+		ShaderManager::printShaderError(v);
+	}
+
+	glCompileShader(f);
+	glGetShaderiv(f, GL_COMPILE_STATUS, &compiled);
+	if (!compiled) {
+		cout << fragFile << " : Fragment shader not compiled." << endl;
+		ShaderManager::printShaderError(f);
+	}
+
+	glCompileShader(g);
+	glGetShaderiv(g, GL_COMPILE_STATUS, &compiled);
+	if (!compiled) {
+		cout << geomFile << " : Geometry shader not compiled." << endl;
+		ShaderManager::printShaderError(g);
+	}
+
+	p = glCreateProgram();
+
+	glAttachShader(p, v);
+	glAttachShader(p, f);
+	glAttachShader(p, g);
+
+	glBindAttribLocation(p, LOCATION_VERTEX, "in_Position");
+	glBindAttribLocation(p, LOCATION_COLOUR, "in_Color");
+	glBindAttribLocation(p, LOCATION_NORMAL, "in_Normal");
+	glBindAttribLocation(p, LOCATION_TEXCOORD, "in_TexCoord");
+
+	glLinkProgram(p);
+	glUseProgram(p);
+
+	delete[] vs; // dont forget to free allocated memory
+	delete[] fs; // we allocated this in the loadFile function...
+	delete[] gs;
 
 	return p;
 }

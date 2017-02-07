@@ -1,7 +1,7 @@
 #include "Skybox.h"
 
 Skybox::Skybox(const char *cubeTexFiles[6]) {
-	skyboxProgram = ShaderManager::initShaders("cubeMap.vert", "cubeMap.frag");
+	skyboxProgram = ShaderManager::initShaders("Shaders/cubeMap.vert", "Shaders/cubeMap.frag");
 		loadCubeMap(cubeTexFiles, &textures);
 }
 
@@ -62,7 +62,7 @@ void Skybox::renderSkybox(glm::mat4 projection, glm::mat4 view, Model *modelData
 	glBindTexture(GL_TEXTURE_CUBE_MAP, textures);
 	glm::mat4 model;
 	model = glm::scale(model, glm::vec3(1.5f, 1.5f, 1.5f));
-	MeshManager::setUniformMatrix4fv(skyboxProgram, "modelMatrix", glm::value_ptr(model));
+	MeshManager::setUniformMatrix4fv(skyboxProgram, "model", glm::value_ptr(model));
 	modelData->Draw(skyboxProgram);
 	
 	mvStack.pop();
@@ -72,3 +72,31 @@ void Skybox::renderSkybox(glm::mat4 projection, glm::mat4 view, Model *modelData
 	glDepthMask(GL_TRUE); // make sure depth test is on
 
 }
+
+void Skybox::renderSkybox(glm::mat4 projection, glm::mat4 view, Model *modelData, GLuint texture) {
+	// skybox as single cube using cube map
+
+	std::stack<glm::mat4> mvStack;
+	mvStack.push(view); // I can't make it use the matrix straight out
+						// probably something stupid but ain't nobody got time
+	glUseProgram(skyboxProgram);
+	MeshManager::setUniformMatrix4fv(skyboxProgram, "projection", glm::value_ptr(projection));
+	glDepthMask(GL_FALSE); // make sure writing to update depth test is off
+	glm::mat3 mvRotOnlyMat3 = glm::mat3(mvStack.top());
+	mvStack.push(glm::mat4(mvRotOnlyMat3));
+	MeshManager::setUniformMatrix4fv(skyboxProgram, "view", glm::value_ptr(mvStack.top()));
+	glCullFace(GL_FRONT); // drawing inside of cube!
+	glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
+	glm::mat4 model;
+	model = glm::scale(model, glm::vec3(1.5f, 1.5f, 1.5f));
+	MeshManager::setUniformMatrix4fv(skyboxProgram, "model", glm::value_ptr(model));
+	modelData->Draw(skyboxProgram);
+
+	mvStack.pop();
+	mvStack.pop(); // :(
+	glCullFace(GL_BACK); // drawing inside of cube!
+						 // back to remainder of rendering
+	glDepthMask(GL_TRUE); // make sure depth test is on
+
+}
+

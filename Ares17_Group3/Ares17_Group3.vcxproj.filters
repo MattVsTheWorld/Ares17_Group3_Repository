@@ -22,6 +22,21 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Shaders\Cubemaps / Skybox">
+      <UniqueIdentifier>{68aade35-84ed-4412-80ba-63088548c839}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Model shader">
+      <UniqueIdentifier>{0bef32ba-1a77-4dcf-a18a-9a057cfe82ad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Shadowmap shaders">
+      <UniqueIdentifier>{6dabc4b0-f66f-4d53-9b3b-740261487a5a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Texture only">
+      <UniqueIdentifier>{65cca100-ca89-4def-b07e-44b2d6444f05}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Unused">
+      <UniqueIdentifier>{5d86fb33-3f44-4257-97b9-9cdc7b8be3bf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -106,29 +121,38 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="phong-tex.frag">
-      <Filter>Shaders</Filter>
+    <None Include="Shaders\cubeMap.frag">
+      <Filter>Shaders\Cubemaps / Skybox</Filter>
     </None>
-    <None Include="phong-tex.vert">
-      <Filter>Shaders</Filter>
+    <None Include="Shaders\cubeMap.vert">
+      <Filter>Shaders\Cubemaps / Skybox</Filter>
     </None>
-    <None Include="textured.frag">
-      <Filter>Shaders</Filter>
+    <None Include="Shaders\modelLoading.frag">
+      <Filter>Shaders\Model shader</Filter>
     </None>
-    <None Include="textured.vert">
-      <Filter>Shaders</Filter>
+    <None Include="Shaders\modelLoading.vert">
+      <Filter>Shaders\Model shader</Filter>
     </None>
-    <None Include="cubeMap.frag">
-      <Filter>Shaders</Filter>
+    <None Include="Shaders\simpleShadowMap.frag">
+      <Filter>Shaders\Shadowmap shaders</Filter>
     </None>
-    <None Include="cubeMap.vert">
-      <Filter>Shaders</Filter>
+    <None Include="Shaders\simpleShadowMap.gs">
+      <Filter>Shaders\Shadowmap shaders</Filter>
     </None>
-    <None Include="modelLoading.vert">
-      <Filter>Shaders</Filter>
+    <None Include="Shaders\simpleShadowMap.vert">
+      <Filter>Shaders\Shadowmap shaders</Filter>
     </None>
-    <None Include="modelLoading.frag">
-      <Filter>Shaders</Filter>
+    <None Include="Shaders\textured.vert">
+      <Filter>Shaders\Texture only</Filter>
+    </None>
+    <None Include="Shaders\textured.frag">
+      <Filter>Shaders\Texture only</Filter>
+    </None>
+    <None Include="Shaders\phong-tex.frag">
+      <Filter>Shaders\Unused</Filter>
+    </None>
+    <None Include="Shaders\phong-tex.vert">
+      <Filter>Shaders\Unused</Filter>
     </None>
   </ItemGroup>
 </Project>

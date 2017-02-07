@@ -1,6 +1,6 @@
 #include "btShapeManager.h"
 
-btShapeManager::btShapeManager(GLuint shader, MeshManager::lightStruct _light) {
+btShapeManager::btShapeManager() {
 	btSettings.collisionConfig = new btDefaultCollisionConfiguration();
 	btSettings.dispatcher = new btCollisionDispatcher(btSettings.collisionConfig); //base algorithm good (?)
 	btSettings.broadphase = new btDbvtBroadphase(); //divide space into different spaces // can use a more performancy ones // axis sweep?
@@ -8,8 +8,8 @@ btShapeManager::btShapeManager(GLuint shader, MeshManager::lightStruct _light) {
 	btSettings.world = new btDiscreteDynamicsWorld(btSettings.dispatcher, btSettings.broadphase, btSettings.solver, btSettings.collisionConfig);
 	btSettings.world->setGravity(btVector3(0, -10, 0)); // x y z as usual
 
-	modelProgram = shader;
-	light = _light;
+	//modelProgram = shader;
+	//light = _light;
 	//test
 	defaultTexture = loadBitmap::loadBitmap("wall.bmp");
 }
@@ -56,22 +56,22 @@ btRigidBody* btShapeManager::addSphere(float rad, float x, float y, float z, flo
 	return body;
 }
 
-void btShapeManager::renderSphere(btRigidBody* sphere, glm::mat4 view, glm::mat4 proj, Model *modelData, MeshManager::materialStruct material) {
+void btShapeManager::renderSphere(btRigidBody* sphere, glm::mat4 view, glm::mat4 proj, Model *modelData, GLuint shader) {
 
 	if (sphere->getCollisionShape()->getShapeType() != SPHERE_SHAPE_PROXYTYPE) //cout << "Wrong collision shape ";	
 		return;
 
-	glUseProgram(modelProgram);
+//	glUseProgram(modelProgram);
 	//mvStack.push(mvStack.top());// push modelview to stack
 
 	//	mvStack.top() = glm::translate(mvStack.top(), glm::vec3(-10.0f, -0.1f, -10.0f));
 	// Draw the loaded model
 	//MeshManager::setLight(modelProgram, testLight);
-	MeshManager::setLight(modelProgram, light);
-	MeshManager::setMaterial(modelProgram, material);
+//	MeshManager::setLight(modelProgram, light);
+//	MeshManager::setMaterial(modelProgram, material);
 
-	MeshManager::setUniformMatrix4fv(modelProgram, "projection", glm::value_ptr(proj));
-	MeshManager::setUniformMatrix4fv(modelProgram, "view", glm::value_ptr(view));
+//	MeshManager::setUniformMatrix4fv(modelProgram, "projection", glm::value_ptr(proj));
+//	MeshManager::setUniformMatrix4fv(modelProgram, "view", glm::value_ptr(view));
 
 	float r = ((btSphereShape*)sphere->getCollisionShape())->getRadius();
 
@@ -84,29 +84,29 @@ void btShapeManager::renderSphere(btRigidBody* sphere, glm::mat4 view, glm::mat4
 	glBindTexture(GL_TEXTURE_2D, defaultTexture);
 
 	model = glm::scale(model, glm::vec3(r, r, r));
-	glUniformMatrix4fv(glGetUniformLocation(modelProgram, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(model));
-	modelData->Draw(modelProgram);
+	glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
+	modelData->Draw(shader);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 	//	mvStack.pop();
 }
 
-void btShapeManager::renderCapsule(btRigidBody* capsule, glm::mat4 view, glm::mat4 proj, Model *modelData, MeshManager::materialStruct material) {
+void btShapeManager::renderCapsule(btRigidBody* capsule, glm::mat4 view, glm::mat4 proj, Model *modelData, GLuint shader) {
 
 	if (capsule->getCollisionShape()->getShapeType() != CAPSULE_SHAPE_PROXYTYPE) //cout << "Wrong collision shape ";	
 		return;
 
-	glUseProgram(modelProgram);
+//	glUseProgram(modelProgram);
 	//mvStack.push(mvStack.top());// push modelview to stack
 
 	//	mvStack.top() = glm::translate(mvStack.top(), glm::vec3(-10.0f, -0.1f, -10.0f));
 	// Draw the loaded model
 	//MeshManager::setLight(modelProgram, testLight);
-	MeshManager::setLight(modelProgram, light);
-	MeshManager::setMaterial(modelProgram, material);
+//	MeshManager::setLight(modelProgram, light);
+//	MeshManager::setMaterial(modelProgram, material);
 
-	MeshManager::setUniformMatrix4fv(modelProgram, "projection", glm::value_ptr(proj));
-	MeshManager::setUniformMatrix4fv(modelProgram, "view", glm::value_ptr(view));
+//	MeshManager::setUniformMatrix4fv(modelProgram, "projection", glm::value_ptr(proj));
+//	MeshManager::setUniformMatrix4fv(modelProgram, "view", glm::value_ptr(view));
 
 	float r = ((btCapsuleShape*)capsule->getCollisionShape())->getRadius();
 	float h = ((btCapsuleShape*)capsule->getCollisionShape())->getHalfHeight()*2;
@@ -120,27 +120,27 @@ void btShapeManager::renderCapsule(btRigidBody* capsule, glm::mat4 view, glm::ma
 	glBindTexture(GL_TEXTURE_2D, defaultTexture);
 
 	model = glm::scale(model, glm::vec3(r, h, r));
-	glUniformMatrix4fv(glGetUniformLocation(modelProgram, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(model));
-	modelData->Draw(modelProgram);
+	glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
+	modelData->Draw(shader);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 	//	mvStack.pop();
 }
 
 // Just move it after
-void btShapeManager::renderBox(btRigidBody* box, glm::mat4 view, glm::mat4 proj, Model *modelData, MeshManager::materialStruct material) {
+void btShapeManager::renderBox(btRigidBody* box, glm::mat4 view, glm::mat4 proj, Model *modelData, GLuint shader) {
 
 	if (box->getCollisionShape()->getShapeType() != BOX_SHAPE_PROXYTYPE) 			//cout << "Wrong collision shape";
 		return;
 
-	glUseProgram(modelProgram);
+//	glUseProgram(modelProgram);
 	//MeshManager::setLight(shaderProgram, testLight);
 	//MeshManager::setMaterial(shaderProgram, defaultMaterial);
 	//	mvStack.push(mvStack.top());// push modelview to stack
-	MeshManager::setLight(modelProgram, light);
-	MeshManager::setMaterial(modelProgram, material);
-	MeshManager::setUniformMatrix4fv(modelProgram, "projection", glm::value_ptr(proj));
-	MeshManager::setUniformMatrix4fv(modelProgram, "view", glm::value_ptr(view));
+//	MeshManager::setLight(modelProgram, light);
+//	MeshManager::setMaterial(modelProgram, material);
+//	MeshManager::setUniformMatrix4fv(modelProgram, "projection", glm::value_ptr(proj));
+//	MeshManager::setUniformMatrix4fv(modelProgram, "view", glm::value_ptr(view));
 
 	btVector3 extent = ((btBoxShape*)box->getCollisionShape())->getHalfExtentsWithMargin();
 	btTransform t;
@@ -158,8 +158,8 @@ void btShapeManager::renderBox(btRigidBody* box, glm::mat4 view, glm::mat4 proj,
 	//MeshManager::setUniformMatrix4fv(shaderProgram, "projection", glm::value_ptr(projection));		
 	//MeshManager::drawIndexedMesh(testCube->object_getMesh(), testCube->object_getIndex(), GL_TRIANGLES);
 
-	glUniformMatrix4fv(glGetUniformLocation(modelProgram, "modelMatrix"), 1, GL_FALSE, glm::value_ptr(model));
-	modelData->Draw(modelProgram);
+	glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
+	modelData->Draw(shader);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 	//	mvStack.pop();
@@ -167,6 +167,16 @@ void btShapeManager::renderBox(btRigidBody* box, glm::mat4 view, glm::mat4 proj,
 
 void btShapeManager::addToWorld(btRigidBody* body) {
 	btSettings.world->addRigidBody(body);
+}
+
+void btShapeManager::addGhostToWorld(btPairCachingGhostObject* ghost) {
+	btSettings.world->addCollisionObject(ghost, btBroadphaseProxy::KinematicFilter, btBroadphaseProxy::StaticFilter | btBroadphaseProxy::DefaultFilter); // ?
+	// world->addCollisionObject(ghostobject, btBroadphaseProxy::KinematicFilter, btBroadphaseProxy::StaticFilter | btBroadphaseProxy::DefaultFilter);
+	btSettings.world->getPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());
+}
+
+btBroadphasePair* btShapeManager::findWorldPair(const btBroadphasePair &pair) {
+	return btSettings.world->getPairCache()->findPair(pair.m_pProxy0, pair.m_pProxy1);
 }
 
 // Create plane + info on bullet
