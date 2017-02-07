@@ -57,9 +57,13 @@ namespace SceneManager {
 		"star-skybox/sky_back.bmp", "star-skybox/sky_front.bmp", "star-skybox/sky_right.bmp", "star-skybox/sky_left.bmp", "star-skybox/sky_top.bmp", "star-skybox/sky_bot.bmp"
 	};
 
-	// Load models
-	std::map<string, Model*> models;
+	// Load modelTypes
+	std::map<string, Model*> modelTypes;
+
+	std::vector<Model*> models;
+
 	GLuint defaultTexture;
+	GLuint groundTexture;
 
 	glm::mat4 view;
 
@@ -322,12 +326,14 @@ namespace SceneManager {
 		*/
 	}
 
-	void initModels() {
-		models.insert(std::pair<string, Model*>("nanosuit", new Model("Nanosuit/nanosuit.obj")));
-		models.insert(std::pair<string, Model*>("pistol", new Model("CHOO/Socom pistol.obj")));
-		models.insert(std::pair<string, Model*>("plasmacutter", new Model("Model/Guns/Plasmacutter/DYIPlasmcutter.obj")));
-		models.insert(std::pair<string, Model*>("cube", new Model("cube.obj")));
-		models.insert(std::pair<string, Model*>("sphere", new Model("sphere.obj")));
+	void initmodelTypes() {
+		modelTypes.insert(std::pair<string, Model*>("nanosuit", new Model("Models/Nanosuit/nanosuit.obj")));
+		modelTypes.insert(std::pair<string, Model*>("pistol", new Model("Models/Weapons/Socom pistol.obj")));
+		modelTypes.insert(std::pair<string, Model*>("plasmacutter", new Model("Models/Weapons/Plasmacutter/DYIPlasmcutter.obj")));
+		modelTypes.insert(std::pair<string, Model*>("cube", new Model("Models/cube.obj")));
+		modelTypes.insert(std::pair<string, Model*>("sphere", new Model("Models/sphere.obj")));
+		modelTypes.insert(std::pair<string, Model*>("car", new Model("Models/Car/model.obj")));
+		modelTypes.insert(std::pair<string, Model*>("house", new Model("Models/House/houselow.obj")));
 	}
 
 	void insertBox() {
@@ -442,9 +448,10 @@ namespace SceneManager {
 		//+++
 		bt_manager = new btShapeManager();
 
-		initModels();
+		initmodelTypes();
 
 		defaultTexture = loadBitmap::loadBitmap("wall.bmp");
+		groundTexture = loadBitmap::loadBitmap("terrain.bmp");
 
 		MeshManager::setLight(shaderProgram, testLight);
 		MeshManager::setMaterial(shaderProgram, greenMaterial);
@@ -814,7 +821,7 @@ namespace SceneManager {
 
 		glm::mat4 model;
 		model = glm::translate(model, pos);
-		model = glm::rotate(model, float(-yaw*DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
+		//model = glm::rotate(model, float(-yaw*DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::rotate(model, float(180 * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, scale);	// It's a bit too big for our scene, so scale it down
 		//model = glm::scale(model, glm::vec3(0.05f, 0.05f, 0.05f));	// for gun
@@ -1018,7 +1025,7 @@ namespace SceneManager {
 		// PLAYER capsule
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		glDisable(GL_CULL_FACE);
-		bt_manager->renderCapsule(playerBody, view, projection, models["sphere"], shader);
+		bt_manager->renderCapsule(playerBody, view, projection, modelTypes["sphere"], shader, defaultTexture);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		glEnable(GL_CULL_FACE);
 		///+++++++++++++++
@@ -1029,22 +1036,24 @@ namespace SceneManager {
 			id_pair.first; // string
 
 			if (id_pair.second->getCollisionShape()->getShapeType() == BOX_SHAPE_PROXYTYPE) {
-				bt_manager->renderBox(bodies[id_pair.first], view, projection, models["cube"], shader);
+				bt_manager->renderBox(bodies[id_pair.first], view, projection, modelTypes["cube"], shader, groundTexture);
 			}
 
 			if (id_pair.second->getCollisionShape()->getShapeType() == SPHERE_SHAPE_PROXYTYPE) {
-				bt_manager->renderSphere(bodies[id_pair.first], view, projection, models["sphere"], shader);
+				bt_manager->renderSphere(bodies[id_pair.first], view, projection, modelTypes["sphere"], shader,defaultTexture);
 			}
 			i++;
 		}
 		///+++++++++++++++
-		// RENDERING MODELS
-
+		// RENDERING modelTypes
+	/*	renderObject(projection, modelTypes["tree"], glm::vec3(10.0, 10.0, 10.0), glm::vec3(0.05, 0.05, 0.05), shader);*/
+		renderObject(projection, modelTypes["car"], glm::vec3(-10.0, 0.0, -10.0), glm::vec3(0.02, 0.02, 0.02), shader);
+		renderObject(projection, modelTypes["house"], glm::vec3(-10.0, 0.0, 0.0), glm::vec3(0.02, 0.02, 0.02), shader);
 		if (pointOfView == THIRD_PERSON)
-			renderObject(projection, models["nanosuit"], glm::vec3(player->getPosition().x, player->getPosition().y-1.75, player->getPosition().z), glm::vec3(0.2,0.2,0.2), shader);
+			renderObject(projection, modelTypes["nanosuit"], glm::vec3(player->getPosition().x, player->getPosition().y-1.75, player->getPosition().z), glm::vec3(0.02,0.02,0.02), shader);
 
 		if (pointOfView == FIRST_PERSON)
-			renderWep(projection, models["plasmacutter"], shader);
+			renderWep(projection, modelTypes["plasmacutter"], shader);
 	}
 	// main render function, sets up the shaders and then calls all other functions
 	void renderShadowScene(glm::mat4 projection, glm::mat4 viewMatrix, GLuint shader, bool cubemap) {
@@ -1130,7 +1139,7 @@ namespace SceneManager {
 				glEnable(GL_CULL_FACE);
 				glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
 
-				skybox->renderSkybox(projection, view, models["cube"]);
+				skybox->renderSkybox(projection, view, modelTypes["cube"]);
 				// normal rendering
 				renderShadowScene(projection, view, modelProgram, false); // render normal scene from normal point of view
 			
