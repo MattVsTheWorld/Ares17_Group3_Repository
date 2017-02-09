@@ -17,7 +17,6 @@ namespace SDLmanager {
 			exitFatalError("Unable to initialize SDL");
 
 		// Request an OpenGL 3.0 context.
-
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
@@ -29,7 +28,7 @@ namespace SDLmanager {
 
 														   // Create 800x600 window
 		window = SDL_CreateWindow("Ares 17", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-			800, 600, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
+			SCREENWIDTH, SCREENHEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
 		if (!window) // Check window was created OK
 			exitFatalError("Unable to create window");
 

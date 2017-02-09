@@ -6,6 +6,13 @@ using namespace std;
 #define SPEED_CAP_XZ 10.0
 #define SPEED_CAP_Y 3.0
 
+#define AMBIENT_FACTOR 1.0f
+#define DIFFUSE_FACTOR 0.8f
+#define SPECULAR_FACTOR 1.0f
+#define ATTENUATION_CONST 0.05f
+#define ATTENUATION_LINEAR 0.009f
+#define ATTENUATION_QUAD 0.032f
+
 typedef std::pair<string, btRigidBody*> bodyID;
 
 // this class still needs a lot of work
@@ -15,7 +22,7 @@ namespace SceneManager {
 	glm::vec3 playerScale(1.0, 2.8, 1.0);
 
 	// Shaders
-	GLuint shaderProgram;
+	//GLuint shaderProgram;
 	GLuint texturedProgram;
 	GLuint modelProgram;
 
@@ -23,8 +30,6 @@ namespace SceneManager {
 	Skybox *skybox;
 	btShapeManager *bt_manager;
 
-	float SCREENWIDTH = 800.0f;
-	float SCREENHEIGHT = 600.0f;
 	unsigned int lastTime = 0, currentTime;
 	enum pov { FIRST_PERSON, THIRD_PERSON };
 	pov pointOfView = FIRST_PERSON;
@@ -83,34 +88,6 @@ namespace SceneManager {
 	};
 	//glm::vec4 lightPos(0.0, 5.0, 0.0, 1.0);
 	glm::vec3 lightPos(0.0, 6.0, 0.0);
-
-	MeshManager::materialStruct greenMaterial = {
-		{ 0.6f, 0.4f, 0.2f, 1.0f }, // ambient
-		{ 0.5f, 1.0f, 0.5f, 1.0f }, // diffuse
-		{ 0.0f, 0.1f, 0.0f, 1.0f }, // specular
-		2.0f  // shininess
-	};
-
-	MeshManager::materialStruct redMaterial = {
-		{ 0.6f, 0.4f, 0.4f, 1.0f }, // ambient
-		{ 0.6f, 0.4f, 0.4f, 1.0f }, // diffuse
-		{ 0.6f, 0.4f, 0.4f, 1.0f }, // specular
-		2.0f  // shininess
-	};
-
-	MeshManager::materialStruct purpleMaterial = {
-		{ 0.6f, 0.4f, 1.0f, 1.0f }, // ambient
-		{ 0.6f, 0.4f, 1.0f, 1.0f }, // diffuse
-		{ 0.6f, 0.4f, 1.0f, 1.0f }, // specular
-		2.0f  // shininess
-	};
-
-	MeshManager::materialStruct defaultMaterial = {
-		{ 0.5f, 0.5f, 0.5f, 1.0f }, // ambient
-		{ 0.5f, 0.5f, 0.5f, 1.0f }, // diffuse
-		{ 0.5f, 0.5f, 0.5f, 1.0f }, // specular
-		2.0f  // shininess
-	};
 
 	std::map<string, btRigidBody*> bodies;	
 	// TEST
@@ -354,6 +331,7 @@ namespace SceneManager {
 
 	void initPlayer(float rad, float height, float mass) {
 		player = new Player(eye);
+
 		btTransform t;
 		t.setIdentity();
 		t.setOrigin(btVector3(player->getPosition().x, player->getPosition().y, player->getPosition().z));
@@ -365,42 +343,20 @@ namespace SceneManager {
 		btRigidBody::btRigidBodyConstructionInfo info(mass, motion, playerShape, inertia);
 
 		playerBody = new btRigidBody(info);
-		playerBody->setAngularFactor(0); // ? // Doesn't fall sideways
+		playerBody->setAngularFactor(0); // Doesn't fall sideways
 		bt_manager->addToWorld(playerBody);
 		playerBody->setActivationState(DISABLE_DEACTIVATION);
 		playerBody->setFriction(8);
 
 		// Now ghost
-		//btGhostObject* ghostObject = new btGhostObject();
 		ghostObject = new btPairCachingGhostObject();								// create object
 		ghostObject->setCollisionShape(playerShape);								// set shape
 		ghostObject->setWorldTransform(t);											// set world transform	
-		ghostObject->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);  // disable collision response
-																					// could also add CF_CHARACTER_OBJECT
+		ghostObject->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);  // disable collision response // could also add CF_CHARACTER_OBJECT // If I knew what that flag did...
+																					
 		bt_manager->addGhostToWorld(ghostObject);
-		//
-	/*	btGhostObject* playerGhost = new btGhostObject();
-		playerGhost->setCollisionShape(playerShape);
-		playerGhost->setWorldTransform(t);*/
-		// btRigidBody::setAngularFactor // to 0
-		// +++++
-		/// NEWEST
-		//playerBody->setCollisionFlags(playerBody->getCollisionFlags() | btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK); // add
-	}
 
-	//Collision callback
-	// id, index -> triangle mesh
-	// flag - 1 static, 2 kinematic - 4 no contact response (through object....)
-	// no contact response e.g. -> sphere of action of a lever (we know player is inside aka colliding, but we don't move him around)
-	// 8 material callback
-	//bool callbackFunc(btManifoldPoint& cp, const btCollisionObject* obj1, int id1, int index1, const btCollisionObject* obj2, int id2, int index2)
-	//{
-	//	// add collision flag to rest of flags
-	//	
-	//	// SEE GLOBAL ON TOP
-	//	std::cout << "collision" << std::endl;
-	//	return false;
-	//}
+	}
 
 	void  findCollision(btPairCachingGhostObject* ghostObject) { // ignore player?
 		btManifoldArray manifoldArray;
@@ -436,15 +392,12 @@ namespace SceneManager {
 	}
 
 	void init(void) {
-			
-		//gContactAddedCallback = callbackFunc;
 
-		shaderProgram = ShaderManager::initShaders("Shaders/phong-tex.vert", "Shaders/phong-tex.frag");
+		//shaderProgram = ShaderManager::initShaders("Shaders/phong-tex.vert", "Shaders/phong-tex.frag");
 		texturedProgram = ShaderManager::initShaders("Shaders/textured.vert", "Shaders/textured.frag");
 		modelProgram = ShaderManager::initShaders("Shaders/modelLoading.vert", "Shaders/modelLoading.frag");
 		//+++
 		depthShaderProgram = ShaderManager::initShaders("Shaders/simpleShadowMap.vert", "Shaders/simpleShadowMap.frag", "Shaders/simpleShadowMap.gs");
-
 		//+++
 		bt_manager = new btShapeManager();
 
@@ -453,8 +406,7 @@ namespace SceneManager {
 		defaultTexture = loadBitmap::loadBitmap("wall.bmp");
 		groundTexture = loadBitmap::loadBitmap("terrain.bmp");
 
-		MeshManager::setLight(shaderProgram, testLight);
-		MeshManager::setMaterial(shaderProgram, greenMaterial);
+	//	MeshManager::setLight(shaderProgram, testLight);
 
 		initPlayer(1.0f, 1.5f, 40.0f);
 		initBoxes();
@@ -974,12 +926,6 @@ namespace SceneManager {
 	}
 
 	//function that passes all light positions and properties to the shader
-#define AMBIENT_FACTOR 1.0f
-#define DIFFUSE_FACTOR 0.8f
-#define SPECULAR_FACTOR 1.0f
-#define ATTENUATION_CONST 0.05f
-#define ATTENUATION_LINEAR 0.009f
-#define ATTENUATION_QUAD 0.032f
 
 	void pointLight(GLuint shader) {
 		GLuint uniformIndex = glGetUniformLocation(shader, "viewPos");
@@ -1050,8 +996,7 @@ namespace SceneManager {
 		renderObject(projection, modelTypes["car"], glm::vec3(0.0, 0.0, -15.0), glm::vec3(0.02, 0.02, 0.02), shader);
 		renderObject(projection, modelTypes["house"], glm::vec3(-15.0, 0.0, -15.0), glm::vec3(0.02, 0.02, 0.02), shader);
 		if (pointOfView == THIRD_PERSON)
-			renderObject(projection, modelTypes["nanosuit"], glm::vec3(player->getPosition().x, player->getPosition().y-1.75, player->getPosition().z), glm::vec3(0.02,0.02,0.02), shader);
-
+			renderObject(projection, modelTypes["nanosuit"], glm::vec3(player->getPosition().x, player->getPosition().y-1.75, player->getPosition().z), glm::vec3(0.2,0.2,0.2), shader);
 		if (pointOfView == FIRST_PERSON)
 			renderWep(projection, modelTypes["plasmacutter"], shader);
 	}
@@ -1100,7 +1045,7 @@ namespace SceneManager {
 
 	}
 
-	void draw(SDL_Window * window) {//, int fps) {
+	void draw(SDL_Window * window) { //, int fps) { // fps counter; 4 of 5
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear window
 		glEnable(GL_CULL_FACE);
 		glClearColor(0.5f, 0.7f, 0.8f, 1.0f);
@@ -1142,8 +1087,8 @@ namespace SceneManager {
 				skybox->renderSkybox(projection, view, modelTypes["cube"]);
 				// normal rendering
 				renderShadowScene(projection, view, modelProgram, false); // render normal scene from normal point of view
-			
-				//h_manager->renderToHud(fps, texturedProgram, cube, glm::vec3(-0.9f, 0.9f, 0.9f));
+				// fps counter; 5 of 5
+				//h_manager->renderToHud(fps, texturedProgram, modelTypes["cube"], glm::vec3(-0.9f, 0.9f, 0.9f));
 			}
 			glDepthMask(GL_TRUE);
 		}

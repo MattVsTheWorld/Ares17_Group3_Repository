@@ -6,11 +6,7 @@ btShapeManager::btShapeManager() {
 	btSettings.broadphase = new btDbvtBroadphase(); //divide space into different spaces // can use a more performancy ones // axis sweep?
 	btSettings.solver = new btSequentialImpulseConstraintSolver(); // can use OpenCL, multithreading (?)
 	btSettings.world = new btDiscreteDynamicsWorld(btSettings.dispatcher, btSettings.broadphase, btSettings.solver, btSettings.collisionConfig);
-	btSettings.world->setGravity(btVector3(0, -10, 0)); // x y z as usual
-
-	//modelProgram = shader;
-	//light = _light;
-	//test
+	btSettings.world->setGravity(btVector3(0, GRAVITY, 0)); // x y z as usual
 }
 
 void btShapeManager::update() {
@@ -55,22 +51,29 @@ btRigidBody* btShapeManager::addSphere(float rad, float x, float y, float z, flo
 	return body;
 }
 
+btRigidBody* btShapeManager::addCapsule(float rad, float height, float x, float y, float z, float mass) {
+
+	btTransform t;
+	t.setIdentity();
+	t.setOrigin(btVector3(x, y, z));
+	btCapsuleShape* capsule = new btCapsuleShape(rad, height);
+	btVector3 inertia(0, 0, 0);
+	if (mass != 0.0)
+		capsule->calculateLocalInertia(mass, inertia);
+
+	btMotionState* motion = new btDefaultMotionState(t);
+	btRigidBody::btRigidBodyConstructionInfo info(mass, motion, capsule, inertia);
+
+	btRigidBody* body = new btRigidBody(info);
+	btSettings.world->addRigidBody(body);
+
+	return body;
+}
+
 void btShapeManager::renderSphere(btRigidBody* sphere, glm::mat4 view, glm::mat4 proj, Model *modelData, GLuint shader, GLuint texture) {
 
 	if (sphere->getCollisionShape()->getShapeType() != SPHERE_SHAPE_PROXYTYPE) //cout << "Wrong collision shape ";	
 		return;
-
-//	glUseProgram(modelProgram);
-	//mvStack.push(mvStack.top());// push modelview to stack
-
-	//	mvStack.top() = glm::translate(mvStack.top(), glm::vec3(-10.0f, -0.1f, -10.0f));
-	// Draw the loaded model
-	//MeshManager::setLight(modelProgram, testLight);
-//	MeshManager::setLight(modelProgram, light);
-//	MeshManager::setMaterial(modelProgram, material);
-
-//	MeshManager::setUniformMatrix4fv(modelProgram, "projection", glm::value_ptr(proj));
-//	MeshManager::setUniformMatrix4fv(modelProgram, "view", glm::value_ptr(view));
 
 	float r = ((btSphereShape*)sphere->getCollisionShape())->getRadius();
 
@@ -79,33 +82,19 @@ void btShapeManager::renderSphere(btRigidBody* sphere, glm::mat4 view, glm::mat4
 	glm::mat4 model;
 	t.getOpenGLMatrix(glm::value_ptr(model));
 
-	glActiveTexture(GL_TEXTURE0);
+	glActiveTexture(GL_TEXTURE0); // ? not working ?
 	glBindTexture(GL_TEXTURE_2D, texture);
 
 	model = glm::scale(model, glm::vec3(r, r, r));
 	glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
 	modelData->Draw(shader);
-
 	glBindTexture(GL_TEXTURE_2D, 0);
-	//	mvStack.pop();
 }
 
 void btShapeManager::renderCapsule(btRigidBody* capsule, glm::mat4 view, glm::mat4 proj, Model *modelData, GLuint shader, GLuint texture) {
 
 	if (capsule->getCollisionShape()->getShapeType() != CAPSULE_SHAPE_PROXYTYPE) //cout << "Wrong collision shape ";	
 		return;
-
-//	glUseProgram(modelProgram);
-	//mvStack.push(mvStack.top());// push modelview to stack
-
-	//	mvStack.top() = glm::translate(mvStack.top(), glm::vec3(-10.0f, -0.1f, -10.0f));
-	// Draw the loaded model
-	//MeshManager::setLight(modelProgram, testLight);
-//	MeshManager::setLight(modelProgram, light);
-//	MeshManager::setMaterial(modelProgram, material);
-
-//	MeshManager::setUniformMatrix4fv(modelProgram, "projection", glm::value_ptr(proj));
-//	MeshManager::setUniformMatrix4fv(modelProgram, "view", glm::value_ptr(view));
 
 	float r = ((btCapsuleShape*)capsule->getCollisionShape())->getRadius();
 	float h = ((btCapsuleShape*)capsule->getCollisionShape())->getHalfHeight()*2;
@@ -123,45 +112,28 @@ void btShapeManager::renderCapsule(btRigidBody* capsule, glm::mat4 view, glm::ma
 	modelData->Draw(shader);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
-	//	mvStack.pop();
 }
 
-// Just move it after
 void btShapeManager::renderBox(btRigidBody* box, glm::mat4 view, glm::mat4 proj, Model *modelData, GLuint shader, GLuint texture) {
 
 	if (box->getCollisionShape()->getShapeType() != BOX_SHAPE_PROXYTYPE) 			//cout << "Wrong collision shape";
 		return;
 
-//	glUseProgram(modelProgram);
-	//MeshManager::setLight(shaderProgram, testLight);
-	//MeshManager::setMaterial(shaderProgram, defaultMaterial);
-	//	mvStack.push(mvStack.top());// push modelview to stack
-//	MeshManager::setLight(modelProgram, light);
-//	MeshManager::setMaterial(modelProgram, material);
-//	MeshManager::setUniformMatrix4fv(modelProgram, "projection", glm::value_ptr(proj));
-//	MeshManager::setUniformMatrix4fv(modelProgram, "view", glm::value_ptr(view));
-
 	btVector3 extent = ((btBoxShape*)box->getCollisionShape())->getHalfExtentsWithMargin();
 	btTransform t;
 	box->getMotionState()->getWorldTransform(t);
 
-
 	glm::mat4 model;
 	t.getOpenGLMatrix(glm::value_ptr(model));
-
 	model = glm::scale(model, glm::vec3(extent.x(), extent.y(), extent.z())); //DEFINITELY goes after
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture);
-	//MeshManager::setUniformMatrix4fv(shaderProgram, "modelview", glm::value_ptr(mvStack.top()));
-	//MeshManager::setUniformMatrix4fv(shaderProgram, "projection", glm::value_ptr(projection));		
-	//MeshManager::drawIndexedMesh(testCube->object_getMesh(), testCube->object_getIndex(), GL_TRIANGLES);
 
 	glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
 	modelData->Draw(shader);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
-	//	mvStack.pop();
 }
 
 void btShapeManager::addToWorld(btRigidBody* body) {
