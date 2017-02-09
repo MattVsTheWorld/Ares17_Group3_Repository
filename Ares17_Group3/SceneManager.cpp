@@ -47,7 +47,7 @@ namespace SceneManager {
 	GLuint depthMapFBO; // FBO
 	GLuint depthCubemap;
 	//GLuint depthMap;	// FBO texture
-	const GLuint SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+	const GLuint SHADOW_WIDTH = 1440, SHADOW_HEIGHT = 1440;
 	GLfloat aspect = (GLfloat)SHADOW_WIDTH / (GLfloat)SHADOW_HEIGHT;
 	GLfloat near = 0.01f;
 	GLfloat far = 40.0f;
