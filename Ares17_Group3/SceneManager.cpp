@@ -23,17 +23,15 @@ namespace SceneManager {
 	Skybox *skybox;
 	btShapeManager *bt_manager;
 
-	float SCREENWIDTH = 800.0f;
-	float SCREENHEIGHT = 600.0f;
+//	float SCREENWIDTH = 800.0f;
+//	float SCREENHEIGHT = 600.0f;
 	unsigned int lastTime = 0, currentTime;
 	enum pov { FIRST_PERSON, THIRD_PERSON };
 	pov pointOfView = FIRST_PERSON;
 	enum modes { PLAY, EDIT };
 	modes mode = PLAY;
-	enum edit { MODEL, BOUNDING };
-	edit stage = MODEL;
-	enum addingMode { BOX, SPHERE };
-	addingMode addmode = BOX;
+	enum bound { BOX, SPHERE };
+	bound boundingType = BOX;
 
 	// SHADOWS
 	GLuint depthShaderProgram; //shader to create shadow cubemaps
@@ -83,13 +81,13 @@ namespace SceneManager {
 	glm::vec3 up(0.0f, 1.0f, 0.0f);
 
 	MeshManager::lightStruct testLight = {
-		{ 0.6f, 0.4f, 0.6f, 1.0f }, // ambient
+		{ 0.9f, 0.9f, 0.9f, 1.0f }, // ambient
 		{ 1.0f, 1.0f, 1.0f, 1.0f }, // diffuse
 		{ 1.0f, 1.0f, 1.0f, 1.0f }, // specular
-		{ 0.0f, 6.0f, 0.0f, 1.0f }  // position
+		{ 0.0f, 10.0f, 0.0f, 1.0f }  // position
 	};
 	//glm::vec4 lightPos(0.0, 5.0, 0.0, 1.0);
-	glm::vec3 lightPos(0.0, 6.0, 0.0);
+	glm::vec3 lightPos(0.0, 10.0, 0.0);
 
 	MeshManager::materialStruct greenMaterial = {
 		{ 0.6f, 0.4f, 0.2f, 1.0f }, // ambient
@@ -336,18 +334,16 @@ namespace SceneManager {
 			id_pair.second->getWorldTransform().getOrigin(); // rigidBody
 
 			if (id_pair.second->getCollisionShape()->getShapeType() == BOX_SHAPE_PROXYTYPE) {
-				if (boxNo != 0)
-					boxNo++;
 				key = "box";
 				key.append(to_string(boxNo));
 				bodies[key]->setActivationState(DISABLE_DEACTIVATION);
+				boxNo++;
 			}
 			else if (id_pair.second->getCollisionShape()->getShapeType() == SPHERE_SHAPE_PROXYTYPE) {
-				if (sphereNo != 0)
-					sphereNo++;
 				key = "sphere";
 				key.append(to_string(sphereNo));
 				bodies[key]->setActivationState(DISABLE_DEACTIVATION);
+				sphereNo++;
 			}
 		}
 		// NOTE : should probably use this
@@ -366,29 +362,28 @@ namespace SceneManager {
 		modelTypes.insert(std::pair<string, Model*>("car", new Model("Models/Car/model.obj")));
 		modelTypes.insert(std::pair<string, Model*>("house", new Model("Models/House/houselow.obj")));
 	}
-
-	void insertBounding() {
+	
+	void insertBounding(std::string modelName, glm::vec3 modelScale, glm::vec3 boundingScale, float radius) {
 		glm::vec3 position(moveForward(player->getPosition(), yaw, 0.5f));
 		float mass = 0.5;
-		glm::vec3 scale(0.5, 0.5, 0.5);;
-		float radius = 0.5;
 		std::string key;
 		
-		if (addmode == BOX) {
+		if (boundingType == BOX) {
 			key = "box";
 			key.append(to_string(boxNo));
-			bodies.insert(std::pair<string, btRigidBody*>(key, bt_manager->addBox(scale.x, scale.y, scale.z, position.x, position.y, position.z, mass)));
-			cout << "Box Added\n";
+			bodies.insert(std::pair<string, btRigidBody*>(key, bt_manager->addBox(boundingScale.x, boundingScale.y, boundingScale.z, position.x, position.y, position.z, mass)));
+			cout << key << " Added\n";
 			boxNo++;
 		}
-		if (addmode == SPHERE) {
+		if (boundingType == SPHERE) {
 			key = "sphere";
 			key.append(to_string(sphereNo));
 			bodies.insert(std::pair<string, btRigidBody*>(key, bt_manager->addSphere(radius, position.x, position.y, position.z, mass)));
-			cout << "Sphere Added\n";
+			cout << key << "Added\n";
 			sphereNo++;
 		}
 		bodies[key]->setActivationState(DISABLE_DEACTIVATION);
+		models.insert(std::pair<string, std::pair<string, glm::vec3>>(key, make_pair(modelName, modelScale)));
 	}
 
 	void initPlayer(float rad, float height, float mass) {
@@ -517,7 +512,7 @@ namespace SceneManager {
 	}
 	
 	int objectID = 0;
-	std::string bodyParser() {
+	/*std::string bodyParser() {
 		std::string lastKey = "";
 		std::string object = "";
 		if (addmode == BOX)
@@ -536,11 +531,10 @@ namespace SceneManager {
 			}
 		}
 		return lastKey;
-	}
+	}*/
 
 	bool leftClick = false;
 	bool rightClick = false;
-	
 	float coolDownOfGun = 0.5; //wait between shots
 	bool shiftPressed = true;
 	//*****************************CONTROLS********************
@@ -627,19 +621,23 @@ namespace SceneManager {
 				bodies["box1"]->setLinearVelocity(btVector3(-5.0, 0.0, 0.0));
 		}
 		else if (mode == EDIT) {
-
-			std::string lastKey = bodyParser();
+			std::string currentModel = "nanosuit";
+			std::string lastKey;
+			if (boundingType == BOX) {
+				lastKey = std::string("box").append(to_string(boxNo-1));
+			}
+			else if (boundingType == SPHERE) {
+				lastKey = std::string("sphere").append(to_string(sphereNo - 1));
+			}
 
 			btVector3 lastObject = bodies[lastKey]->getWorldTransform().getOrigin();
-			btVector3 lastObjectScale = (((btBoxShape*)bodies[lastKey]->getCollisionShape())->getHalfExtentsWithMargin()) * 2;
-
 			btVector3 playerPos = playerBody->getWorldTransform().getOrigin();
 
 			btTransform t;
 			t.setIdentity();
 
 			if (leftClick == true && pointOfView == FIRST_PERSON) {
-				insertBounding();
+				insertBounding(currentModel, glm::vec3(0.02, 0.02, 0.02), glm::vec3(0.2, 0.2, 0.2), 0.2);	
 				leftClick = false;
 			}
 
@@ -680,16 +678,16 @@ namespace SceneManager {
 			}
 
 			if (keys[SDL_SCANCODE_KP_DIVIDE]){
-				addmode = BOX;
-				objectID = 0;
+				boundingType = BOX;
+				std::cout << "Bounding Type: BOX" << std::endl;
 			}
 			if (keys[SDL_SCANCODE_KP_MULTIPLY]){
-				addmode = SPHERE;
-				objectID = 0;
+				boundingType = SPHERE;
+				std::cout << "Bounding Type: SPHERE" << std::endl;
 			}
-
+						
 			if (keys[SDL_SCANCODE_KP_8]) {
-				glm::vec3 moveLeft = glm::vec3(moveForward(glm::vec3(lastObject.x(), lastObject.y(), lastObject.z()), yaw, 0.5));
+				glm::vec3 moveLeft = glm::vec3(moveForward(glm::vec3(lastObject.x(), lastObject.y(), lastObject.z()), yaw, 0.1));
 				t.setOrigin(btVector3(moveLeft.x, moveLeft.y, moveLeft.z));
 				bodies[lastKey]->setWorldTransform(t);
 			}
@@ -708,27 +706,41 @@ namespace SceneManager {
 				t.setOrigin(btVector3(moveLeft.x, moveLeft.y, moveLeft.z));
 				bodies[lastKey]->setWorldTransform(t);
 			}
+
+			if (keys[SDL_SCANCODE_KP_7]) {
+				btQuaternion s = btQuaternion(btScalar(-1.0), btScalar(0.0), btScalar(0.0), btScalar(0.0));
+				bodies[lastKey]->getWorldTransform().setRotation(s);
+			}
+			if (keys[SDL_SCANCODE_KP_9]) {
+				btQuaternion s = btQuaternion(btScalar(1.0), btScalar(0.0), btScalar(0.0), btScalar(0.0));
+				bodies[lastKey]->getWorldTransform().setRotation(s);
+			}
+			
 			if (keys[SDL_SCANCODE_KP_PLUS]) {
-				if (addmode == BOX) {
-					if (objectID > boxNo)
-						objectID = boxNo;
-					else
-						objectID++;
+				if (objectID >= modelTypes.size() - 1)
+					objectID = modelTypes.size() - 1;
+				else
+					objectID++;
+				int i = 0;
+				for (const auto& id_pair : modelTypes) {
+					if (i == objectID)
+						currentModel = id_pair.first;
+					i++;
 				}
-				else if (addmode == SPHERE) {
-					if (objectID > sphereNo)
-						objectID = sphereNo;
-					else
-						objectID++;
-				}
-				std::cout << objectID << std::endl;
+				std::cout << currentModel << " selected" << std::endl;
 			}
 			if (keys[SDL_SCANCODE_KP_MINUS]) {
 				if (objectID > 0)
-					objectID--;
+					objectID = modelTypes.size() - 1;
 				else
-					objectID = 0;
-				std::cout << objectID << std::endl;
+					objectID--;
+				int i = 0;
+				for (const auto& id_pair : modelTypes) {
+					if (i == objectID)
+						currentModel = id_pair.first;
+					i++;
+				}
+				std::cout << currentModel << " selected" << std::endl;
 			}
 			
 			float scaling = 0.0005;
@@ -846,7 +858,7 @@ namespace SceneManager {
 		model = glm::translate(model, pos);
 		//model = glm::rotate(model, float(-yaw*DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
 		//model = glm::rotate(model, float(180 * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
-		model = glm::rotate(model, float(rotate), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, float(rotate * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, scale);	// It's a bit too big for our scene, so scale it down
 		//model = glm::scale(model, glm::vec3(0.05f, 0.05f, 0.05f));	// for gun]
 		glActiveTexture(GL_TEXTURE0);
@@ -1065,16 +1077,22 @@ namespace SceneManager {
 		//	btQuaternion test = bodies[id_pair.first]->getWorldTransform().getRotation();
 	//		test.getAngle();
 
-
 			if (id_pair.second->getCollisionShape()->getShapeType() == BOX_SHAPE_PROXYTYPE) {
+				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+				glDisable(GL_CULL_FACE);
 				bt_manager->renderBox(bodies[id_pair.first], view, projection, modelTypes["cube"], shader, groundTexture);
-				renderObject(projection, modelTypes[models[id_pair.first].first], position, models[id_pair.first].second, shader, groundTexture, bodies[id_pair.first]->getWorldTransform().getRotation().getAngle());
-		//		cout << bodies[id_pair.first]->getWorldTransform().getRotation().getAngle() << endl;
+				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+				glEnable(GL_CULL_FACE);
+				renderObject(projection, modelTypes[models[id_pair.first].first], position, models[id_pair.first].second, shader, groundTexture, bodies[id_pair.first]->getWorldTransform().getRotation().getX());
 			}
 
 			if (id_pair.second->getCollisionShape()->getShapeType() == SPHERE_SHAPE_PROXYTYPE) {
+				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+				glDisable(GL_CULL_FACE);
 				bt_manager->renderSphere(bodies[id_pair.first], view, projection, modelTypes["sphere"], shader, defaultTexture);
-				renderObject(projection, modelTypes[models[id_pair.first].first], position, models[id_pair.first].second, shader, defaultTexture, bodies[id_pair.first]->getWorldTransform().getRotation().getAngle());
+				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+				glEnable(GL_CULL_FACE);
+				renderObject(projection, modelTypes[models[id_pair.first].first], position, models[id_pair.first].second, shader, defaultTexture, bodies[id_pair.first]->getWorldTransform().getRotation().getX());
 			}
 			i++;
 		}

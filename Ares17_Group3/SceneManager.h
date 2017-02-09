@@ -19,6 +19,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "Skybox.h"
 
+#include "SDLmanager.h"
 //#include <btBulletDynamicsCommon.h>
 #include "btShapeManager.h"
 // TEMPORARY
