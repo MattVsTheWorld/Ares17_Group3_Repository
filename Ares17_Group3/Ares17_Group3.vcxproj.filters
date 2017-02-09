@@ -22,8 +22,20 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Shaders\New">
-      <UniqueIdentifier>{989bc0af-18d1-46e4-8db2-5784ad610ed8}</UniqueIdentifier>
+    <Filter Include="Shaders\Cubemaps / Skybox">
+      <UniqueIdentifier>{68aade35-84ed-4412-80ba-63088548c839}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Model shader">
+      <UniqueIdentifier>{0bef32ba-1a77-4dcf-a18a-9a057cfe82ad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Shadowmap shaders">
+      <UniqueIdentifier>{6dabc4b0-f66f-4d53-9b3b-740261487a5a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Texture only">
+      <UniqueIdentifier>{65cca100-ca89-4def-b07e-44b2d6444f05}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Unused">
+      <UniqueIdentifier>{5d86fb33-3f44-4257-97b9-9cdc7b8be3bf}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -37,9 +49,6 @@
       <Filter>Engine</Filter>
     </ClCompile>
     <ClCompile Include="MeshManager.cpp">
-      <Filter>Engine</Filter>
-    </ClCompile>
-    <ClCompile Include="SDLmanager.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
     <ClCompile Include="ShaderManager.cpp">
@@ -63,11 +72,14 @@
     <ClCompile Include="Player.cpp">
       <Filter>Being worked on</Filter>
     </ClCompile>
+    <ClCompile Include="SDLmanager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SoundManager.cpp">
+      <Filter>Being worked on</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="SDLmanager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="ShaderManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -107,40 +119,46 @@
     <ClInclude Include="Player.h">
       <Filter>Being worked on</Filter>
     </ClInclude>
+    <ClInclude Include="SDLmanager.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SoundManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\cubeMap.frag">
-      <Filter>Shaders\New</Filter>
+      <Filter>Shaders\Cubemaps / Skybox</Filter>
     </None>
     <None Include="Shaders\cubeMap.vert">
-      <Filter>Shaders\New</Filter>
+      <Filter>Shaders\Cubemaps / Skybox</Filter>
     </None>
     <None Include="Shaders\modelLoading.frag">
-      <Filter>Shaders\New</Filter>
+      <Filter>Shaders\Model shader</Filter>
     </None>
     <None Include="Shaders\modelLoading.vert">
-      <Filter>Shaders\New</Filter>
-    </None>
-    <None Include="Shaders\phong-tex.frag">
-      <Filter>Shaders\New</Filter>
-    </None>
-    <None Include="Shaders\phong-tex.vert">
-      <Filter>Shaders\New</Filter>
+      <Filter>Shaders\Model shader</Filter>
     </None>
     <None Include="Shaders\simpleShadowMap.frag">
-      <Filter>Shaders\New</Filter>
+      <Filter>Shaders\Shadowmap shaders</Filter>
     </None>
     <None Include="Shaders\simpleShadowMap.gs">
-      <Filter>Shaders\New</Filter>
+      <Filter>Shaders\Shadowmap shaders</Filter>
     </None>
     <None Include="Shaders\simpleShadowMap.vert">
-      <Filter>Shaders\New</Filter>
-    </None>
-    <None Include="Shaders\textured.frag">
-      <Filter>Shaders\New</Filter>
+      <Filter>Shaders\Shadowmap shaders</Filter>
     </None>
     <None Include="Shaders\textured.vert">
-      <Filter>Shaders\New</Filter>
+      <Filter>Shaders\Texture only</Filter>
+    </None>
+    <None Include="Shaders\textured.frag">
+      <Filter>Shaders\Texture only</Filter>
+    </None>
+    <None Include="Shaders\phong-tex.frag">
+      <Filter>Shaders\Unused</Filter>
+    </None>
+    <None Include="Shaders\phong-tex.vert">
+      <Filter>Shaders\Unused</Filter>
     </None>
   </ItemGroup>
 </Project>

@@ -2,7 +2,7 @@
 
 
 Player::Player(glm::vec3 _eye) {
-		eye = _eye;
+	eye = _eye;
 }
 
 void Player::setPosition(glm::vec3 newEye) {

@@ -6,15 +6,10 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-//test
-#include "loadBitmap.h"
 
-// Class to manage shapes created with the bullet physics library
+#define GRAVITY -10
 
-// shader doesn't change, can save as variable
-// Undecided on light yet; that might change.
-// Add set/ get light?
-
+// Settings struct
 struct btSettings {
 	btDynamicsWorld* world;
 	btDispatcher* dispatcher;
@@ -22,18 +17,20 @@ struct btSettings {
 	btBroadphaseInterface* broadphase; //improves collision check (?) // can improve by knowing world size (?)
 	btConstraintSolver* solver;
 };
-
+// Class to manage shapes created with the bullet physics library
 class btShapeManager {
 public:
 	btShapeManager();
 	void update();
 	btRigidBody* addBox(float width, float height, float depth, float x, float y, float z, float mass);
 	btRigidBody* addSphere(float rad, float x, float y, float z, float mass);
-//	btRigid
+	btRigidBody* addCapsule(float rad, float height, float x, float y, float z, float mass);
 	void renderSphere(btRigidBody* sphere, glm::mat4 view, glm::mat4 proj, Model *modelData, GLuint shader, GLuint texture);
 	void renderBox(btRigidBody* box, glm::mat4 view, glm::mat4 proj, Model *modelData, GLuint shader, GLuint texture);
 	void renderCapsule(btRigidBody* capsule, glm::mat4 view, glm::mat4 proj, Model *modelData, GLuint shader, GLuint texture);
 	void addToWorld(btRigidBody* body);
+	void addGhostToWorld(btPairCachingGhostObject* ghost);
+	btBroadphasePair* findWorldPair(const btBroadphasePair &pair);
 
 private:	
 	btSettings btSettings;
