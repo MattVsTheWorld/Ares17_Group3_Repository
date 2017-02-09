@@ -527,6 +527,7 @@ namespace SceneManager {
 	bool rightClick = false;
 	float coolDownOfGun = 0.5; //wait between shots
 	bool shiftPressed = true;
+	std::string currentModel = "nanosuit";
 	//*****************************CONTROLS********************
 	void controls(SDL_Window * window, SDL_Event sdlEvent) {
 		int MidX = SCREENWIDTH / 2;
@@ -578,27 +579,11 @@ namespace SceneManager {
 			mode = EDIT;
 		}
 
-
+		float increase;
 		if (mode == PLAY) {
-			if (keys[SDL_SCANCODE_W]) {
-				//	player->setPosition(moveForward(player->getPosition(), yaw, 0.1f));
-				playerBody->setLinearVelocity(speedForward(1.0f, yaw, (keys[SDL_SCANCODE_A] == SDL_PRESSED || keys[SDL_SCANCODE_D] == SDL_PRESSED))); // work in progress
-			}
-			else if (keys[SDL_SCANCODE_S]) {
-				//player->setPosition(moveForward(player->getPosition(), yaw, -0.1f));
-				//bodies[1]->setLinearVelocity(btVector3(0.0, 5.0, 0.0));
-				playerBody->setLinearVelocity(speedForward(-1.0f, yaw, (keys[SDL_SCANCODE_A] == SDL_PRESSED || keys[SDL_SCANCODE_D] == SDL_PRESSED))); // work in progress
-			} //else player->setVelocity(glm::vec3(0.0, player->getVelocity().y, player->getVelocity().z));
-			if (keys[SDL_SCANCODE_A]) {
-				//player->setPosition(moveRight(player->getPosition(), yaw, -0.1f));
-				playerBody->setLinearVelocity(speedRight(-1.0f, yaw, (keys[SDL_SCANCODE_W] == SDL_PRESSED || keys[SDL_SCANCODE_S] == SDL_PRESSED))); // work in progress
-			}
-			else if (keys[SDL_SCANCODE_D]) {
-				//player->setPosition(moveRight(player->getPosition(), yaw, 0.1f));
-				playerBody->setLinearVelocity(speedRight(1.0f, yaw, (keys[SDL_SCANCODE_W] == SDL_PRESSED || keys[SDL_SCANCODE_S] == SDL_PRESSED))); // work in progress
-
-			}
-			else { increase = 0.3f; }
+			if (player->getState() == ON_GROUND)
+				increase = 1.0f;
+			else increase = 0.3f;
 				if (keys[SDL_SCANCODE_W]) {
 					playerBody->setLinearVelocity(speedForward(increase, yaw, (keys[SDL_SCANCODE_A] == SDL_PRESSED || keys[SDL_SCANCODE_D] == SDL_PRESSED))); // work in progress
 				}
@@ -629,7 +614,7 @@ namespace SceneManager {
 				bodies["box1"]->setLinearVelocity(btVector3(-5.0, 0.0, 0.0));
 		}
 		else if (mode == EDIT) {
-			std::string currentModel = "nanosuit";
+			
 			std::string lastKey;
 			if (boundingType == BOX) {
 				lastKey = std::string("box").append(to_string(boxNo-1));
@@ -708,7 +693,7 @@ namespace SceneManager {
 			}
 			
 			if (keys[SDL_SCANCODE_KP_PLUS]) {
-				if (objectID >= modelTypes.size() - 1)
+				if (objectID > modelTypes.size() - 1)
 					objectID = modelTypes.size() - 1;
 				else
 					objectID++;
@@ -721,8 +706,8 @@ namespace SceneManager {
 				std::cout << currentModel << " selected" << std::endl;
 			}
 			if (keys[SDL_SCANCODE_KP_MINUS]) {
-				if (objectID > 0)
-					objectID = modelTypes.size() - 1;
+				if (objectID < 0)
+					objectID = 0;
 				else
 					objectID--;
 				int i = 0;
