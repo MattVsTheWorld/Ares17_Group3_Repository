@@ -7,11 +7,33 @@ using namespace std;
 #define SPEED_CAP_Y 3.0
 
 #define AMBIENT_FACTOR 1.0f
-#define DIFFUSE_FACTOR 0.8f
+#define DIFFUSE_FACTOR 0.9f
 #define SPECULAR_FACTOR 1.0f
 #define ATTENUATION_CONST 0.05f
 #define ATTENUATION_LINEAR 0.009f
 #define ATTENUATION_QUAD 0.032f
+
+struct PointLight {
+	glm::vec3 position;
+
+	float att_constant;
+	float att_linear;
+	float att_quadratic;
+
+	glm::vec3 ambient;
+	glm::vec3 diffuse;
+	glm::vec3 specular;
+};
+
+PointLight mainLight{
+	glm::vec3(0.0f, 6.0f, 0.0f),
+	
+	ATTENUATION_CONST, ATTENUATION_LINEAR, ATTENUATION_QUAD,
+	
+	glm::vec3(AMBIENT_FACTOR,AMBIENT_FACTOR,AMBIENT_FACTOR),
+	glm::vec3(DIFFUSE_FACTOR,DIFFUSE_FACTOR,DIFFUSE_FACTOR),
+	glm::vec3(SPECULAR_FACTOR,SPECULAR_FACTOR,SPECULAR_FACTOR)
+};
 
 typedef std::pair<string, btRigidBody*> bodyID;
 
@@ -80,14 +102,14 @@ namespace SceneManager {
 	glm::vec3 at(0.0f, 0.5f, -1.0f);
 	glm::vec3 up(0.0f, 1.0f, 0.0f);
 
-	MeshManager::lightStruct testLight = {
-		{ 0.6f, 0.4f, 0.6f, 1.0f }, // ambient
-		{ 1.0f, 1.0f, 1.0f, 1.0f }, // diffuse
-		{ 1.0f, 1.0f, 1.0f, 1.0f }, // specular
-		{ 0.0f, 6.0f, 0.0f, 1.0f }  // position
-	};
-	//glm::vec4 lightPos(0.0, 5.0, 0.0, 1.0);
-	glm::vec3 lightPos(0.0, 6.0, 0.0);
+	//MeshManager::lightStruct testLight = {
+	//	{ 0.6f, 0.4f, 0.6f, 1.0f }, // ambient
+	//	{ 1.0f, 1.0f, 1.0f, 1.0f }, // diffuse
+	//	{ 1.0f, 1.0f, 1.0f, 1.0f }, // specular
+	//	{ 0.0f, 6.0f, 0.0f, 1.0f }  // position
+	//};
+	////glm::vec4 lightPos(0.0, 5.0, 0.0, 1.0);
+	//glm::vec3 lightPos(0.0, 6.0, 0.0);
 
 	std::map<string, btRigidBody*> bodies;	
 	// TEST
@@ -406,8 +428,6 @@ namespace SceneManager {
 		defaultTexture = loadBitmap::loadBitmap("wall.bmp");
 		groundTexture = loadBitmap::loadBitmap("terrain.bmp");
 
-	//	MeshManager::setLight(shaderProgram, testLight);
-
 		initPlayer(1.0f, 1.5f, 40.0f);
 		initBoxes();
 		h_manager = new hudManager();
@@ -455,9 +475,6 @@ namespace SceneManager {
 		return(wvel);
 
 	} */
-
-	//playerBody->setLinearVelocity(btVector3(0.0, 0.0, 0.0));
-
 	void lockCamera()
 	{
 		if (pitch > 70)
@@ -762,15 +779,6 @@ namespace SceneManager {
 	}
 
 	void renderObject(glm::mat4 proj, Model *modelData, glm::vec3 pos, glm::vec3 scale, GLuint shader) {
-		//glUseProgram(modelProgram);
-		//mvStack.push(mvStack.top());// push modelview to stack
-	//	MeshManager::setLight(modelProgram, testLight);
-	//	MeshManager::setMaterial(modelProgram, defaultMaterial);
-	//	MeshManager::setUniformMatrix4fv(modelProgram, "projection", glm::value_ptr(proj));
-	//	MeshManager::setUniformMatrix4fv(modelProgram, "view", glm::value_ptr(view));
-		//	mvStack.top() = glm::translate(mvStack.top(), glm::vec3(-10.0f, -0.1f, -10.0f));
-			// Draw the loaded model
-
 		glm::mat4 model;
 		model = glm::translate(model, pos);
 		//model = glm::rotate(model, float(-yaw*DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -779,11 +787,9 @@ namespace SceneManager {
 		//model = glm::scale(model, glm::vec3(0.05f, 0.05f, 0.05f));	// for gun
 		glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
 		modelData->Draw(shader);
-
-		//mvStack.pop();
 	}
 
-	/*void renderWep(glm::mat4 proj, Model *modelData, GLuint shader) {
+	/*void renderWeapon(glm::mat4 proj, Model *modelData, GLuint shader) {
 		//glUseProgram(modelProgram);
 		glDisable(GL_DEPTH_TEST);//Disable depth test for HUD label
 		//mvStack.push(glm::mat4(1.0));// push modelview to stack
@@ -827,7 +833,7 @@ namespace SceneManager {
 		glDepthMask(GL_TRUE);
 	}*/
 
-	void renderWep(glm::mat4 proj, Model *modelData, GLuint shader) {
+	void renderWeapon(glm::mat4 proj, Model *modelData, GLuint shader) {
 		glm::mat4 model;
 		glm::vec3 gunPos = moveForward(glm::vec3(player->getPosition().x, player->getPosition().y-0.15, player->getPosition().z), yaw, 0.2);
 		gunPos = moveRight(gunPos, yaw, 0.2);
@@ -914,15 +920,8 @@ namespace SceneManager {
 			eye = moveForward(at, pitch, -6.0f); // move behind him
 			eye.y += pitch; // displacement determined by user interaction
 			view = glm::lookAt(eye, at, up);
-			//mvStack.top() = glm::lookAt(eye, at, up);
 		}
 
-		glm::vec4 tmp = view*glm::vec4(lightPos, 1.0f);
-		//glm::vec4 tmp = mvStack.top()*lightPos;
-		testLight.position[0] = tmp.x;
-		testLight.position[1] = tmp.y;
-		testLight.position[2] = tmp.z;
-		MeshManager::setLightPos(modelProgram, glm::value_ptr(tmp));
 	}
 
 	//function that passes all light positions and properties to the shader
@@ -931,36 +930,36 @@ namespace SceneManager {
 		GLuint uniformIndex = glGetUniformLocation(shader, "viewPos");
 		glUniform3fv(uniformIndex, 1, glm::value_ptr(player->getPosition()));
 		uniformIndex = glGetUniformLocation(shader, "pointLight.position");
-		glUniform3f(uniformIndex, lightPos.x, lightPos.y, lightPos.z);
+		glUniform3f(uniformIndex, mainLight.position.x, mainLight.position.y, mainLight.position.z);
 		uniformIndex = glGetUniformLocation(shader, "pointLight.ambient");
-		glUniform3f(uniformIndex, AMBIENT_FACTOR, AMBIENT_FACTOR, AMBIENT_FACTOR);
+		glUniform3f(uniformIndex, mainLight.ambient.r, mainLight.ambient.g, mainLight.ambient.b);
 		uniformIndex = glGetUniformLocation(shader, "pointLight.diffuse");
-		glUniform3f(uniformIndex, DIFFUSE_FACTOR, DIFFUSE_FACTOR, DIFFUSE_FACTOR);
+		glUniform3f(uniformIndex, mainLight.diffuse.r, mainLight.diffuse.g, mainLight.diffuse.b);
 		uniformIndex = glGetUniformLocation(shader, "pointLight.specular");
-		glUniform3f(uniformIndex, SPECULAR_FACTOR, SPECULAR_FACTOR, SPECULAR_FACTOR);
+		glUniform3f(uniformIndex, mainLight.specular.r, mainLight.specular.g, mainLight.specular.b);
 		uniformIndex = glGetUniformLocation(shader, "pointLight.constant");
-		glUniform1f(uniformIndex, ATTENUATION_CONST);
+		glUniform1f(uniformIndex, mainLight.att_constant);
 		uniformIndex = glGetUniformLocation(shader, "pointLight.linear");
-		glUniform1f(uniformIndex, ATTENUATION_LINEAR);
+		glUniform1f(uniformIndex, mainLight.att_linear);
 		uniformIndex = glGetUniformLocation(shader, "pointLight.quadratic");
-		glUniform1f(uniformIndex, ATTENUATION_QUAD);
+		glUniform1f(uniformIndex, mainLight.att_quadratic);
 	}
 
 	void pointShadow(GLuint shader) {
 		glm::mat4 shadowProj = glm::perspective(float(90.0f*DEG_TO_RADIAN), aspect, near, far); //perspective projection is the best suited for this
 		std::vector<glm::mat4> shadowTransforms;
 		shadowTransforms.push_back(shadowProj *
-			glm::lookAt(lightPos, lightPos + glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0)));
+			glm::lookAt(mainLight.position, mainLight.position + glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0)));
 		shadowTransforms.push_back(shadowProj *
-			glm::lookAt(lightPos, lightPos + glm::vec3(-1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0)));
+			glm::lookAt(mainLight.position, mainLight.position + glm::vec3(-1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0)));
 		shadowTransforms.push_back(shadowProj *
-			glm::lookAt(lightPos, lightPos + glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0, 0.0, 1.0)));
+			glm::lookAt(mainLight.position, mainLight.position + glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0, 0.0, 1.0)));
 		shadowTransforms.push_back(shadowProj *
-			glm::lookAt(lightPos, lightPos + glm::vec3(0.0, -1.0, 0.0), glm::vec3(0.0, 0.0, -1.0)));
+			glm::lookAt(mainLight.position, mainLight.position + glm::vec3(0.0, -1.0, 0.0), glm::vec3(0.0, 0.0, -1.0)));
 		shadowTransforms.push_back(shadowProj *
-			glm::lookAt(lightPos, lightPos + glm::vec3(0.0, 0.0, 1.0), glm::vec3(0.0, -1.0, 0.0)));
+			glm::lookAt(mainLight.position, mainLight.position + glm::vec3(0.0, 0.0, 1.0), glm::vec3(0.0, -1.0, 0.0)));
 		shadowTransforms.push_back(shadowProj *
-			glm::lookAt(lightPos, lightPos + glm::vec3(0.0, 0.0, -1.0), glm::vec3(0.0, -1.0, 0.0)));
+			glm::lookAt(mainLight.position, mainLight.position + glm::vec3(0.0, 0.0, -1.0), glm::vec3(0.0, -1.0, 0.0)));
 
 		for (int k = 0; k < 6; ++k)
 			glUniformMatrix4fv(glGetUniformLocation(shader, ("shadowMatrices[" + std::to_string(k) + "]").c_str()), 1, GL_FALSE, glm::value_ptr(shadowTransforms[k]));
@@ -998,8 +997,9 @@ namespace SceneManager {
 		if (pointOfView == THIRD_PERSON)
 			renderObject(projection, modelTypes["nanosuit"], glm::vec3(player->getPosition().x, player->getPosition().y-1.75, player->getPosition().z), glm::vec3(0.2,0.2,0.2), shader);
 		if (pointOfView == FIRST_PERSON)
-			renderWep(projection, modelTypes["plasmacutter"], shader);
+			renderWeapon(projection, modelTypes["plasmacutter"], shader);
 	}
+
 	// main render function, sets up the shaders and then calls all other functions
 	void renderShadowScene(glm::mat4 projection, glm::mat4 viewMatrix, GLuint shader, bool cubemap) {
 
