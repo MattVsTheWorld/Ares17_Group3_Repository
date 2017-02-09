@@ -16,6 +16,28 @@
 #include "loadBitmap.h"
 #define DEG_TO_RADIAN 0.017453293
 
+#define SPEED_CAP_XZ 10.0
+#define SPEED_CAP_Y 3.0
+
+#define AMBIENT_FACTOR 1.0f
+#define DIFFUSE_FACTOR 0.9f
+#define SPECULAR_FACTOR 1.0f
+#define ATTENUATION_CONST 0.035f
+#define ATTENUATION_LINEAR 0.0065f
+#define ATTENUATION_QUAD 0.0024f
+
+struct PointLight {
+	glm::vec3 position;
+
+	float att_constant;
+	float att_linear;
+	float att_quadratic;
+
+	glm::vec3 ambient;
+	glm::vec3 diffuse;
+	glm::vec3 specular;
+};
+
 namespace SceneManager {
 	void init(void);
 	void update(SDL_Window *window, SDL_Event sdlEvent);

@@ -3,30 +3,10 @@
 
 using namespace std;
 
-#define SPEED_CAP_XZ 10.0
-#define SPEED_CAP_Y 3.0
 
-#define AMBIENT_FACTOR 1.0f
-#define DIFFUSE_FACTOR 0.9f
-#define SPECULAR_FACTOR 1.0f
-#define ATTENUATION_CONST 0.05f
-#define ATTENUATION_LINEAR 0.009f
-#define ATTENUATION_QUAD 0.032f
-
-struct PointLight {
-	glm::vec3 position;
-
-	float att_constant;
-	float att_linear;
-	float att_quadratic;
-
-	glm::vec3 ambient;
-	glm::vec3 diffuse;
-	glm::vec3 specular;
-};
 
 PointLight mainLight{
-	glm::vec3(0.0f, 6.0f, 0.0f),
+	glm::vec3(0.0f, 20.0f, 0.0f),
 	
 	ATTENUATION_CONST, ATTENUATION_LINEAR, ATTENUATION_QUAD,
 	
@@ -70,7 +50,7 @@ namespace SceneManager {
 	const GLuint SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
 	GLfloat aspect = (GLfloat)SHADOW_WIDTH / (GLfloat)SHADOW_HEIGHT;
 	GLfloat near = 0.01f;
-	GLfloat far = 25.0f;
+	GLfloat far = 40.0f;
 	//////////////////
 	/// End
 	//////////////////
@@ -101,15 +81,6 @@ namespace SceneManager {
 	glm::vec3 eye(2.0f, 3.0f, -6.0f);
 	glm::vec3 at(0.0f, 0.5f, -1.0f);
 	glm::vec3 up(0.0f, 1.0f, 0.0f);
-
-	//MeshManager::lightStruct testLight = {
-	//	{ 0.6f, 0.4f, 0.6f, 1.0f }, // ambient
-	//	{ 1.0f, 1.0f, 1.0f, 1.0f }, // diffuse
-	//	{ 1.0f, 1.0f, 1.0f, 1.0f }, // specular
-	//	{ 0.0f, 6.0f, 0.0f, 1.0f }  // position
-	//};
-	////glm::vec4 lightPos(0.0, 5.0, 0.0, 1.0);
-	//glm::vec3 lightPos(0.0, 6.0, 0.0);
 
 	std::map<string, btRigidBody*> bodies;	
 	// TEST
