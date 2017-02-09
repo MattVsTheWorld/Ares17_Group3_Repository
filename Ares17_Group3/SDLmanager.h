@@ -4,7 +4,6 @@
 #include <SDL.h>
 #include <iostream>
 
-
 #define SCREENWIDTH 1440.0f
 #define SCREENHEIGHT 900.0f
 

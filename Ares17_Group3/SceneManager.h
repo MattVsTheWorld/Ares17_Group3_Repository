@@ -14,6 +14,9 @@
 #include "Player.h"
 // TEMPORARY
 #include "loadBitmap.h"
+//+++
+#include "SoundManager.h"
+//+++
 #define DEG_TO_RADIAN 0.017453293
 
 #define SPEED_CAP_XZ 10.0
