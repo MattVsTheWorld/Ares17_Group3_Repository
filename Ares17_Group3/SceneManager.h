@@ -17,6 +17,7 @@
 #include "loadBitmap.h"
 //+++
 #include "SoundManager.h"
+#include "Projectile.h"
 //+++
 #define DEG_TO_RADIAN 0.017453293
 

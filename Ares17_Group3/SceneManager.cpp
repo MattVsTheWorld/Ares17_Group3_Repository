@@ -53,7 +53,7 @@ namespace SceneManager {
 	// If the level gets too big and you can see the edge of the shadowmapping, increase the far 
 	// (or consider adding multiple lights / opting for a directional light shadowmap)
 	GLfloat near_plane = 0.01f;
-	GLfloat far_plane = 40.0f;
+	GLfloat far_plane = 60.0f;
 	//////////////////
 	/// End
 	//////////////////
@@ -418,7 +418,7 @@ namespace SceneManager {
 						const btVector3& ptB = pt.getPositionWorldOnB();
 						const btVector3& normalOnB = pt.m_normalWorldOnB;
 						// <START>  handle collisions here
-						cout << "Colliding with something";
+						cout << "Player colliding with something while jumping.";
 						player->setState(ON_GROUND);
 						//  <END>   handle collisions here
 					}
@@ -585,18 +585,18 @@ namespace SceneManager {
 				increase = 1.0f;
 			else increase = 0.3f;
 				if (keys[SDL_SCANCODE_W]) {
-					playerBody->setLinearVelocity(speedForward(increase, yaw, (keys[SDL_SCANCODE_A] == SDL_PRESSED || keys[SDL_SCANCODE_D] == SDL_PRESSED))); // work in progress
+					playerBody->setLinearVelocity(speedForward(increase, yaw, (keys[SDL_SCANCODE_A] == SDL_PRESSED || keys[SDL_SCANCODE_D] == SDL_PRESSED)));
 				}
 				else if (keys[SDL_SCANCODE_S]) {
-					playerBody->setLinearVelocity(speedForward(-increase, yaw, (keys[SDL_SCANCODE_A] == SDL_PRESSED || keys[SDL_SCANCODE_D] == SDL_PRESSED))); // work in progress
+					playerBody->setLinearVelocity(speedForward(-increase, yaw, (keys[SDL_SCANCODE_A] == SDL_PRESSED || keys[SDL_SCANCODE_D] == SDL_PRESSED)));
 				} 
 				if (keys[SDL_SCANCODE_A]) {
 					//player->setPosition(moveRight(player->getPosition(), yaw, -0.1f));
-					playerBody->setLinearVelocity(speedRight(-increase, yaw, (keys[SDL_SCANCODE_W] == SDL_PRESSED || keys[SDL_SCANCODE_S] == SDL_PRESSED))); // work in progress
+					playerBody->setLinearVelocity(speedRight(-increase, yaw, (keys[SDL_SCANCODE_W] == SDL_PRESSED || keys[SDL_SCANCODE_S] == SDL_PRESSED)));
 				}
 				else if (keys[SDL_SCANCODE_D]) {
 					//player->setPosition(moveRight(player->getPosition(), yaw, 0.1f));
-					playerBody->setLinearVelocity(speedRight(increase, yaw, (keys[SDL_SCANCODE_W] == SDL_PRESSED || keys[SDL_SCANCODE_S] == SDL_PRESSED))); // work in progress
+					playerBody->setLinearVelocity(speedRight(increase, yaw, (keys[SDL_SCANCODE_W] == SDL_PRESSED || keys[SDL_SCANCODE_S] == SDL_PRESSED)));
 				}
 			
 
@@ -1035,7 +1035,7 @@ namespace SceneManager {
 	}
 
 	// main render function, sets up the shaders and then calls all other functions
-	void renderShadowScene(glm::mat4 projection, glm::mat4 viewMatrix, GLuint shader, bool cubemap) {
+	void renderShadowedScene(glm::mat4 projection, glm::mat4 viewMatrix, GLuint shader, bool cubemap) {
 
 		GLuint uniformIndex;
 		glUseProgram(shader);
@@ -1106,7 +1106,7 @@ namespace SceneManager {
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear FBO
 				glClear(GL_DEPTH_BUFFER_BIT);
 
-				renderShadowScene(projection, view, depthShaderProgram, true); // render using light's point of view and simpler shader program
+				renderShadowedScene(projection, view, depthShaderProgram, true); // render using light's point of view and simpler shader program
 
 				glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			} else {
@@ -1120,7 +1120,7 @@ namespace SceneManager {
 
 				skybox->renderSkybox(projection, view, modelTypes["cube"]);
 				// normal rendering
-				renderShadowScene(projection, view, modelProgram, false); // render normal scene from normal point of view
+				renderShadowedScene(projection, view, modelProgram, false); // render normal scene from normal point of view
 				// fps counter; 5 of 5
 				//h_manager->renderToHud(fps, texturedProgram, modelTypes["cube"], glm::vec3(-0.9f, 0.9f, 0.9f));
 			}
