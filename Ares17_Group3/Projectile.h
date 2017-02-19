@@ -19,10 +19,10 @@ public:
 	void renderProjectiles(glm::mat4 view, glm::mat4 proj, Model * modelData, GLuint shader, GLuint texture) {
 		for (vector <pair<btRigidBody*, double>>::iterator projectileIterator = this->liveProjectiles.begin(); projectileIterator != this->liveProjectiles.end(); ++projectileIterator)
 		{
-			if (((pair<btRigidBody*, double>)*projectileIterator).second <= 0) // if dead, remove
+			if (((pair<btRigidBody*, double>)*projectileIterator).second <= 0) // if dead, remove // delete?
 				liveProjectiles.erase(remove(liveProjectiles.begin(), liveProjectiles.end(), (pair<btRigidBody*, double>)*projectileIterator), liveProjectiles.end());
 			else {
-				;//		this->shapeManager->renderSphere((((pair<btRigidBody*, double>)*projectileIterator).first)
+				this->shapeManager->renderSphere((((pair<btRigidBody*, double>)*projectileIterator).first), view, proj, modelData, shader, texture);//		this->shapeManager->renderSphere((((pair<btRigidBody*, double>)*projectileIterator).first)
 			}
 		}
 		

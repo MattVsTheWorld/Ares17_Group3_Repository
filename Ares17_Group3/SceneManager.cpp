@@ -4,7 +4,7 @@
 using namespace std;
 
 
-typedef std::pair<string, btRigidBody*> bodyID;
+//typedef std::pair<string, btRigidBody*> bodyID;
 
 // this class still needs a lot of work
 namespace SceneManager {
@@ -255,28 +255,68 @@ namespace SceneManager {
 							if (key.find("box") != std::string::npos) {
 								variables = 11;
 								float digit = stof(asString);
-								if (i == 2) position.x = digit;
-								if (i == 3) position.y = digit;
-								if (i == 4) position.z = digit; 
-								if (i == 5) boundingScale.x = digit;
-								if (i == 6) boundingScale.y = digit;
-								if (i == 7) boundingScale.z = digit;
-								if (i == 8) modelScale.x = digit;
-								if (i == 9) modelScale.y = digit;
-								if (i == 10) modelScale.z = digit;
-								if (i == 11) mass = digit;
+								switch (i) {
+								case 2:
+									position.x = digit;
+									break;
+								case 3:
+									position.y = digit;
+									break;
+								case 4:
+									position.z = digit;
+									break;
+								case 5:
+									boundingScale.x = digit;
+									break;
+								case 6:
+									boundingScale.y = digit;
+									break;
+								case 7:
+									boundingScale.z = digit;;
+									break;
+								case 8:
+									modelScale.x = digit;
+									break;
+								case 9:
+									modelScale.y = digit;
+									break;
+								case 10:
+									modelScale.z = digit;
+									break;
+								case 11:
+									mass = digit;
+									break;
+								}
 							}
 							else if (key.find("sphere") != std::string::npos) {
 								variables = 9;
 								float digit = stof(asString);
-								if (i == 2) position.x = digit;
-								if (i == 3) position.y = digit;
-								if (i == 4) position.z = digit;
-								if (i == 5) radius = digit;
-								if (i == 6) modelScale.x = digit;
-								if (i == 7) modelScale.y = digit;
-								if (i == 8) modelScale.z = digit;
-								if (i == 9) mass = digit;
+								switch (i) {
+								case 2:
+									position.x = digit;
+									break;
+								case 3:
+									position.y = digit;
+									break;
+								case 4:
+									position.z = digit;
+									break;
+								case 5:
+									radius = digit;
+									break;
+								case 6:
+									modelScale.x = digit;
+									break;
+								case 7:
+									modelScale.y = digit;
+									break;
+								case 8:
+									modelScale.z = digit;
+									break;
+								case 9:
+									mass = digit;
+									break;
+								}
 							}
 						}//else
 					}//for loop

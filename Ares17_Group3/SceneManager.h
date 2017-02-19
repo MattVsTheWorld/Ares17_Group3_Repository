@@ -18,6 +18,7 @@
 //+++
 #include "SoundManager.h"
 #include "Projectile.h"
+#include "levelLoader.h"
 //+++
 #define DEG_TO_RADIAN 0.017453293
 
