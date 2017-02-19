@@ -1,16 +1,12 @@
 #include "SceneManager.h"
-#include <time.h>
 
 using namespace std;
-
-
 typedef std::pair<string, btRigidBody*> bodyID;
 
 // this class still needs a lot of work
 namespace SceneManager {
 
 	Player *player;
-
 	PointLight mainLight{
 		glm::vec3(0.0f, 20.0f, 0.0f),
 
@@ -74,8 +70,6 @@ namespace SceneManager {
 	// TEST
 	btRigidBody* playerBody;
 	//	
-
-
 	GLuint defaultTexture;
 	GLuint groundTexture;
 

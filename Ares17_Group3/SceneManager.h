@@ -17,12 +17,13 @@
 #include "loadBitmap.h"
 //+++
 #include "SoundManager.h"
+#include <time.h>
 #include "Projectile.h"
+#include "Controls.h"
 //+++
-#define DEG_TO_RADIAN 0.017453293
+//#define DEG_TO_RADIAN 0.017453293
 
-#define SPEED_CAP_XZ 10.0
-#define SPEED_CAP_Y 3.0
+
 
 #define AMBIENT_FACTOR 1.0f
 #define DIFFUSE_FACTOR 0.9f
