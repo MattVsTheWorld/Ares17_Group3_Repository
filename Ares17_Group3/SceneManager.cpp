@@ -25,6 +25,7 @@ namespace SceneManager {
 	hudManager *h_manager;
 	Skybox *skybox;
 	btShapeManager *bt_manager;
+	Projectile *projectile_manager; // !++!
 
 	unsigned int lastTime = 0, currentTime;
 	enum pov { FIRST_PERSON, THIRD_PERSON };
@@ -452,7 +453,7 @@ namespace SceneManager {
 						const btVector3& ptB = pt.getPositionWorldOnB();
 						const btVector3& normalOnB = pt.m_normalWorldOnB;
 						// <START>  handle collisions here
-						cout << "Player colliding with something while jumping.";
+						cout << "Player colliding with something while jumping." << endl;
 						player->setState(ON_GROUND);
 						//  <END>   handle collisions here
 					}
@@ -470,6 +471,7 @@ namespace SceneManager {
 		depthShaderProgram = ShaderManager::initShaders("Shaders/simpleShadowMap.vert", "Shaders/simpleShadowMap.frag", "Shaders/simpleShadowMap.gs");
 		//+++
 		bt_manager = new btShapeManager();
+		projectile_manager = new Projectile(bt_manager);
 
 		initmodelTypes();
 
@@ -580,16 +582,20 @@ namespace SceneManager {
 		SDL_WarpMouseInWindow(window, MidX, MidY);
 
 		//MOUSECLICK
-
+		
 		if (sdlEvent.type == SDL_MOUSEBUTTONDOWN && pointOfView == FIRST_PERSON) {
 			if (sdlEvent.button.button == SDL_BUTTON_LEFT) {
 				if (coolDownOfGun <= 0.0f) {
 					leftClick = true;
 					coolDownOfGun = 0.5f;
+					cout << "Attempting to shoot bullet." << endl;
+					projectile_manager->addProjectile(glm::vec3(0, 0, 0), 10); //!++!
+			//		Projectile* bullet = new Projectile(bt_manager, glm::vec3(0, 0, 0), 1);
 				}
 			}
 			if (sdlEvent.button.button == SDL_BUTTON_RIGHT) rightClick = true;
 		}
+
 
 		if (sdlEvent.type == SDL_MOUSEBUTTONUP  && pointOfView == FIRST_PERSON) {
 			leftClick = false;
@@ -1066,6 +1072,9 @@ namespace SceneManager {
 
 		if (pointOfView == FIRST_PERSON)
 			renderWeapon(projection, modelTypes["plasmacutter"], shader);
+
+		//!++!
+		projectile_manager->renderProjectiles(view, projection, modelTypes["sphere"], shader, defaultTexture);
 	}
 
 	// main render function, sets up the shaders and then calls all other functions

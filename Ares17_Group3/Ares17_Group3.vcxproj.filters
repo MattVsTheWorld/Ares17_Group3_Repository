@@ -60,14 +60,8 @@
     <ClCompile Include="Skybox.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
-    <ClCompile Include="Object.cpp">
-      <Filter>To be deleted / redone</Filter>
-    </ClCompile>
     <ClCompile Include="SceneManager.cpp">
       <Filter>Being worked on</Filter>
-    </ClCompile>
-    <ClCompile Include="Bullet.cpp">
-      <Filter>To be deleted / redone</Filter>
     </ClCompile>
     <ClCompile Include="btShapeManager.cpp">
       <Filter>Being worked on</Filter>
@@ -104,12 +98,6 @@
     <ClInclude Include="SceneManager.h">
       <Filter>Being worked on</Filter>
     </ClInclude>
-    <ClInclude Include="Object.h">
-      <Filter>To be deleted / redone</Filter>
-    </ClInclude>
-    <ClInclude Include="Bullet.h">
-      <Filter>To be deleted / redone</Filter>
-    </ClInclude>
     <ClInclude Include="main.h">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -125,11 +113,14 @@
     <ClInclude Include="SoundManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Projectile.h">
-      <Filter>Being worked on</Filter>
-    </ClInclude>
     <ClInclude Include="Player.h">
       <Filter>Being worked on</Filter>
+    </ClInclude>
+    <ClInclude Include="Projectile.h">
+      <Filter>Being worked on\February</Filter>
+    </ClInclude>
+    <ClInclude Include="TempObjects.h">
+      <Filter>Being worked on\February</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
