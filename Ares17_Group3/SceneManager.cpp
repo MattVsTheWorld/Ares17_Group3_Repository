@@ -90,8 +90,10 @@ namespace SceneManager {
 		return glm::vec3(pos.x + d*std::sin(yaw*DEG_TO_RADIAN), pos.y, pos.z - d*std::cos(yaw*DEG_TO_RADIAN));
 	}
 
-	glm::vec3 moveForward(glm::vec3 pos, GLfloat yaw, GLfloat pitch, GLfloat d) {
-		cout << d*std::sin(pitch*DEG_TO_RADIAN) << endl;
+	glm::vec3 moveForward(glm::vec3 pos, GLfloat yaw, GLfloat pitch, GLfloat d) { // TODO: fix
+		cout << "x" << d*std::sin(yaw*DEG_TO_RADIAN) << endl;
+		cout << "y" << -d*std::sin(pitch) << endl;
+		cout << "z" << -d*std::cos(yaw*DEG_TO_RADIAN) << endl;
 		return glm::vec3(pos.x + d*std::sin(yaw*DEG_TO_RADIAN), pos.y - d*std::sin(pitch), pos.z - d*std::cos(yaw*DEG_TO_RADIAN));
 	}
 	glm::vec3 moveRight(glm::vec3 pos, GLfloat angle, GLfloat d) {
@@ -530,12 +532,14 @@ namespace SceneManager {
 		return(wvel);
 
 	} */
+#define PITCHLOCK 3.0f //TODO: edit pitch lock
 	void lockCamera()
 	{
-		if (pitch > 70)
-			pitch = 70;
-		if (pitch < -70)
-			pitch = -70;
+	//	cout << pitch << endl;
+		if (pitch > PITCHLOCK)
+			pitch = PITCHLOCK;
+		if (pitch < -PITCHLOCK)
+			pitch = -PITCHLOCK;
 		if (yaw < 0.0)
 			yaw += 360.0;
 		if (yaw > 360.0)

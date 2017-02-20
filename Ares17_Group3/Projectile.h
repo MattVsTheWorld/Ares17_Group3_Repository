@@ -5,6 +5,7 @@
 #include "TempObjects.h"
 #define BULLET_SIZE 0.05f
 #define DEFAULT_LIFESPAN 20.0f
+#define DEFAULT_MASS 1.0f
 
 class Projectile : public TempObjects {
 private:
@@ -19,8 +20,9 @@ public:
 		//liveProjectiles.push_back(make_pair(shapeManager->addSphere(10, 0, 0, 0, 10), this->lifespan));
 	}
 	void addProjectile(glm::vec3 spawn, float speed, float yaw, float pitch) {
-		btRigidBody *temp = shapeManager->addSphere(BULLET_SIZE, spawn.x, spawn.y, spawn.z, 10);
+		btRigidBody *temp = shapeManager->addSphere(BULLET_SIZE, spawn.x, spawn.y, spawn.z, DEFAULT_MASS);
 		liveProjectiles->push_back(make_pair(temp, DEFAULT_LIFESPAN));
+		// TODO: fix angles. yaw and pitch are ""unrelated"", creating the unwanted effect that shooting up won't reduce ground-parallel speed
 		temp->setLinearVelocity(btVector3(speed*std::sin(yaw), -speed*std::sin(pitch), -speed*std::cos(yaw)));
 		//cout << liveProjectiles->size();
 	}
