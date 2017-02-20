@@ -3,6 +3,8 @@
 
 #include "btShapeManager.h"
 #include "TempObjects.h"
+#define BULLET_SIZE 0.05f
+#define DEFAULT_LIFESPAN 20.0f
 
 class Projectile : public TempObjects {
 private:
@@ -16,8 +18,10 @@ public:
 		liveProjectiles = new vector <pair<btRigidBody*, double>>;
 		//liveProjectiles.push_back(make_pair(shapeManager->addSphere(10, 0, 0, 0, 10), this->lifespan));
 	}
-	void addProjectile(glm::vec3 direction, float speed) {
-		liveProjectiles->push_back(make_pair(shapeManager->addSphere(2, 0, 2, 0, 10), 20));
+	void addProjectile(glm::vec3 spawn, float speed, float yaw, float pitch) {
+		btRigidBody *temp = shapeManager->addSphere(BULLET_SIZE, spawn.x, spawn.y, spawn.z, 10);
+		liveProjectiles->push_back(make_pair(temp, DEFAULT_LIFESPAN));
+		temp->setLinearVelocity(btVector3(speed*std::sin(yaw), -speed*std::sin(pitch), -speed*std::cos(yaw)));
 		//cout << liveProjectiles->size();
 	}
 	~Projectile() {
