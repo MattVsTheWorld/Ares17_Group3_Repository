@@ -3,13 +3,13 @@
 
 #include "btShapeManager.h"
 #define BULLET_SIZE 0.05f
-#define DEFAULT_LIFESPAN 2.0f
+#define DEFAULT_LIFESPAN 6.0f
 #define DEFAULT_MASS 1.0f
-#define PROJ_SPEED 2.0f
+#define PROJ_SPEED 20.0f
 
 typedef pair<btRigidBody*, double> _proj;
 
-class Projectile{
+class Projectile {
 private:
 	btShapeManager *shapeManager;
 	vector <pair<btRigidBody*, double>> *liveProjectiles;
@@ -31,19 +31,30 @@ public:
 		delete this; // :thinking:
 	}
 	void renderProjectiles(glm::mat4 view, glm::mat4 proj, Model * modelData, GLuint shader, GLuint texture, double time_step) {
-		if (liveProjectiles->size() > 0) {
+		//if (liveProjectiles->size() > 0) {
 		//	using _proj = pair<btRigidBody*, double*>;
 			//cout << time_step << " ";
-			for (vector <_proj>::iterator projectileIterator = liveProjectiles->begin(); projectileIterator != liveProjectiles->end(); ++projectileIterator)
-			{
-				(static_cast<_proj>(*projectileIterator)) = make_pair((static_cast<_proj>(*projectileIterator)).first, (static_cast<_proj>(*projectileIterator)).second - time_step);
-				cout << (static_cast<_proj>(*projectileIterator)).second << " ";
-				if ((static_cast<_proj>(*projectileIterator)).second <= 0) // if dead, remove // delete?
-					liveProjectiles->erase(remove(liveProjectiles->begin(), liveProjectiles->end(), static_cast<_proj>(*projectileIterator)), liveProjectiles->end());
-				else {
-					this->shapeManager->renderSphere(((static_cast<_proj>(*projectileIterator)).first), view, proj, modelData, shader, texture);//		this->shapeManager->renderSphere((((pair<btRigidBody*, double>)*projectileIterator).first)
-				}
+			//for (vector <_proj>::iterator projectileIterator = liveProjectiles->begin(); projectileIterator != liveProjectiles->end(); ++projectileIterator)
+		vector <_proj>::iterator projectileIterator = liveProjectiles->begin();
+		while (liveProjectiles->size() > 0 && projectileIterator != liveProjectiles->end()) {
+			
+			(*projectileIterator) = make_pair((static_cast<_proj>(*projectileIterator)).first, (static_cast<_proj>(*projectileIterator)).second - time_step);
+			//cout << (static_cast<_proj>(*projectileIterator)).second - time_step;
+			//cout << (static_cast<_proj>(*projectileIterator)).second << " ";
+			if ((static_cast<_proj>(*projectileIterator)).second <= 0) // if dead, remove // delete?
+				liveProjectiles->erase(remove(liveProjectiles->begin(), liveProjectiles->end(), static_cast<_proj>(*projectileIterator)), liveProjectiles->end());
+			else {
+				this->shapeManager->renderSphere(((static_cast<_proj>(*projectileIterator)).first), view, proj, modelData, shader, texture);//		this->shapeManager->renderSphere((((pair<btRigidBody*, double>)*projectileIterator).first)
 			}
+			if (liveProjectiles->size() > 0)
+				projectileIterator++;
+			//cout << liveProjectiles->size();
+			//if (liveProjectiles->size() <= 0)
+			//{
+			//	cout << "OBAMA WAS BORN IN HAWAYY";
+			//	//projectileIterator--;
+			//	//continue;
+			//}
 		}
 	}
 };
