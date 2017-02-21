@@ -31,12 +31,13 @@ public:
 	}
 	void renderProjectiles(glm::mat4 view, glm::mat4 proj, Model * modelData, GLuint shader, GLuint texture) {
 		if (liveProjectiles->size() > 0) {
-			for (vector <pair<btRigidBody*, double>>::iterator projectileIterator = liveProjectiles->begin(); projectileIterator != liveProjectiles->end(); ++projectileIterator)
+			using _proj = pair<btRigidBody*, double>;
+			for (vector <_proj>::iterator projectileIterator = liveProjectiles->begin(); projectileIterator != liveProjectiles->end(); ++projectileIterator)
 			{
-				if (((pair<btRigidBody*, double>)*projectileIterator).second <= 0) // if dead, remove // delete?
-					liveProjectiles->erase(remove(liveProjectiles->begin(), liveProjectiles->end(), (pair<btRigidBody*, double>)*projectileIterator), liveProjectiles->end());
+				if (((_proj)*projectileIterator).second <= 0) // if dead, remove // delete?
+					liveProjectiles->erase(remove(liveProjectiles->begin(), liveProjectiles->end(), static_cast<_proj>(*projectileIterator)), liveProjectiles->end());
 				else {
-					this->shapeManager->renderSphere((((pair<btRigidBody*, double>)*projectileIterator).first), view, proj, modelData, shader, texture);//		this->shapeManager->renderSphere((((pair<btRigidBody*, double>)*projectileIterator).first)
+					this->shapeManager->renderSphere(((static_cast<_proj>(*projectileIterator)).first), view, proj, modelData, shader, texture);//		this->shapeManager->renderSphere((((pair<btRigidBody*, double>)*projectileIterator).first)
 				}
 			}
 		}
