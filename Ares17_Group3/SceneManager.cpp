@@ -28,6 +28,7 @@ namespace SceneManager {
 	Projectile *projectile_manager; // !++!
 
 	unsigned int lastTime = 0, currentTime;
+	float dt_secs;
 	enum pov { FIRST_PERSON, THIRD_PERSON };
 	pov pointOfView = FIRST_PERSON;
 	enum modes { PLAY, EDIT };
@@ -598,7 +599,7 @@ namespace SceneManager {
 					leftClick = true;
 					coolDownOfGun = 0.5f;
 					cout << "Attempting to shoot bullet." << endl;
-					projectile_manager->addProjectile(moveForward(player->getPosition(), yaw, pitch, 1), 20, (yaw*DEG_TO_RADIAN), pitch); //!++!
+					projectile_manager->addProjectile(moveForward(player->getPosition(), yaw, pitch, 1), PROJ_SPEED, (yaw*DEG_TO_RADIAN), pitch); //!++!
 					//cout << pitch << "\n";
 			//		Projectile* bullet = new Projectile(bt_manager, glm::vec3(0, 0, 0), 1);
 				}
@@ -961,7 +962,8 @@ namespace SceneManager {
 	void update(SDL_Window * window, SDL_Event sdlEvent) {
 		controls(window, sdlEvent);
 
-		float dt_secs = gameTime();
+		dt_secs = gameTime();
+		//cout << dt_secs;
 		coolDownOfGun -= dt_secs;
 
 		// 18/01
@@ -1084,7 +1086,7 @@ namespace SceneManager {
 			renderWeapon(projection, modelTypes["plasmacutter"], shader);
 
 		//!++!
-		projectile_manager->renderProjectiles(view, projection, modelTypes["sphere"], shader, defaultTexture);
+		projectile_manager->renderProjectiles(view, projection, modelTypes["sphere"], shader, defaultTexture, dt_secs);
 	}
 
 	// main render function, sets up the shaders and then calls all other functions

@@ -119,9 +119,6 @@
     <ClInclude Include="Projectile.h">
       <Filter>Being worked on\February</Filter>
     </ClInclude>
-    <ClInclude Include="TempObjects.h">
-      <Filter>Being worked on\February</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\cubeMap.frag">
