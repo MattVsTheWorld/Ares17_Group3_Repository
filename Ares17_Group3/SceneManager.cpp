@@ -436,7 +436,7 @@ namespace SceneManager {
 
 	}
 
-	void  findCollision(btPairCachingGhostObject* ghostObject) { // ignore player?
+	void findCollision(btPairCachingGhostObject* ghostObject) { // ignore player?
 		btManifoldArray manifoldArray;
 		btBroadphasePairArray& pairArray =
 			ghostObject->getOverlappingPairCache()->getOverlappingPairArray();
