@@ -52,7 +52,7 @@ public:
 			get<2>(static_cast<_proj>(*projectileIterator))->setWorldTransform(get<0>(static_cast<_proj>(*projectileIterator))->getWorldTransform());
 		
 			// OH NO! I'M NOT :(
-			findCollision(get<2>(static_cast<_proj>(*projectileIterator)));
+			// findCollision(get<2>(static_cast<_proj>(*projectileIterator)));
 			if (get<1>(static_cast<_proj>(*projectileIterator)) <= 0) // if dead, remove // delete?
 				liveProjectiles->erase(remove(liveProjectiles->begin(), liveProjectiles->end(), static_cast<_proj>(*projectileIterator)), liveProjectiles->end());
 			else {
