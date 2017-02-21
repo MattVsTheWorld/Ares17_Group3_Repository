@@ -6,6 +6,7 @@
 #define DEFAULT_LIFESPAN 6.0f
 #define DEFAULT_MASS 1.0f
 #define PROJ_SPEED 20.0f
+#define PITCHLOCK 3.0f
 
 typedef pair<btRigidBody*, double> _proj;
 
@@ -23,6 +24,13 @@ public:
 	void addProjectile(glm::vec3 spawn, float speed, float yaw, float pitch) {
 		btRigidBody *temp = shapeManager->addSphere(BULLET_SIZE, spawn.x, spawn.y, spawn.z, DEFAULT_MASS);
 		liveProjectiles->push_back(make_pair(temp, DEFAULT_LIFESPAN));
+		if ((pitch) >= PITCHLOCK / 2)
+			pitch = PITCHLOCK / 2;
+		if (pitch <= -(PITCHLOCK / 2))
+			pitch = -PITCHLOCK / 2;
+	/*	cout << "x" << 1*std::sin(yaw) << endl;
+		cout << "y" << -1*std::sin(pitch) << endl;
+		cout << "z" << -1*std::cos(yaw) << endl;*/
 		// TODO: fix angles. yaw and pitch are ""unrelated"", creating the unwanted effect that shooting up won't reduce ground-parallel speed
 		temp->setLinearVelocity(btVector3(speed*std::sin(yaw), -speed*std::sin(pitch), -speed*std::cos(yaw)));
 		//cout << liveProjectiles->size();
@@ -37,24 +45,14 @@ public:
 			//for (vector <_proj>::iterator projectileIterator = liveProjectiles->begin(); projectileIterator != liveProjectiles->end(); ++projectileIterator)
 		vector <_proj>::iterator projectileIterator = liveProjectiles->begin();
 		while (liveProjectiles->size() > 0 && projectileIterator != liveProjectiles->end()) {
-			
 			(*projectileIterator) = make_pair((static_cast<_proj>(*projectileIterator)).first, (static_cast<_proj>(*projectileIterator)).second - time_step);
-			//cout << (static_cast<_proj>(*projectileIterator)).second - time_step;
-			//cout << (static_cast<_proj>(*projectileIterator)).second << " ";
 			if ((static_cast<_proj>(*projectileIterator)).second <= 0) // if dead, remove // delete?
 				liveProjectiles->erase(remove(liveProjectiles->begin(), liveProjectiles->end(), static_cast<_proj>(*projectileIterator)), liveProjectiles->end());
 			else {
 				this->shapeManager->renderSphere(((static_cast<_proj>(*projectileIterator)).first), view, proj, modelData, shader, texture);//		this->shapeManager->renderSphere((((pair<btRigidBody*, double>)*projectileIterator).first)
 			}
 			if (liveProjectiles->size() > 0)
-				projectileIterator++;
-			//cout << liveProjectiles->size();
-			//if (liveProjectiles->size() <= 0)
-			//{
-			//	cout << "OBAMA WAS BORN IN HAWAYY";
-			//	//projectileIterator--;
-			//	//continue;
-			//}
+				projectileIterator++; 
 		}
 	}
 };
