@@ -34,6 +34,8 @@ namespace SceneManager {
 	modes mode = PLAY;
 	enum bound { BOX, SPHERE };
 	bound boundingType = BOX;
+	enum editStages{ MODEL, BOUNDING };
+	editStages stage = MODEL;
 
 	// SHADOWS
 	GLuint depthShaderProgram; //shader to create shadow cubemaps
@@ -68,6 +70,9 @@ namespace SceneManager {
 
 	std::map<string, std::pair<string, glm::vec3>> models; //objType, <modelName, scale>
 	std::map<string, btRigidBody*> bodies;
+	
+	std::pair<std::string, glm::vec3> temp[2];
+	
 	// TEST
 	btRigidBody* playerBody;
 	//	
@@ -570,6 +575,7 @@ namespace SceneManager {
 
 	bool leftClick = false;
 	bool rightClick = false;
+	bool creation = false;
 	float coolDownOfGun = 0.5; //wait between shots
 	bool shiftPressed = true;
 	std::string currentModel = "nanosuit";
@@ -605,7 +611,6 @@ namespace SceneManager {
 			}
 			if (sdlEvent.button.button == SDL_BUTTON_RIGHT) rightClick = true;
 		}
-
 
 		if (sdlEvent.type == SDL_MOUSEBUTTONUP  && pointOfView == FIRST_PERSON) {
 			leftClick = false;
@@ -680,7 +685,16 @@ namespace SceneManager {
 			t.setIdentity();
 
 			if (leftClick == true && pointOfView == FIRST_PERSON) {
-				insertBounding(currentModel, glm::vec3(0.02, 0.02, 0.02), glm::vec3(0.2, 0.2, 0.2), 0.2);
+				temp[0] = std::make_pair(currentModel, glm::vec3(0.02, 0.02, 0.02));
+				std::string bounding = "box";
+				if (boundingType == BOX) {
+					bounding = "box";
+				}
+				else if(boundingType == SPHERE) {
+					bounding = "sphere";
+				}
+				temp[1] = std::make_pair(bounding, glm::vec3(0.02, 0.02, 0.02));
+				creation = true;
 				leftClick = false;
 			}
 
@@ -693,14 +707,17 @@ namespace SceneManager {
 			else if (keys[SDL_SCANCODE_D])
 				player->setPosition(moveRight(player->getPosition(), yaw, 0.1f));
 			if (keys[SDL_SCANCODE_LSHIFT]) {
-				shiftPressed = false;
+				shiftPressed = true;
+				std::cout << "Shift pressed. (Increase)" << std::endl;
 			}
 			if (keys[SDL_SCANCODE_LCTRL]) {
-				shiftPressed = true;
+				shiftPressed = false;
+				std::cout << "Ctrl pressed. (decrease)" << std::endl;
 			}
 
 			if (keys[SDL_SCANCODE_O]) {
 				writeFile();
+				std::cout << "File saved" << std::endl;
 			}
 
 			if (keys[SDL_SCANCODE_KP_DIVIDE]) {
@@ -717,20 +734,39 @@ namespace SceneManager {
 				t.setOrigin(btVector3(moveLeft.x, moveLeft.y, moveLeft.z));
 				bodies[lastKey]->setWorldTransform(t);
 			}
+			else if (keys[SDL_SCANCODE_KP_5]) {
+				glm::vec3 moveLeft = glm::vec3(moveForward(glm::vec3(lastObject.x(), lastObject.y(), lastObject.z()), yaw, -0.1));
+				t.setOrigin(btVector3(moveLeft.x, moveLeft.y, moveLeft.z));
+				bodies[lastKey]->setWorldTransform(t);
+			}
 			if (keys[SDL_SCANCODE_KP_4]) {
 				glm::vec3 moveLeft = glm::vec3(moveRight(glm::vec3(lastObject.x(), lastObject.y(), lastObject.z()), yaw, -0.1));
 				t.setOrigin(btVector3(moveLeft.x, moveLeft.y, moveLeft.z));
 				bodies[lastKey]->setWorldTransform(t);
 			}
-			if (keys[SDL_SCANCODE_KP_6]) {
+			else if (keys[SDL_SCANCODE_KP_6]) {
 				glm::vec3 moveLeft = glm::vec3(moveRight(glm::vec3(lastObject.x(), lastObject.y(), lastObject.z()), yaw, 0.1));
 				t.setOrigin(btVector3(moveLeft.x, moveLeft.y, moveLeft.z));
 				bodies[lastKey]->setWorldTransform(t);
 			}
-			if (keys[SDL_SCANCODE_KP_5]) {
-				glm::vec3 moveLeft = glm::vec3(moveForward(glm::vec3(lastObject.x(), lastObject.y(), lastObject.z()), yaw, -0.1));
-				t.setOrigin(btVector3(moveLeft.x, moveLeft.y, moveLeft.z));
-				bodies[lastKey]->setWorldTransform(t);
+
+			if (keys[SDL_SCANCODE_KP_PERIOD]) {
+				if (stage == MODEL) {
+					stage = BOUNDING;
+					std::cout << "Editing stage: BOUNDING" << std::endl;
+				}
+				if (stage == BOUNDING) {
+					stage = MODEL;
+					std::cout << "Editing stage: MODEL" << std::endl;
+				}
+			}
+
+			if (keys[SDL_SCANCODE_KP_ENTER]){
+				if (coolDownOfGun <= 0.0f) {
+					insertBounding(temp[0].first, temp[0].second, temp[1].second, temp[1].second.x);
+					coolDownOfGun = 5.0f;
+					creation = false;
+				}
 			}
 
 			if (keys[SDL_SCANCODE_KP_7]) {
@@ -770,44 +806,95 @@ namespace SceneManager {
 			}
 
 			float scaling = 0.0005;
+			int i = 0;
+			if (stage == MODEL) {
+				i = 0;
+			}
+			else if (stage == BOUNDING) {
+				i = 1;
+			}
 			if (shiftPressed) {
-				if (keys[SDL_SCANCODE_KP_1]) {
-					models[lastKey].second.x += scaling;
+				if (creation == true) {
+					if (keys[SDL_SCANCODE_KP_1]) {
+						temp[i].second.x += scaling;
+					}
+					if (keys[SDL_SCANCODE_KP_2]) {
+						temp[i].second.y += scaling;
+					}
+					if (keys[SDL_SCANCODE_KP_3]) {
+						temp[i].second.z += scaling;
+						/*float scale = lastObjectScale.z();
+						scale += scaling;
+						btBoxShape* box = new btBoxShape(btVector3(lastObjectScale.x(), lastObjectScale.y(), scale));
+						bodies[lastKey]->setCollisionShape(box);*/
+					}
+					if (keys[SDL_SCANCODE_KP_0]) {
+						temp[i].second.x += scaling;
+						temp[i].second.y += scaling;
+						temp[i].second.z += scaling;
+					}
 				}
-				if (keys[SDL_SCANCODE_KP_2]) {
-					models[lastKey].second.y += scaling;
-				}
-				if (keys[SDL_SCANCODE_KP_3]) {
-					models[lastKey].second.z += scaling;
-					/*float scale = lastObjectScale.z();
-					scale += scaling;
-					btBoxShape* box = new btBoxShape(btVector3(lastObjectScale.x(), lastObjectScale.y(), scale));
-					bodies[lastKey]->setCollisionShape(box);*/
-				}
-				if (keys[SDL_SCANCODE_KP_0]) {
-					models[lastKey].second.x += scaling;
-					models[lastKey].second.y += scaling;
-					models[lastKey].second.z += scaling;
+				else{
+					if (keys[SDL_SCANCODE_KP_1]) {
+						models[lastKey].second.x += scaling;
+					}
+					if (keys[SDL_SCANCODE_KP_2]) {
+						models[lastKey].second.y += scaling;
+					}
+					if (keys[SDL_SCANCODE_KP_3]) {
+						models[lastKey].second.z += scaling;
+						/*float scale = lastObjectScale.z();
+						scale += scaling;
+						btBoxShape* box = new btBoxShape(btVector3(lastObjectScale.x(), lastObjectScale.y(), scale));
+						bodies[lastKey]->setCollisionShape(box);*/
+					}
+					if (keys[SDL_SCANCODE_KP_0]) {
+						models[lastKey].second.x += scaling;
+						models[lastKey].second.y += scaling;
+						models[lastKey].second.z += scaling;
+					}
 				}
 			}
 			if (!shiftPressed) {
-				if (keys[SDL_SCANCODE_KP_1]) {
-					models[lastKey].second.x -= scaling;
+				if (creation == true) {
+					if (keys[SDL_SCANCODE_KP_1]) {
+						temp[i].second.x -= scaling;
+					}
+					if (keys[SDL_SCANCODE_KP_2]) {
+						temp[i].second.y -= scaling;
+					}
+					if (keys[SDL_SCANCODE_KP_3]) {
+						temp[i].second.z -= scaling;
+						/*float scale = lastObjectScale.z();
+						scale += scaling;
+						btBoxShape* box = new btBoxShape(btVector3(lastObjectScale.x(), lastObjectScale.y(), scale));
+						bodies[lastKey]->setCollisionShape(box);*/
+					}
+					if (keys[SDL_SCANCODE_KP_0]) {
+						temp[i].second.x -= scaling;
+						temp[i].second.y -= scaling;
+						temp[i].second.z -= scaling;
+					}
 				}
-				if (keys[SDL_SCANCODE_KP_2]) {
-					models[lastKey].second.y -= scaling;
-				}
-				if (keys[SDL_SCANCODE_KP_3]) {
-					models[lastKey].second.z -= scaling;
-					/*float scale = lastObjectScale.z();
-					scale += scaling;
-					btBoxShape* box = new btBoxShape(btVector3(lastObjectScale.x(), lastObjectScale.y(), scale));
-					bodies[lastKey]->setCollisionShape(box);*/
-				}
-				if (keys[SDL_SCANCODE_KP_0]) {
-					models[lastKey].second.x -= scaling;
-					models[lastKey].second.y -= scaling;
-					models[lastKey].second.z -= scaling;
+				else {
+					if (keys[SDL_SCANCODE_KP_1]) {
+						models[lastKey].second.x -= scaling;
+					}
+					if (keys[SDL_SCANCODE_KP_2]) {
+						models[lastKey].second.y -= scaling;
+					}
+					if (keys[SDL_SCANCODE_KP_3]) {
+						models[lastKey].second.z -= scaling;
+						/*float scale = lastObjectScale.z();
+						scale += scaling;
+						btBoxShape* box = new btBoxShape(btVector3(lastObjectScale.x(), lastObjectScale.y(), scale));
+						bodies[lastKey]->setCollisionShape(box);*/
+					}
+					if (keys[SDL_SCANCODE_KP_0]) {
+						models[lastKey].second.x -= scaling;
+						models[lastKey].second.y -= scaling;
+						models[lastKey].second.z -= scaling;
+					}
 				}
 			}
 		}
@@ -1049,7 +1136,9 @@ namespace SceneManager {
 			// First = name / key
 			id_pair.first; // string
 			btVector3 p = bodies[id_pair.first]->getWorldTransform().getOrigin();
-			glm::vec3 position = glm::vec3(p.x(), p.y(), p.z());
+			btVector3 y = (((btBoxShape*)bodies[id_pair.first]->getCollisionShape())->getHalfExtentsWithMargin());
+			glm::vec3 spherePosition = glm::vec3(p.x(), p.y(), p.z());
+			glm::vec3 position = glm::vec3(p.x(), p.y() - y.y(), p.z());
 			//	btQuaternion test = bodies[id_pair.first]->getWorldTransform().getRotation();
 		//		test.getAngle();
 
@@ -1068,7 +1157,7 @@ namespace SceneManager {
 				bt_manager->renderSphere(bodies[id_pair.first], view, projection, modelTypes["sphere"], shader, defaultTexture);
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 				glEnable(GL_CULL_FACE);
-				renderObject(projection, modelTypes[models[id_pair.first].first], position, models[id_pair.first].second, shader, defaultTexture, bodies[id_pair.first]->getWorldTransform().getRotation().getX());
+				renderObject(projection, modelTypes[models[id_pair.first].first], spherePosition, models[id_pair.first].second, shader, defaultTexture, bodies[id_pair.first]->getWorldTransform().getRotation().getX());
 			}
 			i++;
 		}
