@@ -1051,7 +1051,9 @@ namespace SceneManager {
 			// First = name / key
 			id_pair.first; // string
 			btVector3 p = bodies[id_pair.first]->getWorldTransform().getOrigin();
-			glm::vec3 position = glm::vec3(p.x(), p.y(), p.z());
+			btVector3 y = (((btBoxShape*)bodies[id_pair.first]->getCollisionShape())->getHalfExtentsWithMargin());
+			glm::vec3 spherePosition = glm::vec3(p.x(), p.y(), p.z());
+			glm::vec3 position = glm::vec3(p.x(), p.y() - y.y(), p.z());
 			//	btQuaternion test = bodies[id_pair.first]->getWorldTransform().getRotation();
 		//		test.getAngle();
 
@@ -1070,7 +1072,7 @@ namespace SceneManager {
 				bt_manager->renderSphere(bodies[id_pair.first], view, projection, modelTypes["sphere"], shader, defaultTexture);
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 				glEnable(GL_CULL_FACE);
-				renderObject(projection, modelTypes[models[id_pair.first].first], position, models[id_pair.first].second, shader, defaultTexture, bodies[id_pair.first]->getWorldTransform().getRotation().getX());
+				renderObject(projection, modelTypes[models[id_pair.first].first], spherePosition, models[id_pair.first].second, shader, defaultTexture, bodies[id_pair.first]->getWorldTransform().getRotation().getX());
 			}
 			i++;
 		}
