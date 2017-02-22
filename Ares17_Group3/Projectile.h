@@ -75,7 +75,7 @@ public:
 	//	}
 	//}
 
-	void findCollision(btPairCachingGhostObject* ghostObject) { // ignore player?
+	void findCollision(btPairCachingGhostObject* ghostObject) { // TODO: ignore self
 		btManifoldArray manifoldArray;
 		btBroadphasePairArray& pairArray =
 			ghostObject->getOverlappingPairCache()->getOverlappingPairArray();
