@@ -28,6 +28,7 @@ namespace SceneManager {
 	Projectile *projectile_manager; // !++!
 
 	unsigned int lastTime = 0, currentTime;
+	float dt_secs;
 	enum pov { FIRST_PERSON, THIRD_PERSON };
 	pov pointOfView = FIRST_PERSON;
 	enum modes { PLAY, EDIT };
@@ -71,7 +72,10 @@ namespace SceneManager {
 	std::map<string, std::pair<string, glm::vec3>> models; //objType, <modelName, scale>
 	std::map<string, btRigidBody*> bodies;
 	
-	std::pair<std::string, glm::vec3> temp[2];
+	std::tuple<std::string, glm::vec3, glm::vec3> temp[2];
+
+	std::string currentModel = "nanosuit";
+	std::string currentBounding = "cube";
 	
 	// TEST
 	btRigidBody* playerBody;
@@ -89,16 +93,15 @@ namespace SceneManager {
 	glm::vec3 at(0.0f, 0.5f, -1.0f);
 	glm::vec3 up(0.0f, 1.0f, 0.0f);
 
-
 	// Old movement methods, used in edit mode (?)
 	glm::vec3 moveForward(glm::vec3 pos, GLfloat angle, GLfloat d) {
 		return glm::vec3(pos.x + d*std::sin(yaw*DEG_TO_RADIAN), pos.y, pos.z - d*std::cos(yaw*DEG_TO_RADIAN));
 	}
 
 	glm::vec3 moveForward(glm::vec3 pos, GLfloat yaw, GLfloat pitch, GLfloat d) { // TODO: fix
-		cout << "x" << d*std::sin(yaw*DEG_TO_RADIAN) << endl;
-		cout << "y" << -d*std::sin(pitch) << endl;
-		cout << "z" << -d*std::cos(yaw*DEG_TO_RADIAN) << endl;
+		//cout << "x" << d*std::sin(yaw*DEG_TO_RADIAN) << endl;
+		//cout << "y" << -d*std::sin(pitch) << endl;
+		//cout << "z" << -d*std::cos(yaw*DEG_TO_RADIAN) << endl;
 		return glm::vec3(pos.x + d*std::sin(yaw*DEG_TO_RADIAN), pos.y - d*std::sin(pitch), pos.z - d*std::cos(yaw*DEG_TO_RADIAN));
 	}
 	glm::vec3 moveRight(glm::vec3 pos, GLfloat angle, GLfloat d) {
@@ -429,7 +432,7 @@ namespace SceneManager {
 		playerBody->setAngularFactor(0); // Doesn't fall sideways
 		bt_manager->addToWorld(playerBody);
 		playerBody->setActivationState(DISABLE_DEACTIVATION);
-		playerBody->setFriction(8);
+		playerBody->setFriction(8); 
 
 		// Now ghost
 		ghostObject = new btPairCachingGhostObject();								// create object
@@ -492,6 +495,9 @@ namespace SceneManager {
 
 		initPlayer(1.0f, 1.5f, 40.0f);
 		initBoxes();
+		temp[0] = std::make_tuple(currentModel, at,glm::vec3(0.02, 0.02, 0.02));
+		temp[1] = std::make_tuple(currentBounding, std::get<1>(temp[0]), glm::vec3(0.2, 0.2, 0.2));
+
 		h_manager = new hudManager();
 		skybox = new Skybox(skyTexFiles);
 
@@ -537,7 +543,7 @@ namespace SceneManager {
 		return(wvel);
 
 	} */
-#define PITCHLOCK 3.0f //TODO: edit pitch lock
+//#define PITCHLOCK 3.0f //TODO: edit pitch lock
 	void lockCamera()
 	{
 	//	cout << pitch << endl;
@@ -578,7 +584,6 @@ namespace SceneManager {
 	bool creation = false;
 	float coolDownOfGun = 0.5; //wait between shots
 	bool shiftPressed = true;
-	std::string currentModel = "nanosuit";
 	//*****************************CONTROLS********************
 	void controls(SDL_Window * window, SDL_Event sdlEvent) {
 		int MidX = SCREENWIDTH / 2;
@@ -598,24 +603,7 @@ namespace SceneManager {
 
 		//MOUSECLICK
 
-		if (sdlEvent.type == SDL_MOUSEBUTTONDOWN && pointOfView == FIRST_PERSON) {
-			if (sdlEvent.button.button == SDL_BUTTON_LEFT) {
-				if (coolDownOfGun <= 0.0f) {
-					leftClick = true;
-					coolDownOfGun = 0.5f;
-					cout << "Attempting to shoot bullet." << endl;
-					projectile_manager->addProjectile(moveForward(player->getPosition(), yaw, pitch, 1), 20, (yaw*DEG_TO_RADIAN), pitch); //!++!
-					//cout << pitch << "\n";
-			//		Projectile* bullet = new Projectile(bt_manager, glm::vec3(0, 0, 0), 1);
-				}
-			}
-			if (sdlEvent.button.button == SDL_BUTTON_RIGHT) rightClick = true;
-		}
 
-		if (sdlEvent.type == SDL_MOUSEBUTTONUP  && pointOfView == FIRST_PERSON) {
-			leftClick = false;
-			rightClick = false;
-		}
 
 		//KEYBOARD
 		// To be changed ****
@@ -636,6 +624,25 @@ namespace SceneManager {
 
 		float increase;
 		if (mode == PLAY) {
+			if (sdlEvent.type == SDL_MOUSEBUTTONDOWN && pointOfView == FIRST_PERSON) {
+				if (sdlEvent.button.button == SDL_BUTTON_LEFT) {
+					if (coolDownOfGun <= 0.0f) {
+						leftClick = true;
+						coolDownOfGun = 0.5f;
+						cout << "Attempting to shoot bullet." << endl;
+						projectile_manager->addProjectile(moveForward(player->getPosition(), yaw, pitch, 1), PROJ_SPEED, (yaw*DEG_TO_RADIAN), pitch); //!++!
+																																			  //cout << pitch << "\n";
+																																			  //		Projectile* bullet = new Projectile(bt_manager, glm::vec3(0, 0, 0), 1);
+					}
+				}
+				if (sdlEvent.button.button == SDL_BUTTON_RIGHT) rightClick = true;
+			}
+
+			if (sdlEvent.type == SDL_MOUSEBUTTONUP  && pointOfView == FIRST_PERSON) {
+				leftClick = false;
+				rightClick = false;
+			}
+
 			if (player->getState() == ON_GROUND)
 				increase = 1.0f;
 			else increase = 0.3f;
@@ -675,7 +682,7 @@ namespace SceneManager {
 				lastKey = std::string("box").append(to_string(boxNo - 1));
 			}
 			else if (boundingType == SPHERE) {
-				lastKey = std::string("sphere").append(to_string(sphereNo - 1));
+				lastKey = std::string("sphere").append(to_string(sphereNo - 1)); 
 			}
 
 			btVector3 lastObject = bodies[lastKey]->getWorldTransform().getOrigin();
@@ -684,18 +691,37 @@ namespace SceneManager {
 			btTransform t;
 			t.setIdentity();
 
-			if (leftClick == true && pointOfView == FIRST_PERSON) {
-				temp[0] = std::make_pair(currentModel, glm::vec3(0.02, 0.02, 0.02));
-				std::string bounding = "box";
-				if (boundingType == BOX) {
-					bounding = "box";
+			if (sdlEvent.type == SDL_MOUSEBUTTONDOWN && pointOfView == FIRST_PERSON) {
+				if (sdlEvent.button.button == SDL_BUTTON_LEFT) {
+					if (coolDownOfGun <= 0.0f) {
+						leftClick = true;
+						coolDownOfGun = 0.5f;
+						temp[0] = std::make_tuple(currentModel, at, glm::vec3(0.02, 0.02, 0.02));
+						std::string bounding = "box";
+						if (boundingType == BOX) {
+							bounding = "box";
+						}
+						else if (boundingType == SPHERE) {
+							bounding = "sphere";
+						}
+						temp[1] = std::make_tuple(currentBounding, std::get<1>(temp[0]),glm::vec3(0.02, 0.02, 0.02));
+						creation = true;
+					}
 				}
-				else if(boundingType == SPHERE) {
-					bounding = "sphere";
-				}
-				temp[1] = std::make_pair(bounding, glm::vec3(0.02, 0.02, 0.02));
-				creation = true;
+				if (sdlEvent.button.button == SDL_BUTTON_RIGHT) rightClick = true;
+			}
+
+			if (sdlEvent.type == SDL_MOUSEBUTTONUP  && pointOfView == FIRST_PERSON) {
 				leftClick = false;
+				rightClick = false;
+			}
+
+			int i = 0;
+			if (stage == MODEL) {
+				i = 0;
+			}
+			else if (stage == BOUNDING) {
+				i = 1;
 			}
 
 			if (keys[SDL_SCANCODE_W])
@@ -722,48 +748,73 @@ namespace SceneManager {
 
 			if (keys[SDL_SCANCODE_KP_DIVIDE]) {
 				boundingType = BOX;
+				currentBounding = "box";
 				std::cout << "Bounding Type: BOX" << std::endl;
 			}
 			if (keys[SDL_SCANCODE_KP_MULTIPLY]) {
 				boundingType = SPHERE;
+				currentBounding = "sphere";
 				std::cout << "Bounding Type: SPHERE" << std::endl;
 			}
 
-			if (keys[SDL_SCANCODE_KP_8]) {
-				glm::vec3 moveLeft = glm::vec3(moveForward(glm::vec3(lastObject.x(), lastObject.y(), lastObject.z()), yaw, 0.1));
-				t.setOrigin(btVector3(moveLeft.x, moveLeft.y, moveLeft.z));
-				bodies[lastKey]->setWorldTransform(t);
+			if (creation == true) {
+				if (keys[SDL_SCANCODE_KP_8]) {
+					glm::vec3 move = glm::vec3(moveForward(glm::vec3(std::get<1>(temp[i])), yaw, 0.1));
+					temp[i] = make_tuple(std::get<0>(temp[i]), move, std::get<2>(temp[i]));
+				}
+				else if (keys[SDL_SCANCODE_KP_5]) {
+					glm::vec3 move = glm::vec3(moveForward(glm::vec3(glm::vec3(std::get<1>(temp[i]))), yaw, -0.1));
+					temp[i] = make_tuple(std::get<0>(temp[i]), move, std::get<2>(temp[i]));
+				}
+				if (keys[SDL_SCANCODE_KP_4]) {
+					glm::vec3 move = glm::vec3(moveRight(glm::vec3(glm::vec3(std::get<1>(temp[i]))), yaw, -0.1));
+					temp[i] = make_tuple(std::get<0>(temp[i]), move, std::get<2>(temp[i]));
+				}
+				else if (keys[SDL_SCANCODE_KP_6]) {
+					glm::vec3 move = glm::vec3(moveRight(glm::vec3(glm::vec3(std::get<1>(temp[i]))), yaw, 0.1));
+					temp[i] = make_tuple(std::get<0>(temp[i]), move, std::get<2>(temp[i]));
+				}
 			}
-			else if (keys[SDL_SCANCODE_KP_5]) {
-				glm::vec3 moveLeft = glm::vec3(moveForward(glm::vec3(lastObject.x(), lastObject.y(), lastObject.z()), yaw, -0.1));
-				t.setOrigin(btVector3(moveLeft.x, moveLeft.y, moveLeft.z));
-				bodies[lastKey]->setWorldTransform(t);
-			}
-			if (keys[SDL_SCANCODE_KP_4]) {
-				glm::vec3 moveLeft = glm::vec3(moveRight(glm::vec3(lastObject.x(), lastObject.y(), lastObject.z()), yaw, -0.1));
-				t.setOrigin(btVector3(moveLeft.x, moveLeft.y, moveLeft.z));
-				bodies[lastKey]->setWorldTransform(t);
-			}
-			else if (keys[SDL_SCANCODE_KP_6]) {
-				glm::vec3 moveLeft = glm::vec3(moveRight(glm::vec3(lastObject.x(), lastObject.y(), lastObject.z()), yaw, 0.1));
-				t.setOrigin(btVector3(moveLeft.x, moveLeft.y, moveLeft.z));
-				bodies[lastKey]->setWorldTransform(t);
+			else {
+				if (keys[SDL_SCANCODE_KP_8]) {
+					glm::vec3 moveLeft = glm::vec3(moveForward(glm::vec3(lastObject.x(), lastObject.y(), lastObject.z()), yaw, 0.1));
+					t.setOrigin(btVector3(moveLeft.x, moveLeft.y, moveLeft.z));
+					bodies[lastKey]->setWorldTransform(t);
+				}
+				else if (keys[SDL_SCANCODE_KP_5]) {
+					glm::vec3 moveLeft = glm::vec3(moveForward(glm::vec3(lastObject.x(), lastObject.y(), lastObject.z()), yaw, -0.1));
+					t.setOrigin(btVector3(moveLeft.x, moveLeft.y, moveLeft.z));
+					bodies[lastKey]->setWorldTransform(t);
+				}
+				if (keys[SDL_SCANCODE_KP_4]) {
+					glm::vec3 moveLeft = glm::vec3(moveRight(glm::vec3(lastObject.x(), lastObject.y(), lastObject.z()), yaw, -0.1));
+					t.setOrigin(btVector3(moveLeft.x, moveLeft.y, moveLeft.z));
+					bodies[lastKey]->setWorldTransform(t);
+				}
+				else if (keys[SDL_SCANCODE_KP_6]) {
+					glm::vec3 moveLeft = glm::vec3(moveRight(glm::vec3(lastObject.x(), lastObject.y(), lastObject.z()), yaw, 0.1));
+					t.setOrigin(btVector3(moveLeft.x, moveLeft.y, moveLeft.z));
+					bodies[lastKey]->setWorldTransform(t);
+				}
 			}
 
 			if (keys[SDL_SCANCODE_KP_PERIOD]) {
-				if (stage == MODEL) {
-					stage = BOUNDING;
-					std::cout << "Editing stage: BOUNDING" << std::endl;
-				}
-				if (stage == BOUNDING) {
-					stage = MODEL;
-					std::cout << "Editing stage: MODEL" << std::endl;
+				if (coolDownOfGun <= 0.0f) {
+					coolDownOfGun = 5.0f;
+					if (stage == MODEL) {
+						stage = BOUNDING;
+						std::cout << "Editing stage: BOUNDING" << std::endl;
+					}
+					else if (stage == BOUNDING) {
+						stage = MODEL;
+						std::cout << "Editing stage: MODEL" << std::endl;
+					}
 				}
 			}
 
 			if (keys[SDL_SCANCODE_KP_ENTER]){
 				if (coolDownOfGun <= 0.0f) {
-					insertBounding(temp[0].first, temp[0].second, temp[1].second, temp[1].second.x);
+					insertBounding(std::get<0>(temp[0]), std::get<2>(temp[0]), std::get<2>(temp[1]), std::get<2>(temp[1]).x);
 					coolDownOfGun = 5.0f;
 					creation = false;
 				}
@@ -806,32 +857,23 @@ namespace SceneManager {
 			}
 
 			float scaling = 0.0005;
-			int i = 0;
-			if (stage == MODEL) {
-				i = 0;
-			}
-			else if (stage == BOUNDING) {
-				i = 1;
-			}
 			if (shiftPressed) {
 				if (creation == true) {
 					if (keys[SDL_SCANCODE_KP_1]) {
-						temp[i].second.x += scaling;
+						temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).x + scaling, std::get<2>(temp[i]).y, std::get<2>(temp[i]).z));
 					}
 					if (keys[SDL_SCANCODE_KP_2]) {
-						temp[i].second.y += scaling;
+						temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).y + scaling, std::get<2>(temp[i]).y, std::get<2>(temp[i]).z));
 					}
 					if (keys[SDL_SCANCODE_KP_3]) {
-						temp[i].second.z += scaling;
+						temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).z + scaling, std::get<2>(temp[i]).y, std::get<2>(temp[i]).z));
 						/*float scale = lastObjectScale.z();
 						scale += scaling;
 						btBoxShape* box = new btBoxShape(btVector3(lastObjectScale.x(), lastObjectScale.y(), scale));
 						bodies[lastKey]->setCollisionShape(box);*/
 					}
 					if (keys[SDL_SCANCODE_KP_0]) {
-						temp[i].second.x += scaling;
-						temp[i].second.y += scaling;
-						temp[i].second.z += scaling;
+						temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).x + scaling, std::get<2>(temp[i]).y + scaling, std::get<2>(temp[i]).z) + scaling);
 					}
 				}
 				else{
@@ -858,22 +900,20 @@ namespace SceneManager {
 			if (!shiftPressed) {
 				if (creation == true) {
 					if (keys[SDL_SCANCODE_KP_1]) {
-						temp[i].second.x -= scaling;
+						temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).x - scaling, std::get<2>(temp[i]).y, std::get<2>(temp[i]).z));
 					}
 					if (keys[SDL_SCANCODE_KP_2]) {
-						temp[i].second.y -= scaling;
+						temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).y - scaling, std::get<2>(temp[i]).y, std::get<2>(temp[i]).z));
 					}
 					if (keys[SDL_SCANCODE_KP_3]) {
-						temp[i].second.z -= scaling;
+						temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).z - scaling, std::get<2>(temp[i]).y, std::get<2>(temp[i]).z));
 						/*float scale = lastObjectScale.z();
 						scale += scaling;
 						btBoxShape* box = new btBoxShape(btVector3(lastObjectScale.x(), lastObjectScale.y(), scale));
 						bodies[lastKey]->setCollisionShape(box);*/
 					}
 					if (keys[SDL_SCANCODE_KP_0]) {
-						temp[i].second.x -= scaling;
-						temp[i].second.y -= scaling;
-						temp[i].second.z -= scaling;
+						temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).x - scaling, std::get<2>(temp[i]).y - scaling, std::get<2>(temp[i]).z) - scaling);
 					}
 				}
 				else {
@@ -1048,7 +1088,8 @@ namespace SceneManager {
 	void update(SDL_Window * window, SDL_Event sdlEvent) {
 		controls(window, sdlEvent);
 
-		float dt_secs = gameTime();
+		dt_secs = gameTime();
+		//cout << dt_secs;
 		coolDownOfGun -= dt_secs;
 
 		// 18/01
@@ -1172,8 +1213,17 @@ namespace SceneManager {
 		if (pointOfView == FIRST_PERSON)
 			renderWeapon(projection, modelTypes["plasmacutter"], shader);
 
+		if (mode == EDIT) {
+			renderObject(projection, modelTypes[std::get<0>(temp[0])], std::get<1>(temp[0]), std::get<2>(temp[0]), shader, 0, 0);
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			glDisable(GL_CULL_FACE);
+			renderObject(projection, modelTypes[std::get<0>(temp[1])], std::get<1>(temp[1]), std::get<2>(temp[1]), shader, 0, 0);
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+			glDisable(GL_CULL_FACE);
+		}
+
 		//!++!
-		projectile_manager->renderProjectiles(view, projection, modelTypes["sphere"], shader, defaultTexture);
+		projectile_manager->renderProjectiles(view, projection, modelTypes["sphere"], shader, defaultTexture, dt_secs);
 	}
 
 	// main render function, sets up the shaders and then calls all other functions
@@ -1231,8 +1281,7 @@ namespace SceneManager {
 		//mvStack.push(modelview);
 		glDepthMask(GL_TRUE);
 		view = glm::mat4(1.0);
-
-
+		
 		projection = glm::perspective(float(60.0f*DEG_TO_RADIAN), SCREENWIDTH / SCREENHEIGHT, 0.1f, 150.0f);
 
 		for (int pass = 0; pass < 2; pass++) {
