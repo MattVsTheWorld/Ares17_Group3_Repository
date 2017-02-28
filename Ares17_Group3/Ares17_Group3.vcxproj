@@ -156,12 +156,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="btShapeManager.cpp" />
-    <ClCompile Include="Bullet.cpp" />
     <ClCompile Include="hudManager.cpp" />
     <ClCompile Include="loadBitmap.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MeshManager.cpp" />
-    <ClCompile Include="Object.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="SceneManager.cpp" />
     <ClCompile Include="SDLmanager.cpp" />
@@ -171,15 +169,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="btShapeManager.h" />
-    <ClInclude Include="Bullet.h" />
     <ClInclude Include="hudManager.h" />
     <ClInclude Include="loadBitmap.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="MeshManager.h" />
     <ClInclude Include="Model.h" />
-    <ClInclude Include="Object.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="Projectile.h" />
     <ClInclude Include="SceneManager.h" />
     <ClInclude Include="SDLmanager.h" />
     <ClInclude Include="ShaderManager.h" />

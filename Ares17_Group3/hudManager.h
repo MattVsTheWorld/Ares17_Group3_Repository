@@ -16,7 +16,8 @@ public:
 	GLuint textToTexture(const char * str, GLuint textID);
 	void clearTextTexture(GLuint textID);
 	hudManager(); // constructor, initializes values
-	void renderToHud(int value, GLuint shader, Model *modelData, glm::vec3 pos);
+	//void renderToHud(int value, GLuint shader, Model *modelData, glm::vec3 pos);
+	void renderEditHud(std::string line, std::string value, GLuint shader, Model *modelData, glm::vec3 pos);
 
 
 private:
