@@ -830,8 +830,8 @@ namespace SceneManager {
 					if (coolDown <= 0.0f) {
 						leftClick = true;
 						coolDown = COOL_TIME;
-						temp[0] = std::make_tuple(std::get<0>(temp[0]), at, std::get<1>(temp[0]), glm::vec3(0.0f, yaw, 0.0f));
-						temp[1] = std::make_tuple(std::get<0>(temp[1]), std::get<1>(temp[0]), std::get<2>(temp[1]), glm::vec3(0.0f, yaw, 0.0f));
+						temp[0] = std::make_tuple(currentModel, at, std::get<2>(temp[0]), glm::vec3(0.0f, yaw, 0.0f));
+						temp[1] = std::make_tuple(currentBounding, std::get<1>(temp[0]), std::get<2>(temp[1]), glm::vec3(0.0f, yaw, 0.0f));
 						creation = true;
 					}
 				}
@@ -1035,7 +1035,7 @@ namespace SceneManager {
 					}
 					if (keys[SDL_SCANCODE_KP_7]) { //moveUP
 						glm::vec3 move = glm::vec3(std::get<1>(temp[i]).x, std::get<1>(temp[i]).y + 0.01, std::get<1>(temp[i]).z);
-						temp[i] = make_tuple(std::get<0>(temp[i]), move, std::get<2>(temp[i]), std::get<3>(temp[i]), std::get<3>(temp[i]));
+						temp[i] = make_tuple(std::get<0>(temp[i]), move, std::get<2>(temp[i]), std::get<3>(temp[i]));
 					}
 					if (keys[SDL_SCANCODE_KP_9]) { //moveDOWN
 						glm::vec3 move = glm::vec3(std::get<1>(temp[i]).x, std::get<1>(temp[i]).y - 0.01, std::get<1>(temp[i]).z);
@@ -1073,10 +1073,10 @@ namespace SceneManager {
 					if (keys[SDL_SCANCODE_KP_0]) {
 						temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).x - scaling, std::get<2>(temp[i]).y - scaling, std::get<2>(temp[i]).z - scaling), std::get<3>(temp[i]));
 					}
-					if (keys[SDL_SCANCODE_KP_7]) {
+					if (keys[SDL_SCANCODE_KP_7]) { //rotate left
 						temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), std::get<2>(temp[i]), glm::vec3(std::get<3>(temp[i]).x, std::get<3>(temp[i]).y - 0.1, std::get<3>(temp[i]).z));
 					}
-					if (keys[SDL_SCANCODE_KP_9]) {
+					if (keys[SDL_SCANCODE_KP_9]) { //rotate right
 						temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), std::get<2>(temp[i]), glm::vec3(std::get<3>(temp[i]).x, std::get<3>(temp[i]).y + 0.1, std::get<3>(temp[i]).z));
 					}
 				}
@@ -1487,13 +1487,23 @@ namespace SceneManager {
 				// fps counter; 5 of 5
 				//h_manager->renderToHud(5, texturedProgram, modelTypes["cube"], glm::vec3(-0.0f, 0.0f, 0.9f));
 				if (mode == EDIT) {
-					h_manager->renderEditHud("Bounding", currentBounding, texturedProgram, modelTypes["cube"], glm::vec3(0.55f, 0.45f, 0.9f));
-					h_manager->renderEditHud("Model", currentModel, texturedProgram, modelTypes["cube"], glm::vec3(0.6f, 0.35f, 0.9f));
-					if (coolDown <= 0) {
-						h_manager->renderEditHud("Timer", "READY", texturedProgram, modelTypes["cube"], glm::vec3(0.6f, 0.25f, 0.9f));
+					h_manager->renderEditHud("Bounding", currentBounding, texturedProgram, modelTypes["cube"], glm::vec3(0.7f, 0.45f, 0.9f));
+					h_manager->renderEditHud("Model", currentModel, texturedProgram, modelTypes["cube"], glm::vec3(0.7f, 0.35f, 0.9f));
+					string temp = "";
+					if (stage == MODEL) {
+						temp = "model";
 					}
-					else
-						h_manager->renderEditHud("Timer", "WAIT", texturedProgram, modelTypes["cube"], glm::vec3(0.6f, 0.25f, 0.9f));
+					else {
+						temp = "bounding";
+					}
+					h_manager->renderEditHud("Editing", temp, texturedProgram, modelTypes["cube"], glm::vec3(0.7f, 0.25f, 0.9f));
+					if (coolDown <= 0) {
+						temp = "READY";
+					}
+					else {
+						temp = "WAIT";
+					}
+						h_manager->renderEditHud("Timer", temp, texturedProgram, modelTypes["cube"], glm::vec3(0.7f, 0.15f, 0.9f));
 				}
 			}
 			glDepthMask(GL_TRUE);
