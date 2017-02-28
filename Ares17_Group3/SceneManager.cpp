@@ -18,7 +18,7 @@ namespace SceneManager {
 	};
 
 	// Shaders
-	//GLuint shaderProgram;
+//	GLuint shaderProgram;
 	GLuint texturedProgram;
 	GLuint modelProgram;
 
@@ -33,7 +33,7 @@ namespace SceneManager {
 	pov pointOfView = FIRST_PERSON;
 	enum modes { PLAY, EDIT };
 	modes mode = PLAY;
-	enum bound { BOX, SPHERE };
+	enum bound { BOX, SPHERE, CAPSULE };
 	bound boundingType = BOX;
 	enum editStages{ MODEL, BOUNDING };
 	editStages stage = MODEL;
@@ -69,13 +69,13 @@ namespace SceneManager {
 	// Load modelTypes
 	std::map<string, Model*> modelTypes;
 
-	std::map<string, std::pair<string, glm::vec3>> models; //objType, <modelName, scale>
-	std::map<string, btRigidBody*> bodies;
+	std::map<std::string, std::pair<string, glm::vec3>> models; //objType, <modelName, scale>
+	std::map<std::string, btRigidBody*> bodies;
 	
-	std::tuple<std::string, glm::vec3, glm::vec3> temp[2];
+	std::tuple<std::string, glm::vec3, glm::vec3, glm::vec3> temp[2]; //name, position, scale, rotation
 
 	std::string currentModel = "nanosuit";
-	std::string currentBounding = "cube";
+	std::string currentBounding = "box";
 	
 	// TEST
 	btRigidBody* playerBody;
@@ -148,6 +148,7 @@ namespace SceneManager {
 
 	int boxNo = 0;
 	int sphereNo = 0;
+	int capsuleNo = 0;
 
 	void writeFile() {
 		// writing on a text file
@@ -160,6 +161,7 @@ namespace SceneManager {
 			bodyID id_pair;
 			int boxNo = 0;
 			int sphereNo = 0;
+			int capsuleNo = 0;
 			for (const auto& id_pair : bodies) {
 				// First = name / key
 				id_pair.first; // string
@@ -223,6 +225,31 @@ namespace SceneManager {
 					sphereNo++;
 					cout << "Spheres Saved\n";
 				}
+				else if (id_pair.second->getCollisionShape()->getShapeType() == CAPSULE_SHAPE_PROXYTYPE) {// SPHERE_SHAPE_PROXYTYPE
+					objType = "sphere";
+					objType.append(std::to_string(sphereNo));
+					boundingType = bodies.find(objType)->first;
+					modelName = models.find(objType)->second.first;
+					position = bodies.find(objType)->second->getWorldTransform().getOrigin();
+					float radius = ((btCapsuleShape*)bodies.find(objType)->second->getCollisionShape())->getRadius();
+					float height = ((btCapsuleShape*)bodies.find(objType)->second->getCollisionShape())->getHalfHeight() * 2;
+					modelScale = models.find(objType)->second.second;
+					mass = bodies.find(objType)->second->getInvMass();
+					myfile << boundingType << ",";
+					myfile << modelName << ",";
+					myfile << position.x() << ",";
+					myfile << position.y() << ",";
+					myfile << position.z() << ",";
+					myfile << radius << ",";
+					myfile << height << ",";
+					myfile << modelScale.x << ",";
+					myfile << modelScale.y << ",";
+					myfile << modelScale.z << ",";
+					myfile << mass << ",";
+					myfile << "\n";
+					capsuleNo++;
+					cout << "Capsule Saved\n";
+				}
 			}
 			myfile.close();
 		}
@@ -246,6 +273,7 @@ namespace SceneManager {
 				glm::vec3 boundingScale;
 				glm::vec3 modelScale;
 				float radius;
+				float height;
 				float mass;
 
 				string asString;
@@ -328,6 +356,39 @@ namespace SceneManager {
 									break;
 								}
 							}
+							else if (key.find("capsule") != std::string::npos) {
+								variables = 10;
+								float digit = stof(asString);
+								switch (i) {
+								case 2:
+									position.x = digit;
+									break;
+								case 3:
+									position.y = digit;
+									break;
+								case 4:
+									position.z = digit;
+									break;
+								case 5:
+									radius = digit;
+									break;
+								case 6:
+									height = digit;
+									break;
+								case 7:
+									modelScale.x = digit;
+									break;
+								case 8:
+									modelScale.y = digit;
+									break;
+								case 9:
+									modelScale.z = digit;
+									break;
+								case 10:
+									mass = digit;
+									break;
+								}
+							}
 						}//else
 					}//for loop
 					bodyNo++;
@@ -339,6 +400,11 @@ namespace SceneManager {
 				}
 				else if (key.find("sphere") != std::string::npos) {
 					bodies.insert(std::pair<string, btRigidBody*>(key, bt_manager->addSphere(radius, position.x, position.y, position.z, mass)));
+					models.insert(std::pair<string, std::pair<string, glm::vec3>>(key, std::make_pair(modelName, modelScale)));
+					cout << "Sphere Added\n";
+				}
+				else if (key.find("capsule") != std::string::npos) {
+					bodies.insert(std::pair<string, btRigidBody*>(key, bt_manager->addCapsule(radius, height, position.x, position.y, position.z, mass)));
 					models.insert(std::pair<string, std::pair<string, glm::vec3>>(key, std::make_pair(modelName, modelScale)));
 					cout << "Sphere Added\n";
 				}
@@ -370,6 +436,12 @@ namespace SceneManager {
 				bodies[key]->setActivationState(DISABLE_DEACTIVATION);
 				sphereNo++;
 			}
+			else if (id_pair.second->getCollisionShape()->getShapeType() == CAPSULE_SHAPE_PROXYTYPE) {
+				key = "capsule";
+				key.append(to_string(capsuleNo));
+				bodies[key]->setActivationState(DISABLE_DEACTIVATION);
+				capsuleNo++;
+			}
 		}
 		// NOTE : should probably use this
 		/*
@@ -383,13 +455,15 @@ namespace SceneManager {
 		modelTypes.insert(std::pair<string, Model*>("pistol", new Model("Models/Weapons/Socom pistol.obj")));
 		modelTypes.insert(std::pair<string, Model*>("plasmacutter", new Model("Models/Weapons/Plasmacutter/DYIPlasmcutter.obj")));
 		modelTypes.insert(std::pair<string, Model*>("cube", new Model("Models/cube.obj")));
+		modelTypes.insert(std::pair<string, Model*>("box", modelTypes["cube"]));
 		modelTypes.insert(std::pair<string, Model*>("sphere", new Model("Models/sphere.obj")));
+		modelTypes.insert(std::pair<string, Model*>("capsule", modelTypes["sphere"]));
 		modelTypes.insert(std::pair<string, Model*>("car", new Model("Models/Car/model.obj")));
 		modelTypes.insert(std::pair<string, Model*>("house", new Model("Models/House/houselow.obj")));
 		modelTypes.insert(std::pair<string, Model*>("robot", new Model("Models/Robot/Roboto.obj")));
 	}
 
-	void insertBounding(std::string modelName, glm::vec3 modelScale, glm::vec3 boundingScale, float radius) {
+	void insertBounding(std::string modelName, glm::vec3 modelScale, glm::vec3 boundingScale) {
 		glm::vec3 position(moveForward(player->getPosition(), yaw, 0.5f));
 		float mass = 0.5;
 		std::string key;
@@ -404,9 +478,16 @@ namespace SceneManager {
 		if (boundingType == SPHERE) {
 			key = "sphere";
 			key.append(to_string(sphereNo));
-			bodies.insert(std::pair<string, btRigidBody*>(key, bt_manager->addSphere(radius, position.x, position.y, position.z, mass)));
+			bodies.insert(std::pair<string, btRigidBody*>(key, bt_manager->addSphere(boundingScale.x, position.x, position.y, position.z, mass)));
 			cout << key << "Added\n";
 			sphereNo++;
+		}
+		if (boundingType == CAPSULE) {
+			key = "capsule";
+			key.append(to_string(capsuleNo));
+			bodies.insert(std::pair<string, btRigidBody*>(key, bt_manager->addCapsule(boundingScale.x, boundingScale.y, position.x, position.y, position.z, mass)));
+			cout << key << "Added\n";
+			capsuleNo++;
 		}
 		bodies[key]->setActivationState(DISABLE_DEACTIVATION);
 		models.insert(std::pair<string, std::pair<string, glm::vec3>>(key, make_pair(modelName, modelScale)));
@@ -479,7 +560,7 @@ namespace SceneManager {
 
 	void init(void) {
 
-		//shaderProgram = ShaderManager::initShaders("Shaders/phong-tex.vert", "Shaders/phong-tex.frag");
+	//	shaderProgram = ShaderManager::initShaders("Shaders/phong-tex.vert", "Shaders/phong-tex.frag");
 		texturedProgram = ShaderManager::initShaders("Shaders/textured.vert", "Shaders/textured.frag");
 		modelProgram = ShaderManager::initShaders("Shaders/modelLoading.vert", "Shaders/modelLoading.frag");
 		//+++
@@ -495,8 +576,8 @@ namespace SceneManager {
 
 		initPlayer(1.0f, 1.5f, 40.0f);
 		initBoxes();
-		temp[0] = std::make_tuple(currentModel, at,glm::vec3(0.02, 0.02, 0.02));
-		temp[1] = std::make_tuple(currentBounding, std::get<1>(temp[0]), glm::vec3(0.2, 0.2, 0.2));
+		temp[0] = std::make_tuple(currentModel, at, glm::vec3(0.02, 0.02, 0.02), glm::vec3(0.0f, yaw, 0.0f));
+		temp[1] = std::make_tuple(currentBounding, std::get<1>(temp[0]), glm::vec3(0.2, 0.2, 0.2), glm::vec3(0.0f, yaw, 0.0f));
 
 		h_manager = new hudManager();
 		skybox = new Skybox(skyTexFiles);
@@ -529,7 +610,7 @@ namespace SceneManager {
 			std::cout << "Framebuffer not complete!" << std::endl;
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
-
+	
 	/* Might be useful http://bulletphysics.org/Bullet/phpBB3/viewtopic.php?f=9&t=2069
 	btVector3 getVelocityAtWorldPosition(btRigidBody* body, const btVector3& worldposition, bool local)
 	{
@@ -559,7 +640,7 @@ namespace SceneManager {
 
 	int objectID = 0;
 	/*std::string bodyParser() {
-		std::string lastKey = "";
+		std::string selectedObject.first = "";
 		std::string object = "";
 		if (addmode == BOX)
 			object = "box";
@@ -567,22 +648,22 @@ namespace SceneManager {
 			object = "sphere";
 		for (const auto& id_pair : bodies) {
 			if (object.append(to_string(objectID)) == id_pair.first)
-				lastKey = id_pair.first;
+				selectedObject.first = id_pair.first;
 			else {
 				if (addmode == BOX)
 					object = "box";
 				else if (addmode == SPHERE)
 					object = "sphere";
-				lastKey = object.append(to_string(0));
+				selectedObject.first = object.append(to_string(0));
 			}
 		}
-		return lastKey;
+		return selectedObject.first;
 	}*/
 
 	bool leftClick = false;
 	bool rightClick = false;
 	bool creation = false;
-	float coolDownOfGun = 0.5; //wait between shots
+	float coolDown = 0.0f; //wait between shots
 	bool shiftPressed = true;
 	//*****************************CONTROLS********************
 	void controls(SDL_Window * window, SDL_Event sdlEvent) {
@@ -602,8 +683,6 @@ namespace SceneManager {
 		SDL_WarpMouseInWindow(window, MidX, MidY);
 
 		//MOUSECLICK
-
-
 
 		//KEYBOARD
 		// To be changed ****
@@ -626,9 +705,9 @@ namespace SceneManager {
 		if (mode == PLAY) {
 			if (sdlEvent.type == SDL_MOUSEBUTTONDOWN && pointOfView == FIRST_PERSON) {
 				if (sdlEvent.button.button == SDL_BUTTON_LEFT) {
-					if (coolDownOfGun <= 0.0f) {
+					if (coolDown <= 0.0f) {
 						leftClick = true;
-						coolDownOfGun = 0.5f;
+						coolDown = COOL_TIME;
 						cout << "Attempting to shoot bullet." << endl;
 						projectile_manager->addProjectile(moveForward(player->getPosition(), yaw, pitch, 1), PROJ_SPEED, (yaw*DEG_TO_RADIAN), pitch); //!++!
 																																			  //cout << pitch << "\n";
@@ -677,15 +756,9 @@ namespace SceneManager {
 		}
 		else if (mode == EDIT) {
 
-			std::string lastKey;
-			if (boundingType == BOX) {
-				lastKey = std::string("box").append(to_string(boxNo - 1));
-			}
-			else if (boundingType == SPHERE) {
-				lastKey = std::string("sphere").append(to_string(sphereNo - 1)); 
-			}
+			std::pair<std::string, btRigidBody*> selectedObject = std::make_pair(bodies.begin()->first, bodies.begin()->second);
 
-			btVector3 lastObject = bodies[lastKey]->getWorldTransform().getOrigin();
+			btVector3 lastObject = selectedObject.second->getWorldTransform().getOrigin();
 			btVector3 playerPos = playerBody->getWorldTransform().getOrigin();
 
 			btTransform t;
@@ -693,18 +766,11 @@ namespace SceneManager {
 
 			if (sdlEvent.type == SDL_MOUSEBUTTONDOWN && pointOfView == FIRST_PERSON) {
 				if (sdlEvent.button.button == SDL_BUTTON_LEFT) {
-					if (coolDownOfGun <= 0.0f) {
+					if (coolDown <= 0.0f) {
 						leftClick = true;
-						coolDownOfGun = 0.5f;
-						temp[0] = std::make_tuple(currentModel, at, glm::vec3(0.02, 0.02, 0.02));
-						std::string bounding = "box";
-						if (boundingType == BOX) {
-							bounding = "box";
-						}
-						else if (boundingType == SPHERE) {
-							bounding = "sphere";
-						}
-						temp[1] = std::make_tuple(currentBounding, std::get<1>(temp[0]),glm::vec3(0.02, 0.02, 0.02));
+						coolDown = COOL_TIME;
+						temp[0] = std::make_tuple(std::get<0>(temp[0]), at, std::get<1>(temp[0]), glm::vec3(0.0f, yaw, 0.0f));
+						temp[1] = std::make_tuple(std::get<0>(temp[1]), std::get<1>(temp[0]), std::get<2>(temp[1]), glm::vec3(0.0f, yaw, 0.0f));
 						creation = true;
 					}
 				}
@@ -717,21 +783,36 @@ namespace SceneManager {
 			}
 
 			int i = 0;
+			float scaling = 0;
 			if (stage == MODEL) {
 				i = 0;
+				scaling = MODEL_SCALING;
 			}
 			else if (stage == BOUNDING) {
 				i = 1;
+				scaling = BOUNDING_SCALING;
 			}
 
-			if (keys[SDL_SCANCODE_W])
-				player->setPosition(moveForward(player->getPosition(), yaw, 0.1f));
-			else if (keys[SDL_SCANCODE_S])
-				player->setPosition(moveForward(player->getPosition(), yaw, -0.1f));
-			if (keys[SDL_SCANCODE_A])
-				player->setPosition(moveRight(player->getPosition(), yaw, -0.1f));
-			else if (keys[SDL_SCANCODE_D])
-				player->setPosition(moveRight(player->getPosition(), yaw, 0.1f));
+			if (keys[SDL_SCANCODE_W]) {
+				glm::vec3 move = moveForward(glm::vec3(playerPos.x(), playerPos.y(), playerPos.z()), yaw, 0.1f);
+				t.setOrigin(btVector3(move.x, move.y, move.z));
+				playerBody->setWorldTransform(t);
+			}
+			else if (keys[SDL_SCANCODE_S]) {
+				glm::vec3 move = moveForward(glm::vec3(playerPos.x(), playerPos.y(), playerPos.z()), yaw, -0.1f);
+				t.setOrigin(btVector3(move.x, move.y, move.z));
+				playerBody->setWorldTransform(t);
+			}
+			if (keys[SDL_SCANCODE_A]) {
+				glm::vec3 move = moveRight(glm::vec3(playerPos.x(), playerPos.y(), playerPos.z()), yaw, -0.1f);
+				t.setOrigin(btVector3(move.x, move.y, move.z));
+				playerBody->setWorldTransform(t);
+			}
+			else if (keys[SDL_SCANCODE_D]) {
+				glm::vec3 move = moveRight(glm::vec3(playerPos.x(), playerPos.y(), playerPos.z()), yaw, 0.1f);
+				t.setOrigin(btVector3(move.x, move.y, move.z));
+				playerBody->setWorldTransform(t);
+			}
 			if (keys[SDL_SCANCODE_LSHIFT]) {
 				shiftPressed = true;
 				std::cout << "Shift pressed. (Increase)" << std::endl;
@@ -746,61 +827,85 @@ namespace SceneManager {
 				std::cout << "File saved" << std::endl;
 			}
 
-			if (keys[SDL_SCANCODE_KP_DIVIDE]) {
+			if (keys[SDL_SCANCODE_8]) {
 				boundingType = BOX;
 				currentBounding = "box";
 				std::cout << "Bounding Type: BOX" << std::endl;
 			}
-			if (keys[SDL_SCANCODE_KP_MULTIPLY]) {
+			if (keys[SDL_SCANCODE_9]) {
 				boundingType = SPHERE;
 				currentBounding = "sphere";
 				std::cout << "Bounding Type: SPHERE" << std::endl;
 			}
+			if (keys[SDL_SCANCODE_0]) {
+				boundingType = CAPSULE;
+				currentBounding = "capsule";
+				std::cout << "Bounding Type: CAPSULE" << std::endl;
+			}
+			
+		/*	if (keys[SDL_SCANCODE_KP_DIVIDE]) {
+				std::map<std::string, btRigidBody*>::iterator it;
+				it = bodies.end();
+				if (it != bodies.begin()) {
+					--it;
+				}
+				selectedObject =  std::make_pair(it->first, bodies.begin()->second);
+				std::cout << selectedObject.first << " selected" << std::endl;
+			}
+			else if (keys[SDL_SCANCODE_KP_MULTIPLY]) {
+				std::map<std::string, btRigidBody*>::iterator it;
+				it = bodies.begin();
+				if (it != bodies.end()) {
+					++it;
+				}
+				selectedObject = std::make_pair(it->first, bodies.begin()->second);
+				std::cout << selectedObject.first << " selected" << std::endl;
+			}*/
 
 			if (creation == true) {
 				if (keys[SDL_SCANCODE_KP_8]) {
-					glm::vec3 move = glm::vec3(moveForward(glm::vec3(std::get<1>(temp[i])), yaw, 0.1));
-					temp[i] = make_tuple(std::get<0>(temp[i]), move, std::get<2>(temp[i]));
+					glm::vec3 move = glm::vec3(moveForward(glm::vec3(std::get<1>(temp[i])), yaw, 0.01));
+					temp[i] = make_tuple(std::get<0>(temp[i]), move, std::get<2>(temp[i]), std::get<3>(temp[i]));
 				}
 				else if (keys[SDL_SCANCODE_KP_5]) {
-					glm::vec3 move = glm::vec3(moveForward(glm::vec3(glm::vec3(std::get<1>(temp[i]))), yaw, -0.1));
-					temp[i] = make_tuple(std::get<0>(temp[i]), move, std::get<2>(temp[i]));
+					glm::vec3 move = glm::vec3(moveForward(glm::vec3(glm::vec3(std::get<1>(temp[i]))), yaw, -0.01));
+					temp[i] = make_tuple(std::get<0>(temp[i]), move, std::get<2>(temp[i]), std::get<3>(temp[i]));
 				}
 				if (keys[SDL_SCANCODE_KP_4]) {
-					glm::vec3 move = glm::vec3(moveRight(glm::vec3(glm::vec3(std::get<1>(temp[i]))), yaw, -0.1));
-					temp[i] = make_tuple(std::get<0>(temp[i]), move, std::get<2>(temp[i]));
+					glm::vec3 move = glm::vec3(moveRight(glm::vec3(glm::vec3(std::get<1>(temp[i]))), yaw, -0.01));
+					temp[i] = make_tuple(std::get<0>(temp[i]), move, std::get<2>(temp[i]), std::get<3>(temp[i]));
 				}
 				else if (keys[SDL_SCANCODE_KP_6]) {
-					glm::vec3 move = glm::vec3(moveRight(glm::vec3(glm::vec3(std::get<1>(temp[i]))), yaw, 0.1));
-					temp[i] = make_tuple(std::get<0>(temp[i]), move, std::get<2>(temp[i]));
+					glm::vec3 move = glm::vec3(moveRight(glm::vec3(glm::vec3(std::get<1>(temp[i]))), yaw, 0.01));
+					temp[i] = make_tuple(std::get<0>(temp[i]), move, std::get<2>(temp[i]), std::get<3>(temp[i]));
 				}
 			}
 			else {
 				if (keys[SDL_SCANCODE_KP_8]) {
 					glm::vec3 moveLeft = glm::vec3(moveForward(glm::vec3(lastObject.x(), lastObject.y(), lastObject.z()), yaw, 0.1));
 					t.setOrigin(btVector3(moveLeft.x, moveLeft.y, moveLeft.z));
-					bodies[lastKey]->setWorldTransform(t);
+					selectedObject.second->setWorldTransform(t);
 				}
 				else if (keys[SDL_SCANCODE_KP_5]) {
 					glm::vec3 moveLeft = glm::vec3(moveForward(glm::vec3(lastObject.x(), lastObject.y(), lastObject.z()), yaw, -0.1));
 					t.setOrigin(btVector3(moveLeft.x, moveLeft.y, moveLeft.z));
-					bodies[lastKey]->setWorldTransform(t);
+					selectedObject.second->setWorldTransform(t);
 				}
 				if (keys[SDL_SCANCODE_KP_4]) {
 					glm::vec3 moveLeft = glm::vec3(moveRight(glm::vec3(lastObject.x(), lastObject.y(), lastObject.z()), yaw, -0.1));
 					t.setOrigin(btVector3(moveLeft.x, moveLeft.y, moveLeft.z));
-					bodies[lastKey]->setWorldTransform(t);
+					selectedObject.second->setWorldTransform(t);
 				}
 				else if (keys[SDL_SCANCODE_KP_6]) {
 					glm::vec3 moveLeft = glm::vec3(moveRight(glm::vec3(lastObject.x(), lastObject.y(), lastObject.z()), yaw, 0.1));
 					t.setOrigin(btVector3(moveLeft.x, moveLeft.y, moveLeft.z));
-					bodies[lastKey]->setWorldTransform(t);
+					selectedObject.second->setWorldTransform(t);
 				}
 			}
 
 			if (keys[SDL_SCANCODE_KP_PERIOD]) {
-				if (coolDownOfGun <= 0.0f) {
-					coolDownOfGun = 5.0f;
+				if (coolDown <= 0.0f) {
+					coolDown = COOL_TIME;
 					if (stage == MODEL) {
 						stage = BOUNDING;
 						std::cout << "Editing stage: BOUNDING" << std::endl;
@@ -813,133 +918,126 @@ namespace SceneManager {
 			}
 
 			if (keys[SDL_SCANCODE_KP_ENTER]){
-				if (coolDownOfGun <= 0.0f) {
-					insertBounding(std::get<0>(temp[0]), std::get<2>(temp[0]), std::get<2>(temp[1]), std::get<2>(temp[1]).x);
-					coolDownOfGun = 5.0f;
+				if (coolDown <= 0.0f) {
+					insertBounding(std::get<0>(temp[0]), std::get<2>(temp[0]), std::get<2>(temp[1]), std::get<3>(temp[0]), std::get<3>(temp[1]));
+					coolDown = COOL_TIME;
 					creation = false;
 				}
 			}
-
-			if (keys[SDL_SCANCODE_KP_7]) {
-				btQuaternion s = btQuaternion(btScalar(-1.0), btScalar(0.0), btScalar(0.0), btScalar(0.0));
-				bodies[lastKey]->getWorldTransform().setRotation(s);
-			}
-			if (keys[SDL_SCANCODE_KP_9]) {
-				btQuaternion s = btQuaternion(btScalar(1.0), btScalar(0.0), btScalar(0.0), btScalar(0.0));
-				bodies[lastKey]->getWorldTransform().setRotation(s);
-			}
-
+			
 			if (keys[SDL_SCANCODE_KP_PLUS]) {
-				if (objectID > modelTypes.size() - 1)
-					objectID = modelTypes.size() - 1;
-				else
-					objectID++;
-				int i = 0;
-				for (const auto& id_pair : modelTypes) {
-					if (i == objectID)
-						currentModel = id_pair.first;
-					i++;
+				if (coolDown <= 0.0f) {
+					if (objectID > modelTypes.size() - 1)
+						objectID = modelTypes.size() - 1;
+					else
+						objectID++;
+					int i = 0;
+					for (const auto& id_pair : modelTypes) {
+						if (i == objectID)
+							currentModel = id_pair.first;
+						i++;
+					}
+					std::cout << currentModel << " selected" << std::endl;
+					coolDown = COOL_TIME;
 				}
-				std::cout << currentModel << " selected" << std::endl;
 			}
 			if (keys[SDL_SCANCODE_KP_MINUS]) {
-				if (objectID < 0)
-					objectID = 0;
-				else
-					objectID--;
-				int i = 0;
-				for (const auto& id_pair : modelTypes) {
-					if (i == objectID)
-						currentModel = id_pair.first;
-					i++;
+				if (coolDown <= 0.0f) {
+					if (objectID < 0)
+						objectID = 0;
+					else
+						objectID--;
+					int i = 0;
+					for (const auto& id_pair : modelTypes) {
+						if (i == objectID)
+							currentModel = id_pair.first;
+						i++;
+					}
+					std::cout << currentModel << " selected" << std::endl;
+					coolDown = COOL_TIME;
 				}
-				std::cout << currentModel << " selected" << std::endl;
 			}
 
-			float scaling = 0.0005;
 			if (shiftPressed) {
 				if (creation == true) {
-					if (keys[SDL_SCANCODE_KP_1]) {
-						temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).x + scaling, std::get<2>(temp[i]).y, std::get<2>(temp[i]).z));
+					if (keys[SDL_SCANCODE_KP_1]) { //X scale
+						temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).x + scaling, std::get<2>(temp[i]).y, std::get<2>(temp[i]).z), std::get<3>(temp[i]));
 					}
-					if (keys[SDL_SCANCODE_KP_2]) {
-						temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).y + scaling, std::get<2>(temp[i]).y, std::get<2>(temp[i]).z));
+					if (keys[SDL_SCANCODE_KP_2]) { //Y scale
+						temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).x, std::get<2>(temp[i]).y + scaling, std::get<2>(temp[i]).z), std::get<3>(temp[i]));
 					}
-					if (keys[SDL_SCANCODE_KP_3]) {
-						temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).z + scaling, std::get<2>(temp[i]).y, std::get<2>(temp[i]).z));
-						/*float scale = lastObjectScale.z();
-						scale += scaling;
-						btBoxShape* box = new btBoxShape(btVector3(lastObjectScale.x(), lastObjectScale.y(), scale));
-						bodies[lastKey]->setCollisionShape(box);*/
+					if (keys[SDL_SCANCODE_KP_3]) { //Z scale
+						temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).x, std::get<2>(temp[i]).y, std::get<2>(temp[i]).z + scaling), std::get<3>(temp[i]));
 					}
-					if (keys[SDL_SCANCODE_KP_0]) {
-						temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).x + scaling, std::get<2>(temp[i]).y + scaling, std::get<2>(temp[i]).z) + scaling);
+					if (keys[SDL_SCANCODE_KP_0]) { //ALL scale
+						temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).x + scaling, std::get<2>(temp[i]).y + scaling, std::get<2>(temp[i]).z + scaling), std::get<3>(temp[i]));
+					}
+					if (keys[SDL_SCANCODE_KP_7]) { //moveUP
+						glm::vec3 move = glm::vec3(std::get<1>(temp[i]).x, std::get<1>(temp[i]).y + 0.01, std::get<1>(temp[i]).z);
+						temp[i] = make_tuple(std::get<0>(temp[i]), move, std::get<2>(temp[i]), std::get<3>(temp[i]), std::get<3>(temp[i]));
+					}
+					if (keys[SDL_SCANCODE_KP_9]) { //moveDOWN
+						glm::vec3 move = glm::vec3(std::get<1>(temp[i]).x, std::get<1>(temp[i]).y - 0.01, std::get<1>(temp[i]).z);
+						temp[i] = make_tuple(std::get<0>(temp[i]), move, std::get<2>(temp[i]), std::get<3>(temp[i]));
 					}
 				}
 				else{
 					if (keys[SDL_SCANCODE_KP_1]) {
-						models[lastKey].second.x += scaling;
+						models[selectedObject.first].second.x += scaling;
 					}
 					if (keys[SDL_SCANCODE_KP_2]) {
-						models[lastKey].second.y += scaling;
+						models[selectedObject.first].second.y += scaling;
 					}
 					if (keys[SDL_SCANCODE_KP_3]) {
-						models[lastKey].second.z += scaling;
-						/*float scale = lastObjectScale.z();
-						scale += scaling;
-						btBoxShape* box = new btBoxShape(btVector3(lastObjectScale.x(), lastObjectScale.y(), scale));
-						bodies[lastKey]->setCollisionShape(box);*/
+						models[selectedObject.first].second.z += scaling;
 					}
 					if (keys[SDL_SCANCODE_KP_0]) {
-						models[lastKey].second.x += scaling;
-						models[lastKey].second.y += scaling;
-						models[lastKey].second.z += scaling;
+						models[selectedObject.first].second.x += scaling;
+						models[selectedObject.first].second.y += scaling;
+						models[selectedObject.first].second.z += scaling;
 					}
 				}
 			}
 			if (!shiftPressed) {
 				if (creation == true) {
 					if (keys[SDL_SCANCODE_KP_1]) {
-						temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).x - scaling, std::get<2>(temp[i]).y, std::get<2>(temp[i]).z));
+						temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).x - scaling, std::get<2>(temp[i]).y, std::get<2>(temp[i]).z), std::get<3>(temp[i]));
 					}
 					if (keys[SDL_SCANCODE_KP_2]) {
-						temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).y - scaling, std::get<2>(temp[i]).y, std::get<2>(temp[i]).z));
+						temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).x, std::get<2>(temp[i]).y - scaling, std::get<2>(temp[i]).z), std::get<3>(temp[i]));
 					}
 					if (keys[SDL_SCANCODE_KP_3]) {
-						temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).z - scaling, std::get<2>(temp[i]).y, std::get<2>(temp[i]).z));
-						/*float scale = lastObjectScale.z();
-						scale += scaling;
-						btBoxShape* box = new btBoxShape(btVector3(lastObjectScale.x(), lastObjectScale.y(), scale));
-						bodies[lastKey]->setCollisionShape(box);*/
+						temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).x, std::get<2>(temp[i]).y, std::get<2>(temp[i]).z - scaling), std::get<3>(temp[i]));
 					}
 					if (keys[SDL_SCANCODE_KP_0]) {
-						temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).x - scaling, std::get<2>(temp[i]).y - scaling, std::get<2>(temp[i]).z) - scaling);
+						temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).x - scaling, std::get<2>(temp[i]).y - scaling, std::get<2>(temp[i]).z - scaling), std::get<3>(temp[i]));
+					}
+					if (keys[SDL_SCANCODE_KP_7]) {
+						temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), std::get<2>(temp[i]), std::get<3>(temp[i]).y - 0.1);
+					}
+					if (keys[SDL_SCANCODE_KP_9]) {
+						temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), std::get<2>(temp[i]), std::get<3>(temp[i]).y + 0.1);
 					}
 				}
 				else {
 					if (keys[SDL_SCANCODE_KP_1]) {
-						models[lastKey].second.x -= scaling;
+						models[selectedObject.first].second.x -= scaling;
 					}
 					if (keys[SDL_SCANCODE_KP_2]) {
-						models[lastKey].second.y -= scaling;
+						models[selectedObject.first].second.y -= scaling;
 					}
 					if (keys[SDL_SCANCODE_KP_3]) {
-						models[lastKey].second.z -= scaling;
-						/*float scale = lastObjectScale.z();
-						scale += scaling;
-						btBoxShape* box = new btBoxShape(btVector3(lastObjectScale.x(), lastObjectScale.y(), scale));
-						bodies[lastKey]->setCollisionShape(box);*/
+						models[selectedObject.first].second.z -= scaling;
 					}
 					if (keys[SDL_SCANCODE_KP_0]) {
-						models[lastKey].second.x -= scaling;
-						models[lastKey].second.y -= scaling;
-						models[lastKey].second.z -= scaling;
+						models[selectedObject.first].second.x -= scaling;
+						models[selectedObject.first].second.y -= scaling;
+						models[selectedObject.first].second.z -= scaling;
 					}
 				}
 			}
 		}
-
-
+		
 		if (keys[SDL_SCANCODE_R]) {
 			//cout << getLinearVelocityInBodyFrame(playerBody).x() << " " << getLinearVelocityInBodyFrame(playerBody).y() << " " << getLinearVelocityInBodyFrame(playerBody).z() << "\n";
 			player->setPosition(glm::vec3(player->getPosition().x, player->getPosition().y + 0.1, player->getPosition().z));
@@ -1073,11 +1171,11 @@ namespace SceneManager {
 		//cout << getLinearVelocityInBodyFrame(playerBody).y();
 	}
 
-	float gameTime() {
+	double gameTime() {
 		currentTime = clock();
 
 		unsigned int dt = currentTime - lastTime;
-		float dt_secs = (float)dt / 1000;
+		double dt_secs = (double)dt / 1000;
 		if (dt_secs > 0.017) dt_secs = 0.017; // first value is off ( 5.5~)
 
 		lastTime = currentTime;
@@ -1090,7 +1188,7 @@ namespace SceneManager {
 
 		dt_secs = gameTime();
 		//cout << dt_secs;
-		coolDownOfGun -= dt_secs;
+		coolDown -= dt_secs;
 
 		// 18/01
 		updatePlayer();
@@ -1200,6 +1298,15 @@ namespace SceneManager {
 				glEnable(GL_CULL_FACE);
 				renderObject(projection, modelTypes[models[id_pair.first].first], spherePosition, models[id_pair.first].second, shader, defaultTexture, bodies[id_pair.first]->getWorldTransform().getRotation().getX());
 			}
+
+			if (id_pair.second->getCollisionShape()->getShapeType() == CAPSULE_SHAPE_PROXYTYPE) {
+				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+				glDisable(GL_CULL_FACE);
+				bt_manager->renderCapsule(bodies[id_pair.first], view, projection, modelTypes["capsule"], shader, defaultTexture);
+				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+				glEnable(GL_CULL_FACE);
+				renderObject(projection, modelTypes[models[id_pair.first].first], spherePosition, models[id_pair.first].second, shader, defaultTexture, bodies[id_pair.first]->getWorldTransform().getRotation().getX());
+			}
 			i++;
 		}
 		///+++++++++++++++
@@ -1214,12 +1321,14 @@ namespace SceneManager {
 			renderWeapon(projection, modelTypes["plasmacutter"], shader);
 
 		if (mode == EDIT) {
-			renderObject(projection, modelTypes[std::get<0>(temp[0])], std::get<1>(temp[0]), std::get<2>(temp[0]), shader, 0, 0);
-			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-			glDisable(GL_CULL_FACE);
-			renderObject(projection, modelTypes[std::get<0>(temp[1])], std::get<1>(temp[1]), std::get<2>(temp[1]), shader, 0, 0);
-			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-			glDisable(GL_CULL_FACE);
+			if (creation == true) {
+				renderObject(projection, modelTypes[std::get<0>(temp[0])], std::get<1>(temp[0]), std::get<2>(temp[0]), std::get<3>(temp[0]), shader, 0, 0);
+				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+				glDisable(GL_CULL_FACE);
+				renderObject(projection, modelTypes[std::get<0>(temp[1])], std::get<1>(temp[1]), std::get<2>(temp[1]), std::get<3>(temp[1]), shader, 0, 0);
+				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+				glDisable(GL_CULL_FACE);
+			}
 		}
 
 		//!++!
@@ -1314,7 +1423,16 @@ namespace SceneManager {
 				// normal rendering
 				renderShadowedScene(projection, view, modelProgram, false); // render normal scene from normal point of view
 				// fps counter; 5 of 5
-				//h_manager->renderToHud(fps, texturedProgram, modelTypes["cube"], glm::vec3(-0.9f, 0.9f, 0.9f));
+				//h_manager->renderToHud(5, texturedProgram, modelTypes["cube"], glm::vec3(-0.0f, 0.0f, 0.9f));
+				if (mode == EDIT) {
+					h_manager->renderEditHud("Bounding", currentBounding, texturedProgram, modelTypes["cube"], glm::vec3(0.55f, 0.45f, 0.9f));
+					h_manager->renderEditHud("Model", currentModel, texturedProgram, modelTypes["cube"], glm::vec3(0.6f, 0.35f, 0.9f));
+					if (coolDown <= 0) {
+						h_manager->renderEditHud("Timer", "READY", texturedProgram, modelTypes["cube"], glm::vec3(0.6f, 0.25f, 0.9f));
+					}
+					else
+						h_manager->renderEditHud("Timer", "WAIT", texturedProgram, modelTypes["cube"], glm::vec3(0.6f, 0.25f, 0.9f));
+				}
 			}
 			glDepthMask(GL_TRUE);
 		}

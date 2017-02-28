@@ -4,6 +4,7 @@
 #include "SDL.h"
 
 #include <stack>
+#include <string>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -21,6 +22,10 @@
 #include "Projectile.h"
 //+++
 #define DEG_TO_RADIAN 0.017453293
+
+#define COOL_TIME 1.5f
+#define MODEL_SCALING 0.0001f
+#define BOUNDING_SCALING 0.001f
 
 #define SPEED_CAP_XZ 10.0
 #define SPEED_CAP_Y 3.0
