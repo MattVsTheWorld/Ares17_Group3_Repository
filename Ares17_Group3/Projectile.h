@@ -50,6 +50,7 @@ public:
 		btPairCachingGhostObject* tempGhost = new btPairCachingGhostObject();
 
 		// mask
+		// http://www.bulletphysics.org/mediawiki-1.5.8/index.php/Collision_Filtering
 		int coll = COL_CANHIT;
 		int noColl = COL_NOTHING;
 
