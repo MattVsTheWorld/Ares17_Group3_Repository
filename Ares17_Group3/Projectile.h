@@ -11,6 +11,10 @@
 typedef tuple<btRigidBody*, double, btPairCachingGhostObject*> _proj;
 
 class Projectile {
+	
+
+
+
 private:
 	btShapeManager *shapeManager;
 	vector <_proj> *liveProjectiles;
@@ -22,9 +26,33 @@ public:
 		liveProjectiles = new vector <_proj>;
 		//liveProjectiles.push_back(make_pair(shapeManager->addSphere(10, 0, 0, 0, 10), this->lifespan));
 	}
+
+	btRigidBody* addSphere(float rad, float x, float y, float z, float mass)
+	{
+		btTransform t;
+		t.setIdentity();
+		t.setOrigin(btVector3(x, y, z));
+		btSphereShape* sphere = new btSphereShape(rad);
+		btVector3 inertia(0, 0, 0);
+		if (mass != 0.0)
+			sphere->calculateLocalInertia(mass, inertia);
+
+		btMotionState* motion = new btDefaultMotionState(t);
+		btRigidBody::btRigidBodyConstructionInfo info(mass, motion, sphere, inertia);
+		btRigidBody* body = new btRigidBody(info);
+		shapeManager->addToWorld(body, COL_NOTHING, COL_NOTHING);
+		//bodies.push_back(body);
+		return body;
+	}
+
 	void addProjectile(glm::vec3 spawn, float speed, float yaw, float pitch) {
-		btRigidBody *temp = shapeManager->addSphere(BULLET_SIZE, spawn.x, spawn.y, spawn.z, DEFAULT_MASS);
+		btRigidBody *temp = addSphere(BULLET_SIZE, spawn.x, spawn.y, spawn.z, DEFAULT_MASS);
 		btPairCachingGhostObject* tempGhost = new btPairCachingGhostObject();
+
+		// mask
+		int coll = COL_CANHIT;
+		int noColl = COL_NOTHING;
+
 		tempGhost->setCollisionShape(temp->getCollisionShape());
 		tempGhost->setWorldTransform(temp->getWorldTransform());
 		tempGhost->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);
@@ -52,7 +80,7 @@ public:
 			get<2>(static_cast<_proj>(*projectileIterator))->setWorldTransform(get<0>(static_cast<_proj>(*projectileIterator))->getWorldTransform());
 		
 			// OH NO! I'M NOT :(
-			// findCollision(get<2>(static_cast<_proj>(*projectileIterator)));
+			 findCollision(get<2>(static_cast<_proj>(*projectileIterator)));
 			if (get<1>(static_cast<_proj>(*projectileIterator)) <= 0) // if dead, remove // delete?
 				liveProjectiles->erase(remove(liveProjectiles->begin(), liveProjectiles->end(), static_cast<_proj>(*projectileIterator)), liveProjectiles->end());
 			else {
@@ -99,7 +127,7 @@ public:
 						const btVector3& ptB = pt.getPositionWorldOnB();
 						const btVector3& normalOnB = pt.m_normalWorldOnB;
 						// <START>  handle collisions here
-						cout << "BULLET HIT SOMETHING BABYRAGE" << endl;
+						cout << "BULLET HIT SOMETHING" << endl;
 						//  <END>   handle collisions here
 					}
 				}
@@ -107,5 +135,6 @@ public:
 		}
 	}
 };
+
 
 #endif

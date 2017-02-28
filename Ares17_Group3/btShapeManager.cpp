@@ -140,8 +140,20 @@ void btShapeManager::addToWorld(btRigidBody* body) {
 	btSettings.world->addRigidBody(body);
 }
 
+void btShapeManager::addToWorld(btRigidBody* body, collisiontype COLL_TYPE, int collidesWith) {
+	btSettings.world->addRigidBody(body, COLL_TYPE, collidesWith);
+}
+
+
 void btShapeManager::addGhostToWorld(btPairCachingGhostObject* ghost) {
 	btSettings.world->addCollisionObject(ghost, btBroadphaseProxy::KinematicFilter, btBroadphaseProxy::StaticFilter | btBroadphaseProxy::DefaultFilter); // ?
+	btSettings.world->getPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());
+}
+
+void btShapeManager::addGhostToWorld(btPairCachingGhostObject* ghost, collisiontype COLL_TYPE, int collidesWith) {
+	btSettings.world->addCollisionObject(ghost, COLL_TYPE, collidesWith); // ?
+	
+
 	// world->addCollisionObject(ghostobject, btBroadphaseProxy::KinematicFilter, btBroadphaseProxy::StaticFilter | btBroadphaseProxy::DefaultFilter);
 	btSettings.world->getPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());
 }

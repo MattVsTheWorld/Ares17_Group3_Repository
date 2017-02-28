@@ -574,7 +574,7 @@ namespace SceneManager {
 		playerBody->setAngularFactor(0); // Doesn't fall sideways
 		bt_manager->addToWorld(playerBody);
 		playerBody->setActivationState(DISABLE_DEACTIVATION);
-		playerBody->setFriction(8); 
+		playerBody->setFriction(FRICTION); 
 
 		// Now ghost
 		ghostObject = new btPairCachingGhostObject();								// create object

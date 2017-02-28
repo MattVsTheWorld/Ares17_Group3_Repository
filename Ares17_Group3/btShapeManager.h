@@ -9,6 +9,15 @@
 
 #define GRAVITY -10
 
+//TODO:move
+#define BIT(x) (1<<(x))
+enum collisiontype {
+	COL_NOTHING = 0,
+	COL_CANHIT = BIT(0)
+	//(...)
+};
+//!!
+
 // Settings struct
 struct btSettings {
 	btDynamicsWorld* world;
@@ -29,6 +38,8 @@ public:
 	void renderBox(btRigidBody* box, glm::mat4 view, glm::mat4 proj, Model *modelData, GLuint shader, GLuint texture);
 	void renderCapsule(btRigidBody* capsule, glm::mat4 view, glm::mat4 proj, Model *modelData, GLuint shader, GLuint texture);
 	void addToWorld(btRigidBody* body);
+	void addToWorld(btRigidBody* body, collisiontype COLL_TYPE, int collidesWith);
+	void addGhostToWorld(btPairCachingGhostObject* ghost, collisiontype COLL_TYPE, int collidesWith);
 	void addGhostToWorld(btPairCachingGhostObject* ghost);
 	btBroadphasePair* findWorldPair(const btBroadphasePair &pair);
 
