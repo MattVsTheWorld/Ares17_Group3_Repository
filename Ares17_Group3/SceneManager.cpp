@@ -67,15 +67,15 @@ namespace SceneManager {
 	};
 
 	// Load modelTypes
-	std::map<string, Model*> modelTypes;
+	map<string, Model*> modelTypes;
 
-	std::map<std::string, std::pair<string, glm::vec3>> models; //objType, <modelName, scale>
-	std::map<std::string, btRigidBody*> bodies;
+	map<std::string, std::tuple<string, glm::vec3, glm::vec3>> models; //objType, <modelName, scale>
+	map<std::string, btRigidBody*> bodies;
 	
-	std::tuple<std::string, glm::vec3, glm::vec3, glm::vec3> temp[2]; //name, position, scale, rotation
+	tuple<std::string, glm::vec3, glm::vec3, glm::vec3> temp[2]; //name, position, scale, rotation
 
-	std::string currentModel = "nanosuit";
-	std::string currentBounding = "box";
+	string currentModel = "nanosuit";
+	string currentBounding = "box";
 	
 	// TEST
 	btRigidBody* playerBody;
@@ -175,16 +175,22 @@ namespace SceneManager {
 				btVector3 position;
 				btVector3 boundingScale;
 				glm::vec3 modelScale;
+				glm::vec3 modelRotation;
+				glm::vec3 boundingRotation;
 				float mass;
 				//BoundingType | ModelName | Positions | BoundingScale, ModelScale, mASs
 				if (id_pair.second->getCollisionShape()->getShapeType() == BOX_SHAPE_PROXYTYPE) {
 					objType = "box";
 					objType.append(std::to_string(boxNo));
 					boundingType = bodies.find(objType)->first;
-					modelName = models.find(objType)->second.first;
+					modelName = get<0>(models.find(objType)->second);
 					position = bodies.find(objType)->second->getWorldTransform().getOrigin();
 					boundingScale = (((btBoxShape*)bodies.find(objType)->second->getCollisionShape())->getHalfExtentsWithMargin()) * 2; //*2 as its half
-					modelScale = models.find(objType)->second.second;
+					boundingRotation = glm::vec3(bodies.find(objType)->second->getWorldTransform().getRotation().getX(),
+													bodies.find(objType)->second->getWorldTransform().getRotation().getY(),
+													bodies.find(objType)->second->getWorldTransform().getRotation().getZ());
+					modelScale = get<1>(models.find(objType)->second);
+					modelRotation = get<2>(models.find(objType)->second);
 					mass = bodies.find(objType)->second->getInvMass();
 					myfile << boundingType << ",";
 					myfile << modelName << ",";
@@ -197,6 +203,12 @@ namespace SceneManager {
 					myfile << modelScale.x << ",";
 					myfile << modelScale.y << ",";
 					myfile << modelScale.z << ",";
+					myfile << modelRotation.x << ",";
+					myfile << modelRotation.y << ",";
+					myfile << modelRotation.z << ",";
+					myfile << boundingRotation.x << ",";
+					myfile << boundingRotation.y << ",";
+					myfile << boundingRotation.z << ",";
 					myfile << mass << ",";
 					myfile << "\n";
 					boxNo++;
@@ -206,10 +218,11 @@ namespace SceneManager {
 					objType = "sphere";
 					objType.append(std::to_string(sphereNo));
 					boundingType = bodies.find(objType)->first;
-					modelName = models.find(objType)->second.first;
+					modelName = get<0>(models.find(objType)->second);
 					position = bodies.find(objType)->second->getWorldTransform().getOrigin();
 					float radius = ((btSphereShape*)bodies.find(objType)->second->getCollisionShape())->getRadius();
-					modelScale = models.find(objType)->second.second;
+					modelScale = get<1>(models.find(objType)->second);
+
 					mass = bodies.find(objType)->second->getInvMass();
 					myfile << boundingType << ",";
 					myfile << modelName << ",";
@@ -229,11 +242,15 @@ namespace SceneManager {
 					objType = "sphere";
 					objType.append(std::to_string(sphereNo));
 					boundingType = bodies.find(objType)->first;
-					modelName = models.find(objType)->second.first;
+					modelName = get<0>(models.find(objType)->second);
 					position = bodies.find(objType)->second->getWorldTransform().getOrigin();
 					float radius = ((btCapsuleShape*)bodies.find(objType)->second->getCollisionShape())->getRadius();
 					float height = ((btCapsuleShape*)bodies.find(objType)->second->getCollisionShape())->getHalfHeight() * 2;
-					modelScale = models.find(objType)->second.second;
+					modelScale = get<1>(models.find(objType)->second);
+					modelRotation = get<2>(models.find(objType)->second);
+					boundingRotation = glm::vec3(bodies.find(objType)->second->getWorldTransform().getRotation().getX(), 
+													bodies.find(objType)->second->getWorldTransform().getRotation().getY(), 
+													bodies.find(objType)->second->getWorldTransform().getRotation().getZ());
 					mass = bodies.find(objType)->second->getInvMass();
 					myfile << boundingType << ",";
 					myfile << modelName << ",";
@@ -245,6 +262,12 @@ namespace SceneManager {
 					myfile << modelScale.x << ",";
 					myfile << modelScale.y << ",";
 					myfile << modelScale.z << ",";
+					myfile << modelRotation.x << ",";
+					myfile << modelRotation.y << ",";
+					myfile << modelRotation.z << ",";
+					myfile << boundingRotation.x << ",";
+					myfile << boundingRotation.y << ",";
+					myfile << boundingRotation.z << ",";
 					myfile << mass << ",";
 					myfile << "\n";
 					capsuleNo++;
@@ -271,7 +294,9 @@ namespace SceneManager {
 				std::string modelName;
 				glm::vec3 position;
 				glm::vec3 boundingScale;
+				glm::vec3 boundingRotation;
 				glm::vec3 modelScale;
+				glm::vec3 modelRotation;
 				float radius;
 				float height;
 				float mass;
@@ -291,7 +316,7 @@ namespace SceneManager {
 						else if (i == 1) modelName = asString;
 						else {
 							if (key.find("box") != std::string::npos) {
-								variables = 11;
+								variables = 17;
 								float digit = stof(asString);
 								switch (i) {
 								case 2:
@@ -322,6 +347,24 @@ namespace SceneManager {
 									modelScale.z = digit;
 									break;
 								case 11:
+									modelRotation.z = digit;
+									break;
+								case 12:
+									modelRotation.z = digit;
+									break;
+								case 13:
+									modelRotation.z = digit;
+									break;
+								case 14:
+									boundingRotation.z = digit;
+									break;
+								case 15:
+									boundingRotation.z = digit;
+									break;
+								case 16:
+									boundingRotation.z = digit;
+									break;
+								case 17:
 									mass = digit;
 									break;
 								}
@@ -384,7 +427,25 @@ namespace SceneManager {
 								case 9:
 									modelScale.z = digit;
 									break;
-								case 10:
+								case 11:
+									modelRotation.z = digit;
+									break;
+								case 12:
+									modelRotation.z = digit;
+									break;
+								case 13:
+									modelRotation.z = digit;
+									break;
+								case 14:
+									boundingRotation.z = digit;
+									break;
+								case 15:
+									boundingRotation.z = digit;
+									break;
+								case 16:
+									boundingRotation.z = digit;
+									break;
+								case 17:
 									mass = digit;
 									break;
 								}
@@ -395,17 +456,17 @@ namespace SceneManager {
 				}
 				if (key.find("box") != std::string::npos) {
 					bodies.insert(std::pair<string, btRigidBody*>(key, bt_manager->addBox(boundingScale.x, boundingScale.y, boundingScale.z, position.x, position.y, position.z, mass)));
-					models.insert(std::pair<string, std::pair<string, glm::vec3>>(key, std::make_pair(modelName, modelScale)));
+					models.insert(std::pair<string, std::tuple<string, glm::vec3, glm::vec3>>(key, std::make_tuple(modelName, modelScale, modelRotation)));
 					cout << "Box Added\n";
 				}
 				else if (key.find("sphere") != std::string::npos) {
 					bodies.insert(std::pair<string, btRigidBody*>(key, bt_manager->addSphere(radius, position.x, position.y, position.z, mass)));
-					models.insert(std::pair<string, std::pair<string, glm::vec3>>(key, std::make_pair(modelName, modelScale)));
+					models.insert(std::pair<string, std::tuple<string, glm::vec3, glm::vec3>>(key, std::make_tuple(modelName, modelScale, glm::vec3(0.,0.,0.))));
 					cout << "Sphere Added\n";
 				}
 				else if (key.find("capsule") != std::string::npos) {
 					bodies.insert(std::pair<string, btRigidBody*>(key, bt_manager->addCapsule(radius, height, position.x, position.y, position.z, mass)));
-					models.insert(std::pair<string, std::pair<string, glm::vec3>>(key, std::make_pair(modelName, modelScale)));
+					models.insert(std::pair<string, std::tuple<string, glm::vec3, glm::vec3>>(key, std::make_tuple(modelName, modelScale, modelRotation)));
 					cout << "Sphere Added\n";
 				}
 
@@ -463,7 +524,7 @@ namespace SceneManager {
 		modelTypes.insert(std::pair<string, Model*>("robot", new Model("Models/Robot/Roboto.obj")));
 	}
 
-	void insertBounding(std::string modelName, glm::vec3 modelScale, glm::vec3 boundingScale) {
+	void insertBounding(std::string modelName, glm::vec3 modelScale, glm::vec3 boundingScale, glm::vec3 modelRotation, glm::vec3 boundingRotation) {
 		glm::vec3 position(moveForward(player->getPosition(), yaw, 0.5f));
 		float mass = 0.5;
 		std::string key;
@@ -490,7 +551,7 @@ namespace SceneManager {
 			capsuleNo++;
 		}
 		bodies[key]->setActivationState(DISABLE_DEACTIVATION);
-		models.insert(std::pair<string, std::pair<string, glm::vec3>>(key, make_pair(modelName, modelScale)));
+		models.insert(std::pair<string, std::tuple<string, glm::vec3, glm::vec3>>(key, make_tuple(modelName, modelScale, modelRotation)));
 	}
 
 	// +++!
@@ -983,18 +1044,18 @@ namespace SceneManager {
 				}
 				else{
 					if (keys[SDL_SCANCODE_KP_1]) {
-						models[selectedObject.first].second.x += scaling;
+						get<1>(models[selectedObject.first]).x += scaling;
 					}
 					if (keys[SDL_SCANCODE_KP_2]) {
-						models[selectedObject.first].second.y += scaling;
+						get<1>(models[selectedObject.first]).y += scaling;
 					}
 					if (keys[SDL_SCANCODE_KP_3]) {
-						models[selectedObject.first].second.z += scaling;
+						get<1>(models[selectedObject.first]).z += scaling;
 					}
 					if (keys[SDL_SCANCODE_KP_0]) {
-						models[selectedObject.first].second.x += scaling;
-						models[selectedObject.first].second.y += scaling;
-						models[selectedObject.first].second.z += scaling;
+						get<1>(models[selectedObject.first]).x += scaling;
+						get<1>(models[selectedObject.first]).y += scaling;
+						get<1>(models[selectedObject.first]).z += scaling;
 					}
 				}
 			}
@@ -1013,26 +1074,26 @@ namespace SceneManager {
 						temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).x - scaling, std::get<2>(temp[i]).y - scaling, std::get<2>(temp[i]).z - scaling), std::get<3>(temp[i]));
 					}
 					if (keys[SDL_SCANCODE_KP_7]) {
-						temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), std::get<2>(temp[i]), std::get<3>(temp[i]).y - 0.1);
+						temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), std::get<2>(temp[i]), glm::vec3(std::get<3>(temp[i]).x, std::get<3>(temp[i]).y - 0.1, std::get<3>(temp[i]).z));
 					}
 					if (keys[SDL_SCANCODE_KP_9]) {
-						temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), std::get<2>(temp[i]), std::get<3>(temp[i]).y + 0.1);
+						temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), std::get<2>(temp[i]), glm::vec3(std::get<3>(temp[i]).x, std::get<3>(temp[i]).y + 0.1, std::get<3>(temp[i]).z));
 					}
 				}
 				else {
 					if (keys[SDL_SCANCODE_KP_1]) {
-						models[selectedObject.first].second.x -= scaling;
+						get<1>(models[selectedObject.first]).x -= scaling;
 					}
 					if (keys[SDL_SCANCODE_KP_2]) {
-						models[selectedObject.first].second.y -= scaling;
+						get<1>(models[selectedObject.first]).y -= scaling;
 					}
 					if (keys[SDL_SCANCODE_KP_3]) {
-						models[selectedObject.first].second.z -= scaling;
+						get<1>(models[selectedObject.first]).z -= scaling;
 					}
 					if (keys[SDL_SCANCODE_KP_0]) {
-						models[selectedObject.first].second.x -= scaling;
-						models[selectedObject.first].second.y -= scaling;
-						models[selectedObject.first].second.z -= scaling;
+						get<1>(models[selectedObject.first]).x -= scaling;
+						get<1>(models[selectedObject.first]).y -= scaling;
+						get<1>(models[selectedObject.first]).z -= scaling;
 					}
 				}
 			}
@@ -1083,12 +1144,12 @@ namespace SceneManager {
 		//	if (keys[SDL_SCANCODE_5])cout << bullet.size() << endl;
 	}
 
-	void renderObject(glm::mat4 proj, Model *modelData, glm::vec3 pos, glm::vec3 scale, GLuint shader, GLuint texture, float rotate) {
+	void renderObject(glm::mat4 proj, Model *modelData, glm::vec3 pos, glm::vec3 scale, glm::vec3 rotation, GLuint shader, GLuint texture) {
 		glm::mat4 model;
 		model = glm::translate(model, pos);
 		//model = glm::rotate(model, float(-yaw*DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
 		//model = glm::rotate(model, float(180 * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
-		model = glm::rotate(model, float(rotate * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, float(rotation.y * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, scale);	// It's a bit too big for our scene, so scale it down
 		//model = glm::scale(model, glm::vec3(0.05f, 0.05f, 0.05f));	// for gun]
 		glActiveTexture(GL_TEXTURE0);
@@ -1278,6 +1339,7 @@ namespace SceneManager {
 			btVector3 y = (((btBoxShape*)bodies[id_pair.first]->getCollisionShape())->getHalfExtentsWithMargin());
 			glm::vec3 spherePosition = glm::vec3(p.x(), p.y(), p.z());
 			glm::vec3 position = glm::vec3(p.x(), p.y() - y.y(), p.z());
+			glm::vec3 rotation = glm::vec3(bodies[id_pair.first]->getWorldTransform().getRotation().getX(), bodies[id_pair.first]->getWorldTransform().getRotation().getY(), bodies[id_pair.first]->getWorldTransform().getRotation().getZ());
 			//	btQuaternion test = bodies[id_pair.first]->getWorldTransform().getRotation();
 		//		test.getAngle();
 
@@ -1287,7 +1349,7 @@ namespace SceneManager {
 				bt_manager->renderBox(bodies[id_pair.first], view, projection, modelTypes["cube"], shader, groundTexture);
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 				glEnable(GL_CULL_FACE);
-				renderObject(projection, modelTypes[models[id_pair.first].first], position, models[id_pair.first].second, shader, groundTexture, bodies[id_pair.first]->getWorldTransform().getRotation().getX());
+				renderObject(projection, modelTypes[get<0>(models[id_pair.first])], position, get<1>(models[id_pair.first]), rotation, shader, groundTexture);
 			}
 
 			if (id_pair.second->getCollisionShape()->getShapeType() == SPHERE_SHAPE_PROXYTYPE) {
@@ -1296,7 +1358,7 @@ namespace SceneManager {
 				bt_manager->renderSphere(bodies[id_pair.first], view, projection, modelTypes["sphere"], shader, defaultTexture);
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 				glEnable(GL_CULL_FACE);
-				renderObject(projection, modelTypes[models[id_pair.first].first], spherePosition, models[id_pair.first].second, shader, defaultTexture, bodies[id_pair.first]->getWorldTransform().getRotation().getX());
+				renderObject(projection, modelTypes[get<0>(models[id_pair.first])], spherePosition, get<1>(models[id_pair.first]),  rotation, shader, defaultTexture);
 			}
 
 			if (id_pair.second->getCollisionShape()->getShapeType() == CAPSULE_SHAPE_PROXYTYPE) {
@@ -1305,7 +1367,7 @@ namespace SceneManager {
 				bt_manager->renderCapsule(bodies[id_pair.first], view, projection, modelTypes["capsule"], shader, defaultTexture);
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 				glEnable(GL_CULL_FACE);
-				renderObject(projection, modelTypes[models[id_pair.first].first], spherePosition, models[id_pair.first].second, shader, defaultTexture, bodies[id_pair.first]->getWorldTransform().getRotation().getX());
+				renderObject(projection, modelTypes[get<0>(models[id_pair.first])], spherePosition, get<1>(models[id_pair.first]), rotation, shader, defaultTexture);
 			}
 			i++;
 		}
@@ -1313,7 +1375,7 @@ namespace SceneManager {
 		// RENDERING modelTypes
 
 		if (pointOfView == THIRD_PERSON)
-			renderObject(projection, modelTypes["nanosuit"], glm::vec3(player->getPosition().x, player->getPosition().y - 1.75, player->getPosition().z), glm::vec3(0.2, 0.2, 0.2), shader, 0, -yaw);
+			renderObject(projection, modelTypes["nanosuit"], glm::vec3(player->getPosition().x, player->getPosition().y - 1.75, player->getPosition().z), glm::vec3(0.2, 0.2, 0.2), glm::vec3(0.0, -yaw, 0.0), shader, 0);
 		// rip robot
 		  //		renderObject(projection, modelTypes["robot"], glm::vec3(4.0, 0.0, 0.0), glm::vec3(0.2, 0.2, 0.2), shader);
 
@@ -1322,10 +1384,10 @@ namespace SceneManager {
 
 		if (mode == EDIT) {
 			if (creation == true) {
-				renderObject(projection, modelTypes[std::get<0>(temp[0])], std::get<1>(temp[0]), std::get<2>(temp[0]), std::get<3>(temp[0]), shader, 0, 0);
+				renderObject(projection, modelTypes[std::get<0>(temp[0])], std::get<1>(temp[0]), std::get<2>(temp[0]), std::get<3>(temp[0]), shader, 0);
 				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 				glDisable(GL_CULL_FACE);
-				renderObject(projection, modelTypes[std::get<0>(temp[1])], std::get<1>(temp[1]), std::get<2>(temp[1]), std::get<3>(temp[1]), shader, 0, 0);
+				renderObject(projection, modelTypes[std::get<0>(temp[1])], std::get<1>(temp[1]), std::get<2>(temp[1]), std::get<3>(temp[1]), shader, 0);
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 				glDisable(GL_CULL_FACE);
 			}
