@@ -1108,7 +1108,9 @@ namespace SceneManager {
 				mass += 1;
 			}
 			if (keys[SDL_SCANCODE_MINUS]) {
-				mass -= 1;
+				if (mass > 0) {
+					mass -= 1;
+				}
 			}
 		}
 		

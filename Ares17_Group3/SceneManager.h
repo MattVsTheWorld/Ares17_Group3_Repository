@@ -23,7 +23,7 @@
 //+++
 #define DEG_TO_RADIAN 0.017453293
 
-#define COOL_TIME 0.5f
+#define COOL_TIME 0.2f
 #define MODEL_SCALING 0.001f
 #define BOUNDING_SCALING 0.01f
 
