@@ -552,7 +552,7 @@ namespace SceneManager {
 		}
 		if (boundingType != SPHERE)
 		{
-			playerBody->setAngularFactor(0); // Doesn't fall sideways
+			bodies[key]->setAngularFactor(0); // Doesn't fall sideways
 		}
 		playerBody->setFriction(8);
 		bodies[key]->setActivationState(DISABLE_DEACTIVATION);
@@ -903,198 +903,198 @@ namespace SceneManager {
 						creation = false;
 					}
 				}
-						if (keys[SDL_SCANCODE_8]) {
-							boundingType = BOX;
-							currentBounding = "box";
-							std::cout << "Bounding Type: BOX" << std::endl;
-						}
-						if (keys[SDL_SCANCODE_9]) {
-							boundingType = SPHERE;
-							currentBounding = "sphere";
-							std::cout << "Bounding Type: SPHERE" << std::endl;
-						}
-						if (keys[SDL_SCANCODE_0]) {
-							boundingType = CAPSULE;
-							currentBounding = "capsule";
-							std::cout << "Bounding Type: CAPSULE" << std::endl;
-						}
+				if (keys[SDL_SCANCODE_8]) {
+					boundingType = BOX;
+					currentBounding = "box";
+					std::cout << "Bounding Type: BOX" << std::endl;
+				}
+				if (keys[SDL_SCANCODE_9]) {
+					boundingType = SPHERE;
+					currentBounding = "sphere";
+					std::cout << "Bounding Type: SPHERE" << std::endl;
+				}
+				if (keys[SDL_SCANCODE_0]) {
+					boundingType = CAPSULE;
+					currentBounding = "capsule";
+					std::cout << "Bounding Type: CAPSULE" << std::endl;
+				}
 
-						if (creation == true) {
-							if (keys[SDL_SCANCODE_KP_8]) {
-								glm::vec3 move = glm::vec3(moveForward(glm::vec3(std::get<1>(temp[i])), yaw, 0.01));
-								temp[i] = make_tuple(std::get<0>(temp[i]), move, std::get<2>(temp[i]), std::get<3>(temp[i]));
-							}
-							else if (keys[SDL_SCANCODE_KP_5]) {
-								glm::vec3 move = glm::vec3(moveForward(glm::vec3(glm::vec3(std::get<1>(temp[i]))), yaw, -0.01));
-								temp[i] = make_tuple(std::get<0>(temp[i]), move, std::get<2>(temp[i]), std::get<3>(temp[i]));
-							}
+				if (creation == true) {
+					if (keys[SDL_SCANCODE_KP_8]) {
+						glm::vec3 move = glm::vec3(moveForward(glm::vec3(std::get<1>(temp[i])), yaw, 0.01));
+						temp[i] = make_tuple(std::get<0>(temp[i]), move, std::get<2>(temp[i]), std::get<3>(temp[i]));
+					}
+					else if (keys[SDL_SCANCODE_KP_5]) {
+						glm::vec3 move = glm::vec3(moveForward(glm::vec3(glm::vec3(std::get<1>(temp[i]))), yaw, -0.01));
+						temp[i] = make_tuple(std::get<0>(temp[i]), move, std::get<2>(temp[i]), std::get<3>(temp[i]));
+					}
 
-							if (keys[SDL_SCANCODE_KP_4]) {
-								glm::vec3 move = glm::vec3(moveRight(glm::vec3(glm::vec3(std::get<1>(temp[i]))), yaw, -0.01));
-								temp[i] = make_tuple(std::get<0>(temp[i]), move, std::get<2>(temp[i]), std::get<3>(temp[i]));
-							}
-							else if (keys[SDL_SCANCODE_KP_6]) {
-								glm::vec3 move = glm::vec3(moveRight(glm::vec3(glm::vec3(std::get<1>(temp[i]))), yaw, 0.01));
-								temp[i] = make_tuple(std::get<0>(temp[i]), move, std::get<2>(temp[i]), std::get<3>(temp[i]));
-							}
+					if (keys[SDL_SCANCODE_KP_4]) {
+						glm::vec3 move = glm::vec3(moveRight(glm::vec3(glm::vec3(std::get<1>(temp[i]))), yaw, -0.01));
+						temp[i] = make_tuple(std::get<0>(temp[i]), move, std::get<2>(temp[i]), std::get<3>(temp[i]));
+					}
+					else if (keys[SDL_SCANCODE_KP_6]) {
+						glm::vec3 move = glm::vec3(moveRight(glm::vec3(glm::vec3(std::get<1>(temp[i]))), yaw, 0.01));
+						temp[i] = make_tuple(std::get<0>(temp[i]), move, std::get<2>(temp[i]), std::get<3>(temp[i]));
+					}
+				}
+				else {
+					if (keys[SDL_SCANCODE_KP_8]) {
+						glm::vec3 moveLeft = glm::vec3(moveForward(glm::vec3(lastObject.x(), lastObject.y(), lastObject.z()), yaw, 0.1));
+						t.setOrigin(btVector3(moveLeft.x, moveLeft.y, moveLeft.z));
+						selectedObject.second->setWorldTransform(t);
+					}
+					else if (keys[SDL_SCANCODE_KP_5]) {
+						glm::vec3 moveLeft = glm::vec3(moveForward(glm::vec3(lastObject.x(), lastObject.y(), lastObject.z()), yaw, -0.1));
+						t.setOrigin(btVector3(moveLeft.x, moveLeft.y, moveLeft.z));
+						selectedObject.second->setWorldTransform(t);
+					}
+					if (keys[SDL_SCANCODE_KP_4]) {
+						glm::vec3 moveLeft = glm::vec3(moveRight(glm::vec3(lastObject.x(), lastObject.y(), lastObject.z()), yaw, -0.1));
+						t.setOrigin(btVector3(moveLeft.x, moveLeft.y, moveLeft.z));
+						selectedObject.second->setWorldTransform(t);
+					}
+					else if (keys[SDL_SCANCODE_KP_6]) {
+						glm::vec3 moveLeft = glm::vec3(moveRight(glm::vec3(lastObject.x(), lastObject.y(), lastObject.z()), yaw, 0.1));
+						t.setOrigin(btVector3(moveLeft.x, moveLeft.y, moveLeft.z));
+						selectedObject.second->setWorldTransform(t);
+					}
+				}
+
+				if (keys[SDL_SCANCODE_KP_PERIOD]) {
+					if (coolDown <= 0.0f) {
+						coolDown = COOL_TIME;
+						if (stage == MODEL) {
+							stage = BOUNDING;
+							std::cout << "Editing stage: BOUNDING" << std::endl;
 						}
-						else {
-							if (keys[SDL_SCANCODE_KP_8]) {
-								glm::vec3 moveLeft = glm::vec3(moveForward(glm::vec3(lastObject.x(), lastObject.y(), lastObject.z()), yaw, 0.1));
-								t.setOrigin(btVector3(moveLeft.x, moveLeft.y, moveLeft.z));
-								selectedObject.second->setWorldTransform(t);
-							}
-							else if (keys[SDL_SCANCODE_KP_5]) {
-								glm::vec3 moveLeft = glm::vec3(moveForward(glm::vec3(lastObject.x(), lastObject.y(), lastObject.z()), yaw, -0.1));
-								t.setOrigin(btVector3(moveLeft.x, moveLeft.y, moveLeft.z));
-								selectedObject.second->setWorldTransform(t);
-							}
-							if (keys[SDL_SCANCODE_KP_4]) {
-								glm::vec3 moveLeft = glm::vec3(moveRight(glm::vec3(lastObject.x(), lastObject.y(), lastObject.z()), yaw, -0.1));
-								t.setOrigin(btVector3(moveLeft.x, moveLeft.y, moveLeft.z));
-								selectedObject.second->setWorldTransform(t);
-							}
-							else if (keys[SDL_SCANCODE_KP_6]) {
-								glm::vec3 moveLeft = glm::vec3(moveRight(glm::vec3(lastObject.x(), lastObject.y(), lastObject.z()), yaw, 0.1));
-								t.setOrigin(btVector3(moveLeft.x, moveLeft.y, moveLeft.z));
-								selectedObject.second->setWorldTransform(t);
-							}
+						else if (stage == BOUNDING) {
+							stage = MODEL;
+							std::cout << "Editing stage: MODEL" << std::endl;
 						}
+					}
+				}
 
-						if (keys[SDL_SCANCODE_KP_PERIOD]) {
-							if (coolDown <= 0.0f) {
-								coolDown = COOL_TIME;
-								if (stage == MODEL) {
-									stage = BOUNDING;
-									std::cout << "Editing stage: BOUNDING" << std::endl;
-								}
-								else if (stage == BOUNDING) {
-									stage = MODEL;
-									std::cout << "Editing stage: MODEL" << std::endl;
-								}
-							}
+
+				if (keys[SDL_SCANCODE_KP_7]) { //rotate left
+					temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), std::get<2>(temp[i]), glm::vec3(std::get<3>(temp[i]).x, std::get<3>(temp[i]).y - 0.1, std::get<3>(temp[i]).z));
+				}
+				if (keys[SDL_SCANCODE_KP_9]) { //rotate right
+					temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), std::get<2>(temp[i]), glm::vec3(std::get<3>(temp[i]).x, std::get<3>(temp[i]).y + 0.1, std::get<3>(temp[i]).z));
+
+				}
+
+				if (keys[SDL_SCANCODE_KP_PLUS]) {
+					if (coolDown <= 0.0f) {
+						if (objectID > modelTypes.size() - 1)
+							objectID = modelTypes.size() - 1;
+						else
+							objectID++;
+						int i = 0;
+						for (const auto& id_pair : modelTypes) {
+							if (i == objectID)
+								currentModel = id_pair.first;
+							i++;
 						}
+						std::cout << currentModel << " selected" << std::endl;
+						coolDown = COOL_TIME;
+					}
+				}
+				if (keys[SDL_SCANCODE_KP_MINUS]) {
+					if (coolDown <= 0.0f) {
+						if (objectID < 0)
+							objectID = 0;
+						else
+							objectID--;
+						int i = 0;
+						for (const auto& id_pair : modelTypes) {
+							if (i == objectID)
+								currentModel = id_pair.first;
+							i++;
+						}
+						std::cout << currentModel << " selected" << std::endl;
+						coolDown = COOL_TIME;
+					}
+				}
 
-
-						if (keys[SDL_SCANCODE_KP_7]) { //rotate left
+				if (shiftPressed) {
+					if (creation == true) {
+						if (keys[SDL_SCANCODE_KP_1]) { //X scale
+							temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).x + scaling, std::get<2>(temp[i]).y, std::get<2>(temp[i]).z), std::get<3>(temp[i]));
+						}
+						if (keys[SDL_SCANCODE_KP_2]) { //Y scale
+							temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).x, std::get<2>(temp[i]).y + scaling, std::get<2>(temp[i]).z), std::get<3>(temp[i]));
+						}
+						if (keys[SDL_SCANCODE_KP_3]) { //Z scale
+							temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).x, std::get<2>(temp[i]).y, std::get<2>(temp[i]).z + scaling), std::get<3>(temp[i]));
+						}
+						if (keys[SDL_SCANCODE_KP_0]) { //ALL scale
+							temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).x + scaling, std::get<2>(temp[i]).y + scaling, std::get<2>(temp[i]).z + scaling), std::get<3>(temp[i]));
+						}
+						if (keys[SDL_SCANCODE_KP_7]) { //moveUP
+							glm::vec3 move = glm::vec3(std::get<1>(temp[i]).x, std::get<1>(temp[i]).y + 0.01, std::get<1>(temp[i]).z);
+							temp[i] = make_tuple(std::get<0>(temp[i]), move, std::get<2>(temp[i]), std::get<3>(temp[i]), std::get<3>(temp[i]));
+						}
+						if (keys[SDL_SCANCODE_KP_9]) { //moveDOWN
+							glm::vec3 move = glm::vec3(std::get<1>(temp[i]).x, std::get<1>(temp[i]).y - 0.01, std::get<1>(temp[i]).z);
+							temp[i] = make_tuple(std::get<0>(temp[i]), move, std::get<2>(temp[i]), std::get<3>(temp[i]));
+						}
+					}
+					else {
+						if (keys[SDL_SCANCODE_KP_1]) {
+							get<1>(models[selectedObject.first]).x += scaling;
+						}
+						if (keys[SDL_SCANCODE_KP_2]) {
+							get<1>(models[selectedObject.first]).y += scaling;
+						}
+						if (keys[SDL_SCANCODE_KP_3]) {
+							get<1>(models[selectedObject.first]).z += scaling;
+						}
+						if (keys[SDL_SCANCODE_KP_0]) {
+							get<1>(models[selectedObject.first]).x += scaling;
+							get<1>(models[selectedObject.first]).y += scaling;
+							get<1>(models[selectedObject.first]).z += scaling;
+						}
+					}
+				}
+				if (!shiftPressed) {
+					if (creation == true) {
+						if (keys[SDL_SCANCODE_KP_1]) {
+							temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).x - scaling, std::get<2>(temp[i]).y, std::get<2>(temp[i]).z), std::get<3>(temp[i]));
+						}
+						if (keys[SDL_SCANCODE_KP_2]) {
+							temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).x, std::get<2>(temp[i]).y - scaling, std::get<2>(temp[i]).z), std::get<3>(temp[i]));
+						}
+						if (keys[SDL_SCANCODE_KP_3]) {
+							temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).x, std::get<2>(temp[i]).y, std::get<2>(temp[i]).z - scaling), std::get<3>(temp[i]));
+						}
+						if (keys[SDL_SCANCODE_KP_0]) {
+							temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).x - scaling, std::get<2>(temp[i]).y - scaling, std::get<2>(temp[i]).z - scaling), std::get<3>(temp[i]));
+						}
+						if (keys[SDL_SCANCODE_KP_7]) {
 							temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), std::get<2>(temp[i]), glm::vec3(std::get<3>(temp[i]).x, std::get<3>(temp[i]).y - 0.1, std::get<3>(temp[i]).z));
 						}
-						if (keys[SDL_SCANCODE_KP_9]) { //rotate right
+						if (keys[SDL_SCANCODE_KP_9]) {
 							temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), std::get<2>(temp[i]), glm::vec3(std::get<3>(temp[i]).x, std::get<3>(temp[i]).y + 0.1, std::get<3>(temp[i]).z));
-
 						}
-
-						if (keys[SDL_SCANCODE_KP_PLUS]) {
-							if (coolDown <= 0.0f) {
-								if (objectID > modelTypes.size() - 1)
-									objectID = modelTypes.size() - 1;
-								else
-									objectID++;
-								int i = 0;
-								for (const auto& id_pair : modelTypes) {
-									if (i == objectID)
-										currentModel = id_pair.first;
-									i++;
-								}
-								std::cout << currentModel << " selected" << std::endl;
-								coolDown = COOL_TIME;
-							}
+					}
+					else {
+						if (keys[SDL_SCANCODE_KP_1]) {
+							get<1>(models[selectedObject.first]).x -= scaling;
 						}
-						if (keys[SDL_SCANCODE_KP_MINUS]) {
-							if (coolDown <= 0.0f) {
-								if (objectID < 0)
-									objectID = 0;
-								else
-									objectID--;
-								int i = 0;
-								for (const auto& id_pair : modelTypes) {
-									if (i == objectID)
-										currentModel = id_pair.first;
-									i++;
-								}
-								std::cout << currentModel << " selected" << std::endl;
-								coolDown = COOL_TIME;
-							}
+						if (keys[SDL_SCANCODE_KP_2]) {
+							get<1>(models[selectedObject.first]).y -= scaling;
 						}
-
-						if (shiftPressed) {
-							if (creation == true) {
-								if (keys[SDL_SCANCODE_KP_1]) { //X scale
-									temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).x + scaling, std::get<2>(temp[i]).y, std::get<2>(temp[i]).z), std::get<3>(temp[i]));
-								}
-								if (keys[SDL_SCANCODE_KP_2]) { //Y scale
-									temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).x, std::get<2>(temp[i]).y + scaling, std::get<2>(temp[i]).z), std::get<3>(temp[i]));
-								}
-								if (keys[SDL_SCANCODE_KP_3]) { //Z scale
-									temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).x, std::get<2>(temp[i]).y, std::get<2>(temp[i]).z + scaling), std::get<3>(temp[i]));
-								}
-								if (keys[SDL_SCANCODE_KP_0]) { //ALL scale
-									temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).x + scaling, std::get<2>(temp[i]).y + scaling, std::get<2>(temp[i]).z + scaling), std::get<3>(temp[i]));
-								}
-								if (keys[SDL_SCANCODE_KP_7]) { //moveUP
-									glm::vec3 move = glm::vec3(std::get<1>(temp[i]).x, std::get<1>(temp[i]).y + 0.01, std::get<1>(temp[i]).z);
-									temp[i] = make_tuple(std::get<0>(temp[i]), move, std::get<2>(temp[i]), std::get<3>(temp[i]), std::get<3>(temp[i]));
-								}
-								if (keys[SDL_SCANCODE_KP_9]) { //moveDOWN
-									glm::vec3 move = glm::vec3(std::get<1>(temp[i]).x, std::get<1>(temp[i]).y - 0.01, std::get<1>(temp[i]).z);
-									temp[i] = make_tuple(std::get<0>(temp[i]), move, std::get<2>(temp[i]), std::get<3>(temp[i]));
-								}
-							}
-							else {
-								if (keys[SDL_SCANCODE_KP_1]) {
-									get<1>(models[selectedObject.first]).x += scaling;
-								}
-								if (keys[SDL_SCANCODE_KP_2]) {
-									get<1>(models[selectedObject.first]).y += scaling;
-								}
-								if (keys[SDL_SCANCODE_KP_3]) {
-									get<1>(models[selectedObject.first]).z += scaling;
-								}
-								if (keys[SDL_SCANCODE_KP_0]) {
-									get<1>(models[selectedObject.first]).x += scaling;
-									get<1>(models[selectedObject.first]).y += scaling;
-									get<1>(models[selectedObject.first]).z += scaling;
-								}
-							}
+						if (keys[SDL_SCANCODE_KP_3]) {
+							get<1>(models[selectedObject.first]).z -= scaling;
 						}
-						if (!shiftPressed) {
-							if (creation == true) {
-								if (keys[SDL_SCANCODE_KP_1]) {
-									temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).x - scaling, std::get<2>(temp[i]).y, std::get<2>(temp[i]).z), std::get<3>(temp[i]));
-								}
-								if (keys[SDL_SCANCODE_KP_2]) {
-									temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).x, std::get<2>(temp[i]).y - scaling, std::get<2>(temp[i]).z), std::get<3>(temp[i]));
-								}
-								if (keys[SDL_SCANCODE_KP_3]) {
-									temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).x, std::get<2>(temp[i]).y, std::get<2>(temp[i]).z - scaling), std::get<3>(temp[i]));
-								}
-								if (keys[SDL_SCANCODE_KP_0]) {
-									temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).x - scaling, std::get<2>(temp[i]).y - scaling, std::get<2>(temp[i]).z - scaling), std::get<3>(temp[i]));
-								}
-								if (keys[SDL_SCANCODE_KP_7]) {
-									temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), std::get<2>(temp[i]), glm::vec3(std::get<3>(temp[i]).x, std::get<3>(temp[i]).y - 0.1, std::get<3>(temp[i]).z));
-								}
-								if (keys[SDL_SCANCODE_KP_9]) {
-									temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), std::get<2>(temp[i]), glm::vec3(std::get<3>(temp[i]).x, std::get<3>(temp[i]).y + 0.1, std::get<3>(temp[i]).z));
-								}
-							}
-							else {
-								if (keys[SDL_SCANCODE_KP_1]) {
-									get<1>(models[selectedObject.first]).x -= scaling;
-								}
-								if (keys[SDL_SCANCODE_KP_2]) {
-									get<1>(models[selectedObject.first]).y -= scaling;
-								}
-								if (keys[SDL_SCANCODE_KP_3]) {
-									get<1>(models[selectedObject.first]).z -= scaling;
-								}
-								if (keys[SDL_SCANCODE_KP_0]) {
-									get<1>(models[selectedObject.first]).x -= scaling;
-									get<1>(models[selectedObject.first]).y -= scaling;
-									get<1>(models[selectedObject.first]).z -= scaling;
-								}
-							}
+						if (keys[SDL_SCANCODE_KP_0]) {
+							get<1>(models[selectedObject.first]).x -= scaling;
+							get<1>(models[selectedObject.first]).y -= scaling;
+							get<1>(models[selectedObject.first]).z -= scaling;
 						}
+					}
+				}
 					
 
 
@@ -1350,7 +1350,7 @@ namespace SceneManager {
 			btVector3 p = bodies[id_pair.first]->getWorldTransform().getOrigin();
 			btVector3 y = (((btBoxShape*)bodies[id_pair.first]->getCollisionShape())->getHalfExtentsWithMargin());
 			glm::vec3 spherePosition = glm::vec3(p.x(), p.y(), p.z());
-			glm::vec3 position = glm::vec3(p.x(), p.y(), p.z());
+			glm::vec3 position = glm::vec3(p.x(), p.y()-y.y(), p.z());
 			glm::vec3 rotation = glm::vec3(bodies[id_pair.first]->getWorldTransform().getRotation().getX(), bodies[id_pair.first]->getWorldTransform().getRotation().getY(), bodies[id_pair.first]->getWorldTransform().getRotation().getZ());
 			//	btQuaternion test = bodies[id_pair.first]->getWorldTransform().getRotation();
 		//		test.getAngle();
