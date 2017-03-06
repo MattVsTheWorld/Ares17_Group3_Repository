@@ -35,7 +35,7 @@ namespace SceneManager {
 	modes mode = PLAY;
 	enum bound { BOX, SPHERE, CAPSULE };
 	bound boundingType = BOX;
-	enum editStages { MODEL, BOUNDING };
+	enum editStages{ MODEL, BOUNDING };
 	editStages stage = MODEL;
 
 	// SHADOWS
@@ -71,12 +71,12 @@ namespace SceneManager {
 
 	map<std::string, std::tuple<string, glm::vec3, glm::vec3>> models; //objType, <modelName, scale>
 	map<std::string, btRigidBody*> bodies;
-
+	
 	tuple<std::string, glm::vec3, glm::vec3, glm::vec3> temp[2]; //name, position, scale, rotation
 
 	string currentModel = "nanosuit";
 	string currentBounding = "box";
-
+	
 	// TEST
 	btRigidBody* playerBody;
 	//	
@@ -187,8 +187,8 @@ namespace SceneManager {
 					position = bodies.find(objType)->second->getWorldTransform().getOrigin();
 					boundingScale = (((btBoxShape*)bodies.find(objType)->second->getCollisionShape())->getHalfExtentsWithMargin()) * 2; //*2 as its half
 					boundingRotation = glm::vec3(bodies.find(objType)->second->getWorldTransform().getRotation().getX(),
-						bodies.find(objType)->second->getWorldTransform().getRotation().getY(),
-						bodies.find(objType)->second->getWorldTransform().getRotation().getZ());
+													bodies.find(objType)->second->getWorldTransform().getRotation().getY(),
+													bodies.find(objType)->second->getWorldTransform().getRotation().getZ());
 					modelScale = get<1>(models.find(objType)->second);
 					modelRotation = get<2>(models.find(objType)->second);
 					mass = bodies.find(objType)->second->getInvMass();
@@ -248,9 +248,9 @@ namespace SceneManager {
 					float height = ((btCapsuleShape*)bodies.find(objType)->second->getCollisionShape())->getHalfHeight() * 2;
 					modelScale = get<1>(models.find(objType)->second);
 					modelRotation = get<2>(models.find(objType)->second);
-					boundingRotation = glm::vec3(bodies.find(objType)->second->getWorldTransform().getRotation().getX(),
-						bodies.find(objType)->second->getWorldTransform().getRotation().getY(),
-						bodies.find(objType)->second->getWorldTransform().getRotation().getZ());
+					boundingRotation = glm::vec3(bodies.find(objType)->second->getWorldTransform().getRotation().getX(), 
+													bodies.find(objType)->second->getWorldTransform().getRotation().getY(), 
+													bodies.find(objType)->second->getWorldTransform().getRotation().getZ());
 					mass = bodies.find(objType)->second->getInvMass();
 					myfile << boundingType << ",";
 					myfile << modelName << ",";
@@ -461,7 +461,7 @@ namespace SceneManager {
 				}
 				else if (key.find("sphere") != std::string::npos) {
 					bodies.insert(std::pair<string, btRigidBody*>(key, bt_manager->addSphere(radius, position.x, position.y, position.z, mass)));
-					models.insert(std::pair<string, std::tuple<string, glm::vec3, glm::vec3>>(key, std::make_tuple(modelName, modelScale, glm::vec3(0., 0., 0.))));
+					models.insert(std::pair<string, std::tuple<string, glm::vec3, glm::vec3>>(key, std::make_tuple(modelName, modelScale, glm::vec3(0.,0.,0.))));
 					cout << "Sphere Added\n";
 				}
 				else if (key.find("capsule") != std::string::npos) {
@@ -474,6 +474,7 @@ namespace SceneManager {
 		}
 		else cout << "\nMission failed. We'll get em next time. \n. Unable to open file";
 	}
+
 
 	void initBoxes() {
 		readFile();
@@ -552,7 +553,7 @@ namespace SceneManager {
 		}
 		if (boundingType != SPHERE)
 		{
-			bodies[key]->setAngularFactor(0); // Doesn't fall sideways
+			playerBody->setAngularFactor(0); // Doesn't fall sideways
 		}
 		playerBody->setFriction(8);
 		bodies[key]->setActivationState(DISABLE_DEACTIVATION);
@@ -824,335 +825,340 @@ namespace SceneManager {
 			}
 			else if (mode == EDIT) {
 
-				std::pair<std::string, btRigidBody*> selectedObject = std::make_pair(bodies.begin()->first, bodies.begin()->second);
+			std::pair<std::string, btRigidBody*> selectedObject = std::make_pair(bodies.begin()->first, bodies.begin()->second);
 
-				btVector3 lastObject = selectedObject.second->getWorldTransform().getOrigin();
-				btVector3 playerPos = playerBody->getWorldTransform().getOrigin();
+			btVector3 lastObject = selectedObject.second->getWorldTransform().getOrigin();
+			btVector3 playerPos = playerBody->getWorldTransform().getOrigin();
 
-				btTransform t;
-				t.setIdentity();
+			btTransform t;
+			t.setIdentity();
 
-				if (sdlEvent.type == SDL_MOUSEBUTTONDOWN && pointOfView == FIRST_PERSON) {
-					if (sdlEvent.button.button == SDL_BUTTON_LEFT) {
-						if (coolDown <= 0.0f) {
-							leftClick = true;
-							coolDown = COOL_TIME;
-							temp[0] = std::make_tuple(currentModel, at, std::get<1>(temp[0]), glm::vec3(0.0f, yaw, 0.0f));
-							temp[1] = std::make_tuple(currentBounding, std::get<1>(temp[0]), std::get<2>(temp[1]), glm::vec3(0.0f, yaw, 0.0f));
-							creation = true;
-						}
-					}
-					if (sdlEvent.button.button == SDL_BUTTON_RIGHT) rightClick = true;
-				}
-
-				if (sdlEvent.type == SDL_MOUSEBUTTONUP  && pointOfView == FIRST_PERSON) {
-					leftClick = false;
-					rightClick = false;
-				}
-
-				int i = 0;
-				float scaling = 0;
-				if (stage == MODEL) {
-					i = 0;
-					scaling = MODEL_SCALING;
-				}
-				else if (stage == BOUNDING) {
-					i = 1;
-					scaling = BOUNDING_SCALING;
-				}
-
-				if (keys[SDL_SCANCODE_W]) {
-					glm::vec3 move = moveForward(glm::vec3(playerPos.x(), playerPos.y(), playerPos.z()), yaw, 0.1f);
-					t.setOrigin(btVector3(move.x, move.y, move.z));
-					playerBody->setWorldTransform(t);
-				}
-				else if (keys[SDL_SCANCODE_S]) {
-					glm::vec3 move = moveForward(glm::vec3(playerPos.x(), playerPos.y(), playerPos.z()), yaw, -0.1f);
-					t.setOrigin(btVector3(move.x, move.y, move.z));
-					playerBody->setWorldTransform(t);
-				}
-				if (keys[SDL_SCANCODE_A]) {
-					glm::vec3 move = moveRight(glm::vec3(playerPos.x(), playerPos.y(), playerPos.z()), yaw, -0.1f);
-					t.setOrigin(btVector3(move.x, move.y, move.z));
-					playerBody->setWorldTransform(t);
-				}
-				else if (keys[SDL_SCANCODE_D]) {
-					glm::vec3 move = moveRight(glm::vec3(playerPos.x(), playerPos.y(), playerPos.z()), yaw, 0.1f);
-					t.setOrigin(btVector3(move.x, move.y, move.z));
-					playerBody->setWorldTransform(t);
-				}
-				if (keys[SDL_SCANCODE_LSHIFT]) {
-					shiftPressed = true;
-					std::cout << "Shift pressed. (Increase)" << std::endl;
-				}
-				if (keys[SDL_SCANCODE_LCTRL]) {
-					shiftPressed = false;
-					std::cout << "Ctrl pressed. (decrease)" << std::endl;
-				}
-
-				if (keys[SDL_SCANCODE_O]) {
-					writeFile();
-					std::cout << "File saved" << std::endl;
-				}
-
-
-				if (keys[SDL_SCANCODE_KP_ENTER]) {
+			if (sdlEvent.type == SDL_MOUSEBUTTONDOWN && pointOfView == FIRST_PERSON) {
+				if (sdlEvent.button.button == SDL_BUTTON_LEFT) {
 					if (coolDown <= 0.0f) {
-						insertBounding(std::get<1>(temp[1]), std::get<2>(temp[0]), std::get<2>(temp[1]), std::get<3>(temp[0]), std::get<3>(temp[1]), mass);
+						leftClick = true;
 						coolDown = COOL_TIME;
-						creation = false;
+						temp[0] = std::make_tuple(currentModel, at, std::get<2>(temp[0]), glm::vec3(0.0f, yaw, 0.0f));
+						temp[1] = std::make_tuple(currentBounding, std::get<1>(temp[0]), std::get<2>(temp[1]), glm::vec3(0.0f, yaw, 0.0f));
+						creation = true;
 					}
 				}
-				if (keys[SDL_SCANCODE_8]) {
-					boundingType = BOX;
-					currentBounding = "box";
-					std::cout << "Bounding Type: BOX" << std::endl;
-				}
-				if (keys[SDL_SCANCODE_9]) {
-					boundingType = SPHERE;
-					currentBounding = "sphere";
-					std::cout << "Bounding Type: SPHERE" << std::endl;
-				}
-				if (keys[SDL_SCANCODE_0]) {
-					boundingType = CAPSULE;
-					currentBounding = "capsule";
-					std::cout << "Bounding Type: CAPSULE" << std::endl;
-				}
+				if (sdlEvent.button.button == SDL_BUTTON_RIGHT) rightClick = true;
+			}
 
+			if (sdlEvent.type == SDL_MOUSEBUTTONUP  && pointOfView == FIRST_PERSON) {
+				leftClick = false;
+				rightClick = false;
+			}
+
+			int i = 0;
+			float scaling = 0;
+			if (stage == MODEL) {
+				i = 0;
+				scaling = MODEL_SCALING;
+			}
+			else if (stage == BOUNDING) {
+				i = 1;
+				scaling = BOUNDING_SCALING;
+			}
+
+			if (keys[SDL_SCANCODE_W]) {
+				glm::vec3 move = moveForward(glm::vec3(playerPos.x(), playerPos.y(), playerPos.z()), yaw, 0.1f);
+				t.setOrigin(btVector3(move.x, move.y, move.z));
+				playerBody->setWorldTransform(t);
+			}
+			else if (keys[SDL_SCANCODE_S]) {
+				glm::vec3 move = moveForward(glm::vec3(playerPos.x(), playerPos.y(), playerPos.z()), yaw, -0.1f);
+				t.setOrigin(btVector3(move.x, move.y, move.z));
+				playerBody->setWorldTransform(t);
+			}
+			if (keys[SDL_SCANCODE_A]) {
+				glm::vec3 move = moveRight(glm::vec3(playerPos.x(), playerPos.y(), playerPos.z()), yaw, -0.1f);
+				t.setOrigin(btVector3(move.x, move.y, move.z));
+				playerBody->setWorldTransform(t);
+			}
+			else if (keys[SDL_SCANCODE_D]) {
+				glm::vec3 move = moveRight(glm::vec3(playerPos.x(), playerPos.y(), playerPos.z()), yaw, 0.1f);
+				t.setOrigin(btVector3(move.x, move.y, move.z));
+				playerBody->setWorldTransform(t);
+			}
+			if (keys[SDL_SCANCODE_LSHIFT]) {
+				shiftPressed = true;
+				std::cout << "Shift pressed. (Increase)" << std::endl;
+			}
+			if (keys[SDL_SCANCODE_LCTRL]) {
+				shiftPressed = false;
+				std::cout << "Ctrl pressed. (decrease)" << std::endl;
+			}
+
+			if (keys[SDL_SCANCODE_O]) {
+				writeFile();
+				std::cout << "File saved" << std::endl;
+			}
+
+			if (keys[SDL_SCANCODE_8]) {
+				boundingType = BOX;
+				currentBounding = "box";
+				std::cout << "Bounding Type: BOX" << std::endl;
+			}
+			if (keys[SDL_SCANCODE_9]) {
+				boundingType = SPHERE;
+				currentBounding = "sphere";
+				std::cout << "Bounding Type: SPHERE" << std::endl;
+			}
+			if (keys[SDL_SCANCODE_0]) {
+				boundingType = CAPSULE;
+				currentBounding = "capsule";
+				std::cout << "Bounding Type: CAPSULE" << std::endl;
+			}
+			
+		/*	if (keys[SDL_SCANCODE_KP_DIVIDE]) {
+				std::map<std::string, btRigidBody*>::iterator it;
+				it = bodies.end();
+				if (it != bodies.begin()) {
+					--it;
+				}
+				selectedObject =  std::make_pair(it->first, bodies.begin()->second);
+				std::cout << selectedObject.first << " selected" << std::endl;
+			}
+			else if (keys[SDL_SCANCODE_KP_MULTIPLY]) {
+				std::map<std::string, btRigidBody*>::iterator it;
+				it = bodies.begin();
+				if (it != bodies.end()) {
+					++it;
+				}
+				selectedObject = std::make_pair(it->first, bodies.begin()->second);
+				std::cout << selectedObject.first << " selected" << std::endl;
+			}*/
+
+			if (creation == true) {
+				if (keys[SDL_SCANCODE_KP_8]) {
+					glm::vec3 move = glm::vec3(moveForward(glm::vec3(std::get<1>(temp[i])), yaw, 0.01));
+					temp[i] = make_tuple(std::get<0>(temp[i]), move, std::get<2>(temp[i]), std::get<3>(temp[i]));
+				}
+				else if (keys[SDL_SCANCODE_KP_5]) {
+					glm::vec3 move = glm::vec3(moveForward(glm::vec3(glm::vec3(std::get<1>(temp[i]))), yaw, -0.01));
+					temp[i] = make_tuple(std::get<0>(temp[i]), move, std::get<2>(temp[i]), std::get<3>(temp[i]));
+				}
+				if (keys[SDL_SCANCODE_KP_4]) {
+					glm::vec3 move = glm::vec3(moveRight(glm::vec3(glm::vec3(std::get<1>(temp[i]))), yaw, -0.01));
+					temp[i] = make_tuple(std::get<0>(temp[i]), move, std::get<2>(temp[i]), std::get<3>(temp[i]));
+				}
+				else if (keys[SDL_SCANCODE_KP_6]) {
+					glm::vec3 move = glm::vec3(moveRight(glm::vec3(glm::vec3(std::get<1>(temp[i]))), yaw, 0.01));
+					temp[i] = make_tuple(std::get<0>(temp[i]), move, std::get<2>(temp[i]), std::get<3>(temp[i]));
+				}
+			}
+			else {
+				if (keys[SDL_SCANCODE_KP_8]) {
+					glm::vec3 moveLeft = glm::vec3(moveForward(glm::vec3(lastObject.x(), lastObject.y(), lastObject.z()), yaw, 0.1));
+					t.setOrigin(btVector3(moveLeft.x, moveLeft.y, moveLeft.z));
+					selectedObject.second->setWorldTransform(t);
+				}
+				else if (keys[SDL_SCANCODE_KP_5]) {
+					glm::vec3 moveLeft = glm::vec3(moveForward(glm::vec3(lastObject.x(), lastObject.y(), lastObject.z()), yaw, -0.1));
+					t.setOrigin(btVector3(moveLeft.x, moveLeft.y, moveLeft.z));
+					selectedObject.second->setWorldTransform(t);
+				}
+				if (keys[SDL_SCANCODE_KP_4]) {
+					glm::vec3 moveLeft = glm::vec3(moveRight(glm::vec3(lastObject.x(), lastObject.y(), lastObject.z()), yaw, -0.1));
+					t.setOrigin(btVector3(moveLeft.x, moveLeft.y, moveLeft.z));
+					selectedObject.second->setWorldTransform(t);
+				}
+				else if (keys[SDL_SCANCODE_KP_6]) {
+					glm::vec3 moveLeft = glm::vec3(moveRight(glm::vec3(lastObject.x(), lastObject.y(), lastObject.z()), yaw, 0.1));
+					t.setOrigin(btVector3(moveLeft.x, moveLeft.y, moveLeft.z));
+					selectedObject.second->setWorldTransform(t);
+				}
+			}
+
+			if (keys[SDL_SCANCODE_KP_PERIOD]) {
+				if (coolDown <= 0.0f) {
+					coolDown = COOL_TIME;
+					if (stage == MODEL) {
+						stage = BOUNDING;
+						std::cout << "Editing stage: BOUNDING" << std::endl;
+					}
+					else if (stage == BOUNDING) {
+						stage = MODEL;
+						std::cout << "Editing stage: MODEL" << std::endl;
+					}
+				}
+			}
+
+			if (keys[SDL_SCANCODE_KP_ENTER]){
+				if (coolDown <= 0.0f) {
+					insertBounding(std::get<1>(temp[1]), std::get<2>(temp[0]), std::get<2>(temp[1]), std::get<3>(temp[0]), std::get<3>(temp[1]), mass);
+					coolDown = COOL_TIME;
+					creation = false;
+				}
+			}
+			
+			if (keys[SDL_SCANCODE_KP_PLUS]) {
+				if (coolDown <= 0.0f) {
+					if (objectID > modelTypes.size() - 1)
+						objectID = modelTypes.size() - 1;
+					else
+						objectID++;
+					int i = 0;
+					for (const auto& id_pair : modelTypes) {
+						if (i == objectID)
+							currentModel = id_pair.first;
+						i++;
+					}
+					std::cout << currentModel << " selected" << std::endl;
+					coolDown = COOL_TIME;
+				}
+			}
+			if (keys[SDL_SCANCODE_KP_MINUS]) {
+				if (coolDown <= 0.0f) {
+					if (objectID < 0)
+						objectID = 0;
+					else
+						objectID--;
+					int i = 0;
+					for (const auto& id_pair : modelTypes) {
+						if (i == objectID)
+							currentModel = id_pair.first;
+						i++;
+					}
+					std::cout << currentModel << " selected" << std::endl;
+					coolDown = COOL_TIME;
+				}
+			}
+
+			if (shiftPressed) {
 				if (creation == true) {
-					if (keys[SDL_SCANCODE_KP_8]) {
-						glm::vec3 move = glm::vec3(moveForward(glm::vec3(std::get<1>(temp[i])), yaw, 0.01));
+					if (keys[SDL_SCANCODE_KP_1]) { //X scale
+						temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).x + scaling, std::get<2>(temp[i]).y, std::get<2>(temp[i]).z), std::get<3>(temp[i]));
+					}
+					if (keys[SDL_SCANCODE_KP_2]) { //Y scale
+						temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).x, std::get<2>(temp[i]).y + scaling, std::get<2>(temp[i]).z), std::get<3>(temp[i]));
+					}
+					if (keys[SDL_SCANCODE_KP_3]) { //Z scale
+						temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).x, std::get<2>(temp[i]).y, std::get<2>(temp[i]).z + scaling), std::get<3>(temp[i]));
+					}
+					if (keys[SDL_SCANCODE_KP_0]) { //ALL scale
+						temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).x + scaling, std::get<2>(temp[i]).y + scaling, std::get<2>(temp[i]).z + scaling), std::get<3>(temp[i]));
+					}
+					if (keys[SDL_SCANCODE_KP_7]) { //moveUP
+						glm::vec3 move = glm::vec3(std::get<1>(temp[i]).x, std::get<1>(temp[i]).y + 0.01, std::get<1>(temp[i]).z);
 						temp[i] = make_tuple(std::get<0>(temp[i]), move, std::get<2>(temp[i]), std::get<3>(temp[i]));
 					}
-					else if (keys[SDL_SCANCODE_KP_5]) {
-						glm::vec3 move = glm::vec3(moveForward(glm::vec3(glm::vec3(std::get<1>(temp[i]))), yaw, -0.01));
+					if (keys[SDL_SCANCODE_KP_9]) { //moveDOWN
+						glm::vec3 move = glm::vec3(std::get<1>(temp[i]).x, std::get<1>(temp[i]).y - 0.01, std::get<1>(temp[i]).z);
 						temp[i] = make_tuple(std::get<0>(temp[i]), move, std::get<2>(temp[i]), std::get<3>(temp[i]));
 					}
-
-					if (keys[SDL_SCANCODE_KP_4]) {
-						glm::vec3 move = glm::vec3(moveRight(glm::vec3(glm::vec3(std::get<1>(temp[i]))), yaw, -0.01));
-						temp[i] = make_tuple(std::get<0>(temp[i]), move, std::get<2>(temp[i]), std::get<3>(temp[i]));
+				}
+				else{
+					if (keys[SDL_SCANCODE_KP_1]) {
+						get<1>(models[selectedObject.first]).x += scaling;
 					}
-					else if (keys[SDL_SCANCODE_KP_6]) {
-						glm::vec3 move = glm::vec3(moveRight(glm::vec3(glm::vec3(std::get<1>(temp[i]))), yaw, 0.01));
-						temp[i] = make_tuple(std::get<0>(temp[i]), move, std::get<2>(temp[i]), std::get<3>(temp[i]));
+					if (keys[SDL_SCANCODE_KP_2]) {
+						get<1>(models[selectedObject.first]).y += scaling;
+					}
+					if (keys[SDL_SCANCODE_KP_3]) {
+						get<1>(models[selectedObject.first]).z += scaling;
+					}
+					if (keys[SDL_SCANCODE_KP_0]) {
+						get<1>(models[selectedObject.first]).x += scaling;
+						get<1>(models[selectedObject.first]).y += scaling;
+						get<1>(models[selectedObject.first]).z += scaling;
+					}
+				}
+			}
+			if (!shiftPressed) {
+				if (creation == true) {
+					if (keys[SDL_SCANCODE_KP_1]) {
+						temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).x - scaling, std::get<2>(temp[i]).y, std::get<2>(temp[i]).z), std::get<3>(temp[i]));
+					}
+					if (keys[SDL_SCANCODE_KP_2]) {
+						temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).x, std::get<2>(temp[i]).y - scaling, std::get<2>(temp[i]).z), std::get<3>(temp[i]));
+					}
+					if (keys[SDL_SCANCODE_KP_3]) {
+						temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).x, std::get<2>(temp[i]).y, std::get<2>(temp[i]).z - scaling), std::get<3>(temp[i]));
+					}
+					if (keys[SDL_SCANCODE_KP_0]) {
+						temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).x - scaling, std::get<2>(temp[i]).y - scaling, std::get<2>(temp[i]).z - scaling), std::get<3>(temp[i]));
+					}
+					if (keys[SDL_SCANCODE_KP_7]) { //rotate left
+						temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), std::get<2>(temp[i]), glm::vec3(std::get<3>(temp[i]).x, std::get<3>(temp[i]).y - 0.1, std::get<3>(temp[i]).z));
+					}
+					if (keys[SDL_SCANCODE_KP_9]) { //rotate right
+						temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), std::get<2>(temp[i]), glm::vec3(std::get<3>(temp[i]).x, std::get<3>(temp[i]).y + 0.1, std::get<3>(temp[i]).z));
 					}
 				}
 				else {
-					if (keys[SDL_SCANCODE_KP_8]) {
-						glm::vec3 moveLeft = glm::vec3(moveForward(glm::vec3(lastObject.x(), lastObject.y(), lastObject.z()), yaw, 0.1));
-						t.setOrigin(btVector3(moveLeft.x, moveLeft.y, moveLeft.z));
-						selectedObject.second->setWorldTransform(t);
+					if (keys[SDL_SCANCODE_KP_1]) {
+						get<1>(models[selectedObject.first]).x -= scaling;
 					}
-					else if (keys[SDL_SCANCODE_KP_5]) {
-						glm::vec3 moveLeft = glm::vec3(moveForward(glm::vec3(lastObject.x(), lastObject.y(), lastObject.z()), yaw, -0.1));
-						t.setOrigin(btVector3(moveLeft.x, moveLeft.y, moveLeft.z));
-						selectedObject.second->setWorldTransform(t);
+					if (keys[SDL_SCANCODE_KP_2]) {
+						get<1>(models[selectedObject.first]).y -= scaling;
 					}
-					if (keys[SDL_SCANCODE_KP_4]) {
-						glm::vec3 moveLeft = glm::vec3(moveRight(glm::vec3(lastObject.x(), lastObject.y(), lastObject.z()), yaw, -0.1));
-						t.setOrigin(btVector3(moveLeft.x, moveLeft.y, moveLeft.z));
-						selectedObject.second->setWorldTransform(t);
+					if (keys[SDL_SCANCODE_KP_3]) {
+						get<1>(models[selectedObject.first]).z -= scaling;
 					}
-					else if (keys[SDL_SCANCODE_KP_6]) {
-						glm::vec3 moveLeft = glm::vec3(moveRight(glm::vec3(lastObject.x(), lastObject.y(), lastObject.z()), yaw, 0.1));
-						t.setOrigin(btVector3(moveLeft.x, moveLeft.y, moveLeft.z));
-						selectedObject.second->setWorldTransform(t);
+					if (keys[SDL_SCANCODE_KP_0]) {
+						get<1>(models[selectedObject.first]).x -= scaling;
+						get<1>(models[selectedObject.first]).y -= scaling;
+						get<1>(models[selectedObject.first]).z -= scaling;
 					}
 				}
+			}
 
-				if (keys[SDL_SCANCODE_KP_PERIOD]) {
-					if (coolDown <= 0.0f) {
-						coolDown = COOL_TIME;
-						if (stage == MODEL) {
-							stage = BOUNDING;
-							std::cout << "Editing stage: BOUNDING" << std::endl;
-						}
-						else if (stage == BOUNDING) {
-							stage = MODEL;
-							std::cout << "Editing stage: MODEL" << std::endl;
-						}
-					}
+			if (keys[SDL_SCANCODE_EQUALS]) {
+				mass += 1;
+			}
+			if (keys[SDL_SCANCODE_MINUS]) {
+				if (mass > 0) {
+					mass -= 1;
 				}
+			}
+		}
+		
+		if (keys[SDL_SCANCODE_R]) {
+			//cout << getLinearVelocityInBodyFrame(playerBody).x() << " " << getLinearVelocityInBodyFrame(playerBody).y() << " " << getLinearVelocityInBodyFrame(playerBody).z() << "\n";
+			player->setPosition(glm::vec3(player->getPosition().x, player->getPosition().y + 0.1, player->getPosition().z));
+		}
+		else if (keys[SDL_SCANCODE_F]) {
+			player->setPosition(glm::vec3(player->getPosition().x, player->getPosition().y - 0.1, player->getPosition().z));
+		}
+		//++++
+		if (keys[SDL_SCANCODE_M]) {
+			//	cout << "Curiously cinnamon\n";
+			bodies["box1"]->setLinearVelocity(btVector3(0.0, 5.0, 0.0));
+		}
+		if (keys[SDL_SCANCODE_N]) {
 
+			//btTransform t;
+			t.setIdentity();
+			t.setOrigin(btVector3(0, 10, -10));
+			//btMotionState* motion = new btDefaultMotionState(t);
+			cout << "Setting y\n";
+			motion->setWorldTransform(t);
+			bodies["box1"]->setMotionState(motion);
+		}
+		//++++
+		if (keys[SDL_SCANCODE_K]) {
+			if (pointOfView == FIRST_PERSON) pointOfView = THIRD_PERSON;
+			else pointOfView = FIRST_PERSON;
+		}
 
-				if (keys[SDL_SCANCODE_KP_7]) { //rotate left
-					temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), std::get<2>(temp[i]), glm::vec3(std::get<3>(temp[i]).x, std::get<3>(temp[i]).y - 0.1, std::get<3>(temp[i]).z));
-				}
-				if (keys[SDL_SCANCODE_KP_9]) { //rotate right
-					temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), std::get<2>(temp[i]), glm::vec3(std::get<3>(temp[i]).x, std::get<3>(temp[i]).y + 0.1, std::get<3>(temp[i]).z));
+		if (keys[SDL_SCANCODE_1]) {
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			glDisable(GL_CULL_FACE);
+		}
+		if (keys[SDL_SCANCODE_2]) {
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+			glEnable(GL_CULL_FACE);
+		}
 
-				}
+		//	if (keys[SDL_SCANCODE_3]) bodies[4]->setLinearVelocity(btVector3(0.0, 0.0, 4.0));
+		if (keys[SDL_SCANCODE_ESCAPE]) {
+			exit(0);
+		}
 
-				if (keys[SDL_SCANCODE_KP_PLUS]) {
-					if (coolDown <= 0.0f) {
-						if (objectID > modelTypes.size() - 1)
-							objectID = modelTypes.size() - 1;
-						else
-							objectID++;
-						int i = 0;
-						for (const auto& id_pair : modelTypes) {
-							if (i == objectID)
-								currentModel = id_pair.first;
-							i++;
-						}
-						std::cout << currentModel << " selected" << std::endl;
-						coolDown = COOL_TIME;
-					}
-				}
-				if (keys[SDL_SCANCODE_KP_MINUS]) {
-					if (coolDown <= 0.0f) {
-						if (objectID < 0)
-							objectID = 0;
-						else
-							objectID--;
-						int i = 0;
-						for (const auto& id_pair : modelTypes) {
-							if (i == objectID)
-								currentModel = id_pair.first;
-							i++;
-						}
-						std::cout << currentModel << " selected" << std::endl;
-						coolDown = COOL_TIME;
-					}
-				}
-
-				if (shiftPressed) {
-					if (creation == true) {
-						if (keys[SDL_SCANCODE_KP_1]) { //X scale
-							temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).x + scaling, std::get<2>(temp[i]).y, std::get<2>(temp[i]).z), std::get<3>(temp[i]));
-						}
-						if (keys[SDL_SCANCODE_KP_2]) { //Y scale
-							temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).x, std::get<2>(temp[i]).y + scaling, std::get<2>(temp[i]).z), std::get<3>(temp[i]));
-						}
-						if (keys[SDL_SCANCODE_KP_3]) { //Z scale
-							temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).x, std::get<2>(temp[i]).y, std::get<2>(temp[i]).z + scaling), std::get<3>(temp[i]));
-						}
-						if (keys[SDL_SCANCODE_KP_0]) { //ALL scale
-							temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).x + scaling, std::get<2>(temp[i]).y + scaling, std::get<2>(temp[i]).z + scaling), std::get<3>(temp[i]));
-						}
-						if (keys[SDL_SCANCODE_KP_7]) { //moveUP
-							glm::vec3 move = glm::vec3(std::get<1>(temp[i]).x, std::get<1>(temp[i]).y + 0.01, std::get<1>(temp[i]).z);
-							temp[i] = make_tuple(std::get<0>(temp[i]), move, std::get<2>(temp[i]), std::get<3>(temp[i]), std::get<3>(temp[i]));
-						}
-						if (keys[SDL_SCANCODE_KP_9]) { //moveDOWN
-							glm::vec3 move = glm::vec3(std::get<1>(temp[i]).x, std::get<1>(temp[i]).y - 0.01, std::get<1>(temp[i]).z);
-							temp[i] = make_tuple(std::get<0>(temp[i]), move, std::get<2>(temp[i]), std::get<3>(temp[i]));
-						}
-					}
-					else {
-						if (keys[SDL_SCANCODE_KP_1]) {
-							get<1>(models[selectedObject.first]).x += scaling;
-						}
-						if (keys[SDL_SCANCODE_KP_2]) {
-							get<1>(models[selectedObject.first]).y += scaling;
-						}
-						if (keys[SDL_SCANCODE_KP_3]) {
-							get<1>(models[selectedObject.first]).z += scaling;
-						}
-						if (keys[SDL_SCANCODE_KP_0]) {
-							get<1>(models[selectedObject.first]).x += scaling;
-							get<1>(models[selectedObject.first]).y += scaling;
-							get<1>(models[selectedObject.first]).z += scaling;
-						}
-					}
-				}
-				if (!shiftPressed) {
-					if (creation == true) {
-						if (keys[SDL_SCANCODE_KP_1]) {
-							temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).x - scaling, std::get<2>(temp[i]).y, std::get<2>(temp[i]).z), std::get<3>(temp[i]));
-						}
-						if (keys[SDL_SCANCODE_KP_2]) {
-							temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).x, std::get<2>(temp[i]).y - scaling, std::get<2>(temp[i]).z), std::get<3>(temp[i]));
-						}
-						if (keys[SDL_SCANCODE_KP_3]) {
-							temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).x, std::get<2>(temp[i]).y, std::get<2>(temp[i]).z - scaling), std::get<3>(temp[i]));
-						}
-						if (keys[SDL_SCANCODE_KP_0]) {
-							temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), glm::vec3(std::get<2>(temp[i]).x - scaling, std::get<2>(temp[i]).y - scaling, std::get<2>(temp[i]).z - scaling), std::get<3>(temp[i]));
-						}
-						if (keys[SDL_SCANCODE_KP_7]) {
-							temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), std::get<2>(temp[i]), glm::vec3(std::get<3>(temp[i]).x, std::get<3>(temp[i]).y - 0.1, std::get<3>(temp[i]).z));
-						}
-						if (keys[SDL_SCANCODE_KP_9]) {
-							temp[i] = make_tuple(std::get<0>(temp[i]), std::get<1>(temp[i]), std::get<2>(temp[i]), glm::vec3(std::get<3>(temp[i]).x, std::get<3>(temp[i]).y + 0.1, std::get<3>(temp[i]).z));
-						}
-					}
-					else {
-						if (keys[SDL_SCANCODE_KP_1]) {
-							get<1>(models[selectedObject.first]).x -= scaling;
-						}
-						if (keys[SDL_SCANCODE_KP_2]) {
-							get<1>(models[selectedObject.first]).y -= scaling;
-						}
-						if (keys[SDL_SCANCODE_KP_3]) {
-							get<1>(models[selectedObject.first]).z -= scaling;
-						}
-						if (keys[SDL_SCANCODE_KP_0]) {
-							get<1>(models[selectedObject.first]).x -= scaling;
-							get<1>(models[selectedObject.first]).y -= scaling;
-							get<1>(models[selectedObject.first]).z -= scaling;
-						}
-					}
-				}
-					
-
-
-					if (keys[SDL_SCANCODE_EQUALS]) {
-						mass += 1;
-					}
-					if (keys[SDL_SCANCODE_MINUS]) {
-						if (mass > 0) {
-							mass -= 1;
-						}
-					}
-				}
-
-				if (keys[SDL_SCANCODE_R]) {
-					//cout << getLinearVelocityInBodyFrame(playerBody).x() << " " << getLinearVelocityInBodyFrame(playerBody).y() << " " << getLinearVelocityInBodyFrame(playerBody).z() << "\n";
-					player->setPosition(glm::vec3(player->getPosition().x, player->getPosition().y + 0.1, player->getPosition().z));
-				}
-				else if (keys[SDL_SCANCODE_F]) {
-					player->setPosition(glm::vec3(player->getPosition().x, player->getPosition().y - 0.1, player->getPosition().z));
-				}
-				//++++
-				if (keys[SDL_SCANCODE_M]) {
-					//	cout << "Curiously cinnamon\n";
-					bodies["box1"]->setLinearVelocity(btVector3(0.0, 5.0, 0.0));
-				}
-				if (keys[SDL_SCANCODE_N]) {
-
-					//btTransform t;
-					t.setIdentity();
-					t.setOrigin(btVector3(0, 10, -10));
-					//btMotionState* motion = new btDefaultMotionState(t);
-					cout << "Setting y\n";
-					motion->setWorldTransform(t);
-					bodies["box1"]->setMotionState(motion);
-				}
-				//++++
-				if (keys[SDL_SCANCODE_K]) {
-					if (pointOfView == FIRST_PERSON) pointOfView = THIRD_PERSON;
-					else pointOfView = FIRST_PERSON;
-				}
-
-
-
-				if (keys[SDL_SCANCODE_1]) {
-					glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-					glDisable(GL_CULL_FACE);
-				}
-				if (keys[SDL_SCANCODE_2]) {
-					glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-					glEnable(GL_CULL_FACE);
-				}
-
-				//	if (keys[SDL_SCANCODE_3]) bodies[4]->setLinearVelocity(btVector3(0.0, 0.0, 4.0));
-				if (keys[SDL_SCANCODE_ESCAPE]) {
-					exit(0);
-				}
-
-				//	if (keys[SDL_SCANCODE_5])cout << bullet.size() << endl;
+		//	if (keys[SDL_SCANCODE_5])cout << bullet.size() << endl;
 	}
 
 
@@ -1350,7 +1356,7 @@ namespace SceneManager {
 			btVector3 p = bodies[id_pair.first]->getWorldTransform().getOrigin();
 			btVector3 y = (((btBoxShape*)bodies[id_pair.first]->getCollisionShape())->getHalfExtentsWithMargin());
 			glm::vec3 spherePosition = glm::vec3(p.x(), p.y(), p.z());
-			glm::vec3 position = glm::vec3(p.x(), p.y()-y.y(), p.z());
+			glm::vec3 position = glm::vec3(p.x(), p.y(), p.z());
 			glm::vec3 rotation = glm::vec3(bodies[id_pair.first]->getWorldTransform().getRotation().getX(), bodies[id_pair.first]->getWorldTransform().getRotation().getY(), bodies[id_pair.first]->getWorldTransform().getRotation().getZ());
 			//	btQuaternion test = bodies[id_pair.first]->getWorldTransform().getRotation();
 		//		test.getAngle();
@@ -1370,7 +1376,7 @@ namespace SceneManager {
 				bt_manager->renderSphere(bodies[id_pair.first], view, projection, modelTypes["sphere"], shader, defaultTexture);
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 				glEnable(GL_CULL_FACE);
-				renderObject(projection, modelTypes[get<0>(models[id_pair.first])], spherePosition, get<1>(models[id_pair.first]), rotation, shader, defaultTexture);
+				renderObject(projection, modelTypes[get<0>(models[id_pair.first])], spherePosition, get<1>(models[id_pair.first]),  rotation, shader, defaultTexture);
 			}
 
 			if (id_pair.second->getCollisionShape()->getShapeType() == CAPSULE_SHAPE_PROXYTYPE) {
