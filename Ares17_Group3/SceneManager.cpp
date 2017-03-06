@@ -553,9 +553,9 @@ namespace SceneManager {
 		}
 		if (boundingType != SPHERE)
 		{
-			playerBody->setAngularFactor(0); // Doesn't fall sideways
+			bodies[key]->setAngularFactor(0); // Doesn't fall sideways
 		}
-		playerBody->setFriction(8);
+		bodies[key]->setFriction(8);
 		bodies[key]->setActivationState(DISABLE_DEACTIVATION);
 		models.insert(std::pair<string, std::tuple<string, glm::vec3, glm::vec3>>(key, make_tuple(currentModel, modelScale, modelRotation)));
 	}
