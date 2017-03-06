@@ -17,13 +17,13 @@ class Projectile {
 
 private:
 	btShapeManager *shapeManager;
-	vector <_proj> *liveProjectiles;
+	vector <_proj> liveProjectiles;
 	
 protected:
 public:
 	Projectile(btShapeManager *s_Manager) {
 		this->shapeManager = s_Manager;
-		liveProjectiles = new vector <_proj>;
+		// liveProjectiles = new vector <_proj>;
 		//liveProjectiles.push_back(make_pair(shapeManager->addSphere(10, 0, 0, 0, 10), this->lifespan));
 	}
 
@@ -60,7 +60,7 @@ public:
 		tempGhost->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);
 
 		shapeManager->addGhostToWorld(tempGhost, COL_BULLET, COL_ENEMY | COL_DEFAULT);
-		liveProjectiles->push_back(make_tuple(temp, DEFAULT_LIFESPAN, tempGhost));
+		liveProjectiles.push_back(make_tuple(temp, DEFAULT_LIFESPAN, tempGhost));
 		if ((pitch) >= PITCHLOCK / 2)
 			pitch = PITCHLOCK / 2;
 		if (pitch <= -(PITCHLOCK / 2))
@@ -72,40 +72,53 @@ public:
 		// ALSO: Spawn point is wrong
 		temp->setLinearVelocity(btVector3(speed*std::sin(yaw), -speed*std::sin(pitch), -speed*std::cos(yaw)));
 	}
-	~Projectile() {
-		delete this; // :thinking:
-	}
+	//~Projectile() {
+	//	delete this; // :thinking:
+	//}
+
+	//TODO: Iterator is not fail safe
+	// http://stackoverflow.com/questions/347441/erasing-elements-from-a-vector
+	// Possible solution
+	// Also; does erase remove them? (Slows after time~~~)
+	//TODO: Investigate ^^^
 	void renderProjectiles(glm::mat4 view, glm::mat4 proj, Model * modelData, GLuint shader, GLuint texture, double time_step) {
-		vector <_proj>::iterator projectileIterator = liveProjectiles->begin();
-		while (liveProjectiles->size() > 0 && projectileIterator != liveProjectiles->end()) {
+		vector <_proj>::iterator projectileIterator = liveProjectiles.begin();
+		while (liveProjectiles.size() > 0 && projectileIterator != liveProjectiles.end()) {
 			(*projectileIterator) = make_tuple(get<0>(static_cast<_proj>(*projectileIterator)), get<1>(static_cast<_proj>(*projectileIterator)) - time_step, get<2>(static_cast<_proj>(*projectileIterator)));
 			get<2>(static_cast<_proj>(*projectileIterator))->setWorldTransform(get<0>(static_cast<_proj>(*projectileIterator))->getWorldTransform());
-			findCollision(get<2>(static_cast<_proj>(*projectileIterator)));
-		
+			if (findCollision(get<2>(static_cast<_proj>(*projectileIterator))))
+			{
+				cout << "Collision between bullet and collidable detected. Deleting..." << endl;
+				liveProjectiles.erase(remove(liveProjectiles.begin(), liveProjectiles.end(), static_cast<_proj>(*projectileIterator)), liveProjectiles.end());
+				cout << "Removed.";
+				cout << liveProjectiles.size();
+				continue;
+			}
+			
 			if (get<1>(static_cast<_proj>(*projectileIterator)) <= 0) // if dead, remove // delete?
-				liveProjectiles->erase(remove(liveProjectiles->begin(), liveProjectiles->end(), static_cast<_proj>(*projectileIterator)), liveProjectiles->end());
+				liveProjectiles.erase(remove(liveProjectiles.begin(), liveProjectiles.end(), static_cast<_proj>(*projectileIterator)), liveProjectiles.end());
 			
 			else {
 				this->shapeManager->renderSphere((get<0>(static_cast<_proj>(*projectileIterator))), view, proj, modelData, shader, texture);
 			}
-			if (liveProjectiles->size() > 0)
+			if (liveProjectiles.size() > 0)
 				projectileIterator++; 
 			//get<0>(static_cast<_proj>(*projectileIterator));
 		}
 	}
 
 	//void findBulletCollision() {
-	//	vector <_proj>::iterator projectileIterator = liveProjectiles->begin();
-	//	while (liveProjectiles->size() > 0 && projectileIterator != liveProjectiles->end()) {
+	//	vector <_proj>::iterator projectileIterator = liveProjectiles.begin();
+	//	while (liveProjectiles.size() > 0 && projectileIterator != liveProjectiles.end()) {
 	//		//findCollision((static_cast<_proj>(*projectileIterator)).first);
 	//		//if ((static_cast<_proj>(*projectileIterator)).second <= 0) // if dead, remove // delete?
-	//		//	liveProjectiles->erase(remove(liveProjectiles->begin(), liveProjectiles->end(), static_cast<_proj>(*projectileIterator)), liveProjectiles->end());
-	//		if (liveProjectiles->size() > 0)
+	//		//	liveProjectiles.erase(remove(liveProjectiles.begin(), liveProjectiles.end(), static_cast<_proj>(*projectileIterator)), liveProjectiles.end());
+	//		if (liveProjectiles.size() > 0)
 	//			projectileIterator++;
 	//	}
 	//}
 
-	void findCollision(btPairCachingGhostObject* ghostObject) { // TODO: ignore self
+	bool findCollision(btPairCachingGhostObject* ghostObject) { // TODO: ignore self
 		btManifoldArray manifoldArray;
 		btBroadphasePairArray& pairArray =
 			ghostObject->getOverlappingPairCache()->getOverlappingPairArray();
@@ -129,12 +142,13 @@ public:
 						const btVector3& ptB = pt.getPositionWorldOnB();
 						const btVector3& normalOnB = pt.m_normalWorldOnB;
 						// <START>  handle collisions here
-						cout << "BULLET HIT SOMETHING" << endl;
+						return true;
 						//  <END>   handle collisions here
 					}
 				}
 			}
 		}
+		return false;
 	}
 };
 

@@ -119,6 +119,9 @@
     <ClInclude Include="SoundManager.h">
       <Filter>Being worked on\February</Filter>
     </ClInclude>
+    <ClInclude Include="bass.h">
+      <Filter>Being worked on\February</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\cubeMap.frag">

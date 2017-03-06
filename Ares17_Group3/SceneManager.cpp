@@ -26,6 +26,7 @@ namespace SceneManager {
 	Skybox *skybox;
 	btShapeManager *bt_manager;
 	Projectile *projectile_manager; // !++!
+	SoundManager *s_manager; // ++!
 
 	unsigned int lastTime = 0, currentTime;
 	float dt_secs;
@@ -637,6 +638,9 @@ namespace SceneManager {
 		//+++
 		bt_manager = new btShapeManager();
 		projectile_manager = new Projectile(bt_manager);
+		//!!
+		s_manager = new SoundManager();
+		//s_manager->loadSample("Sounds/wilhelm.wav");
 
 		initmodelTypes();
 
@@ -780,7 +784,7 @@ namespace SceneManager {
 							coolDown = COOL_TIME;
 							cout << "Attempting to shoot bullet." << endl;
 							projectile_manager->addProjectile(moveForward(player->getPosition(), yaw, pitch, 1.0), PROJ_SPEED, (yaw*DEG_TO_RADIAN), pitch); //!++!
-																																				  //cout << pitch << "\n";
+							s_manager->playSound(s_manager->getSound(1), 2, 1);																										  //cout << pitch << "\n";
 																																				  //		Projectile* bullet = new Projectile(bt_manager, glm::vec3(0, 0, 0), 1);
 						}
 					}
