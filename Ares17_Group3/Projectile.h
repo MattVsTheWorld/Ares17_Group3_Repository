@@ -40,7 +40,8 @@ public:
 		btMotionState* motion = new btDefaultMotionState(t);
 		btRigidBody::btRigidBodyConstructionInfo info(mass, motion, sphere, inertia);
 		btRigidBody* body = new btRigidBody(info);
-		shapeManager->addToWorld(body, COL_NOTHING, COL_NOTHING);
+
+		shapeManager->addToWorld(body, COL_BULLET, COL_ENEMY | COL_DEFAULT);
 		//bodies.push_back(body);
 		return body;
 	}
@@ -51,13 +52,14 @@ public:
 
 		// mask
 		// http://www.bulletphysics.org/mediawiki-1.5.8/index.php/Collision_Filtering
-		int coll = COL_CANHIT;
-		int noColl = COL_NOTHING;
+	//	int coll = COL_DEFAULT;
+	//	int noColl = COL_NOTHING;
 
 		tempGhost->setCollisionShape(temp->getCollisionShape());
 		tempGhost->setWorldTransform(temp->getWorldTransform());
 		tempGhost->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);
-		shapeManager->addGhostToWorld(tempGhost);
+
+		shapeManager->addGhostToWorld(tempGhost, COL_BULLET, COL_ENEMY | COL_DEFAULT);
 		liveProjectiles->push_back(make_tuple(temp, DEFAULT_LIFESPAN, tempGhost));
 		if ((pitch) >= PITCHLOCK / 2)
 			pitch = PITCHLOCK / 2;
@@ -77,13 +79,12 @@ public:
 		vector <_proj>::iterator projectileIterator = liveProjectiles->begin();
 		while (liveProjectiles->size() > 0 && projectileIterator != liveProjectiles->end()) {
 			(*projectileIterator) = make_tuple(get<0>(static_cast<_proj>(*projectileIterator)), get<1>(static_cast<_proj>(*projectileIterator)) - time_step, get<2>(static_cast<_proj>(*projectileIterator)));
-			// I'M A GENIUS!!!
 			get<2>(static_cast<_proj>(*projectileIterator))->setWorldTransform(get<0>(static_cast<_proj>(*projectileIterator))->getWorldTransform());
+			findCollision(get<2>(static_cast<_proj>(*projectileIterator)));
 		
-			// OH NO! I'M NOT :(
-			 findCollision(get<2>(static_cast<_proj>(*projectileIterator)));
 			if (get<1>(static_cast<_proj>(*projectileIterator)) <= 0) // if dead, remove // delete?
 				liveProjectiles->erase(remove(liveProjectiles->begin(), liveProjectiles->end(), static_cast<_proj>(*projectileIterator)), liveProjectiles->end());
+			
 			else {
 				this->shapeManager->renderSphere((get<0>(static_cast<_proj>(*projectileIterator))), view, proj, modelData, shader, texture);
 			}

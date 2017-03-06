@@ -27,7 +27,7 @@ btRigidBody* btShapeManager::addBox(float width, float height, float depth, floa
 	btRigidBody::btRigidBodyConstructionInfo info(mass, motion, box, inertia);
 
 	btRigidBody* body = new btRigidBody(info);
-	btSettings.world->addRigidBody(body);
+	btSettings.world->addRigidBody(body, COL_DEFAULT, COLLIDE_ALL);
 	//bodies.push_back(body);
 
 	return body;
@@ -46,7 +46,7 @@ btRigidBody* btShapeManager::addSphere(float rad, float x, float y, float z, flo
 	btMotionState* motion = new btDefaultMotionState(t);
 	btRigidBody::btRigidBodyConstructionInfo info(mass, motion, sphere, inertia);
 	btRigidBody* body = new btRigidBody(info);
-	btSettings.world->addRigidBody(body);
+	btSettings.world->addRigidBody(body, COL_DEFAULT, COLLIDE_ALL);
 	//bodies.push_back(body);
 	return body;
 }
@@ -65,7 +65,7 @@ btRigidBody* btShapeManager::addCapsule(float rad, float height, float x, float 
 	btRigidBody::btRigidBodyConstructionInfo info(mass, motion, capsule, inertia);
 
 	btRigidBody* body = new btRigidBody(info);
-	btSettings.world->addRigidBody(body);
+	btSettings.world->addRigidBody(body, COL_DEFAULT, COLLIDE_ALL);
 
 	return body;
 }

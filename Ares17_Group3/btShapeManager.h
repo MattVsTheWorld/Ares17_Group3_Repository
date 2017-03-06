@@ -13,9 +13,15 @@
 #define BIT(x) (1<<(x))
 enum collisiontype {
 	COL_NOTHING = 0,
-	COL_CANHIT = BIT(0)
+	COL_DEFAULT = BIT(0),
+	COL_PLAYER = BIT(1),
+	COL_BULLET = BIT(2),
+	COL_ENEMY = BIT(3)
+
+	
 	//(...)
 };
+#define COLLIDE_ALL COL_DEFAULT | COL_PLAYER | COL_BULLET | COL_ENEMY
 //!!
 
 // Settings struct
