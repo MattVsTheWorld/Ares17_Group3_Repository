@@ -23,11 +23,12 @@
 //+++
 #define DEG_TO_RADIAN 0.017453293
 
-#define COOL_TIME 1.5f
+#define COOL_TIME 0.5f
 #define MODEL_SCALING 0.0001f
 #define BOUNDING_SCALING 0.001f
 
-#define SPEED_CAP_XZ 10.0
+#define SPEED_CAP_XZ 8.0
+#define FRICTION 8.0
 #define SPEED_CAP_Y 3.0
 
 #define AMBIENT_FACTOR 1.0f

@@ -69,11 +69,11 @@
     <ClCompile Include="SDLmanager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SoundManager.cpp">
-      <Filter>Being worked on</Filter>
-    </ClCompile>
     <ClCompile Include="Player.cpp">
       <Filter>Being worked on</Filter>
+    </ClCompile>
+    <ClCompile Include="SoundManager.cpp">
+      <Filter>Being worked on\February</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -110,13 +110,13 @@
     <ClInclude Include="SDLmanager.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="SoundManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Player.h">
       <Filter>Being worked on</Filter>
     </ClInclude>
     <ClInclude Include="Projectile.h">
+      <Filter>Being worked on\February</Filter>
+    </ClInclude>
+    <ClInclude Include="SoundManager.h">
       <Filter>Being worked on\February</Filter>
     </ClInclude>
   </ItemGroup>
