@@ -837,8 +837,8 @@ namespace SceneManager {
 						if (coolDown <= 0.0f) {
 							leftClick = true;
 							coolDown = COOL_TIME;
-							temp[0] = std::make_tuple(std::get<0>(temp[0]), at, std::get<1>(temp[0]), glm::vec3(0.0f, yaw, 0.0f));
-							temp[1] = std::make_tuple(std::get<0>(temp[1]), std::get<1>(temp[0]), std::get<2>(temp[1]), glm::vec3(0.0f, yaw, 0.0f));
+							temp[0] = std::make_tuple(currentModel, at, std::get<1>(temp[0]), glm::vec3(0.0f, yaw, 0.0f));
+							temp[1] = std::make_tuple(currentBounding, std::get<1>(temp[0]), std::get<2>(temp[1]), glm::vec3(0.0f, yaw, 0.0f));
 							creation = true;
 						}
 					}
