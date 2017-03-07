@@ -76,7 +76,7 @@ namespace SceneManager {
 	
 	tuple<std::string, glm::vec3, glm::vec3, glm::vec3> temp[2]; //name, position, scale, rotation
 
-	string currentModel = "nanosuit";
+	string currentModel = "car";
 	string currentBounding = "box";
 	
 	// TEST
@@ -172,13 +172,13 @@ namespace SceneManager {
 		double test = q.x()*q.y() + q.z()*q.w();
 		if (test > 0.499) { // singularity at north pole
 			rotation.y = 2 * atan2(q.x(), q.w());
-			rotation.x = 3.14 / 2;
+			rotation.x = PI / 2;
 			rotation.z = 0;
 			return;
 		}
 		if (test < -0.499) { // singularity at south pole
 			rotation.y = -2 * atan2(q.x(), q.w());
-			rotation.x = -3.14 / 2;
+			rotation.x = -PI / 2;
 			rotation.z = 0;
 			return;
 		}
@@ -229,7 +229,7 @@ namespace SceneManager {
 					boundingType = bodies.find(objType)->first;
 					modelName = get<0>(models.find(objType)->second);
 					position = bodies.find(objType)->second->getWorldTransform().getOrigin();
-					boundingScale = (((btBoxShape*)bodies.find(objType)->second->getCollisionShape())->getHalfExtentsWithMargin()) * 2; //*2 as its half
+					boundingScale = (((btBoxShape*)bodies.find(objType)->second->getCollisionShape())->getHalfExtentsWithMargin()); //*2 as its half
 					boundingRotation = glm::vec3(bodies.find(objType)->second->getWorldTransform().getRotation().getX(),
 													bodies.find(objType)->second->getWorldTransform().getRotation().getY(),
 													bodies.find(objType)->second->getWorldTransform().getRotation().getZ());
@@ -556,7 +556,6 @@ namespace SceneManager {
 	}
 
 	void initmodelTypes() {
-		modelTypes.insert(std::pair<string, Model*>("nanosuit", new Model("Models/Nanosuit/nanosuit.obj")));
 		modelTypes.insert(std::pair<string, Model*>("pistol", new Model("Models/Weapons/Socom pistol.obj")));
 		modelTypes.insert(std::pair<string, Model*>("plasmacutter", new Model("Models/Weapons/Plasmacutter/DYIPlasmcutter.obj")));
 		modelTypes.insert(std::pair<string, Model*>("cube", new Model("Models/cube.obj")));
@@ -1418,7 +1417,7 @@ namespace SceneManager {
 			btVector3 p = bodies[id_pair.first]->getWorldTransform().getOrigin();
 			btVector3 y = (((btBoxShape*)bodies[id_pair.first]->getCollisionShape())->getHalfExtentsWithMargin());
 			glm::vec3 spherePosition = glm::vec3(p.x(), p.y(), p.z());
-			glm::vec3 position = glm::vec3(p.x(), p.y(), p.z());
+			glm::vec3 position = glm::vec3(p.x(), p.y()-y.y(), p.z());
 			btQuaternion rotation = bodies[id_pair.first]->getWorldTransform().getRotation().normalized();
 
 			if (id_pair.second->getCollisionShape()->getShapeType() == BOX_SHAPE_PROXYTYPE) {
@@ -1453,7 +1452,7 @@ namespace SceneManager {
 		// RENDERING modelTypes
 
 		if (pointOfView == THIRD_PERSON)
-			renderPlayer(projection, modelTypes["nanosuit"], glm::vec3(player->getPosition().x, player->getPosition().y - 1.75, player->getPosition().z), glm::vec3(0.2, 0.2, 0.2), glm::vec3(0.0, -rotationAngles.y, 0.0), shader, 0);
+			renderPlayer(projection, modelTypes["box"], glm::vec3(player->getPosition().x, player->getPosition().y - 1.75, player->getPosition().z), glm::vec3(0.2, 0.2, 0.2), glm::vec3(0.0, -rotationAngles.y, 0.0), shader, 0);
 		// rip robot
 		  //		renderObject(projection, modelTypes["robot"], glm::vec3(4.0, 0.0, 0.0), glm::vec3(0.2, 0.2, 0.2), shader);
 
