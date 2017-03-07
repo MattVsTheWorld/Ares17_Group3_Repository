@@ -14,13 +14,14 @@ class Projectile {
 private:
 	btShapeManager *shapeManager;
 	vector <_proj> liveProjectiles;
+	bool findCollision(btPairCachingGhostObject* ghostObject);
 protected:
 public:
 	Projectile(btShapeManager *s_Manager);
 	btRigidBody* addSphere(float rad, float x, float y, float z, float mass);
 	void addProjectile(glm::vec3 spawn, float speed, float yaw, float pitch);
 	void renderProjectiles(glm::mat4 view, glm::mat4 proj, Model * modelData, GLuint shader, GLuint texture, double time_step);
-	bool findCollision(btPairCachingGhostObject* ghostObject);
+	
 };
 
 

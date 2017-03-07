@@ -11,12 +11,7 @@ using namespace std;
 #include <GL/glew.h> // Contains all the necessery OpenGL includes
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-
-
 #include "Mesh.h"
-
-
-//GLint TextureFromFile(const char* path, string directory);
 
 class Model
 {

@@ -20,6 +20,7 @@
 #include "SoundManager.h"
 #include <time.h>
 #include "Projectile.h"
+#include "NPCDecorator.h"
 //+++
 #define DEG_TO_RADIAN 0.017453293
 
