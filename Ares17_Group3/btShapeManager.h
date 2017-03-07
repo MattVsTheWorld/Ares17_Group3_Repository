@@ -48,7 +48,8 @@ public:
 	void addGhostToWorld(btPairCachingGhostObject* ghost, collisiontype COLL_TYPE, int collidesWith);
 	void addGhostToWorld(btPairCachingGhostObject* ghost);
 	btBroadphasePair* findWorldPair(const btBroadphasePair &pair);
-
+	void removeObject(btRigidBody* body);
+	void removeObject(btPairCachingGhostObject* ghost);
 private:	
 	btSettings btSettings;
 

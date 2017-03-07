@@ -161,6 +161,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MeshManager.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="Projectile.cpp" />
     <ClCompile Include="SceneManager.cpp" />
     <ClCompile Include="SDLmanager.cpp" />
     <ClCompile Include="ShaderManager.cpp" />

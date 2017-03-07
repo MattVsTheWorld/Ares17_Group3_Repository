@@ -162,6 +162,13 @@ btBroadphasePair* btShapeManager::findWorldPair(const btBroadphasePair &pair) {
 	return btSettings.world->getPairCache()->findPair(pair.m_pProxy0, pair.m_pProxy1);
 }
 
+void btShapeManager::removeObject(btRigidBody* body) {
+	btSettings.world->removeCollisionObject(body);
+}
+void btShapeManager::removeObject(btPairCachingGhostObject* ghost) {
+	btSettings.world->removeCollisionObject(ghost);
+}
+
 // Create plane + info on bullet
 /*
 btTransform t; // orientation and position // quaternion :))))) """SIMPLE VARIABLE"""

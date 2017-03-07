@@ -8,7 +8,7 @@ SoundManager::SoundManager() {
 	// load sound samples
 	samples = new HSAMPLE[4];
 	samples[1] = loadSample("Sounds/wilhelm.wav");
-	//samples[2] = loadSample("Background.wav");
+	samples[2] = loadSample("Sounds/goofy.wav");
 	bgMusicState = true; // set music to playing at first
 }
 

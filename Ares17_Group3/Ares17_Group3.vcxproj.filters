@@ -75,6 +75,9 @@
     <ClCompile Include="SoundManager.cpp">
       <Filter>Being worked on\February</Filter>
     </ClCompile>
+    <ClCompile Include="Projectile.cpp">
+      <Filter>Being worked on\February</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ShaderManager.h">

@@ -30,8 +30,8 @@ namespace SceneManager {
 
 	unsigned int lastTime = 0, currentTime;
 	float dt_secs;
-	enum pov { FIRST_PERSON, THIRD_PERSON };
-	pov pointOfView = FIRST_PERSON;
+//	enum pov { FIRST_PERSON, THIRD_PERSON };
+//	pov pointOfView = FIRST_PERSON;
 	enum modes { PLAY, EDIT };
 	modes mode = PLAY;
 	enum bound { BOX, SPHERE, CAPSULE };
@@ -75,7 +75,7 @@ namespace SceneManager {
 	
 	tuple<std::string, glm::vec3, glm::vec3, glm::vec3> temp[2]; //name, position, scale, rotation
 
-	string currentModel = "nanosuit";
+	string currentModel = "box";
 	string currentBounding = "box";
 	
 	// TEST
@@ -514,9 +514,9 @@ namespace SceneManager {
 	}
 
 	void initmodelTypes() {
-		modelTypes.insert(std::pair<string, Model*>("nanosuit", new Model("Models/Nanosuit/nanosuit.obj")));
-		modelTypes.insert(std::pair<string, Model*>("pistol", new Model("Models/Weapons/Socom pistol.obj")));
-		modelTypes.insert(std::pair<string, Model*>("plasmacutter", new Model("Models/Weapons/Plasmacutter/DYIPlasmcutter.obj")));
+	//	modelTypes.insert(std::pair<string, Model*>("nanosuit", new Model("Models/Nanosuit/nanosuit.obj")));
+	//	modelTypes.insert(std::pair<string, Model*>("pistol", new Model("Models/Weapons/Socom pistol.obj")));
+//		modelTypes.insert(std::pair<string, Model*>("plasmacutter", new Model("Models/Weapons/Plasmacutter/DYIPlasmcutter.obj")));
 		modelTypes.insert(std::pair<string, Model*>("cube", new Model("Models/cube.obj")));
 		modelTypes.insert(std::pair<string, Model*>("box", modelTypes["cube"]));
 		modelTypes.insert(std::pair<string, Model*>("sphere", new Model("Models/sphere.obj")));
@@ -777,21 +777,21 @@ namespace SceneManager {
 
 			float increase;
 			if (mode == PLAY) {
-				if (sdlEvent.type == SDL_MOUSEBUTTONDOWN && pointOfView == FIRST_PERSON) {
+				if (sdlEvent.type == SDL_MOUSEBUTTONDOWN){ // && pointOfView == FIRST_PERSON) {
 					if (sdlEvent.button.button == SDL_BUTTON_LEFT) {
 						if (coolDown <= 0.0f) {
 							leftClick = true;
 							coolDown = COOL_TIME;
 							cout << "Attempting to shoot bullet." << endl;
 							projectile_manager->addProjectile(moveForward(player->getPosition(), yaw, pitch, 1.0), PROJ_SPEED, (yaw*DEG_TO_RADIAN), pitch); //!++!
-							s_manager->playSound(s_manager->getSound(1), 2, 1);																										  //cout << pitch << "\n";
+							s_manager->playSound(s_manager->getSound(2), 2, 1);																										  //cout << pitch << "\n";
 																																				  //		Projectile* bullet = new Projectile(bt_manager, glm::vec3(0, 0, 0), 1);
 						}
 					}
 					if (sdlEvent.button.button == SDL_BUTTON_RIGHT) rightClick = true;
 				}
 
-				if (sdlEvent.type == SDL_MOUSEBUTTONUP  && pointOfView == FIRST_PERSON) {
+				if (sdlEvent.type == SDL_MOUSEBUTTONUP) { //  && pointOfView == FIRST_PERSON) {
 					leftClick = false;
 					rightClick = false;
 				}
@@ -837,7 +837,7 @@ namespace SceneManager {
 			btTransform t;
 			t.setIdentity();
 
-			if (sdlEvent.type == SDL_MOUSEBUTTONDOWN && pointOfView == FIRST_PERSON) {
+			if (sdlEvent.type == SDL_MOUSEBUTTONDOWN) { // && pointOfView == FIRST_PERSON) {
 				if (sdlEvent.button.button == SDL_BUTTON_LEFT) {
 					if (coolDown <= 0.0f) {
 						leftClick = true;
@@ -850,7 +850,7 @@ namespace SceneManager {
 				if (sdlEvent.button.button == SDL_BUTTON_RIGHT) rightClick = true;
 			}
 
-			if (sdlEvent.type == SDL_MOUSEBUTTONUP  && pointOfView == FIRST_PERSON) {
+			if (sdlEvent.type == SDL_MOUSEBUTTONUP) { //  && pointOfView == FIRST_PERSON) {
 				leftClick = false;
 				rightClick = false;
 			}
@@ -1143,10 +1143,10 @@ namespace SceneManager {
 			bodies["box1"]->setMotionState(motion);
 		}
 		//++++
-		if (keys[SDL_SCANCODE_K]) {
-			if (pointOfView == FIRST_PERSON) pointOfView = THIRD_PERSON;
-			else pointOfView = FIRST_PERSON;
-		}
+		//if (keys[SDL_SCANCODE_K]) {
+		//	if (pointOfView == FIRST_PERSON) pointOfView = THIRD_PERSON;
+		//	else pointOfView = FIRST_PERSON;
+		//}
 
 		if (keys[SDL_SCANCODE_1]) {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -1286,19 +1286,19 @@ namespace SceneManager {
 	}
 
 	void camera() {
-		if (pointOfView == FIRST_PERSON) {
+	//	if (pointOfView == FIRST_PERSON) {
 			at = moveForward(player->getPosition(), yaw, 1.0f);
 			at.y -= pitch;
 			view = glm::lookAt(player->getPosition(), at, up);
 			//mvStack.top() = glm::lookAt(player->getPosition(), at, up);
-		}
+		//}
 
-		else {
-			at = player->getPosition(); // look at player position
-			eye = moveForward(at, pitch, -6.0f); // move behind him
-			eye.y += pitch; // displacement determined by user interaction
-			view = glm::lookAt(eye, at, up);
-		}
+		//else {
+		//	at = player->getPosition(); // look at player position
+		//	eye = moveForward(at, pitch, -6.0f); // move behind him
+		//	eye.y += pitch; // displacement determined by user interaction
+		//	view = glm::lookAt(eye, at, up);
+		//}
 
 	}
 
@@ -1396,13 +1396,13 @@ namespace SceneManager {
 		///+++++++++++++++
 		// RENDERING modelTypes
 
-		if (pointOfView == THIRD_PERSON)
-			renderObject(projection, modelTypes["nanosuit"], glm::vec3(player->getPosition().x, player->getPosition().y - 1.75, player->getPosition().z), glm::vec3(0.2, 0.2, 0.2), glm::vec3(0.0, -yaw, 0.0), shader, 0);
-		// rip robot
+		//if (pointOfView == THIRD_PERSON)
+		//	renderObject(projection, modelTypes["nanosuit"], glm::vec3(player->getPosition().x, player->getPosition().y - 1.75, player->getPosition().z), glm::vec3(0.2, 0.2, 0.2), glm::vec3(0.0, -yaw, 0.0), shader, 0);
+		//// rip robot
 		  //		renderObject(projection, modelTypes["robot"], glm::vec3(4.0, 0.0, 0.0), glm::vec3(0.2, 0.2, 0.2), shader);
 
-		if (pointOfView == FIRST_PERSON)
-			renderWeapon(projection, modelTypes["plasmacutter"], shader);
+	//	if (pointOfView == FIRST_PERSON)
+	//		renderWeapon(projection, modelTypes["plasmacutter"], shader); //TODO: Render current weapon
 
 		if (mode == EDIT) {
 			if (creation == true) {
