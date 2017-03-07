@@ -41,7 +41,7 @@ void Projectile::addProjectile(glm::vec3 spawn, float speed, float yaw, float pi
 	cout << "y" << -1*std::sin(pitch) << endl;
 	cout << "z" << -1*std::cos(yaw) << endl;*/
 	// TODO: fix angles. yaw and pitch are ""unrelated"", creating the unwanted effect that shooting up won't reduce ground-parallel speed
-	// ALSO: Spawn point is wrong
+	// ALSO: Spawn point is offset ~
 	temp->setLinearVelocity(btVector3(speed*std::sin(yaw), -speed*std::sin(pitch), -speed*std::cos(yaw)));
 }
 
@@ -63,7 +63,7 @@ void Projectile::renderProjectiles(glm::mat4 view, glm::mat4 proj, Model * model
 
 			liveProjectiles.erase(remove(liveProjectiles.begin(), liveProjectiles.end(), liveProjectiles[i]), liveProjectiles.end());
 			//	projectileIterator++;
-			cout << "Removed.";
+			cout << "Removed." << endl;
 			//cout << liveProjectiles.size();
 			continue;
 		}
@@ -73,6 +73,7 @@ void Projectile::renderProjectiles(glm::mat4 view, glm::mat4 proj, Model * model
 			shapeManager->removeObject(get<0>(liveProjectiles[i])); // Remove from world
 			shapeManager->removeObject(get<2>(liveProjectiles[i]));
 			liveProjectiles.erase(remove(liveProjectiles.begin(), liveProjectiles.end(), liveProjectiles[i]), liveProjectiles.end());
+			cout << "Projectile lifespan < 0. Removing..." << endl;
 		}
 
 		else {

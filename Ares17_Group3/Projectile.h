@@ -5,7 +5,7 @@
 #define BULLET_SIZE 0.05f
 #define DEFAULT_LIFESPAN 6.0f
 #define DEFAULT_MASS 1.0f
-#define PROJ_SPEED 20.0f
+#define PROJ_SPEED 30.0f
 #define PITCHLOCK 3.0f
 
 typedef tuple<btRigidBody*, double, btPairCachingGhostObject*> _proj;
@@ -14,7 +14,6 @@ class Projectile {
 private:
 	btShapeManager *shapeManager;
 	vector <_proj> liveProjectiles;
-	//!
 protected:
 public:
 	Projectile(btShapeManager *s_Manager);
