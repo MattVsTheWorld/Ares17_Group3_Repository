@@ -40,6 +40,9 @@
     <Filter Include="Being worked on\February">
       <UniqueIdentifier>{76cc8627-93b5-433d-a3b6-5babe0b004ac}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Being worked on\NPC">
+      <UniqueIdentifier>{d601aa7d-74fb-4a95-90f1-b35352cf176d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -69,11 +72,20 @@
     <ClCompile Include="SDLmanager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SoundManager.cpp">
-      <Filter>Being worked on</Filter>
-    </ClCompile>
     <ClCompile Include="Player.cpp">
       <Filter>Being worked on</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="Model.cpp">
+      <Filter>Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="SoundManager.cpp">
+      <Filter>Being worked on\February</Filter>
+    </ClCompile>
+    <ClCompile Include="Projectile.cpp">
+      <Filter>Being worked on\February</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -110,14 +122,26 @@
     <ClInclude Include="SDLmanager.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="SoundManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Player.h">
       <Filter>Being worked on</Filter>
     </ClInclude>
+    <ClInclude Include="bass.h">
+      <Filter>Being worked on\February</Filter>
+    </ClInclude>
+    <ClInclude Include="SoundManager.h">
+      <Filter>Being worked on\February</Filter>
+    </ClInclude>
     <ClInclude Include="Projectile.h">
       <Filter>Being worked on\February</Filter>
+    </ClInclude>
+    <ClInclude Include="AbstractNPC.h">
+      <Filter>Being worked on\NPC</Filter>
+    </ClInclude>
+    <ClInclude Include="NPCDecorator.h">
+      <Filter>Being worked on\NPC</Filter>
+    </ClInclude>
+    <ClInclude Include="NonPC.h">
+      <Filter>Being worked on\NPC</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
