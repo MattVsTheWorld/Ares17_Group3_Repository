@@ -30,13 +30,13 @@ namespace SceneManager {
 
 	unsigned int lastTime = 0, currentTime;
 	float dt_secs;
-//	enum pov { FIRST_PERSON, THIRD_PERSON };
-//	pov pointOfView = FIRST_PERSON;
+	//	enum pov { FIRST_PERSON, THIRD_PERSON };
+	//	pov pointOfView = FIRST_PERSON;
 	enum modes { PLAY, EDIT };
 	modes mode = PLAY;
 	enum bound { BOX, SPHERE, CAPSULE };
 	bound boundingType = BOX;
-	enum editStages{ MODEL, BOUNDING };
+	enum editStages { MODEL, BOUNDING };
 	editStages stage = MODEL;
 
 	// SHADOWS
@@ -72,13 +72,13 @@ namespace SceneManager {
 
 	map<std::string, std::tuple<string, glm::vec3, glm::vec3, glm::vec3>> models; //objType, <modelName, scale, rotation, offset>
 	map<std::string, btRigidBody*> bodies;
-	
+
 	tuple<std::string, glm::vec3, glm::vec3, glm::vec3> temp[2]; //name, position, scale, rotation
 
 
 	string currentModel = "box";
 	string currentBounding = "box";
-	
+
 	// TEST
 	btRigidBody* playerBody;
 	//	
@@ -232,8 +232,8 @@ namespace SceneManager {
 					position = bodies.find(objType)->second->getWorldTransform().getOrigin();
 					boundingScale = (((btBoxShape*)bodies.find(objType)->second->getCollisionShape())->getHalfExtentsWithMargin()); //*2 as its half
 					boundingRotation = glm::vec3(bodies.find(objType)->second->getWorldTransform().getRotation().getX(),
-													bodies.find(objType)->second->getWorldTransform().getRotation().getY(),
-													bodies.find(objType)->second->getWorldTransform().getRotation().getZ());
+						bodies.find(objType)->second->getWorldTransform().getRotation().getY(),
+						bodies.find(objType)->second->getWorldTransform().getRotation().getZ());
 					modelScale = get<1>(models.find(objType)->second);
 					modelRotation = get<2>(models.find(objType)->second);
 					offset = get<3>(models.find(objType)->second);
@@ -297,9 +297,9 @@ namespace SceneManager {
 					float height = ((btCapsuleShape*)bodies.find(objType)->second->getCollisionShape())->getHalfHeight() * 2;
 					modelScale = get<1>(models.find(objType)->second);
 					modelRotation = get<2>(models.find(objType)->second);
-					boundingRotation = glm::vec3(bodies.find(objType)->second->getWorldTransform().getRotation().getX(), 
-													bodies.find(objType)->second->getWorldTransform().getRotation().getY(), 
-													bodies.find(objType)->second->getWorldTransform().getRotation().getZ());
+					boundingRotation = glm::vec3(bodies.find(objType)->second->getWorldTransform().getRotation().getX(),
+						bodies.find(objType)->second->getWorldTransform().getRotation().getY(),
+						bodies.find(objType)->second->getWorldTransform().getRotation().getZ());
 					offset = get<3>(models.find(objType)->second);
 					mass = bodies.find(objType)->second->getInvMass();
 					myfile << boundingType << ",";
@@ -533,7 +533,7 @@ namespace SceneManager {
 				}
 				else if (key.find("sphere") != std::string::npos) {
 					bodies.insert(std::pair<string, btRigidBody*>(key, bt_manager->addSphere(radius, position.x, position.y, position.z, mass)));
-					models.insert(std::pair<string, std::tuple<string, glm::vec3, glm::vec3, glm::vec3>>(key, std::make_tuple(modelName, modelScale, glm::vec3(0.,0.,0.), offset)));
+					models.insert(std::pair<string, std::tuple<string, glm::vec3, glm::vec3, glm::vec3>>(key, std::make_tuple(modelName, modelScale, glm::vec3(0., 0., 0.), offset)));
 					cout << "Sphere Added\n";
 				}
 				else if (key.find("capsule") != std::string::npos) {
@@ -585,7 +585,7 @@ namespace SceneManager {
 	}
 
 	void initmodelTypes() {
-    //TODO:Player model for death or something
+		//TODO:Player model for death or something
 		modelTypes.insert(std::pair<string, Model*>("cube", new Model("Models/cube.obj")));
 		modelTypes.insert(std::pair<string, Model*>("box", modelTypes["cube"]));
 		modelTypes.insert(std::pair<string, Model*>("sphere", new Model("Models/sphere.obj")));
@@ -629,7 +629,7 @@ namespace SceneManager {
 		}
 		bodies[key]->setFriction(8);
 		bodies[key]->setActivationState(DISABLE_DEACTIVATION);
-		models.insert(std::pair<string, std::tuple<string, glm::vec3, glm::vec3, glm::vec3>>(key, make_tuple(currentModel, modelScale, modelRotation, glm::vec3(0.0f,0.0f,0.0f))));
+		models.insert(std::pair<string, std::tuple<string, glm::vec3, glm::vec3, glm::vec3>>(key, make_tuple(currentModel, modelScale, modelRotation, glm::vec3(0.0f, 0.0f, 0.0f))));
 	}
 
 	// +++!
@@ -768,10 +768,10 @@ namespace SceneManager {
 		return(wvel);
 
 	} */
-//#define rotationAngles.xLOCK 3.0f //TODO: edit rotationAngles.x lock
+	//#define rotationAngles.xLOCK 3.0f //TODO: edit rotationAngles.x lock
 	void lockCamera()
 	{
-	//	cout << rotationAngles.x << endl;
+		//	cout << rotationAngles.x << endl;
 		if (rotationAngles.x > PITCHLOCK)
 			rotationAngles.x = PITCHLOCK;
 		if (rotationAngles.x < -PITCHLOCK)
@@ -787,7 +787,7 @@ namespace SceneManager {
 	unsigned int objectID = 0;
 	unsigned int worldObjectID = 0;
 	std::string selectedKey = "";
-    std::string selectedPrev = "";
+	std::string selectedPrev = "";
 
 	bool leftClick = false;
 	bool rightClick = false;
@@ -823,12 +823,12 @@ namespace SceneManager {
 		motion->setWorldTransform(t);
 
 		const Uint8 *keys = SDL_GetKeyboardState(NULL);
-			if (keys[SDL_SCANCODE_LEFTBRACKET]) {
-				mode = PLAY;
-			}
-			else if (keys[SDL_SCANCODE_RIGHTBRACKET]) {
-				mode = EDIT;
-			}
+		if (keys[SDL_SCANCODE_LEFTBRACKET]) {
+			mode = PLAY;
+		}
+		else if (keys[SDL_SCANCODE_RIGHTBRACKET]) {
+			mode = EDIT;
+		}
 
 		float increase;
 		if (mode == PLAY) {
@@ -837,20 +837,20 @@ namespace SceneManager {
 					if (coolDown <= 0.0f) {
 						leftClick = true;
 						coolDown = COOL_TIME;
-			//			cout << "Attempting to shoot bullet." << endl;
+						//			cout << "Attempting to shoot bullet." << endl;
 						projectile_manager->addProjectile(moveForward(player->getPosition(), rotationAngles, 1.0f), PROJ_SPEED, (rotationAngles.y*DEG_TO_RADIAN), rotationAngles.x); //!++!
 						s_manager->playSound(s_manager->getSound(2), 2, 1);
-            //cout << rotationAngles.x << "\n";
-																																			  //		Projectile* bullet = new Projectile(bt_manager, glm::vec3(0, 0, 0), 1);
-
+						//cout << rotationAngles.x << "\n";
+																																						  //		Projectile* bullet = new Projectile(bt_manager, glm::vec3(0, 0, 0), 1);
 					}
-					if (sdlEvent.button.button == SDL_BUTTON_RIGHT) rightClick = true;
 				}
+				if (sdlEvent.button.button == SDL_BUTTON_RIGHT) rightClick = true;
+			}
 
-				if (sdlEvent.type == SDL_MOUSEBUTTONUP) { //  && pointOfView == FIRST_PERSON) {
-					leftClick = false;
-					rightClick = false;
-				}
+			if (sdlEvent.type == SDL_MOUSEBUTTONUP) { //  && pointOfView == FIRST_PERSON) {
+				leftClick = false;
+				rightClick = false;
+			}
 
 			if (player->getState() == ON_GROUND)
 				increase = 1.0f;
@@ -870,20 +870,20 @@ namespace SceneManager {
 				playerBody->setLinearVelocity(speedRight(increase, rotationAngles.y, (keys[SDL_SCANCODE_W] == SDL_PRESSED || keys[SDL_SCANCODE_S] == SDL_PRESSED)));
 			}
 
-				if (keys[SDL_SCANCODE_SPACE]) {
-					playerBody->setLinearVelocity(jump(SPEED_CAP_Y));
-				}
-
-				if (keys[SDL_SCANCODE_KP_8])
-					bodies["box1"]->setLinearVelocity(btVector3(5.0, 0.0, 0.0));
-				if (keys[SDL_SCANCODE_KP_4])
-					bodies["box1"]->setLinearVelocity(btVector3(0.0, 0.0, 5.0));
-				if (keys[SDL_SCANCODE_KP_6])
-					bodies["box1"]->setLinearVelocity(btVector3(0.0, 0.0, -5.0));
-				if (keys[SDL_SCANCODE_KP_5])
-					bodies["box1"]->setLinearVelocity(btVector3(-5.0, 0.0, 0.0));
+			if (keys[SDL_SCANCODE_SPACE]) {
+				playerBody->setLinearVelocity(jump(SPEED_CAP_Y));
 			}
-			else if (mode == EDIT) {
+
+			if (keys[SDL_SCANCODE_KP_8])
+				bodies["box1"]->setLinearVelocity(btVector3(5.0, 0.0, 0.0));
+			if (keys[SDL_SCANCODE_KP_4])
+				bodies["box1"]->setLinearVelocity(btVector3(0.0, 0.0, 5.0));
+			if (keys[SDL_SCANCODE_KP_6])
+				bodies["box1"]->setLinearVelocity(btVector3(0.0, 0.0, -5.0));
+			if (keys[SDL_SCANCODE_KP_5])
+				bodies["box1"]->setLinearVelocity(btVector3(-5.0, 0.0, 0.0));
+		}
+		else if (mode == EDIT) {
 
 			btVector3 playerPos = playerBody->getWorldTransform().getOrigin();
 
@@ -1007,7 +1007,7 @@ namespace SceneManager {
 					if (keys[SDL_SCANCODE_KP_9]) { //moveDOWN
 						glm::vec3 move = glm::vec3(std::get<1>(temp[i]).x, std::get<1>(temp[i]).y - 0.01, std::get<1>(temp[i]).z);
 						temp[i] = make_tuple(std::get<0>(temp[i]), move, std::get<2>(temp[i]), std::get<3>(temp[i]));
-					}	
+					}
 				}
 				if (!shiftPressed) {
 					if (keys[SDL_SCANCODE_KP_1]) {
@@ -1152,7 +1152,7 @@ namespace SceneManager {
 				}
 			}
 		}
-		
+
 		if (keys[SDL_SCANCODE_R]) {
 			//cout << getLinearVelocityInBodyFrame(playerBody).x() << " " << getLinearVelocityInBodyFrame(playerBody).y() << " " << getLinearVelocityInBodyFrame(playerBody).z() << "\n";
 			player->setPosition(glm::vec3(player->getPosition().x, player->getPosition().y + 0.1, player->getPosition().z));
@@ -1198,6 +1198,7 @@ namespace SceneManager {
 		//	if (keys[SDL_SCANCODE_5])cout << bullet.size() << endl;
 	}
 
+
 	void renderObject(glm::mat4 proj, Model *modelData, glm::vec3 pos, glm::vec3 scale, btQuaternion& rotation, GLuint shader, GLuint texture) {
 
 		glm::mat4 model;
@@ -1207,7 +1208,7 @@ namespace SceneManager {
 		//model = glm::rotate(model, float(rotation.y * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
 		glm::vec3 eulerRotation;
 		toEulerianAngle(rotation, eulerRotation);
-		model = glm::rotate(model, eulerRotation.x, glm::vec3(1.0f, 0.0f ,0.0f));
+		model = glm::rotate(model, eulerRotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
 		model = glm::rotate(model, eulerRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::rotate(model, eulerRotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
 		model = glm::scale(model, scale);	// It's a bit too big for our scene, so scale it down
@@ -1340,21 +1341,21 @@ namespace SceneManager {
 	}
 
 	void camera() {
-//		if (pointOfView == FIRST_PERSON) {
-			at = moveForward(player->getPosition(), rotationAngles.y, 1.0f);
-			at.y -= rotationAngles.x;
+		//		if (pointOfView == FIRST_PERSON) {
+		at = moveForward(player->getPosition(), rotationAngles.y, 1.0f);
+		at.y -= rotationAngles.x;
 
-			view = glm::lookAt(player->getPosition(), at, up);
-			//mvStack.top() = glm::lookAt(player->getPosition(), at, up);
-		//}
+		view = glm::lookAt(player->getPosition(), at, up);
+		//mvStack.top() = glm::lookAt(player->getPosition(), at, up);
+	//}
 
 
-		//else {
-		//	at = player->getPosition(); // look at player position
-		//	eye = moveForward(at, pitch, -6.0f); // move behind him
-		//	eye.y += pitch; // displacement determined by user interaction
-		//	view = glm::lookAt(eye, at, up);
-		//}
+	//else {
+	//	at = player->getPosition(); // look at player position
+	//	eye = moveForward(at, pitch, -6.0f); // move behind him
+	//	eye.y += pitch; // displacement determined by user interaction
+	//	view = glm::lookAt(eye, at, up);
+	//}
 
 	}
 
@@ -1416,7 +1417,7 @@ namespace SceneManager {
 			btVector3 p = bodies[id_pair.first]->getWorldTransform().getOrigin();
 			btVector3 y = (((btBoxShape*)bodies[id_pair.first]->getCollisionShape())->getHalfExtentsWithMargin());
 			glm::vec3 spherePosition = glm::vec3(p.x(), p.y(), p.z());
-			glm::vec3 position = glm::vec3(p.x() + get<3>(models[id_pair.first]).x, p.y()-y.y() + get<3>(models[id_pair.first]).y, p.z() + get<3>(models[id_pair.first]).z);
+			glm::vec3 position = glm::vec3(p.x() + get<3>(models[id_pair.first]).x, p.y() - y.y() + get<3>(models[id_pair.first]).y, p.z() + get<3>(models[id_pair.first]).z);
 			btQuaternion rotation = bodies[id_pair.first]->getWorldTransform().getRotation().normalized();
 
 			if (id_pair.second->getCollisionShape()->getShapeType() == BOX_SHAPE_PROXYTYPE) {
@@ -1434,7 +1435,7 @@ namespace SceneManager {
 				bt_manager->renderSphere(bodies[id_pair.first], view, projection, modelTypes["sphere"], shader, defaultTexture);
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 				glEnable(GL_CULL_FACE);*/
-				renderObject(projection, modelTypes[get<0>(models[id_pair.first])], spherePosition, get<1>(models[id_pair.first]),  rotation, shader, defaultTexture);
+				renderObject(projection, modelTypes[get<0>(models[id_pair.first])], spherePosition, get<1>(models[id_pair.first]), rotation, shader, defaultTexture);
 			}
 
 			if (id_pair.second->getCollisionShape()->getShapeType() == CAPSULE_SHAPE_PROXYTYPE) {
@@ -1582,7 +1583,7 @@ namespace SceneManager {
 					else {
 						temp = "WAIT";
 					}
-						h_manager->renderEditHud("Timer", temp, texturedProgram, modelTypes["cube"], glm::vec3(0.7f, 0.05f, 0.9f));
+					h_manager->renderEditHud("Timer", temp, texturedProgram, modelTypes["cube"], glm::vec3(0.7f, 0.05f, 0.9f));
 				}
 			}
 			glDepthMask(GL_TRUE);
