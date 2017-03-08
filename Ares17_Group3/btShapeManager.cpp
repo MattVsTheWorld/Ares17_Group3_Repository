@@ -27,7 +27,7 @@ btRigidBody* btShapeManager::addBox(float width, float height, float depth, floa
 	btRigidBody::btRigidBodyConstructionInfo info(mass, motion, box, inertia);
 
 	btRigidBody* body = new btRigidBody(info);
-	btSettings.world->addRigidBody(body);
+	btSettings.world->addRigidBody(body, COL_DEFAULT, COLLIDE_ALL);
 	//bodies.push_back(body);
 
 	return body;
@@ -46,7 +46,7 @@ btRigidBody* btShapeManager::addSphere(float rad, float x, float y, float z, flo
 	btMotionState* motion = new btDefaultMotionState(t);
 	btRigidBody::btRigidBodyConstructionInfo info(mass, motion, sphere, inertia);
 	btRigidBody* body = new btRigidBody(info);
-	btSettings.world->addRigidBody(body);
+	btSettings.world->addRigidBody(body, COL_DEFAULT, COLLIDE_ALL);
 	//bodies.push_back(body);
 	return body;
 }
@@ -65,7 +65,7 @@ btRigidBody* btShapeManager::addCapsule(float rad, float height, float x, float 
 	btRigidBody::btRigidBodyConstructionInfo info(mass, motion, capsule, inertia);
 
 	btRigidBody* body = new btRigidBody(info);
-	btSettings.world->addRigidBody(body);
+	btSettings.world->addRigidBody(body, COL_DEFAULT, COLLIDE_ALL);
 
 	return body;
 }
@@ -140,14 +140,33 @@ void btShapeManager::addToWorld(btRigidBody* body) {
 	btSettings.world->addRigidBody(body);
 }
 
+void btShapeManager::addToWorld(btRigidBody* body, collisiontype COLL_TYPE, int collidesWith) {
+	btSettings.world->addRigidBody(body, COLL_TYPE, collidesWith);
+}
+
+
 void btShapeManager::addGhostToWorld(btPairCachingGhostObject* ghost) {
 	btSettings.world->addCollisionObject(ghost, btBroadphaseProxy::KinematicFilter, btBroadphaseProxy::StaticFilter | btBroadphaseProxy::DefaultFilter); // ?
+	btSettings.world->getPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());
+}
+
+void btShapeManager::addGhostToWorld(btPairCachingGhostObject* ghost, collisiontype COLL_TYPE, int collidesWith) {
+	btSettings.world->addCollisionObject(ghost, COLL_TYPE, collidesWith); // ?
+	
+
 	// world->addCollisionObject(ghostobject, btBroadphaseProxy::KinematicFilter, btBroadphaseProxy::StaticFilter | btBroadphaseProxy::DefaultFilter);
 	btSettings.world->getPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());
 }
 
 btBroadphasePair* btShapeManager::findWorldPair(const btBroadphasePair &pair) {
 	return btSettings.world->getPairCache()->findPair(pair.m_pProxy0, pair.m_pProxy1);
+}
+
+void btShapeManager::removeObject(btRigidBody* body) {
+	btSettings.world->removeCollisionObject(body);
+}
+void btShapeManager::removeObject(btPairCachingGhostObject* ghost) {
+	btSettings.world->removeCollisionObject(ghost);
 }
 
 // Create plane + info on bullet

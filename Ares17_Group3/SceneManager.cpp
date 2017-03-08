@@ -28,11 +28,12 @@ namespace SceneManager {
 	Skybox *skybox;
 	btShapeManager *bt_manager;
 	Projectile *projectile_manager; // !++!
+	SoundManager *s_manager; // ++!
 
 	unsigned int lastTime = 0, currentTime;
 	float dt_secs;
-	enum pov { FIRST_PERSON, THIRD_PERSON };
-	pov pointOfView = FIRST_PERSON;
+//	enum pov { FIRST_PERSON, THIRD_PERSON };
+//	pov pointOfView = FIRST_PERSON;
 	enum modes { PLAY, EDIT };
 	modes mode = PLAY;
 	enum bound { BOX, SPHERE, CAPSULE };
@@ -77,6 +78,7 @@ namespace SceneManager {
 	tuple<std::string, glm::vec3, glm::vec3, glm::vec3> temp[2]; //name, position, scale, rotation
 
 	string currentModel = "car";
+
 	string currentBounding = "box";
 	
 	// TEST
@@ -519,6 +521,7 @@ namespace SceneManager {
 		else cout << "\nMission failed. We'll get em next time. \n. Unable to open file";
 	}
 
+
 	void initBoxes() {
 		readFile();
 
@@ -556,8 +559,10 @@ namespace SceneManager {
 	}
 
 	void initmodelTypes() {
+
 		modelTypes.insert(std::pair<string, Model*>("pistol", new Model("Models/Weapons/Socom pistol.obj")));
 		modelTypes.insert(std::pair<string, Model*>("plasmacutter", new Model("Models/Weapons/Plasmacutter/DYIPlasmcutter.obj")));
+
 		modelTypes.insert(std::pair<string, Model*>("cube", new Model("Models/cube.obj")));
 		modelTypes.insert(std::pair<string, Model*>("box", modelTypes["cube"]));
 		modelTypes.insert(std::pair<string, Model*>("sphere", new Model("Models/sphere.obj")));
@@ -595,9 +600,9 @@ namespace SceneManager {
 		}
 		if (boundingType != SPHERE)
 		{
-			playerBody->setAngularFactor(0); // Doesn't fall sideways
+			bodies[key]->setAngularFactor(0); // Doesn't fall sideways
 		}
-		playerBody->setFriction(8);
+		bodies[key]->setFriction(8);
 		bodies[key]->setActivationState(DISABLE_DEACTIVATION);
 		models.insert(std::pair<string, std::tuple<string, glm::vec3, glm::vec3>>(key, make_tuple(currentModel, modelScale, modelRotation)));
 	}
@@ -620,9 +625,11 @@ namespace SceneManager {
 
 		playerBody = new btRigidBody(info);
 		playerBody->setAngularFactor(0); // Doesn't fall sideways
-		bt_manager->addToWorld(playerBody);
+		int playerCollidesWith = COL_DEFAULT | COL_ENEMY;
+		// body, group, mask
+		bt_manager->addToWorld(playerBody, COL_PLAYER, playerCollidesWith);
 		playerBody->setActivationState(DISABLE_DEACTIVATION);
-		playerBody->setFriction(8); 
+		playerBody->setFriction(FRICTION);
 
 		// Now ghost
 		ghostObject = new btPairCachingGhostObject();								// create object
@@ -630,7 +637,7 @@ namespace SceneManager {
 		ghostObject->setWorldTransform(t);											// set world transform	
 		ghostObject->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);  // disable collision response // could also add CF_CHARACTER_OBJECT // If I knew what that flag did...
 
-		bt_manager->addGhostToWorld(ghostObject);
+		bt_manager->addGhostToWorld(ghostObject, COL_PLAYER, playerCollidesWith);
 
 	}
 
@@ -658,7 +665,7 @@ namespace SceneManager {
 						const btVector3& ptB = pt.getPositionWorldOnB();
 						const btVector3& normalOnB = pt.m_normalWorldOnB;
 						// <START>  handle collisions here
-						cout << "Player colliding with something while jumping." << endl;
+					//	cout << "Player colliding with something while jumping." << endl;
 						player->setState(ON_GROUND);
 						//  <END>   handle collisions here
 					}
@@ -669,7 +676,7 @@ namespace SceneManager {
 
 	void init(void) {
 
-	//	shaderProgram = ShaderManager::initShaders("Shaders/phong-tex.vert", "Shaders/phong-tex.frag");
+		//	shaderProgram = ShaderManager::initShaders("Shaders/phong-tex.vert", "Shaders/phong-tex.frag");
 		texturedProgram = ShaderManager::initShaders("Shaders/textured.vert", "Shaders/textured.frag");
 		modelProgram = ShaderManager::initShaders("Shaders/modelLoading.vert", "Shaders/modelLoading.frag");
 		//+++
@@ -677,6 +684,9 @@ namespace SceneManager {
 		//+++
 		bt_manager = new btShapeManager();
 		projectile_manager = new Projectile(bt_manager);
+		//!!
+		s_manager = new SoundManager();
+		//s_manager->loadSample("Sounds/wilhelm.wav");
 
 		initmodelTypes();
 
@@ -719,7 +729,7 @@ namespace SceneManager {
 			std::cout << "Framebuffer not complete!" << std::endl;
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
-	
+
 	/* Might be useful http://bulletphysics.org/Bullet/phpBB3/viewtopic.php?f=9&t=2069
 	btVector3 getVelocityAtWorldPosition(btRigidBody* body, const btVector3& worldposition, bool local)
 	{
@@ -745,6 +755,7 @@ namespace SceneManager {
 			rotationAngles.y += 360.0;
 		if (rotationAngles.y > 360.0)
 			rotationAngles.y -= 360;
+
 	}
 
 	int mass = 0;
@@ -804,12 +815,12 @@ namespace SceneManager {
 		motion->setWorldTransform(t);
 
 		const Uint8 *keys = SDL_GetKeyboardState(NULL);
-		if (keys[SDL_SCANCODE_LEFTBRACKET]) {
-			mode = PLAY;
-		}
-		else if (keys[SDL_SCANCODE_RIGHTBRACKET]) {
-			mode = EDIT;
-		}
+			if (keys[SDL_SCANCODE_LEFTBRACKET]) {
+				mode = PLAY;
+			}
+			else if (keys[SDL_SCANCODE_RIGHTBRACKET]) {
+				mode = EDIT;
+			}
 
 		float increase;
 		if (mode == PLAY) {
@@ -818,19 +829,19 @@ namespace SceneManager {
 					if (coolDown <= 0.0f) {
 						leftClick = true;
 						coolDown = COOL_TIME;
-						cout << "Attempting to shoot bullet." << endl;
+				//		cout << "Attempting to shoot bullet." << endl;
 						projectile_manager->addProjectile(moveForward(player->getPosition(), rotationAngles, 1), PROJ_SPEED, (rotationAngles.y*DEG_TO_RADIAN), rotationAngles.x); //!++!
-																																			  //cout << rotationAngles.x << "\n";
+						s_manager->playSound(s_manager->getSound(2), 2, 1);	
+            //cout << rotationAngles.x << "\n";
 																																			  //		Projectile* bullet = new Projectile(bt_manager, glm::vec3(0, 0, 0), 1);
 					}
+					if (sdlEvent.button.button == SDL_BUTTON_RIGHT) rightClick = true;
 				}
-				if (sdlEvent.button.button == SDL_BUTTON_RIGHT) rightClick = true;
-			}
 
-			if (sdlEvent.type == SDL_MOUSEBUTTONUP  && pointOfView == FIRST_PERSON) {
-				leftClick = false;
-				rightClick = false;
-			}
+				if (sdlEvent.type == SDL_MOUSEBUTTONUP) { //  && pointOfView == FIRST_PERSON) {
+					leftClick = false;
+					rightClick = false;
+				}
 
 			if (player->getState() == ON_GROUND)
 				increase = 1.0f;
@@ -851,20 +862,20 @@ namespace SceneManager {
 			}
 
 
-			if (keys[SDL_SCANCODE_SPACE]) {
-				playerBody->setLinearVelocity(jump(SPEED_CAP_Y));
-			}
+				if (keys[SDL_SCANCODE_SPACE]) {
+					playerBody->setLinearVelocity(jump(SPEED_CAP_Y));
+				}
 
-			if (keys[SDL_SCANCODE_KP_8])
-				bodies["box1"]->setLinearVelocity(btVector3(5.0, 0.0, 0.0));
-			if (keys[SDL_SCANCODE_KP_4])
-				bodies["box1"]->setLinearVelocity(btVector3(0.0, 0.0, 5.0));
-			if (keys[SDL_SCANCODE_KP_6])
-				bodies["box1"]->setLinearVelocity(btVector3(0.0, 0.0, -5.0));
-			if (keys[SDL_SCANCODE_KP_5])
-				bodies["box1"]->setLinearVelocity(btVector3(-5.0, 0.0, 0.0));
-		}
-		else if (mode == EDIT) {
+				if (keys[SDL_SCANCODE_KP_8])
+					bodies["box1"]->setLinearVelocity(btVector3(5.0, 0.0, 0.0));
+				if (keys[SDL_SCANCODE_KP_4])
+					bodies["box1"]->setLinearVelocity(btVector3(0.0, 0.0, 5.0));
+				if (keys[SDL_SCANCODE_KP_6])
+					bodies["box1"]->setLinearVelocity(btVector3(0.0, 0.0, -5.0));
+				if (keys[SDL_SCANCODE_KP_5])
+					bodies["box1"]->setLinearVelocity(btVector3(-5.0, 0.0, 0.0));
+			}
+			else if (mode == EDIT) {
 
 			std::pair<std::string, btRigidBody*> selectedObject = std::make_pair(bodies.begin()->first, bodies.begin()->second);
 
@@ -874,7 +885,7 @@ namespace SceneManager {
 			btTransform t;
 			t.setIdentity();
 
-			if (sdlEvent.type == SDL_MOUSEBUTTONDOWN && pointOfView == FIRST_PERSON) {
+			if (sdlEvent.type == SDL_MOUSEBUTTONDOWN) { // && pointOfView == FIRST_PERSON) {
 				if (sdlEvent.button.button == SDL_BUTTON_LEFT) {
 					if (coolDown <= 0.0f) {
 						leftClick = true;
@@ -887,7 +898,7 @@ namespace SceneManager {
 				if (sdlEvent.button.button == SDL_BUTTON_RIGHT) rightClick = true;
 			}
 
-			if (sdlEvent.type == SDL_MOUSEBUTTONUP  && pointOfView == FIRST_PERSON) {
+			if (sdlEvent.type == SDL_MOUSEBUTTONUP) { //  && pointOfView == FIRST_PERSON) {
 				leftClick = false;
 				rightClick = false;
 			}
@@ -1180,10 +1191,10 @@ namespace SceneManager {
 			bodies["box1"]->setMotionState(motion);
 		}
 		//++++
-		if (keys[SDL_SCANCODE_K]) {
-			if (pointOfView == FIRST_PERSON) pointOfView = THIRD_PERSON;
-			else pointOfView = FIRST_PERSON;
-		}
+		//if (keys[SDL_SCANCODE_K]) {
+		//	if (pointOfView == FIRST_PERSON) pointOfView = THIRD_PERSON;
+		//	else pointOfView = FIRST_PERSON;
+		//}
 
 		if (keys[SDL_SCANCODE_1]) {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -1203,6 +1214,7 @@ namespace SceneManager {
 	}
 
 	void renderObject(glm::mat4 proj, Model *modelData, glm::vec3 pos, glm::vec3 scale, btQuaternion& rotation, GLuint shader, GLuint texture) {
+
 		glm::mat4 model;
 		model = glm::translate(model, pos);
 		//model = glm::rotate(model, float(-rotationAngles.y*DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -1343,19 +1355,19 @@ namespace SceneManager {
 	}
 
 	void camera() {
-		if (pointOfView == FIRST_PERSON) {
+//		if (pointOfView == FIRST_PERSON) {
 			at = moveForward(player->getPosition(), rotationAngles.y, 1.0f);
 			at.y -= rotationAngles.x;
 			view = glm::lookAt(player->getPosition(), at, up);
 			//mvStack.top() = glm::lookAt(player->getPosition(), at, up);
-		}
+		//}
 
-		else {
-			at = player->getPosition(); // look at player position
-			eye = moveForward(at, rotationAngles.x, -6.0f); // move behind him
-			eye.y += rotationAngles.x; // displacement determined by user interaction
-			view = glm::lookAt(eye, at, up);
-		}
+		//else {
+		//	at = player->getPosition(); // look at player position
+		//	eye = moveForward(at, pitch, -6.0f); // move behind him
+		//	eye.y += pitch; // displacement determined by user interaction
+		//	view = glm::lookAt(eye, at, up);
+		//}
 
 	}
 
@@ -1451,13 +1463,14 @@ namespace SceneManager {
 		///+++++++++++++++
 		// RENDERING modelTypes
 
-		if (pointOfView == THIRD_PERSON)
-			renderPlayer(projection, modelTypes["box"], glm::vec3(player->getPosition().x, player->getPosition().y - 1.75, player->getPosition().z), glm::vec3(0.2, 0.2, 0.2), glm::vec3(0.0, -rotationAngles.y, 0.0), shader, 0);
-		// rip robot
+
+		//if (pointOfView == THIRD_PERSON)
+		//	renderObject(projection, modelTypes["nanosuit"], glm::vec3(player->getPosition().x, player->getPosition().y - 1.75, player->getPosition().z), glm::vec3(0.2, 0.2, 0.2), glm::vec3(0.0, -yaw, 0.0), shader, 0);
+		//// rip robot
 		  //		renderObject(projection, modelTypes["robot"], glm::vec3(4.0, 0.0, 0.0), glm::vec3(0.2, 0.2, 0.2), shader);
 
-		if (pointOfView == FIRST_PERSON)
-			renderWeapon(projection, modelTypes["plasmacutter"], shader);
+	//	if (pointOfView == FIRST_PERSON)
+	//		renderWeapon(projection, modelTypes["plasmacutter"], shader); //TODO: Render current weapon
 
 		if (mode == EDIT) {
 			if (creation == true) {
@@ -1529,7 +1542,7 @@ namespace SceneManager {
 		//mvStack.push(modelview);
 		glDepthMask(GL_TRUE);
 		view = glm::mat4(1.0);
-		
+
 		projection = glm::perspective(float(60.0f*DEG_TO_RADIAN), SCREENWIDTH / SCREENHEIGHT, 0.1f, 150.0f);
 
 		for (int pass = 0; pass < 2; pass++) {
