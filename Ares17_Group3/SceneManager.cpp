@@ -586,15 +586,29 @@ namespace SceneManager {
 
 	void initmodelTypes() {
 		//TODO:Player model for death or something
-		modelTypes.insert(std::pair<string, Model*>("cube", new Model("Models/cube.obj")));
-		modelTypes.insert(std::pair<string, Model*>("box", modelTypes["cube"]));
-		modelTypes.insert(std::pair<string, Model*>("sphere", new Model("Models/sphere.obj")));
-		modelTypes.insert(std::pair<string, Model*>("capsule", modelTypes["sphere"]));
-		modelTypes.insert(std::pair<string, Model*>("car", new Model("Models/Car/model.obj")));
-		modelTypes.insert(std::pair<string, Model*>("house", new Model("Models/House/houselow.obj")));
+		//Enemies
 		modelTypes.insert(std::pair<string, Model*>("robot", new Model("Models/Robot/Roboto.obj")));
-		modelTypes.insert(std::pair<string, Model*>("carpile", new Model("Models/CarPile/wasteddisplay.obj")));
-		modelTypes.insert(std::pair<string, Model*>("oiltank", new Model("Models/oiltank/Oiltank.obj")));
+		//Environment
+		modelTypes.insert(std::pair<string, Model*>("cube", new Model("Models/Environment/cube.obj")));
+		modelTypes.insert(std::pair<string, Model*>("box", modelTypes["cube"]));
+		modelTypes.insert(std::pair<string, Model*>("sphere", new Model("Models/Environment/sphere.obj")));
+		modelTypes.insert(std::pair<string, Model*>("capsule", modelTypes["sphere"]));
+		modelTypes.insert(std::pair<string, Model*>("car", new Model("Models/Environment/Car/model.obj")));
+		modelTypes.insert(std::pair<string, Model*>("house", new Model("Models/Environment/House/houselow.obj")));
+		modelTypes.insert(std::pair<string, Model*>("carpile", new Model("Models/Environment/CarPile/wasteddisplay.obj")));
+		modelTypes.insert(std::pair<string, Model*>("oiltank", new Model("Models/Environment/OilTank/Oiltank.obj")));
+		modelTypes.insert(std::pair<string, Model*>("rock", new Model("Models/Environment/Rock/model.obj")));
+		modelTypes.insert(std::pair<string, Model*>("barrier", new Model("Models/Environment/Barrier/model.obj")));
+		//Collectable
+		modelTypes.insert(std::pair<string, Model*>("heart", new Model("Models/Collectable/Heart/Heart.obj")));
+		modelTypes.insert(std::pair<string, Model*>("potion", new Model("Models/Collectable/Potion/pocion lowpoly.obj")));		
+		//Guns
+		modelTypes.insert(std::pair<string, Model*>("ak47", new Model("Models/Guns/AK47/Gun_low_poly.obj")));
+		modelTypes.insert(std::pair<string, Model*>("pistol", new Model("Models/Guns/Pistol/Gun.obj")));
+		modelTypes.insert(std::pair<string, Model*>("scifigun", new Model("Models/Guns/Scifi/25ad7fc3a09f4a958dd62b5b522257ee.obj")));
+		modelTypes.insert(std::pair<string, Model*>("rifle", new Model("Models/Guns/Rifle/gun_rifle_lo.obj")));
+		modelTypes.insert(std::pair<string, Model*>("scifipistol", new Model("Models/Guns/ScifiPistol/ceeb75e9f4e34b6191d92c38a470453d.obj")));
+		modelTypes.insert(std::pair<string, Model*>("nukacola", new Model("Models/Guns/NukaCola/NukaColaGun.obj")));
 	}
 
 	void insertBounding(glm::vec3 boundingPos, glm::vec3 modelScale, glm::vec3 boundingScale, glm::vec3 modelRotation, glm::vec3 boundingRotation, float mass) {
@@ -889,7 +903,7 @@ namespace SceneManager {
 
 			btTransform t;
 			t.setIdentity();
-
+			
 			if (sdlEvent.type == SDL_MOUSEBUTTONDOWN) { // && pointOfView == FIRST_PERSON) {
 				if (sdlEvent.button.button == SDL_BUTTON_LEFT) {
 					if (coolDown <= 0.0f) {
@@ -969,6 +983,13 @@ namespace SceneManager {
 				std::cout << "Bounding Type: CAPSULE" << std::endl;
 			}
 
+			/*if (keys[SDL_SCANCODE_R]) {
+				double x = -3.05048;
+				double y = 3;
+				double z = -30.6176;
+				t.setOrigin(btVector3(x, y, z));
+				playerBody->setWorldTransform(t);
+			}*/
 
 			if (creation == true) {
 				if (keys[SDL_SCANCODE_KP_8]) {
@@ -1153,13 +1174,6 @@ namespace SceneManager {
 			}
 		}
 
-		if (keys[SDL_SCANCODE_R]) {
-			//cout << getLinearVelocityInBodyFrame(playerBody).x() << " " << getLinearVelocityInBodyFrame(playerBody).y() << " " << getLinearVelocityInBodyFrame(playerBody).z() << "\n";
-			player->setPosition(glm::vec3(player->getPosition().x, player->getPosition().y + 0.1, player->getPosition().z));
-		}
-		else if (keys[SDL_SCANCODE_F]) {
-			player->setPosition(glm::vec3(player->getPosition().x, player->getPosition().y - 0.1, player->getPosition().z));
-		}
 		//++++
 		if (keys[SDL_SCANCODE_M]) {
 			//	cout << "Curiously cinnamon\n";
@@ -1193,6 +1207,11 @@ namespace SceneManager {
 		//	if (keys[SDL_SCANCODE_3]) bodies[4]->setLinearVelocity(btVector3(0.0, 0.0, 4.0));
 		if (keys[SDL_SCANCODE_ESCAPE]) {
 			exit(0);
+		}
+
+		if (keys[SDL_SCANCODE_SEMICOLON]) {
+			std::cout << "Pos: " << eye.x << ", " << eye.y << ", " << eye.z << std::endl;
+			std::cout << "At: " << at.x << ", " << at.y << ", " << at.z << std::endl;
 		}
 
 		//	if (keys[SDL_SCANCODE_5])cout << bullet.size() << endl;
@@ -1421,29 +1440,29 @@ namespace SceneManager {
 			btQuaternion rotation = bodies[id_pair.first]->getWorldTransform().getRotation().normalized();
 
 			if (id_pair.second->getCollisionShape()->getShapeType() == BOX_SHAPE_PROXYTYPE) {
-				/*glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 				glDisable(GL_CULL_FACE);
 				bt_manager->renderBox(bodies[id_pair.first], view, projection, modelTypes["cube"], shader, groundTexture);
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-				glEnable(GL_CULL_FACE);*/
+				glEnable(GL_CULL_FACE);
 				renderObject(projection, modelTypes[get<0>(models[id_pair.first])], position, get<1>(models[id_pair.first]), rotation, shader, groundTexture);
 			}
 
 			if (id_pair.second->getCollisionShape()->getShapeType() == SPHERE_SHAPE_PROXYTYPE) {
-				/*glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 				glDisable(GL_CULL_FACE);
 				bt_manager->renderSphere(bodies[id_pair.first], view, projection, modelTypes["sphere"], shader, defaultTexture);
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-				glEnable(GL_CULL_FACE);*/
+				glEnable(GL_CULL_FACE);
 				renderObject(projection, modelTypes[get<0>(models[id_pair.first])], spherePosition, get<1>(models[id_pair.first]), rotation, shader, defaultTexture);
 			}
 
 			if (id_pair.second->getCollisionShape()->getShapeType() == CAPSULE_SHAPE_PROXYTYPE) {
-				/*glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 				glDisable(GL_CULL_FACE);
 				bt_manager->renderCapsule(bodies[id_pair.first], view, projection, modelTypes["capsule"], shader, defaultTexture);
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-				glEnable(GL_CULL_FACE);*/
+				glEnable(GL_CULL_FACE);
 				renderObject(projection, modelTypes[get<0>(models[id_pair.first])], spherePosition, get<1>(models[id_pair.first]), rotation, shader, defaultTexture);
 			}
 			i++;
