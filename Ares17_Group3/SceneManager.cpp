@@ -59,6 +59,10 @@ namespace SceneManager {
 	/// End
 	//////////////////
 
+	// +++ \_/
+	AbstractNPC *enemies[10];
+	// +++ /-\
+
 	const char *testTexFiles[6] = {
 		"Town-skybox/Town_bk.bmp", "Town-skybox/Town_ft.bmp", "Town-skybox/Town_rt.bmp", "Town-skybox/Town_lf.bmp", "Town-skybox/Town_up.bmp", "Town-skybox/Town_dn.bmp"
 	};
@@ -136,7 +140,7 @@ namespace SceneManager {
 			speed = btVector3(speed.x() + (speed.absolute().x() > SPEED_CAP_XZ ? 0 : _speed*std::cos(angle*DEG_TO_RADIAN)), speed.y(), speed.z() + (speed.absolute().z() > SPEED_CAP_XZ ? 0 : _speed*std::sin(angle*DEG_TO_RADIAN)));
 		return speed;
 	}
-
+	//TODO: fix when gameplay done ||TRIGGERED||
 	btVector3 jump(GLfloat _speed) {
 		btVector3 speed = getLinearVelocityInBodyFrame(playerBody);
 		if (player->getState() != JUMPING) {
@@ -690,7 +694,7 @@ namespace SceneManager {
 						const btVector3& ptB = pt.getPositionWorldOnB();
 						const btVector3& normalOnB = pt.m_normalWorldOnB;
 						// <START>  handle collisions here
-					//	cout << "Player colliding with something while jumping." << endl;
+						cout << "Player colliding with something while jumping." << endl;
 						player->setState(ON_GROUND);
 						//  <END>   handle collisions here
 					}
@@ -725,6 +729,13 @@ namespace SceneManager {
 
 		h_manager = new hudManager();
 		skybox = new Skybox(skyTexFiles);
+
+		glm::mat4 projection;
+		// +++ \_/
+		// health, range, manager, sp, radius, height, mass, model, shader, textuer
+		enemies[0] = new Heavy(new Melee(new NonPC(100, 10, bt_manager, glm::vec3(0, 10, 0), 1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture)));
+		// +++ /-\
+
 
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_BLEND);
@@ -1410,6 +1421,8 @@ namespace SceneManager {
 		glEnable(GL_CULL_FACE);*/
 		///+++++++++++++++
 
+
+
 		int i = 0;
 		for (const auto& id_pair : bodies) {
 			// First = name / key
@@ -1421,35 +1434,44 @@ namespace SceneManager {
 			btQuaternion rotation = bodies[id_pair.first]->getWorldTransform().getRotation().normalized();
 
 			if (id_pair.second->getCollisionShape()->getShapeType() == BOX_SHAPE_PROXYTYPE) {
-				/*glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 				glDisable(GL_CULL_FACE);
 				bt_manager->renderBox(bodies[id_pair.first], view, projection, modelTypes["cube"], shader, groundTexture);
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-				glEnable(GL_CULL_FACE);*/
+				glEnable(GL_CULL_FACE);
 				renderObject(projection, modelTypes[get<0>(models[id_pair.first])], position, get<1>(models[id_pair.first]), rotation, shader, groundTexture);
 			}
 
 			if (id_pair.second->getCollisionShape()->getShapeType() == SPHERE_SHAPE_PROXYTYPE) {
-				/*glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 				glDisable(GL_CULL_FACE);
 				bt_manager->renderSphere(bodies[id_pair.first], view, projection, modelTypes["sphere"], shader, defaultTexture);
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-				glEnable(GL_CULL_FACE);*/
+				glEnable(GL_CULL_FACE);
 				renderObject(projection, modelTypes[get<0>(models[id_pair.first])], spherePosition, get<1>(models[id_pair.first]), rotation, shader, defaultTexture);
 			}
 
 			if (id_pair.second->getCollisionShape()->getShapeType() == CAPSULE_SHAPE_PROXYTYPE) {
-				/*glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 				glDisable(GL_CULL_FACE);
 				bt_manager->renderCapsule(bodies[id_pair.first], view, projection, modelTypes["capsule"], shader, defaultTexture);
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-				glEnable(GL_CULL_FACE);*/
+				glEnable(GL_CULL_FACE);
 				renderObject(projection, modelTypes[get<0>(models[id_pair.first])], spherePosition, get<1>(models[id_pair.first]), rotation, shader, defaultTexture);
 			}
 			i++;
 		}
 		///+++++++++++++++
 		// RENDERING modelTypes
+
+		//++! \_/
+		//TODO: Finish enemies
+		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		//glDisable(GL_CULL_FACE);
+		enemies[0]->render(modelTypes["robot"], view, projection);
+	//	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	//	glEnable(GL_CULL_FACE);
+		//--------
 
 
 		//if (pointOfView == THIRD_PERSON)
