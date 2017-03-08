@@ -19,6 +19,7 @@ btRigidBody* btShapeManager::addBox(float width, float height, float depth, floa
 	t.setIdentity();
 	t.setOrigin(btVector3(x, y, z));
 	btBoxShape* box = new btBoxShape(btVector3(width, height, depth));
+	
 	btVector3 inertia(0, 0, 0);
 	if (mass != 0.0)
 		box->calculateLocalInertia(mass, inertia);
