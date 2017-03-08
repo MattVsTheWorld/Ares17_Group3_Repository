@@ -1,4 +1,6 @@
 #include "SceneManager.h"
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/quaternion.hpp>
 
 using namespace std;
 typedef std::pair<string, btRigidBody*> bodyID;
@@ -75,7 +77,8 @@ namespace SceneManager {
 	
 	tuple<std::string, glm::vec3, glm::vec3, glm::vec3> temp[2]; //name, position, scale, rotation
 
-	string currentModel = "box";
+	string currentModel = "car";
+
 	string currentBounding = "box";
 	
 	// TEST
@@ -86,9 +89,7 @@ namespace SceneManager {
 
 	glm::mat4 view;
 
-	GLfloat pitch = 0.0f;
-	GLfloat yaw = 0.0f;
-	GLfloat roll = 0.0f;
+	glm::vec3 rotationAngles(static_cast<GLfloat>(0.0f), static_cast<GLfloat>(0.0f), static_cast<GLfloat>(0.0f));
 
 	glm::vec3 eye(2.0f, 3.0f, -6.0f);
 	glm::vec3 at(0.0f, 0.5f, -1.0f);
@@ -96,17 +97,17 @@ namespace SceneManager {
 
 	// Old movement methods, used in edit mode (?)
 	glm::vec3 moveForward(glm::vec3 pos, GLfloat angle, GLfloat d) {
-		return glm::vec3(pos.x + d*std::sin(yaw*DEG_TO_RADIAN), pos.y, pos.z - d*std::cos(yaw*DEG_TO_RADIAN));
+		return glm::vec3(pos.x + d*std::sin(rotationAngles.y*DEG_TO_RADIAN), pos.y, pos.z - d*std::cos(rotationAngles.y*DEG_TO_RADIAN));
 	}
 
-	glm::vec3 moveForward(glm::vec3 pos, GLfloat yaw, GLfloat pitch, GLfloat d) { // TODO: fix
-		//cout << "x" << d*std::sin(yaw*DEG_TO_RADIAN) << endl;
-		//cout << "y" << -d*std::sin(pitch) << endl;
-		//cout << "z" << -d*std::cos(yaw*DEG_TO_RADIAN) << endl;
-		return glm::vec3(pos.x + d*std::sin(yaw*DEG_TO_RADIAN), pos.y - d*std::sin(pitch), pos.z - d*std::cos(yaw*DEG_TO_RADIAN));
+	glm::vec3 moveForward(glm::vec3 pos, glm::vec3 rotationAngles, GLfloat d) { // TODO: fix
+		//cout << "x" << d*std::sin(rotationAngles.y*DEG_TO_RADIAN) << endl;
+		//cout << "y" << -d*std::sin(rotationAngles.x) << endl;
+		//cout << "z" << -d*std::cos(rotationAngles.y*DEG_TO_RADIAN) << endl;
+		return glm::vec3(pos.x + d*std::sin(rotationAngles.y*DEG_TO_RADIAN), pos.y - d*std::sin(rotationAngles.x), pos.z - d*std::cos(rotationAngles.y*DEG_TO_RADIAN));
 	}
 	glm::vec3 moveRight(glm::vec3 pos, GLfloat angle, GLfloat d) {
-		return glm::vec3(pos.x + d*std::cos(yaw*DEG_TO_RADIAN), pos.y, pos.z + d*std::sin(yaw*DEG_TO_RADIAN));
+		return glm::vec3(pos.x + d*std::cos(rotationAngles.y*DEG_TO_RADIAN), pos.y, pos.z + d*std::sin(rotationAngles.y*DEG_TO_RADIAN));
 	}
 
 	static btVector3 getLinearVelocityInBodyFrame(btRigidBody* body)
@@ -145,6 +146,50 @@ namespace SceneManager {
 			player->setState(JUMPING);
 		}
 		return speed;
+	}
+
+	/*static void toEulerianAngle(const glm::quat& q, glm::vec3& rotationAngles)
+	{
+		double ysqr = q.y * q.y;
+
+		// rotationAngles.z (x-axis rotation)
+		double t0 = +2.0 * (q.w * q.x + q.y * q.z);
+		double t1 = +1.0 - 2.0 * (q.x * q.x + ysqr);
+		rotationAngles.z = std::atan2(t0, t1);
+
+		// rotationAngles.x (y-axis rotation)
+		double t2 = +2.0 * (q.w * q.y - q.z * q.x);
+		t2 = t2 > 1.0 ? 1.0 : t2;
+		t2 = t2 < -1.0 ? -1.0 : t2;
+		rotationAngles.x = std::asin(t2);
+
+		// rotationAngles.y (z-axis rotation)
+		double t3 = +2.0 * (q.w * q.z + q.x * q.y);
+		double t4 = +1.0 - 2.0 * (ysqr + q.z * q.z);
+		rotationAngles.y = std::atan2(t3, t4);
+	}*/
+
+	static void toEulerianAngle(const btQuaternion& q, glm::vec3& rotation)
+	{
+		double test = q.x()*q.y() + q.z()*q.w();
+		if (test > 0.499) { // singularity at north pole
+			rotation.y = 2 * atan2(q.x(), q.w());
+			rotation.x = PI / 2;
+			rotation.z = 0;
+			return;
+		}
+		if (test < -0.499) { // singularity at south pole
+			rotation.y = -2 * atan2(q.x(), q.w());
+			rotation.x = -PI / 2;
+			rotation.z = 0;
+			return;
+		}
+		double sqx = q.x()*q.x();
+		double sqy = q.y()*q.y();
+		double sqz = q.z()*q.z();
+		rotation.y = atan2(2 * q.y()*q.w() - 2 * q.x()*q.z(), 1 - 2 * sqy - 2 * sqz);
+		rotation.x = asin(2 * test);
+		rotation.z = atan2(2 * q.x()*q.w() - 2 * q.y()*q.z(), 1 - 2 * sqx - 2 * sqz);
 	}
 
 	int boxNo = 0;
@@ -186,7 +231,7 @@ namespace SceneManager {
 					boundingType = bodies.find(objType)->first;
 					modelName = get<0>(models.find(objType)->second);
 					position = bodies.find(objType)->second->getWorldTransform().getOrigin();
-					boundingScale = (((btBoxShape*)bodies.find(objType)->second->getCollisionShape())->getHalfExtentsWithMargin()) * 2; //*2 as its half
+					boundingScale = (((btBoxShape*)bodies.find(objType)->second->getCollisionShape())->getHalfExtentsWithMargin()); //*2 as its half
 					boundingRotation = glm::vec3(bodies.find(objType)->second->getWorldTransform().getRotation().getX(),
 													bodies.find(objType)->second->getWorldTransform().getRotation().getY(),
 													bodies.find(objType)->second->getWorldTransform().getRotation().getZ());
@@ -514,9 +559,10 @@ namespace SceneManager {
 	}
 
 	void initmodelTypes() {
-	//	modelTypes.insert(std::pair<string, Model*>("nanosuit", new Model("Models/Nanosuit/nanosuit.obj")));
-	//	modelTypes.insert(std::pair<string, Model*>("pistol", new Model("Models/Weapons/Socom pistol.obj")));
-//		modelTypes.insert(std::pair<string, Model*>("plasmacutter", new Model("Models/Weapons/Plasmacutter/DYIPlasmcutter.obj")));
+
+		modelTypes.insert(std::pair<string, Model*>("pistol", new Model("Models/Weapons/Socom pistol.obj")));
+		modelTypes.insert(std::pair<string, Model*>("plasmacutter", new Model("Models/Weapons/Plasmacutter/DYIPlasmcutter.obj")));
+
 		modelTypes.insert(std::pair<string, Model*>("cube", new Model("Models/cube.obj")));
 		modelTypes.insert(std::pair<string, Model*>("box", modelTypes["cube"]));
 		modelTypes.insert(std::pair<string, Model*>("sphere", new Model("Models/sphere.obj")));
@@ -649,8 +695,8 @@ namespace SceneManager {
 
 		initPlayer(1.0f, 1.5f, 40.0f);
 		initBoxes();
-		temp[0] = std::make_tuple(currentModel, at, glm::vec3(0.02, 0.02, 0.02), glm::vec3(0.0f, yaw, 0.0f));
-		temp[1] = std::make_tuple(currentBounding, std::get<1>(temp[0]), glm::vec3(0.2, 0.2, 0.2), glm::vec3(0.0f, yaw, 0.0f));
+		temp[0] = std::make_tuple(currentModel, at, glm::vec3(0.02, 0.02, 0.02), glm::vec3(0.0f, rotationAngles.y, 0.0f));
+		temp[1] = std::make_tuple(currentBounding, std::get<1>(temp[0]), glm::vec3(0.2, 0.2, 0.2), glm::vec3(0.0f, rotationAngles.y, 0.0f));
 
 		h_manager = new hudManager();
 		skybox = new Skybox(skyTexFiles);
@@ -697,18 +743,19 @@ namespace SceneManager {
 		return(wvel);
 
 	} */
-	//#define PITCHLOCK 3.0f //TODO: edit pitch lock
+//#define rotationAngles.xLOCK 3.0f //TODO: edit rotationAngles.x lock
 	void lockCamera()
 	{
-		//	cout << pitch << endl;
-		if (pitch > PITCHLOCK)
-			pitch = PITCHLOCK;
-		if (pitch < -PITCHLOCK)
-			pitch = -PITCHLOCK;
-		if (yaw < 0.0)
-			yaw += 360.0;
-		if (yaw > 360.0)
-			yaw -= 360;
+	//	cout << rotationAngles.x << endl;
+		if (rotationAngles.x > PITCHLOCK)
+			rotationAngles.x = PITCHLOCK;
+		if (rotationAngles.x < -PITCHLOCK)
+			rotationAngles.x = -PITCHLOCK;
+		if (rotationAngles.y < 0.0)
+			rotationAngles.y += 360.0;
+		if (rotationAngles.y > 360.0)
+			rotationAngles.y -= 360;
+
 	}
 
 	int mass = 0;
@@ -747,13 +794,13 @@ namespace SceneManager {
 		SDL_ShowCursor(SDL_DISABLE);
 		int tmpx, tmpy;
 		SDL_GetMouseState(&tmpx, &tmpy);
-		yaw -= 0.1*(MidX - tmpx); //for y
-		pitch -= 0.1*(MidY - tmpy) / 10; //for x
+		rotationAngles.y -= 0.1*(MidX - tmpx); //for y
+		rotationAngles.x -= 0.1*(MidY - tmpy) / 10; //for x
 		lockCamera();
 
 		//rotate the camera (move everything in the opposit direction)
-		glRotatef(-pitch, 1.0, 0.0, 0.0); //basically glm::rotate
-		glRotatef(-yaw, 0.0, 1.0, 0.0);
+		glRotatef(-rotationAngles.x, 1.0, 0.0, 0.0); //basically glm::rotate
+		glRotatef(-rotationAngles.y, 0.0, 1.0, 0.0);
 		SDL_WarpMouseInWindow(window, MidX, MidY);
 
 		//MOUSECLICK
@@ -775,18 +822,18 @@ namespace SceneManager {
 				mode = EDIT;
 			}
 
-			float increase;
-			if (mode == PLAY) {
-				if (sdlEvent.type == SDL_MOUSEBUTTONDOWN){ // && pointOfView == FIRST_PERSON) {
-					if (sdlEvent.button.button == SDL_BUTTON_LEFT) {
-						if (coolDown <= 0.0f) {
-							leftClick = true;
-							coolDown = COOL_TIME;
-							cout << "Attempting to shoot bullet." << endl;
-							projectile_manager->addProjectile(moveForward(player->getPosition(), yaw, pitch, 1.0), PROJ_SPEED, (yaw*DEG_TO_RADIAN), pitch); //!++!
-							s_manager->playSound(s_manager->getSound(2), 2, 1);																										  //cout << pitch << "\n";
-																																				  //		Projectile* bullet = new Projectile(bt_manager, glm::vec3(0, 0, 0), 1);
-						}
+		float increase;
+		if (mode == PLAY) {
+			if (sdlEvent.type == SDL_MOUSEBUTTONDOWN && pointOfView == FIRST_PERSON) {
+				if (sdlEvent.button.button == SDL_BUTTON_LEFT) {
+					if (coolDown <= 0.0f) {
+						leftClick = true;
+						coolDown = COOL_TIME;
+				//		cout << "Attempting to shoot bullet." << endl;
+						projectile_manager->addProjectile(moveForward(player->getPosition(), rotationAngles, 1), PROJ_SPEED, (rotationAngles.y*DEG_TO_RADIAN), rotationAngles.x); //!++!
+						s_manager->playSound(s_manager->getSound(2), 2, 1);	
+            //cout << rotationAngles.x << "\n";
+																																			  //		Projectile* bullet = new Projectile(bt_manager, glm::vec3(0, 0, 0), 1);
 					}
 					if (sdlEvent.button.button == SDL_BUTTON_RIGHT) rightClick = true;
 				}
@@ -796,23 +843,24 @@ namespace SceneManager {
 					rightClick = false;
 				}
 
-				if (player->getState() == ON_GROUND)
-					increase = 1.0f;
-				else increase = 0.3f;
-				if (keys[SDL_SCANCODE_W]) {
-					playerBody->setLinearVelocity(speedForward(increase, yaw, (keys[SDL_SCANCODE_A] == SDL_PRESSED || keys[SDL_SCANCODE_D] == SDL_PRESSED)));
-				}
-				else if (keys[SDL_SCANCODE_S]) {
-					playerBody->setLinearVelocity(speedForward(-increase, yaw, (keys[SDL_SCANCODE_A] == SDL_PRESSED || keys[SDL_SCANCODE_D] == SDL_PRESSED)));
-				}
-				if (keys[SDL_SCANCODE_A]) {
-					//player->setPosition(moveRight(player->getPosition(), yaw, -0.1f));
-					playerBody->setLinearVelocity(speedRight(-increase, yaw, (keys[SDL_SCANCODE_W] == SDL_PRESSED || keys[SDL_SCANCODE_S] == SDL_PRESSED)));
-				}
-				else if (keys[SDL_SCANCODE_D]) {
-					//player->setPosition(moveRight(player->getPosition(), yaw, 0.1f));
-					playerBody->setLinearVelocity(speedRight(increase, yaw, (keys[SDL_SCANCODE_W] == SDL_PRESSED || keys[SDL_SCANCODE_S] == SDL_PRESSED)));
-				}
+			if (player->getState() == ON_GROUND)
+				increase = 1.0f;
+			else increase = 0.3f;
+			if (keys[SDL_SCANCODE_W]) {
+				playerBody->setLinearVelocity(speedForward(increase, rotationAngles.y, (keys[SDL_SCANCODE_A] == SDL_PRESSED || keys[SDL_SCANCODE_D] == SDL_PRESSED)));
+			}
+			else if (keys[SDL_SCANCODE_S]) {
+				playerBody->setLinearVelocity(speedForward(-increase, rotationAngles.y, (keys[SDL_SCANCODE_A] == SDL_PRESSED || keys[SDL_SCANCODE_D] == SDL_PRESSED)));
+			}
+			if (keys[SDL_SCANCODE_A]) {
+				//player->setPosition(moveRight(player->getPosition(), rotationAngles.y, -0.1f));
+				playerBody->setLinearVelocity(speedRight(-increase, rotationAngles.y, (keys[SDL_SCANCODE_W] == SDL_PRESSED || keys[SDL_SCANCODE_S] == SDL_PRESSED)));
+			}
+			else if (keys[SDL_SCANCODE_D]) {
+				//player->setPosition(moveRight(player->getPosition(), rotationAngles.y, 0.1f));
+				playerBody->setLinearVelocity(speedRight(increase, rotationAngles.y, (keys[SDL_SCANCODE_W] == SDL_PRESSED || keys[SDL_SCANCODE_S] == SDL_PRESSED)));
+			}
+
 
 				if (keys[SDL_SCANCODE_SPACE]) {
 					playerBody->setLinearVelocity(jump(SPEED_CAP_Y));
@@ -842,8 +890,8 @@ namespace SceneManager {
 					if (coolDown <= 0.0f) {
 						leftClick = true;
 						coolDown = COOL_TIME;
-						temp[0] = std::make_tuple(currentModel, at, std::get<2>(temp[0]), glm::vec3(0.0f, yaw, 0.0f));
-						temp[1] = std::make_tuple(currentBounding, std::get<1>(temp[0]), std::get<2>(temp[1]), glm::vec3(0.0f, yaw, 0.0f));
+						temp[0] = std::make_tuple(currentModel, at, std::get<2>(temp[0]), glm::vec3(0.0f, rotationAngles.y, 0.0f));
+						temp[1] = std::make_tuple(currentBounding, std::get<1>(temp[0]), std::get<2>(temp[1]), glm::vec3(0.0f, rotationAngles.y, 0.0f));
 						creation = true;
 					}
 				}
@@ -867,22 +915,22 @@ namespace SceneManager {
 			}
 
 			if (keys[SDL_SCANCODE_W]) {
-				glm::vec3 move = moveForward(glm::vec3(playerPos.x(), playerPos.y(), playerPos.z()), yaw, 0.1f);
+				glm::vec3 move = moveForward(glm::vec3(playerPos.x(), playerPos.y(), playerPos.z()), rotationAngles.y, 0.1f);
 				t.setOrigin(btVector3(move.x, move.y, move.z));
 				playerBody->setWorldTransform(t);
 			}
 			else if (keys[SDL_SCANCODE_S]) {
-				glm::vec3 move = moveForward(glm::vec3(playerPos.x(), playerPos.y(), playerPos.z()), yaw, -0.1f);
+				glm::vec3 move = moveForward(glm::vec3(playerPos.x(), playerPos.y(), playerPos.z()), rotationAngles.y, -0.1f);
 				t.setOrigin(btVector3(move.x, move.y, move.z));
 				playerBody->setWorldTransform(t);
 			}
 			if (keys[SDL_SCANCODE_A]) {
-				glm::vec3 move = moveRight(glm::vec3(playerPos.x(), playerPos.y(), playerPos.z()), yaw, -0.1f);
+				glm::vec3 move = moveRight(glm::vec3(playerPos.x(), playerPos.y(), playerPos.z()), rotationAngles.y, -0.1f);
 				t.setOrigin(btVector3(move.x, move.y, move.z));
 				playerBody->setWorldTransform(t);
 			}
 			else if (keys[SDL_SCANCODE_D]) {
-				glm::vec3 move = moveRight(glm::vec3(playerPos.x(), playerPos.y(), playerPos.z()), yaw, 0.1f);
+				glm::vec3 move = moveRight(glm::vec3(playerPos.x(), playerPos.y(), playerPos.z()), rotationAngles.y, 0.1f);
 				t.setOrigin(btVector3(move.x, move.y, move.z));
 				playerBody->setWorldTransform(t);
 			}
@@ -937,40 +985,40 @@ namespace SceneManager {
 
 			if (creation == true) {
 				if (keys[SDL_SCANCODE_KP_8]) {
-					glm::vec3 move = glm::vec3(moveForward(glm::vec3(std::get<1>(temp[i])), yaw, 0.01));
+					glm::vec3 move = glm::vec3(moveForward(glm::vec3(std::get<1>(temp[i])), rotationAngles.y, 0.01));
 					temp[i] = make_tuple(std::get<0>(temp[i]), move, std::get<2>(temp[i]), std::get<3>(temp[i]));
 				}
 				else if (keys[SDL_SCANCODE_KP_5]) {
-					glm::vec3 move = glm::vec3(moveForward(glm::vec3(glm::vec3(std::get<1>(temp[i]))), yaw, -0.01));
+					glm::vec3 move = glm::vec3(moveForward(glm::vec3(glm::vec3(std::get<1>(temp[i]))), rotationAngles.y, -0.01));
 					temp[i] = make_tuple(std::get<0>(temp[i]), move, std::get<2>(temp[i]), std::get<3>(temp[i]));
 				}
 				if (keys[SDL_SCANCODE_KP_4]) {
-					glm::vec3 move = glm::vec3(moveRight(glm::vec3(glm::vec3(std::get<1>(temp[i]))), yaw, -0.01));
+					glm::vec3 move = glm::vec3(moveRight(glm::vec3(glm::vec3(std::get<1>(temp[i]))), rotationAngles.y, -0.01));
 					temp[i] = make_tuple(std::get<0>(temp[i]), move, std::get<2>(temp[i]), std::get<3>(temp[i]));
 				}
 				else if (keys[SDL_SCANCODE_KP_6]) {
-					glm::vec3 move = glm::vec3(moveRight(glm::vec3(glm::vec3(std::get<1>(temp[i]))), yaw, 0.01));
+					glm::vec3 move = glm::vec3(moveRight(glm::vec3(glm::vec3(std::get<1>(temp[i]))), rotationAngles.y, 0.01));
 					temp[i] = make_tuple(std::get<0>(temp[i]), move, std::get<2>(temp[i]), std::get<3>(temp[i]));
 				}
 			}
 			else {
 				if (keys[SDL_SCANCODE_KP_8]) {
-					glm::vec3 moveLeft = glm::vec3(moveForward(glm::vec3(lastObject.x(), lastObject.y(), lastObject.z()), yaw, 0.1));
+					glm::vec3 moveLeft = glm::vec3(moveForward(glm::vec3(lastObject.x(), lastObject.y(), lastObject.z()), rotationAngles.y, 0.1));
 					t.setOrigin(btVector3(moveLeft.x, moveLeft.y, moveLeft.z));
 					selectedObject.second->setWorldTransform(t);
 				}
 				else if (keys[SDL_SCANCODE_KP_5]) {
-					glm::vec3 moveLeft = glm::vec3(moveForward(glm::vec3(lastObject.x(), lastObject.y(), lastObject.z()), yaw, -0.1));
+					glm::vec3 moveLeft = glm::vec3(moveForward(glm::vec3(lastObject.x(), lastObject.y(), lastObject.z()), rotationAngles.y, -0.1));
 					t.setOrigin(btVector3(moveLeft.x, moveLeft.y, moveLeft.z));
 					selectedObject.second->setWorldTransform(t);
 				}
 				if (keys[SDL_SCANCODE_KP_4]) {
-					glm::vec3 moveLeft = glm::vec3(moveRight(glm::vec3(lastObject.x(), lastObject.y(), lastObject.z()), yaw, -0.1));
+					glm::vec3 moveLeft = glm::vec3(moveRight(glm::vec3(lastObject.x(), lastObject.y(), lastObject.z()), rotationAngles.y, -0.1));
 					t.setOrigin(btVector3(moveLeft.x, moveLeft.y, moveLeft.z));
 					selectedObject.second->setWorldTransform(t);
 				}
 				else if (keys[SDL_SCANCODE_KP_6]) {
-					glm::vec3 moveLeft = glm::vec3(moveRight(glm::vec3(lastObject.x(), lastObject.y(), lastObject.z()), yaw, 0.1));
+					glm::vec3 moveLeft = glm::vec3(moveRight(glm::vec3(lastObject.x(), lastObject.y(), lastObject.z()), rotationAngles.y, 0.1));
 					t.setOrigin(btVector3(moveLeft.x, moveLeft.y, moveLeft.z));
 					selectedObject.second->setWorldTransform(t);
 				}
@@ -1165,15 +1213,36 @@ namespace SceneManager {
 		//	if (keys[SDL_SCANCODE_5])cout << bullet.size() << endl;
 	}
 
+	void renderObject(glm::mat4 proj, Model *modelData, glm::vec3 pos, glm::vec3 scale, btQuaternion& rotation, GLuint shader, GLuint texture) {
 
-	void renderObject(glm::mat4 proj, Model *modelData, glm::vec3 pos, glm::vec3 scale, glm::vec3 rotation, GLuint shader, GLuint texture) {
 		glm::mat4 model;
 		model = glm::translate(model, pos);
-		//model = glm::rotate(model, float(-yaw*DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
+		//model = glm::rotate(model, float(-rotationAngles.y*DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
+		//model = glm::rotate(model, float(180 * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
+		//model = glm::rotate(model, float(rotation.y * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
+		glm::vec3 eulerRotation;
+		toEulerianAngle(rotation, eulerRotation);
+		model = glm::rotate(model, eulerRotation.x, glm::vec3(1.0f, 0.0f ,0.0f));
+		model = glm::rotate(model, eulerRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, eulerRotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::scale(model, scale);	// It's a bit too big for our scene, so scale it down
+		//model = glm::scale(model, glm::vec3(0.05f, 0.05f, 0.05f));	// for gun]
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		modelData->Draw(shader);
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+
+	void renderPlayer(glm::mat4 proj, Model *modelData, glm::vec3 pos, glm::vec3 scale, glm::vec3 rotation, GLuint shader, GLuint texture) {
+		glm::mat4 model;
+		model = glm::translate(model, pos);
+		//model = glm::rotate(model, float(-rotationAngles.y*DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
 		//model = glm::rotate(model, float(180 * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::rotate(model, float(rotation.y * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, scale);	// It's a bit too big for our scene, so scale it down
-		//model = glm::scale(model, glm::vec3(0.05f, 0.05f, 0.05f));	// for gun]
+											//model = glm::scale(model, glm::vec3(0.05f, 0.05f, 0.05f));	// for gun]
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texture);
 		glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
@@ -1209,7 +1278,7 @@ namespace SceneManager {
 		glm::vec3 gun_pos(2.5f, -2.5f, -5.0f);
 		float Y_axisRotation = 30.0f*DEG_TO_RADIAN;
 		model = glm::translate(model, gun_pos);
-		//model = glm::rotate(model, float(-yaw*DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
+		//model = glm::rotate(model, float(-rotationAngles.y*DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::rotate(model, float(180 * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::rotate(model, Y_axisRotation, glm::vec3(0.0f, 1.0f, 0.0f)); // Rotate in y axis
 		//model = glm::rotate(model, Z_axisRotation, glm::vec3(0.0f, 0.0f, 1.0f)); // Rotate in z axis
@@ -1228,12 +1297,12 @@ namespace SceneManager {
 
 	void renderWeapon(glm::mat4 proj, Model *modelData, GLuint shader) {
 		glm::mat4 model;
-		glm::vec3 gunPos = moveForward(glm::vec3(player->getPosition().x, player->getPosition().y - 0.15, player->getPosition().z), yaw, 0.2);
-		gunPos = moveRight(gunPos, yaw, 0.2);
+		glm::vec3 gunPos = moveForward(glm::vec3(player->getPosition().x, player->getPosition().y - 0.15, player->getPosition().z), rotationAngles.y, 0.2);
+		gunPos = moveRight(gunPos, rotationAngles.y, 0.2);
 		model = glm::translate(model, gunPos);
 		float Y_axisRotation = 30.0f*DEG_TO_RADIAN;
-		model = glm::rotate(model, float(-yaw*DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
-		model = glm::rotate(model, float(pitch*DEG_TO_RADIAN), glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, float(-rotationAngles.y*DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, float(rotationAngles.x*DEG_TO_RADIAN), glm::vec3(1.0f, 0.0f, 0.0f));
 		model = glm::rotate(model, float(180 * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::rotate(model, Y_axisRotation, glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.005f, 0.005f, 0.005f));
@@ -1286,9 +1355,9 @@ namespace SceneManager {
 	}
 
 	void camera() {
-	//	if (pointOfView == FIRST_PERSON) {
-			at = moveForward(player->getPosition(), yaw, 1.0f);
-			at.y -= pitch;
+//		if (pointOfView == FIRST_PERSON) {
+			at = moveForward(player->getPosition(), rotationAngles.y, 1.0f);
+			at.y -= rotationAngles.x;
 			view = glm::lookAt(player->getPosition(), at, up);
 			//mvStack.top() = glm::lookAt(player->getPosition(), at, up);
 		//}
@@ -1360,10 +1429,8 @@ namespace SceneManager {
 			btVector3 p = bodies[id_pair.first]->getWorldTransform().getOrigin();
 			btVector3 y = (((btBoxShape*)bodies[id_pair.first]->getCollisionShape())->getHalfExtentsWithMargin());
 			glm::vec3 spherePosition = glm::vec3(p.x(), p.y(), p.z());
-			glm::vec3 position = glm::vec3(p.x(), p.y(), p.z());
-			glm::vec3 rotation = glm::vec3(bodies[id_pair.first]->getWorldTransform().getRotation().getX(), bodies[id_pair.first]->getWorldTransform().getRotation().getY(), bodies[id_pair.first]->getWorldTransform().getRotation().getZ());
-			//	btQuaternion test = bodies[id_pair.first]->getWorldTransform().getRotation();
-		//		test.getAngle();
+			glm::vec3 position = glm::vec3(p.x(), p.y()-y.y(), p.z());
+			btQuaternion rotation = bodies[id_pair.first]->getWorldTransform().getRotation().normalized();
 
 			if (id_pair.second->getCollisionShape()->getShapeType() == BOX_SHAPE_PROXYTYPE) {
 				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -1396,6 +1463,7 @@ namespace SceneManager {
 		///+++++++++++++++
 		// RENDERING modelTypes
 
+
 		//if (pointOfView == THIRD_PERSON)
 		//	renderObject(projection, modelTypes["nanosuit"], glm::vec3(player->getPosition().x, player->getPosition().y - 1.75, player->getPosition().z), glm::vec3(0.2, 0.2, 0.2), glm::vec3(0.0, -yaw, 0.0), shader, 0);
 		//// rip robot
@@ -1406,10 +1474,10 @@ namespace SceneManager {
 
 		if (mode == EDIT) {
 			if (creation == true) {
-				renderObject(projection, modelTypes[std::get<0>(temp[0])], std::get<1>(temp[0]), std::get<2>(temp[0]), std::get<3>(temp[0]), shader, 0);
+				renderPlayer(projection, modelTypes[std::get<0>(temp[0])], std::get<1>(temp[0]), std::get<2>(temp[0]), std::get<3>(temp[0]), shader, 0);
 				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 				glDisable(GL_CULL_FACE);
-				renderObject(projection, modelTypes[std::get<0>(temp[1])], std::get<1>(temp[1]), std::get<2>(temp[1]), std::get<3>(temp[1]), shader, 0);
+				renderPlayer(projection, modelTypes[std::get<0>(temp[1])], std::get<1>(temp[1]), std::get<2>(temp[1]), std::get<3>(temp[1]), shader, 0);
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 				glDisable(GL_CULL_FACE);
 			}
