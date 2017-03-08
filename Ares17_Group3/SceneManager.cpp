@@ -619,7 +619,7 @@ namespace SceneManager {
 						const btVector3& ptB = pt.getPositionWorldOnB();
 						const btVector3& normalOnB = pt.m_normalWorldOnB;
 						// <START>  handle collisions here
-						cout << "Player colliding with something while jumping." << endl;
+					//	cout << "Player colliding with something while jumping." << endl;
 						player->setState(ON_GROUND);
 						//  <END>   handle collisions here
 					}

@@ -2,7 +2,6 @@
 #define NPCDECORATOR
 #include "NonPC.h"
 
-
 // NPCDecorator implements AbstractNPC
 class NPCDecorator : public AbstractNPC {
 private:

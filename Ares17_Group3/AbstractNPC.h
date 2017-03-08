@@ -4,8 +4,7 @@
 #include <iostream>
 
 #include <iostream>
-// Instead of importing the entire std namespace, we can be
-// specific about which std library classes and objects are to be included:
+
 using std::cout;
 using std::endl;
 using std::cin;

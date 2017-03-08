@@ -1,10 +1,10 @@
-#ifndef NonPC
-#define NonPC
+#ifndef NONPC
+#define NONPC
 #include "AbstractNPC.h"
 
 
 // NPC implements AbstractNPC - all methods defined inline
-class NPC : public AbstractNPC {
+class NonPC : public AbstractNPC {
 private:
 	//string name;
 	// ++
@@ -65,7 +65,7 @@ public:
 		return body;
 	}
 
-	NPC(double _h, double _r, btShapeManager* _sm, glm::vec3 spawn, float radius, float height, float mass /*other parameters*/) {
+	NonPC(double _h, double _r, btShapeManager* _sm, glm::vec3 spawn, float radius, float height, float mass /*other parameters*/) {
 		health = _h;
 		range = _r;
 		shapeManager = _sm;
@@ -86,7 +86,7 @@ public:
 	
 	double getRange() { return range; }
 	double getHealth() { return health; }
-	~NPC() { /*cout << "Deleting NPC object " << name << endl;*/ } //TODO: destructor
+	~NonPC() { /*cout << "Deleting NPC object " << name << endl;*/ } //TODO: destructor
 protected:
 //	int health;
 //	int mana;
