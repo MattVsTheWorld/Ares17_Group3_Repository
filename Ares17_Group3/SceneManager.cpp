@@ -824,7 +824,7 @@ namespace SceneManager {
 
 		float increase;
 		if (mode == PLAY) {
-			if (sdlEvent.type == SDL_MOUSEBUTTONDOWN && pointOfView == FIRST_PERSON) {
+		//	if (sdlEvent.type == SDL_MOUSEBUTTONDOWN && pointOfView == FIRST_PERSON) {
 				if (sdlEvent.button.button == SDL_BUTTON_LEFT) {
 					if (coolDown <= 0.0f) {
 						leftClick = true;
