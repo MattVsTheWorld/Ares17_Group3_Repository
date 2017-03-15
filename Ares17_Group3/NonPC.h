@@ -90,7 +90,7 @@ public:
 		btMotionState* motion = new btDefaultMotionState(t);
 		btRigidBody::btRigidBodyConstructionInfo info(mass, motion, capsule, inertia);
 		btRigidBody* body = new btRigidBody(info);
-		body->setAngularFactor(0);
+		body->setAngularFactor(btVector3(0,1,0));
 		shapeManager->addToWorld(body, COL_ENEMY, COL_BULLET | COL_PLAYER | COL_DEFAULT); // Can add COL_ENEMY for enemy to enemy collision
 
 		return body;
@@ -121,7 +121,7 @@ public:
 	//	delete shapeManager;
 		delete npcBody;
 		delete npcGhost;
-		cout << "Done deleting enemy objects" << endl;
+		cout << "Done deleting enemy object" << endl;
 	}
 
 	bool update(Model * modelData, glm::mat4 view, glm::mat4 proj) {
