@@ -40,6 +40,7 @@ namespace SceneManager {
 	enum editStages { MODEL, BOUNDING };
 	editStages stage = MODEL;
 
+
 	// SHADOWS
 	GLuint depthShaderProgram; //shader to create shadow cubemaps
 
@@ -61,7 +62,8 @@ namespace SceneManager {
 	//////////////////
 
 	// +++ \_/
-	AbstractNPC *enemies[10];
+	//TODO: vector
+	vector <AbstractNPC *>enemies;
 	// +++ /-\
 
 	const char *testTexFiles[6] = {
@@ -695,7 +697,7 @@ namespace SceneManager {
 						const btVector3& ptB = pt.getPositionWorldOnB();
 						const btVector3& normalOnB = pt.m_normalWorldOnB;
 						// <START>  handle collisions here
-						cout << "Player colliding with something while jumping." << endl;
+				//		cout << "Player colliding with something while jumping." << endl;
 						player->setState(ON_GROUND);
 						//  <END>   handle collisions here
 					}
@@ -734,7 +736,9 @@ namespace SceneManager {
 		glm::mat4 projection;
 		// +++ \_/
 		// health, range, manager, sp, radius, height, mass, model, shader, textuer
-		enemies[0] = new Heavy(new Melee(new NonPC(100, 10, bt_manager, glm::vec3(0, 10, 0), 1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture)));
+		//for (int i = 0; i < 3; i++) {
+		enemies.push_back(new Melee(new NonPC(100, 10, bt_manager, glm::vec3(0, 10, 0), 1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture)));
+		//}
 		// +++ /-\
 
 
@@ -1470,7 +1474,11 @@ namespace SceneManager {
 		//TODO: Finish enemies
 		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		//glDisable(GL_CULL_FACE);
-		enemies[0]->render(modelTypes["robot"], view, projection);
+		for (int i = 0; i < enemies.size(); i++) {
+			if (!enemies[i]->update(modelTypes["robot"], view, projection))
+				enemies.erase(remove(enemies.begin(), enemies.end(), enemies[i]), enemies.end());
+		}
+			
 	//	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	//	glEnable(GL_CULL_FACE);
 		//--------

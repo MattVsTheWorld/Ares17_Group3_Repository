@@ -8,10 +8,34 @@ private:
 
 public:
 	NPCDecorator(AbstractNPC *n) { npc = n; }
-	void render(Model * modelData, glm::mat4 view, glm::mat4 proj) { npc->render(modelData, view, proj); } // delegate render to npc data member
-	void setHealth(double newHp) { npc->setHealth(newHp); }
-	double getRange() { return npc->getRange(); }
-	double getHealth() { return npc->getHealth(); }
+	~NPCDecorator() {
+	//	delete this;
+	}
+	bool update(Model * modelData, glm::mat4 view, glm::mat4 proj) {
+		if (npc->getHealth() <= 0) {
+			delete npc;
+			delete this;
+			return false;
+		}
+		else {
+			render(modelData, view, proj);
+			return true;
+		}
+	}
+
+	void render(Model * modelData, glm::mat4 view, glm::mat4 proj) {
+		npc->render(modelData, view, proj); 
+	} // delegate render to npc data member
+
+	void modifyHealth(double newHp) { 
+		npc->modifyHealth(newHp); 
+	}
+	double getRange() {
+		return npc->getRange(); 
+	}
+	double getHealth() { 
+		return npc->getHealth(); 
+	}
 protected:
 	AbstractNPC * npc;
 };
@@ -20,7 +44,7 @@ protected:
 class Melee : public NPCDecorator {
 public:
 	Melee(AbstractNPC *n) : NPCDecorator(n) {
-		setHealth(50);
+		modifyHealth(50);
 	}
 	//void render() {
 	//	// render special features 
@@ -29,7 +53,7 @@ public:
 	//	Model * modelData;
 	//	NPCDecorator::render(modelData); // delegate to base class
 	//}
-	void setHealth(double newHp) { this->npc->setHealth(newHp); }
+	void modifyHealth(double newHp) { this->npc->modifyHealth(newHp); }
 	double getRange() { return NPCDecorator::getRange(); } //TODO: maybe return a fixed melee range instead?
 	double getHealth() { return NPCDecorator::getHealth(); }
 	~Melee() { /*cout << "Deleting decorator" << endl;*/ }
@@ -38,7 +62,7 @@ public:
 class Ranged : public NPCDecorator {
 public:
 	Ranged(AbstractNPC *n) : NPCDecorator(n) { 
-		setHealth(30);
+		modifyHealth(30);
 	}
 	//void render() {
 	//	// render special features 
@@ -47,7 +71,7 @@ public:
 	//	Model * modelData;
 	//	NPCDecorator::render(modelData); // delegate to base class
 	//}
-	void setHealth(double newHp) { this->npc->setHealth(newHp); }
+	void modifyHealth(double newHp) { this->npc->modifyHealth(newHp); }
 	double getRange() { return NPCDecorator::getRange(); }
 	double getHealth() { return NPCDecorator::getHealth(); }
 	~Ranged() { /*cout << "Deleting decorator" << endl;*/ }
@@ -56,7 +80,7 @@ public:
 class Light : public NPCDecorator {
 public:
 	Light(AbstractNPC *n) : NPCDecorator(n) { 
-		setHealth(10);
+		modifyHealth(10);
 	}
 	//void render() {
 	//	// render special features 
@@ -65,7 +89,7 @@ public:
 	//	Model * modelData;
 	//	NPCDecorator::render(modelData); // delegate to base class
 	//}
-	void setHealth(double newHp) { this->npc->setHealth(newHp); }
+	void modifyHealth(double newHp) { this->npc->modifyHealth(newHp); }
 	double getRange() { return NPCDecorator::getRange(); }
 	double getHealth() { return NPCDecorator::getHealth();/* + 10; */ }
 	~Light() { /*cout << "Deleting decorator" << endl;*/ }
@@ -74,7 +98,7 @@ public:
 class Medium : public NPCDecorator {
 public:
 	Medium(AbstractNPC *n) : NPCDecorator(n) {
-		setHealth(40);
+		modifyHealth(40);
 	}
 	//void render() {
 	//	// render special features 
@@ -83,7 +107,7 @@ public:
 	//	Model * modelData;
 	//	NPCDecorator::render(modelData); // delegate to base class
 	//}
-	void setHealth(double newHp) { this->npc->setHealth(newHp); }
+	void modifyHealth(double newHp) { this->npc->modifyHealth(newHp); }
 	double getRange() { return NPCDecorator::getRange(); }
 	double getHealth() { return NPCDecorator::getHealth(); }
 	~Medium() { /*cout << "Deleting decorator" << endl; */}
@@ -92,7 +116,7 @@ public:
 class Heavy : public NPCDecorator {
 public:
 	Heavy(AbstractNPC *n) : NPCDecorator(n) {
-		setHealth(200);
+		modifyHealth(200);
 	}
 	//void render() {
 	//	// render special features 
@@ -101,7 +125,7 @@ public:
 	//	Model * modelData;
 	//	NPCDecorator::render(modelData); // delegate to base class
 	//}
-	void setHealth(double newHp) { this->npc->setHealth(newHp); }
+	void modifyHealth(double newHp) { this->npc->modifyHealth(newHp); }
 	double getRange() { return NPCDecorator::getRange(); }
 	double getHealth() { return NPCDecorator::getHealth(); }
 	~Heavy() { /*cout << "Deleting decorator" << endl;*/ }

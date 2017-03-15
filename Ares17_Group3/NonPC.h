@@ -114,47 +114,61 @@ public:
 		npcBody = temp;
 		npcGhost = tempGhost;
 	}
+
+	~NonPC() {
+		shapeManager->removeObject(npcBody);
+		shapeManager->removeObject(npcGhost);
+	//	delete shapeManager;
+		delete npcBody;
+		delete npcGhost;
+		cout << "Done deleting enemy objects" << endl;
+	}
+
+	bool update(Model * modelData, glm::mat4 view, glm::mat4 proj) {
+			this->render(modelData, view, proj);
+			return true;
+	}
 	void render(Model * modelData, glm::mat4 view, glm::mat4 proj) {
 
-		if (findCollision(npcGhost))
-		{
-			this->health -= 10;
-			cout << "HIT! Health = " << this->health << endl;
-		}
 
-		btTransform t;
-		t.setIdentity();
-		npcBody->getMotionState()->getWorldTransform(t);
-		btVector3 pos = t.getOrigin();
-		npcGhost->setWorldTransform(t);
-		// Bounding box
-		//TODO: fix (or feature)
-		//this->shapeManager->renderCapsule(npcBody, view, proj, boundingModel, shader, texture);
+			if (findCollision(npcGhost))
+			{
+				this->health -= 10;
+				cout << "HIT! Health = " << this->health << endl;
+			}
 
-		btQuaternion& rotation = npcBody->getWorldTransform().getRotation().normalized();
-		glm::mat4 model;
-		model = glm::translate(model, glm::vec3(pos.x(), pos.y() - 1.75, pos.z()));
-		glm::vec3 eulerRotation;
-		toEulerianAngle(rotation, eulerRotation);
-		model = glm::rotate(model, eulerRotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
-		model = glm::rotate(model, eulerRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
-		model = glm::rotate(model, eulerRotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
-		model = glm::scale(model, glm::vec3(0.15, 0.15, 0.15));	// It's a bit too big for our scene, so scale it down
-											//model = glm::scale(model, glm::vec3(0.05f, 0.05f, 0.05f));	// for gun]
-	//	glActiveTexture(GL_TEXTURE0);
-	//	glBindTexture(GL_TEXTURE_2D, texture);
-		glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
-		modelData->Draw(shader);
+			btTransform t;
+			t.setIdentity();
+			npcBody->getMotionState()->getWorldTransform(t);
+			btVector3 pos = t.getOrigin();
+			npcGhost->setWorldTransform(t);
+			// Bounding box
+			//TODO: fix (or feature)
+			//this->shapeManager->renderCapsule(npcBody, view, proj, boundingModel, shader, texture);
 
-		glBindTexture(GL_TEXTURE_2D, 0);
+			btQuaternion& rotation = npcBody->getWorldTransform().getRotation().normalized();
+			glm::mat4 model;
+			model = glm::translate(model, glm::vec3(pos.x(), pos.y() - 1.75, pos.z()));
+			glm::vec3 eulerRotation;
+			toEulerianAngle(rotation, eulerRotation);
+			model = glm::rotate(model, eulerRotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+			model = glm::rotate(model, eulerRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+			model = glm::rotate(model, eulerRotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+			model = glm::scale(model, glm::vec3(0.15, 0.15, 0.15));	// It's a bit too big for our scene, so scale it down
+												//model = glm::scale(model, glm::vec3(0.05f, 0.05f, 0.05f));	// for gun]
+		//	glActiveTexture(GL_TEXTURE0);
+		//	glBindTexture(GL_TEXTURE_2D, texture);
+			glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
+			modelData->Draw(shader);
+
+			glBindTexture(GL_TEXTURE_2D, 0);
 		//TODO: actual model
 
 	} //TODO: actual model
 
-	void setHealth(double newHp) { this->health += newHp; }
+	void modifyHealth(double newHp) { this->health += newHp; }
 	double getRange() { return range; }
 	double getHealth() { return health; }
-	~NonPC() { /*cout << "Deleting NPC object " << name << endl;*/ } //TODO: destructor
 protected:
 	//	int health;
 	//	int mana;
