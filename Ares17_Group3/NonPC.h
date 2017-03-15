@@ -140,7 +140,7 @@ public:
 			//!
 		if (recalculatePath) {
 			//cout<< "But why" << endl;
-	//		this->moveNpc(btVector3(0.0, 0.0, 5.0));
+	//		this->moveNpc(btVector3(0.0, 0.0, 5.0)); //TODO: pathfinding
 			recalculatePath = false;
 		}
 		

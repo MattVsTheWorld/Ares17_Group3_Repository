@@ -43,6 +43,9 @@
     <Filter Include="Being worked on\NPC">
       <UniqueIdentifier>{d601aa7d-74fb-4a95-90f1-b35352cf176d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Being worked on\February\AI">
+      <UniqueIdentifier>{2ad699c1-f32e-4de0-b5ea-60a74c4e9e07}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -142,6 +145,12 @@
     </ClInclude>
     <ClInclude Include="NonPC.h">
       <Filter>Being worked on\NPC</Filter>
+    </ClInclude>
+    <ClInclude Include="Node.h">
+      <Filter>Being worked on\February\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="Grid.h">
+      <Filter>Being worked on\February\AI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

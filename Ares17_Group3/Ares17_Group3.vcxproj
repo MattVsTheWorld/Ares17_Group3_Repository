@@ -174,12 +174,14 @@
     <ClInclude Include="bass.h" />
     <ClInclude Include="btShapeManager.h" />
     <ClInclude Include="AbstractNPC.h" />
+    <ClInclude Include="Grid.h" />
     <ClInclude Include="hudManager.h" />
     <ClInclude Include="loadBitmap.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="MeshManager.h" />
     <ClInclude Include="Model.h" />
+    <ClInclude Include="Node.h" />
     <ClInclude Include="NonPC.h" />
     <ClInclude Include="NPCDecorator.h" />
     <ClInclude Include="Player.h" />

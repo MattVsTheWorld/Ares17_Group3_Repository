@@ -738,6 +738,7 @@ namespace SceneManager {
 		// health, range, manager, sp, radius, height, mass, model, shader, textuer
 		//for (int i = 0; i < 3; i++) {
 		enemies.push_back(new Melee(new NonPC(100, 10, bt_manager, glm::vec3(0, 10, 0), 1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture)));
+		enemies.push_back(new Melee(new NonPC(100, 10, bt_manager, glm::vec3(2, 10, 0), 1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture)));
 		//}
 		// +++ /-\
 
