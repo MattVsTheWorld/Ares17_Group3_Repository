@@ -864,7 +864,8 @@ namespace SceneManager {
 						coolDown = COOL_TIME;
 						//			cout << "Attempting to shoot bullet." << endl;
 						projectile_manager->addProjectile(moveForward(player->getPosition(), rotationAngles, 1.0f), PROJ_SPEED, (rotationAngles.y*DEG_TO_RADIAN), rotationAngles.x); //!++!
-						s_manager->playSound(s_manager->getSound(2), 2, 1);
+						//s_manager->playSound(s_manager->getSound(2), 2, 1);
+						//TODO: Enable sound
 						//cout << rotationAngles.x << "\n";
 																																						  //		Projectile* bullet = new Projectile(bt_manager, glm::vec3(0, 0, 0), 1);
 					}
