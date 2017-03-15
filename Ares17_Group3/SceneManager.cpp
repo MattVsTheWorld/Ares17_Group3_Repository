@@ -1475,22 +1475,25 @@ namespace SceneManager {
 		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		//glDisable(GL_CULL_FACE);
 		for (int i = 0; i < enemies.size(); i++) {
-			if (!enemies[i]->update(modelTypes["robot"], view, projection))
+			if (!enemies[i]->update(modelTypes["robot"], view, projection, dt_secs))
+			{
 				enemies.erase(remove(enemies.begin(), enemies.end(), enemies[i]), enemies.end());
+				//TODO: space to add stuff
+			}
 		}
-			
-	//	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	//	glEnable(GL_CULL_FACE);
-		//--------
+
+		//	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		//	glEnable(GL_CULL_FACE);
+			//--------
 
 
-		//if (pointOfView == THIRD_PERSON)
-		//	renderObject(projection, modelTypes["nanosuit"], glm::vec3(player->getPosition().x, player->getPosition().y - 1.75, player->getPosition().z), glm::vec3(0.2, 0.2, 0.2), glm::vec3(0.0, -yaw, 0.0), shader, 0);
-		//// rip robot
-		  //		renderObject(projection, modelTypes["robot"], glm::vec3(4.0, 0.0, 0.0), glm::vec3(0.2, 0.2, 0.2), shader);
+			//if (pointOfView == THIRD_PERSON)
+			//	renderObject(projection, modelTypes["nanosuit"], glm::vec3(player->getPosition().x, player->getPosition().y - 1.75, player->getPosition().z), glm::vec3(0.2, 0.2, 0.2), glm::vec3(0.0, -yaw, 0.0), shader, 0);
+			//// rip robot
+			  //		renderObject(projection, modelTypes["robot"], glm::vec3(4.0, 0.0, 0.0), glm::vec3(0.2, 0.2, 0.2), shader);
 
-	//	if (pointOfView == FIRST_PERSON)
-	//		renderWeapon(projection, modelTypes["plasmacutter"], shader); //TODO: Render current weapon
+		//	if (pointOfView == FIRST_PERSON)
+		//		renderWeapon(projection, modelTypes["plasmacutter"], shader); //TODO: Render current weapon
 
 		if (mode == EDIT) {
 			if (creation == true) {
