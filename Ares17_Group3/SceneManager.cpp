@@ -4,6 +4,7 @@ using namespace std;
 typedef std::pair<string, btRigidBody*> bodyID;
 
 // this class still needs a lot of work
+// gg
 namespace SceneManager {
 
 	Player *player;
