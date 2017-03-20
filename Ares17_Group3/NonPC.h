@@ -81,8 +81,10 @@ private:
 	}
 
 	void changeSpeed(float speed, float angle) {
+		//cout << angle << endl;
+		//TODO: fix
 		this->npcBody->setLinearVelocity(btVector3(npcBody->getLinearVelocity().x() + speed*std::sin(angle),
-			npcBody->getLinearVelocity().y(), npcBody->getLinearVelocity().z() + speed*std::cos(angle)));
+			npcBody->getLinearVelocity().y(), npcBody->getLinearVelocity().z() - speed*std::cos(angle)));
 	}
 public:
 
@@ -142,7 +144,7 @@ public:
 		btVector3 pos = t.getOrigin();
 		
 		cout << "Going to: " << v->getIndex() << endl;
-		float angle = atan2(pos.z() - goTo.z(), pos.x() - goTo.x()); // RADIANS
+		float angle = (atan2(pos.z() - goTo.z(), pos.x() - goTo.x())); // RADIANS
 		changeSpeed(3, angle);
 
 		// find angle between direction
@@ -154,8 +156,10 @@ public:
 		cout << "////////\n" << startId << " to " << endId << endl;
 		list<vertex*> path = pathfinder->algorithm_standard(adjList->getVertex(startId), adjList->getVertex(endId));
 		queue<vertex*> toVisit;
-		for (const auto &pathIterator : path)
+		for (const auto &pathIterator : path) {
+			cout << " " << pathIterator->getIndex() << " ";
 			toVisit.push(static_cast<vertex*>(pathIterator));
+		} 
 		adjList->resetCosts();
 		delete pathfinder;
 		return toVisit;
