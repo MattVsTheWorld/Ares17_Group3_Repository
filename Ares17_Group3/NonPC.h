@@ -17,7 +17,8 @@ private:
 	// Model
 	GLuint shader;
 	GLuint texture;
-
+	/// ++++
+	queue<vertex*> currentPath;
 	bool recalculatePath = true;
 	double recalcTimer = 2;
 	// +++++++++++++++
@@ -134,13 +135,31 @@ public:
 		changeSpeed(newDir);
 	}
 
-	bool update(Model * modelData, glm::mat4 view, glm::mat4 proj, float dt) {
+	queue<vertex*> findPath(AdjacencyList *adjList, int startId, int endId) {
+		A_star *pathfinder = new A_star(adjList);
+		cout << "////////\n" << startId << " to " << endId << endl;
+		list<vertex*> path = pathfinder->algorithm_standard(adjList->getVertex(startId), adjList->getVertex(endId));
+		queue<vertex*> toVisit;
+		for (const auto &pathIterator : path)
+			toVisit.push(static_cast<vertex*>(pathIterator));
+		adjList->resetCosts();
+		delete pathfinder;
+		return toVisit;
+	} // findPath function
 
-		//	this->npcBody->setLinearVelocity(btVector3(0,0,1));
-			//!
+	bool update(Model * modelData, glm::mat4 view, glm::mat4 proj, float dt, Grid* _g, btVector3 &playerPos) {
+
 		if (recalculatePath) {
+
+			btTransform t;
+			t.setIdentity();
+			npcBody->getMotionState()->getWorldTransform(t);
+			btVector3 pos = t.getOrigin();
+
+			currentPath = findPath(_g->getAdjList(), _g->getNodeFromWorldPos(pos), _g->getNodeFromWorldPos(playerPos));
 			//cout<< "But why" << endl;
 	//		this->moveNpc(btVector3(0.0, 0.0, 5.0)); //TODO: pathfinding
+			
 			recalculatePath = false;
 		}
 		
@@ -151,18 +170,19 @@ public:
 			recalculatePath = true;
 		}
 		//!
-		this->render(modelData, view, proj);
-		return true;
-	}
-
-	void render(Model * modelData, glm::mat4 view, glm::mat4 proj) {
-
 
 		if (findCollision(npcGhost))
 		{
 			this->health -= 10;
 			cout << "HIT! Health = " << this->health << endl;
 		}
+
+
+		this->render(modelData, view, proj);
+		return true;
+	}
+
+	void render(Model * modelData, glm::mat4 view, glm::mat4 proj) {
 
 		btTransform t;
 		t.setIdentity();

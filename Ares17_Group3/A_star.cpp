@@ -33,7 +33,7 @@ A_star::A_star(AdjacencyList *_adjList) {
 	iterations = 0;
 }
 
-void A_star::algorithm_standard(vertex* start, vertex* end) {
+list<vertex*> A_star::algorithm_standard(vertex* start, vertex* end) {
 	openSet.push_back(start);
 	while (!openSet.empty()) {
 		auto currentVert = openSet[0];
@@ -48,13 +48,13 @@ void A_star::algorithm_standard(vertex* start, vertex* end) {
 		closedSet.insert(currentVert);
 		// if current vertex is goal, path found
 		if (currentVert == end) {																					
-			cout << "Cost to goal: " << currentVert->getgCost() << endl;
-			list<vertex*> foundPath = retracePath(start, end);
-			cout << "Path is: " << start->getIndex() << " ";
-			for (const auto &pathIterator : foundPath)
-				cout << (static_cast<vertex *>(pathIterator))->getIndex() << " ";
-			cout << endl;
-			return;
+		//	cout << "Cost to goal: " << currentVert->getgCost() << endl;
+		//	list<vertex*> foundPath = retracePath(start, end);
+		//	cout << "Path is: " << start->getIndex() << " ";
+		//	for (const auto &pathIterator : foundPath)
+		//		cout << (static_cast<vertex *>(pathIterator))->getIndex() << " ";
+	//		cout << endl;
+			return retracePath(start,end);
 		}
 		using neighbour = pair<vertex*, int>;
 		list<neighbour> neighbourList;

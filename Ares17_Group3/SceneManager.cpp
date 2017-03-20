@@ -40,6 +40,8 @@ namespace SceneManager {
 	enum editStages { MODEL, BOUNDING };
 	editStages stage = MODEL;
 
+	//AI
+	Grid* level1Grid;
 
 	// SHADOWS
 	GLuint depthShaderProgram; //shader to create shadow cubemaps
@@ -746,6 +748,9 @@ namespace SceneManager {
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+		// AI
+		level1Grid = new Grid();
 
 		////////////////////
 		/// FBO for shadows
@@ -1471,12 +1476,13 @@ namespace SceneManager {
 		///+++++++++++++++
 		// RENDERING modelTypes
 
+		btVector3 playerPos(player->getPosition().x, player->getPosition().y, player->getPosition().z);
 		//++! \_/
 		//TODO: Finish enemies
 		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		//glDisable(GL_CULL_FACE);
 		for (int i = 0; i < enemies.size(); i++) {
-			if (!enemies[i]->update(modelTypes["robot"], view, projection, dt_secs))
+			if (!enemies[i]->update(modelTypes["robot"], view, projection, dt_secs,level1Grid, playerPos))
 			{
 				enemies.erase(remove(enemies.begin(), enemies.end(), enemies[i]), enemies.end());
 				//TODO: space to add stuff

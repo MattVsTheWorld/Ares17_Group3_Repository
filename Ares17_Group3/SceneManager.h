@@ -23,11 +23,7 @@
 #include "NPCDecorator.h"
 //+++
 
-//+++ AI
-#include "AdjacencyList.h"
-#include "A_star.h"
-#include <chrono>
-#include "Grid.h"
+
 
 #define DEG_TO_RADIAN 0.017453293f
 #define PI 3.14159265359f

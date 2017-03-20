@@ -21,7 +21,7 @@ private:
 	protected:
 public:
 	A_star(AdjacencyList *_adjList);										// Create base object by copying the graph
-	void algorithm_standard(vertex* start, vertex* end);					// "standard" version of the algorithm (every iteration explores the entire open set)
+	list<vertex*> algorithm_standard(vertex* start, vertex* end);			// "standard" version of the algorithm (every iteration explores the entire open set)
 	int getIterationCount();												// return iteration count
 	void resetIterationCount();												// set iteration count to 0
 };
