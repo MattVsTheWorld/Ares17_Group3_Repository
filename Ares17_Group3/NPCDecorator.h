@@ -12,7 +12,7 @@ public:
 		//	delete this;
 	}
 
-	void moveNpc(btVector3 &newDir) { ; }
+	void moveNpc(vertex* v) { ; }
 	queue<vertex*> findPath(AdjacencyList *adjList, int startId, int endId) { return npc->findPath(adjList, startId, endId); }
 	bool update(Model * modelData, glm::mat4 view, glm::mat4 proj, float dt, Grid* _g, btVector3 &playerPos) {
 		if (npc->getHealth() <= 0) {

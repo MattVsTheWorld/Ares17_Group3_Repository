@@ -21,7 +21,7 @@ public:
 	//	virtual btRigidBody* addBoundingCapsule() = 0;
 	virtual void render(Model * modelData, glm::mat4 view, glm::mat4 proj) = 0;
 	virtual void modifyHealth(double newHp) = 0;
-	virtual void moveNpc(btVector3 &newDir) = 0;
+	virtual void moveNpc(vertex* v) = 0;
 	virtual queue<vertex*> findPath(AdjacencyList *adjList, int startId, int endId) = 0;
 	virtual bool update(Model * modelData, glm::mat4 view, glm::mat4 proj, float dt, Grid* _g, btVector3 &playerPos) = 0;
 	//	virtual bool findCollision() = 0;

@@ -4,6 +4,8 @@
 
 #define PI 3.14159265359f
 
+
+
 // NPC implements AbstractNPC - all methods defined inline
 class NonPC : public AbstractNPC {
 private:
@@ -78,9 +80,9 @@ private:
 		rotation.z = atan2(2 * q.x()*q.w() - 2 * q.y()*q.z(), 1 - 2 * sqx - 2 * sqz);
 	}
 
-	void changeSpeed(btVector3 &newDir) {
-		this->npcBody->setLinearVelocity(btVector3(npcBody->getLinearVelocity().x() + newDir.x(),
-			npcBody->getLinearVelocity().y() + newDir.y(), npcBody->getLinearVelocity().z() + newDir.z()));
+	void changeSpeed(float speed, float angle) {
+		this->npcBody->setLinearVelocity(btVector3(npcBody->getLinearVelocity().x() + speed*std::sin(angle),
+			npcBody->getLinearVelocity().y(), npcBody->getLinearVelocity().z() + speed*std::cos(angle)));
 	}
 public:
 
@@ -120,6 +122,7 @@ public:
 		shapeManager->addGhostToWorld(tempGhost, COL_ENEMY, COL_BULLET); // Can add COL_ENEMY for enemy to enemy collision
 		npcBody = temp;
 		npcGhost = tempGhost;
+
 	}
 
 	~NonPC() {
@@ -131,8 +134,19 @@ public:
 		cout << "Done deleting enemy object" << endl;
 	}
 
-	void moveNpc(btVector3 &newDir) {
-		changeSpeed(newDir);
+	void moveNpc(vertex* v) {
+		btVector3 goTo(v->getCoords().first, 0, v->getCoords().second);
+		btTransform t;
+		t.setIdentity();
+		npcBody->getMotionState()->getWorldTransform(t);
+		btVector3 pos = t.getOrigin();
+		
+		cout << "Going to: " << v->getIndex() << endl;
+		float angle = atan2(pos.z() - goTo.z(), pos.x() - goTo.x()); // RADIANS
+		changeSpeed(3, angle);
+
+		// find angle between direction
+		//changeSpeed(newDir);
 	}
 
 	queue<vertex*> findPath(AdjacencyList *adjList, int startId, int endId) {
@@ -148,27 +162,37 @@ public:
 	} // findPath function
 
 	bool update(Model * modelData, glm::mat4 view, glm::mat4 proj, float dt, Grid* _g, btVector3 &playerPos) {
-
-		if (recalculatePath) {
-
-			btTransform t;
-			t.setIdentity();
-			npcBody->getMotionState()->getWorldTransform(t);
-			btVector3 pos = t.getOrigin();
-
-			currentPath = findPath(_g->getAdjList(), _g->getNodeFromWorldPos(pos), _g->getNodeFromWorldPos(playerPos));
-			//cout<< "But why" << endl;
-	//		this->moveNpc(btVector3(0.0, 0.0, 5.0)); //TODO: pathfinding
-			
-			recalculatePath = false;
-		}
+		btTransform t;
+		t.setIdentity();
+		npcBody->getMotionState()->getWorldTransform(t);
+		btVector3 pos = t.getOrigin();
 		
+		if (once) {
+			currentPath = findPath(_g->getAdjList(), _g->getNodeFromWorldPos(pos), _g->getNodeFromWorldPos(playerPos));
+			once = false;
+		}
 		recalcTimer -= dt;
 		if (recalcTimer <= 0)
 		{
+			currentPath = findPath(_g->getAdjList(), _g->getNodeFromWorldPos(pos), _g->getNodeFromWorldPos(playerPos));
 			recalcTimer = 2;
 			recalculatePath = true;
 		}
+
+
+		if (recalculatePath) {
+			//TODO: pathfinding
+			//
+			if (!currentPath.empty()) {
+				if (_g->getAdjList()->getVertex(_g->getNodeFromWorldPos(pos)) == currentPath.front())
+					currentPath.pop();
+				// move to 
+				this->moveNpc(currentPath.front());
+			}//
+			
+			recalculatePath = false;
+		}
+
 		//!
 
 		if (findCollision(npcGhost))
@@ -222,6 +246,7 @@ protected:
 		// ++
 	double health;
 	double range;
+	bool once = true;
 	// (...) space to add more parameters...
 };
 
