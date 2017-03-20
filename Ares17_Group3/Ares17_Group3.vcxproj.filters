@@ -90,6 +90,12 @@
     <ClCompile Include="Projectile.cpp">
       <Filter>Being worked on\February</Filter>
     </ClCompile>
+    <ClCompile Include="A_star.cpp">
+      <Filter>Being worked on\February\AI</Filter>
+    </ClCompile>
+    <ClCompile Include="AdjacencyList.cpp">
+      <Filter>Being worked on\February\AI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ShaderManager.h">
@@ -146,7 +152,10 @@
     <ClInclude Include="NonPC.h">
       <Filter>Being worked on\NPC</Filter>
     </ClInclude>
-    <ClInclude Include="Node.h">
+    <ClInclude Include="A_star.h">
+      <Filter>Being worked on\February\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="AdjacencyList.h">
       <Filter>Being worked on\February\AI</Filter>
     </ClInclude>
     <ClInclude Include="Grid.h">
