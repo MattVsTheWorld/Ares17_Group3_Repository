@@ -5,10 +5,33 @@ Mesh::Mesh(vector<Vertex> vertices, vector<GLuint> indices, vector<Texture> text
 	this->vertices = vertices;
 	this->indices = indices;
 	this->textures = textures;
+	//scene = _scene;
 
 	// Now that we have all the required data, set the vertex buffers and its attribute pointers.
 	this->setupMesh();
 }
+
+//Mesh::~Mesh()
+//{
+//	Clear();
+//}
+//
+//void Mesh::Clear()
+//{
+//	if (VAO != 0) {
+//		glDeleteVertexArrays(1, &VAO);
+//		VAO = 0;
+//	}
+//	if (VBO != 0) {
+//		glDeleteVertexArrays(1, &VBO);
+//		VBO = 0;
+//	}
+//	if (EBO != 0) {
+//		glDeleteVertexArrays(1, &EBO);
+//		EBO = 0;
+//	}
+//}
+
 
 // Render the mesh
 void Mesh::Draw(GLuint shader)
@@ -40,7 +63,25 @@ void Mesh::Draw(GLuint shader)
 	// Draw mesh
 	glBindVertexArray(this->VAO);
 	glDrawElements(GL_TRIANGLES, this->indices.size(), GL_UNSIGNED_INT, 0);
+	//for (GLuint i = 0; i < m_Entries.size(); i++) {
+	//	//const GLuint MaterialIndex = m_Entries[i].MaterialIndex;
+
+	//	//assert(MaterialIndex < m_Textures.size());
+
+	//	//if (m_Textures[MaterialIndex]) {
+	//	//	m_Textures[MaterialIndex]->Bind(GL_TEXTURE0);
+	////	}
+
+	//	glDrawElementsBaseVertex(GL_TRIANGLES,
+	//		m_Entries[i].NumIndices,
+	//		GL_UNSIGNED_INT,
+	//		(void*)(sizeof(GLuint) * m_Entries[i].BaseIndex),
+	//		m_Entries[i].BaseVertex);
+	//}
+
+	// Make sure the VAO is not changed from the outside    
 	glBindVertexArray(0);
+
 
 	// Always good practice to set everything back to defaults once configured.
 	for (GLuint i = 0; i < this->textures.size(); i++)
@@ -52,6 +93,9 @@ void Mesh::Draw(GLuint shader)
 
 void Mesh::setupMesh()
 {
+	//Clear();
+
+
 	// Create buffers/arrays
 	glGenVertexArrays(1, &this->VAO);
 	glGenBuffers(1, &this->VBO);
@@ -79,5 +123,13 @@ void Mesh::setupMesh()
 	glEnableVertexAttribArray(LOCATION_TEXCOORD);
 	glVertexAttribPointer(LOCATION_TEXCOORD, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, TexCoords));
 
+	glEnableVertexAttribArray(LOCATION_BONE_ID);
+	glVertexAttribIPointer(LOCATION_BONE_ID, 4, GL_INT, sizeof(VertexBoneData), (const GLvoid*)0);
+
+	glEnableVertexAttribArray(LOCATION_BONE_WEIGHT);
+	glVertexAttribPointer(LOCATION_BONE_WEIGHT, 4, GL_FLOAT, GL_FALSE, sizeof(VertexBoneData), (const GLvoid*)16);
+
+
 	glBindVertexArray(0);
 }
+

@@ -5,6 +5,7 @@
 #include <sstream>
 #include <iostream>
 #include <vector>
+#include <map>
 using namespace std;
 // GL Includes
 #include <GL/glew.h> // Contains all the necessery OpenGL includes
@@ -23,6 +24,10 @@ using namespace std;
 #define LOCATION_NORMAL		2
 #define LOCATION_TEXCOORD   3
 #define LOCATION_INDEX		4
+#define LOCATION_BONE_ID     5
+#define LOCATION_BONE_WEIGHT 6
+
+#define NUM_BONES_PER_VERTEX 4
 
 struct Vertex {
 	// Position
@@ -31,6 +36,8 @@ struct Vertex {
 	glm::vec3 Normal;
 	// TexCoords
 	glm::vec2 TexCoords;
+	// Bone ID
+
 };
 
 struct Texture {
@@ -38,6 +45,8 @@ struct Texture {
 	string type;
 	aiString path;
 };
+
+
 
 class Mesh {
 public:
@@ -48,10 +57,15 @@ public:
 
 	/*  Functions  */
 	// Constructor
+	
 	Mesh(vector<Vertex> vertices, vector<GLuint> indices, vector<Texture> textures);
+	//~Mesh();
 	// Render the mesh
 	void Draw(GLuint shader);
+
 private:
+
+	////////////////////////////////////////////////////////////////////
 	/*  Render data  */
 	GLuint VAO, VBO, EBO;
 	/*  Functions    */

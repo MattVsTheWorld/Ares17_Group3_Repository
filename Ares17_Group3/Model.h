@@ -22,8 +22,93 @@ public:
 	// Draws the model, and thus all its meshes
 	void Draw(GLuint shader);
 
+	struct BoneInfo
+	{
+		aiMatrix4x4 BoneOffset;
+		aiMatrix4x4 FinalTransformation;
+
+		BoneInfo()
+		{
+			//initialise everything to zero
+			for (int x = 0; x < NUM_BONES_PER_VERTEX; x++) {
+				for (int y = 0; y < NUM_BONES_PER_VERTEX; y++) {
+					BoneOffset[x][y] = 0.0f;
+					FinalTransformation[x][y] = 0.0f;
+
+				}
+			}
+		}
+	};
+
+	////////////////////////ANIMATION STUFF!!!!!/////////////////////////
+	void CalcInterpolatedScaling(aiVector3D& Out, float AnimationTime, const aiNodeAnim* pNodeAnim);
+	void CalcInterpolatedRotation(aiQuaternion& Out, float AnimationTime, const aiNodeAnim* pNodeAnim);
+	void CalcInterpolatedPosition(aiVector3D& Out, float AnimationTime, const aiNodeAnim* pNodeAnim);
+	GLuint FindScaling(float AnimationTime, const aiNodeAnim* pNodeAnim);
+	GLuint FindRotation(float AnimationTime, const aiNodeAnim* pNodeAnim);
+	GLuint FindPosition(float AnimationTime, const aiNodeAnim* pNodeAnim);
+	const aiNodeAnim* FindNodeAnim(const aiAnimation* pAnimation, const string NodeName);
+	void ReadNodeHeirarchy(float AnimationTime, const aiNode* pNode, const aiMatrix4x4& ParentTransform);
+	void LoadBones(GLuint MeshIndex, const aiMesh* paiMesh);
+	aiMatrix4x4 getm_GlobalInverseTransform() {
+		return m_GlobalInverseTransform;
+	}
+	void setm_GlobalInverseTransform(aiMatrix4x4 i) {
+		m_GlobalInverseTransform = i;
+	}
+	void BoneTransform(float TimeInSeconds, vector<aiMatrix4x4>& Transforms);
+	GLuint NumBones() const
+	{
+		return m_NumBones;
+	}
+	//	void Clear();
+
+	struct VertexBoneData
+	{
+		GLuint IDs[NUM_BONES_PER_VERTEX];
+		float Weights[NUM_BONES_PER_VERTEX];
+
+		VertexBoneData()
+		{
+			Reset();
+		};
+
+		void Reset()
+		{
+			//initialise everything to zero
+			for (int i = 0; i < NUM_BONES_PER_VERTEX; i++) {
+				IDs[i] = 0.0f;
+				Weights[i] = 0.0f;
+			}
+		}
+
+		void AddBoneData(GLuint BoneID, float Weight);
+	};
+
+	struct MeshEntry {
+		MeshEntry()
+		{
+			NumIndices = 0;
+			BaseVertex = 0;
+			BaseIndex = 0;
+		}
+
+		unsigned int NumIndices;
+		unsigned int BaseVertex;
+		unsigned int BaseIndex;
+	};
 private:
+	
 	/*  Model Data  */
+	vector<VertexBoneData> Bones;
+	map<string, GLuint> m_BoneMapping; // maps a bone name to its index
+	GLuint m_NumBones;
+	vector<BoneInfo> m_BoneInfo;
+
+	vector<MeshEntry> m_Entries;
+	aiMatrix4x4 m_GlobalInverseTransform;
+
+	const aiScene* scene;
 	vector<Mesh> meshes;
 	string directory;
 	vector<Texture> textures_loaded;	// Stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
@@ -31,8 +116,8 @@ private:
 	// Loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
 	void loadModel(string path);
 	// Processes a node in a recursive fashion. Processes each individual mesh located at the node and repeats this process on its children nodes (if any).
-	void processNode(aiNode* node, const aiScene* scene);
-	Mesh processMesh(aiMesh* mesh, const aiScene* scene);
+	void Model::processNode(aiNode* node, const aiScene* scene);
+	Mesh processMesh(GLuint meshIndex, aiMesh* mesh, const aiScene* scene);
 	// Checks all material textures of a given type and loads the textures if they're not loaded yet.
 	// The required info is returned as a Texture struct.
 	vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, string typeName);
