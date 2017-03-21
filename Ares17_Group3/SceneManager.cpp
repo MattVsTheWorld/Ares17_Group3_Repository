@@ -1577,6 +1577,14 @@ namespace SceneManager {
 
 	}
 
+	void renderHud(GLuint shader, Model *modelData) {
+		// HP
+		h_manager->renderPlayerHud("Health: ", player->getHealth(), shader, modelData, glm::vec3(-0.875f, 0.925f, 1.0f), glm::vec3(0.6275,0.4,0.0));
+
+		// Armor
+		h_manager->renderPlayerHud("Armor: ", player->getArmor(), shader, modelData, glm::vec3(-0.65f, 0.925f, 1.0f), glm::vec3(0, 0, 0.4));
+	}
+
 	void draw(SDL_Window * window) { //, int fps) { // fps counter; 4 of 5
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear window
 		glEnable(GL_CULL_FACE);
@@ -1621,6 +1629,9 @@ namespace SceneManager {
 				renderShadowedScene(projection, view, modelProgram, false); // render normal scene from normal point of view
 				// fps counter; 5 of 5
 				//h_manager->renderToHud(5, texturedProgram, modelTypes["cube"], glm::vec3(-0.0f, 0.0f, 0.9f));
+
+				renderHud(texturedProgram, modelTypes["cube"]);
+				
 				if (mode == EDIT) {
 					h_manager->renderEditHud("Bounding", currentBounding, texturedProgram, modelTypes["cube"], glm::vec3(0.7f, 0.45f, 0.9f));
 					h_manager->renderEditHud("Model", currentModel, texturedProgram, modelTypes["cube"], glm::vec3(0.7f, 0.35f, 0.9f));
