@@ -42,8 +42,11 @@ public:
 		{
 			this->invincible = true;
 	//		std::cout << "NO DAMGIO" << std::endl;
-			this->health -= damage;
-			std::cout << "Took a hit! Hp now: " << this->health << std::endl;
+			if (this->armor > 0)
+				this->armor -= (damage / 2);
+			else
+				this->health -= damage;
+		//	std::cout << "Took a hit! Hp now: " << this->health << std::endl;
 		}
 		
 	}

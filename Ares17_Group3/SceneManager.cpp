@@ -1317,17 +1317,19 @@ namespace SceneManager {
 		glDepthMask(GL_TRUE);
 	}*/
 
-	void renderWeapon(glm::mat4 proj, Model *modelData, GLuint shader) {
+	void renderWeapon(glm::mat4 proj, Model *modelData, GLuint shader, glm::vec3 scale) {
 		glm::mat4 model;
-		glm::vec3 gunPos = moveForward(glm::vec3(player->getPosition().x, player->getPosition().y - 0.15, player->getPosition().z), rotationAngles.y, 0.2f);
+		glm::vec3 gunPos = moveForward(glm::vec3(player->getPosition().x, player->getPosition().y - 0.15, player->getPosition().z), rotationAngles, 0.35f);
 		gunPos = moveRight(gunPos, rotationAngles.y, 0.2f);
+		cout << "gunpos: " << gunPos.x << " " << gunPos.y << " " << gunPos.z << endl;
 		model = glm::translate(model, gunPos);
 		float Y_axisRotation = 30.0f*DEG_TO_RADIAN;
 		model = glm::rotate(model, float(-rotationAngles.y*DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::rotate(model, float(rotationAngles.x*DEG_TO_RADIAN), glm::vec3(1.0f, 0.0f, 0.0f));
-		model = glm::rotate(model, float(180 * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
-		model = glm::rotate(model, Y_axisRotation, glm::vec3(0.0f, 1.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(0.005f, 0.005f, 0.005f));
+		//model = glm::rotate(model, float(rotationAngles.*DEG_TO_RADIAN), glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::rotate(model, float(260 * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
+//		model = glm::rotate(model, Y_axisRotation, glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::scale(model, scale);
 		//	model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));	// It's a bit too big for our scene, so scale it down
 																	//model = glm::scale(model, glm::vec3(0.05f, 0.05f, 0.05f));	// for gun
 		glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
@@ -1514,7 +1516,7 @@ namespace SceneManager {
 			  //		renderObject(projection, modelTypes["robot"], glm::vec3(4.0, 0.0, 0.0), glm::vec3(0.2, 0.2, 0.2), shader);
 
 		//	if (pointOfView == FIRST_PERSON)
-		//		renderWeapon(projection, modelTypes["plasmacutter"], shader); //TODO: Render current weapon
+		renderWeapon(projection, modelTypes["scifipistol"], shader, glm::vec3(0.05,0.05,0.05)); //TODO: Render current weapon
 
 		if (mode == EDIT) {
 			if (creation == true) {

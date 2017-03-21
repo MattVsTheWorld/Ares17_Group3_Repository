@@ -39,7 +39,7 @@ hudManager::hudManager() {
 	if (TTF_Init() == -1)
 		std::cout << "TTF failed to initialise." << std::endl;
 
-	textFont = TTF_OpenFont("MavenPro-Regular.ttf", 24);
+	textFont = TTF_OpenFont("Nippon_Tech.ttf", 24);
 	if (textFont == NULL)
 		std::cout << "Failed to open font." << std::endl;
 
@@ -95,7 +95,6 @@ void hudManager::renderPlayerHud(std::string line, double value, GLuint shader, 
 	MeshManager::setUniformMatrix4fv(shader, "view", glm::value_ptr(glm::mat4(1.0)));
 	MeshManager::setUniformMatrix4fv(shader, "projection", glm::value_ptr(glm::mat4(1.0)));
 	MeshManager::setUniformMatrix4fv(shader, "model", glm::value_ptr(id));
-	//MeshManager::setUniformMatrix4fv(shader, "text_color", glm::value_ptr(color));
 	glUniform3fv(glGetUniformLocation(shader, "text_color"), 1, glm::value_ptr(color));
 	
 	modelData->Draw(shader);
