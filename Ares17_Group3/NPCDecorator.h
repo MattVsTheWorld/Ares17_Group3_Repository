@@ -14,7 +14,7 @@ public:
 
 	void moveNpc(vertex* v) { ; }
 	queue<vertex*> findPath(AdjacencyList *adjList, int startId, int endId) { return npc->findPath(adjList, startId, endId); }
-	bool update(Model * modelData, glm::mat4 view, glm::mat4 proj, float dt, Grid* _g, btVector3 &playerPos) {
+	bool update(Model * modelData, glm::mat4 view, glm::mat4 proj, float dt, Grid* _g, btVector3 &playerPos, GLuint shader) {
 		if (npc->getHealth() <= 0) {
 			delete npc;
 			delete this;
@@ -22,14 +22,14 @@ public:
 		}
 
 		else {
-			npc->update(modelData, view, proj, dt, _g, playerPos);
+			npc->update(modelData, view, proj, dt, _g, playerPos, shader);
 			//render(modelData, view, proj);
 			return true;
 		}
 	}
 
-	void render(Model * modelData, glm::mat4 view, glm::mat4 proj) {
-		npc->render(modelData, view, proj); //TODO: delete (unused)
+	void render(Model * modelData, glm::mat4 view, glm::mat4 proj, GLuint shader) {
+		npc->render(modelData, view, proj, shader); //TODO: delete (unused)
 	} // delegate render to npc data member
 
 	void modifyHealth(double newHp) {

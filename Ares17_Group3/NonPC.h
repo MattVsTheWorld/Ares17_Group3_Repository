@@ -18,7 +18,7 @@ private:
 	//
 	Model * boundingModel;
 	// Model
-	GLuint shader;
+	//GLuint shader;
 	GLuint texture;
 	/// ++++
 	queue<vertex*> currentPath;
@@ -113,7 +113,7 @@ public:
 		range = _r;
 		shapeManager = _sm;
 		boundingModel = _bmodel;
-		shader = _shader;
+		//shader = _shader;
 		texture = _text;
 		// Construct body
 		btRigidBody *temp = addBoundingCapsule(radius, height, spawn.x, spawn.y, spawn.z, mass);
@@ -166,7 +166,10 @@ public:
 		return toVisit;
 	} // findPath function
 
-	bool update(Model * modelData, glm::mat4 view, glm::mat4 proj, float dt, Grid* _g, btVector3 &playerPos) {
+	bool update(Model * modelData, glm::mat4 view, glm::mat4 proj, float dt, Grid* _g, btVector3 &playerPos, GLuint shader) {
+		
+		this->render(modelData, view, proj, shader);
+		
 		btTransform t;
 		t.setIdentity();
 		npcBody->getMotionState()->getWorldTransform(t);
@@ -176,32 +179,34 @@ public:
 			currentPath = findPath(_g->getAdjList(), _g->getNodeFromWorldPos(pos), _g->getNodeFromWorldPos(playerPos));
 			once = false;
 		}
-		recalcTimer -= dt;
-		if (recalcTimer <= 0)
-		{
-			currentPath = findPath(_g->getAdjList(), _g->getNodeFromWorldPos(pos), _g->getNodeFromWorldPos(playerPos));
-			recalcTimer = REFRESHRATE;
+		if (sqrt(pow(playerPos.x() - pos.x(), 2) + pow(playerPos.z() - pos.z(), 2)) >= 4) { // close
+			recalcTimer -= dt;
+			if (recalcTimer <= 0)
+			{
+				currentPath = findPath(_g->getAdjList(), _g->getNodeFromWorldPos(pos), _g->getNodeFromWorldPos(playerPos));
+				recalcTimer = REFRESHRATE;
+			}
+
+			if (!currentPath.empty())
+				if (_g->getAdjList()->getVertex(_g->getNodeFromWorldPos(pos)) == currentPath.front())
+					currentPath.pop();
+			if (!currentPath.empty())
+				this->moveNpc(currentPath.front());
 		}
-
-		if (!currentPath.empty())
-			if (_g->getAdjList()->getVertex(_g->getNodeFromWorldPos(pos)) == currentPath.front())
-				currentPath.pop();
-		if (!currentPath.empty())
-			this->moveNpc(currentPath.front());
-
+		else {
+			//
+			//TODO: attack
+		}
 		if (findCollision(npcGhost))
 		{
 			this->health -= 10;
 			cout << "HIT! Health = " << this->health << endl;
 		}
-
-
-		this->render(modelData, view, proj);
 		return true;
 	}
 
-	void render(Model * modelData, glm::mat4 view, glm::mat4 proj) {
-
+	void render(Model * modelData, glm::mat4 view, glm::mat4 proj, GLuint shader) {
+	//	glUseProgram(shader);
 		btTransform t;
 		t.setIdentity();
 		npcBody->getMotionState()->getWorldTransform(t);

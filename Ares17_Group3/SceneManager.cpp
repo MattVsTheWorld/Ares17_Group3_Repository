@@ -556,7 +556,6 @@ namespace SceneManager {
 		else cout << "\nMission failed. We'll get em next time. \n. Unable to open file";
 	}
 
-
 	void initBoxes() {
 		readFile();
 
@@ -1448,8 +1447,20 @@ namespace SceneManager {
 		///+++++++++++++++
 
 
+		btVector3 playerPos(player->getPosition().x, player->getPosition().y, player->getPosition().z);
+		//++! \_/
+		//TODO: Finish enemies
+		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		//glDisable(GL_CULL_FACE);
+		for (int i = 0; i < enemies.size(); i++) {
+			if (!enemies[i]->update(modelTypes["robot"], view, projection, dt_secs, level1Grid, playerPos,shader))
+			{
+				enemies.erase(remove(enemies.begin(), enemies.end(), enemies[i]), enemies.end());
+				//TODO: space to add stuff
+			}
+		}
 
-		int i = 0;
+		//int i = 0;
 		for (const auto& id_pair : bodies) {
 			// First = name / key
 			id_pair.first; // string
@@ -1485,23 +1496,12 @@ namespace SceneManager {
 				glEnable(GL_CULL_FACE);
 				renderObject(projection, modelTypes[get<0>(models[id_pair.first])], spherePosition, get<1>(models[id_pair.first]), rotation, shader, defaultTexture);
 			}
-			i++;
+		//	i++;
 		}
 		///+++++++++++++++
 		// RENDERING modelTypes
 
-		btVector3 playerPos(player->getPosition().x, player->getPosition().y, player->getPosition().z);
-		//++! \_/
-		//TODO: Finish enemies
-		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		//glDisable(GL_CULL_FACE);
-		for (int i = 0; i < enemies.size(); i++) {
-			if (!enemies[i]->update(modelTypes["robot"], view, projection, dt_secs,level1Grid, playerPos))
-			{
-				enemies.erase(remove(enemies.begin(), enemies.end(), enemies[i]), enemies.end());
-				//TODO: space to add stuff
-			}
-		}
+
 
 		//	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		//	glEnable(GL_CULL_FACE);
@@ -1526,6 +1526,7 @@ namespace SceneManager {
 				glDisable(GL_CULL_FACE);
 			}
 		}
+
 
 		//!++!
 		projectile_manager->renderProjectiles(view, projection, modelTypes["sphere"], shader, defaultTexture, dt_secs);
