@@ -154,11 +154,11 @@ public:
 	//TODO: search only if reachable
 	queue<vertex*> findPath(AdjacencyList *adjList, int startId, int endId) {
 		A_star *pathfinder = new A_star(adjList);
-		cout << "////////\n" << startId << " to " << endId << endl;
+	//	cout << "////////\n" << startId << " to " << endId << endl;
 		list<vertex*> path = pathfinder->algorithm_standard(adjList->getVertex(startId), adjList->getVertex(endId));
 		queue<vertex*> toVisit;
 		for (const auto &pathIterator : path) {
-			cout << " " << pathIterator->getIndex() << " ";
+	//		cout << " " << pathIterator->getIndex() << " ";
 			toVisit.push(static_cast<vertex*>(pathIterator));
 		}
 		adjList->resetCosts();
@@ -195,9 +195,9 @@ public:
 				this->moveNpc(currentPath.front());
 		}
 		else {
-			//
-			//TODO: attack
-
+			//Attack player
+			//player->varyHealth(-(this->attack));
+			player->takeDamage(this->attack);
 		}
 		if (findCollision(npcGhost))
 		{
@@ -238,16 +238,11 @@ public:
 
 	} //TODO: actual model
 	
-	void setAttack(double atk) {
-		this->attack = atk;
-	}
-
-	double getAttack() {
-		return this->attack;
-	}
-	
+	void setAttack(double atk) { this->attack = atk; }
+	double getAttack() { return this->attack; }	
 	void modifyHealth(double newHp) { this->health += newHp; }
 	double getRange() { return range; }
+	void setRange(double rng) { this->range = rng; }
 	double getHealth() { return health; }
 protected:
 	//	int health;

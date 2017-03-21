@@ -5,6 +5,7 @@ Player::Player(glm::vec3 _eye) {
 	eye = _eye;
 	health = 200;
 	armor = 100;
+	invincible = false;
 }
 
 void Player::setPosition(glm::vec3 newEye) {

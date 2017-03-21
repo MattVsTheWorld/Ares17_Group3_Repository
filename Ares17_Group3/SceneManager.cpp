@@ -1334,7 +1334,7 @@ namespace SceneManager {
 		modelData->Draw(shader);
 	}
 
-	void updatePlayer() {
+	void updatePlayer(float dt) {
 		btTransform t;
 		t.setIdentity();
 		playerBody->getMotionState()->getWorldTransform(t);
@@ -1342,6 +1342,7 @@ namespace SceneManager {
 		btVector3 pos = t.getOrigin();
 		player->setPosition(glm::vec3(pos.x(), pos.y(), pos.z()));
 		ghostObject->setWorldTransform(t);
+		player->update(dt);
 		//cout << getLinearVelocityInBodyFrame(playerBody).y();
 	}
 
@@ -1365,7 +1366,7 @@ namespace SceneManager {
 		coolDown -= dt_secs;
 
 		// 18/01
-		updatePlayer();
+		updatePlayer(dt_secs);
 
 		bt_manager->update();
 		if (player->getState() == JUMPING)

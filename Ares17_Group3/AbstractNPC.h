@@ -28,6 +28,7 @@ public:
 	virtual void setAttack(double atk) = 0;
 	virtual double getAttack() = 0;
 	virtual double getRange() = 0;
+	virtual void setRange(double rng) = 0;
 	virtual double getHealth() = 0;
 	virtual ~AbstractNPC() {}
 };

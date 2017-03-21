@@ -43,6 +43,10 @@ public:
 	double getAttack() { 
 		return npc->getAttack(); }
 
+	void setRange(double rng) {
+		npc->setRange(rng);
+	}
+
 	double getRange() {
 		return npc->getRange();
 	}
@@ -58,6 +62,7 @@ class Melee : public NPCDecorator {
 public:
 	Melee(AbstractNPC *n) : NPCDecorator(n) {
 		modifyHealth(50);
+		setAttack(getAttack() + 20);
 	}
 	//void render() {
 	//	// render special features 
@@ -76,6 +81,9 @@ class Ranged : public NPCDecorator {
 public:
 	Ranged(AbstractNPC *n) : NPCDecorator(n) {
 		modifyHealth(30);
+		setAttack(getAttack() + 10);
+		setRange(getRange() + 15);
+		
 	}
 	//void render() {
 	//	// render special features 
@@ -112,6 +120,7 @@ class Medium : public NPCDecorator {
 public:
 	Medium(AbstractNPC *n) : NPCDecorator(n) {
 		modifyHealth(40);
+		setAttack(getAttack() + 10);
 	}
 	//void render() {
 	//	// render special features 
@@ -130,6 +139,7 @@ class Heavy : public NPCDecorator {
 public:
 	Heavy(AbstractNPC *n) : NPCDecorator(n) {
 		modifyHealth(200);
+		setAttack(getAttack() + 25);
 	}
 	//void render() {
 	//	// render special features 
