@@ -30,8 +30,8 @@ protected:
 private:
 	glm::vec3 eye;
 	playerState currentState;
-	double health = 200;
-	double armor = 50;
+	double health;
+	double armor;
 
 };
 

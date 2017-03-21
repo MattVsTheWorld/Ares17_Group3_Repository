@@ -3,6 +3,8 @@
 
 Player::Player(glm::vec3 _eye) {
 	eye = _eye;
+	health = 200;
+	armor = 100;
 }
 
 void Player::setPosition(glm::vec3 newEye) {

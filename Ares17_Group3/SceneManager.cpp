@@ -752,10 +752,10 @@ namespace SceneManager {
 		// +++ \_/
 		// health, range, manager, sp, radius, height, mass, model, shader, textuer
 		//for (int i = 0; i < 3; i++) {
-		enemies.push_back(new Melee(new NonPC(100, 10, bt_manager, glm::vec3(0, 10, 0), 1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture)));
-	//	enemies.push_back(new Melee(new NonPC(100, 10, bt_manager, glm::vec3(2, 10, 0), 1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture)));
-		//}
-		// +++ /-\
+		enemies.push_back(new Melee(new NonPC(100, 5, bt_manager, glm::vec3(0, 10, 0), 1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture)));
+		//	enemies.push_back(new Melee(new NonPC(100, 10, bt_manager, glm::vec3(2, 10, 0), 1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture)));
+			//}
+			// +++ /-\
 
 
 		glEnable(GL_DEPTH_TEST);
@@ -1453,8 +1453,7 @@ namespace SceneManager {
 		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		//glDisable(GL_CULL_FACE);
 		for (int i = 0; i < enemies.size(); i++) {
-			if (!enemies[i]->update(modelTypes["robot"], view, projection, dt_secs, level1Grid, playerPos,shader))
-			{
+			if (!enemies[i]->update(modelTypes["robot"], view, projection, dt_secs, level1Grid, player, shader)) {
 				enemies.erase(remove(enemies.begin(), enemies.end(), enemies[i]), enemies.end());
 				//TODO: space to add stuff
 			}
@@ -1496,7 +1495,7 @@ namespace SceneManager {
 				glEnable(GL_CULL_FACE);
 				renderObject(projection, modelTypes[get<0>(models[id_pair.first])], spherePosition, get<1>(models[id_pair.first]), rotation, shader, defaultTexture);
 			}
-		//	i++;
+			//	i++;
 		}
 		///+++++++++++++++
 		// RENDERING modelTypes

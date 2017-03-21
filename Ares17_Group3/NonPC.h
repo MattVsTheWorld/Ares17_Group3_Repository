@@ -166,10 +166,11 @@ public:
 		return toVisit;
 	} // findPath function
 
-	bool update(Model * modelData, glm::mat4 view, glm::mat4 proj, float dt, Grid* _g, btVector3 &playerPos, GLuint shader) {
+	bool update(Model * modelData, glm::mat4 view, glm::mat4 proj, float dt, Grid* _g, Player *player, GLuint shader) {
 		
 		this->render(modelData, view, proj, shader);
 		
+		btVector3 playerPos(player->getPosition().x, player->getPosition().y, player->getPosition().z);
 		btTransform t;
 		t.setIdentity();
 		npcBody->getMotionState()->getWorldTransform(t);
@@ -179,7 +180,7 @@ public:
 			currentPath = findPath(_g->getAdjList(), _g->getNodeFromWorldPos(pos), _g->getNodeFromWorldPos(playerPos));
 			once = false;
 		}
-		if (sqrt(pow(playerPos.x() - pos.x(), 2) + pow(playerPos.z() - pos.z(), 2)) >= 4) { // close
+		if (sqrt(pow(playerPos.x() - pos.x(), 2) + pow(playerPos.z() - pos.z(), 2)) >= this->range) { // close
 			recalcTimer -= dt;
 			if (recalcTimer <= 0)
 			{
@@ -196,6 +197,7 @@ public:
 		else {
 			//
 			//TODO: attack
+
 		}
 		if (findCollision(npcGhost))
 		{
@@ -235,7 +237,15 @@ public:
 		//TODO: actual model
 
 	} //TODO: actual model
+	
+	void setAttack(double atk) {
+		this->attack = atk;
+	}
 
+	double getAttack() {
+		return this->attack;
+	}
+	
 	void modifyHealth(double newHp) { this->health += newHp; }
 	double getRange() { return range; }
 	double getHealth() { return health; }
@@ -245,6 +255,7 @@ protected:
 		// ++
 	double health;
 	double range;
+	double attack;
 	bool once = true;
 	// (...) space to add more parameters...
 };
