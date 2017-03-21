@@ -59,6 +59,10 @@ namespace SceneManager {
 	/// End
 	//////////////////
 
+	// +++ \_/
+	AbstractNPC *enemies[10];
+	// +++ /-\
+
 	const char *testTexFiles[6] = {
 		"Town-skybox/Town_bk.bmp", "Town-skybox/Town_ft.bmp", "Town-skybox/Town_rt.bmp", "Town-skybox/Town_lf.bmp", "Town-skybox/Town_up.bmp", "Town-skybox/Town_dn.bmp"
 	};
@@ -136,7 +140,7 @@ namespace SceneManager {
 			speed = btVector3(speed.x() + (speed.absolute().x() > SPEED_CAP_XZ ? 0 : _speed*std::cos(angle*DEG_TO_RADIAN)), speed.y(), speed.z() + (speed.absolute().z() > SPEED_CAP_XZ ? 0 : _speed*std::sin(angle*DEG_TO_RADIAN)));
 		return speed;
 	}
-
+	//TODO: fix when gameplay done ||TRIGGERED||
 	btVector3 jump(GLfloat _speed) {
 		btVector3 speed = getLinearVelocityInBodyFrame(playerBody);
 		if (player->getState() != JUMPING) {
@@ -705,7 +709,7 @@ namespace SceneManager {
 						const btVector3& ptB = pt.getPositionWorldOnB();
 						const btVector3& normalOnB = pt.m_normalWorldOnB;
 						// <START>  handle collisions here
-					//	cout << "Player colliding with something while jumping." << endl;
+						cout << "Player colliding with something while jumping." << endl;
 						player->setState(ON_GROUND);
 						//  <END>   handle collisions here
 					}
@@ -740,6 +744,13 @@ namespace SceneManager {
 
 		h_manager = new hudManager();
 		skybox = new Skybox(skyTexFiles);
+
+		glm::mat4 projection;
+		// +++ \_/
+		// health, range, manager, sp, radius, height, mass, model, shader, textuer
+		enemies[0] = new Heavy(new Melee(new NonPC(100, 10, bt_manager, glm::vec3(0, 10, 0), 1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture)));
+		// +++ /-\
+
 
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_BLEND);
@@ -854,7 +865,8 @@ namespace SceneManager {
 						coolDown = COOL_TIME;
 						//			cout << "Attempting to shoot bullet." << endl;
 						projectile_manager->addProjectile(moveForward(player->getPosition(), rotationAngles, 1.0f), PROJ_SPEED, (rotationAngles.y*DEG_TO_RADIAN), rotationAngles.x); //!++!
-						s_manager->playSound(s_manager->getSound(2), 2, 1);
+						//s_manager->playSound(s_manager->getSound(2), 2, 1);
+						//TODO: Enable sound
 						//cout << rotationAngles.x << "\n";
 																																						  //		Projectile* bullet = new Projectile(bt_manager, glm::vec3(0, 0, 0), 1);
 					}
@@ -1430,6 +1442,8 @@ namespace SceneManager {
 		glEnable(GL_CULL_FACE);*/
 		///+++++++++++++++
 
+
+
 		int i = 0;
 		for (const auto& id_pair : bodies) {
 			// First = name / key
@@ -1470,6 +1484,15 @@ namespace SceneManager {
 		}
 		///+++++++++++++++
 		// RENDERING modelTypes
+
+		//++! \_/
+		//TODO: Finish enemies
+		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		//glDisable(GL_CULL_FACE);
+		enemies[0]->render(modelTypes["robot"], view, projection);
+	//	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	//	glEnable(GL_CULL_FACE);
+		//--------
 
 
 		//if (pointOfView == THIRD_PERSON)
