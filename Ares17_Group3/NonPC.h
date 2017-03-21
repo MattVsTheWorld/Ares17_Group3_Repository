@@ -5,8 +5,6 @@
 #define PI 3.14159265359f
 #define REFRESHRATE 1.0f
 
-
-
 // NPC implements AbstractNPC - all methods defined inline
 class NonPC : public AbstractNPC {
 private:
@@ -23,6 +21,7 @@ private:
 	/// ++++
 	queue<vertex*> currentPath;
 	double recalcTimer = REFRESHRATE;
+	double attackTimer = 0;
 	// +++++++++++++++
 	bool findCollision(btPairCachingGhostObject* ghostObject) {
 		btManifoldArray manifoldArray;
@@ -145,7 +144,7 @@ public:
 
 		//	cout << "Going to: " << v->getIndex() << endl;
 		float angle = (atan2(goTo.z() - pos.z(), goTo.x() - pos.x())); // RADIANS
-		changeSpeed(3, angle); 
+		changeSpeed(3, angle);
 
 		// find angle between direction
 		//changeSpeed(newDir);
@@ -154,11 +153,11 @@ public:
 	//TODO: search only if reachable
 	queue<vertex*> findPath(AdjacencyList *adjList, int startId, int endId) {
 		A_star *pathfinder = new A_star(adjList);
-	//	cout << "////////\n" << startId << " to " << endId << endl;
+		//	cout << "////////\n" << startId << " to " << endId << endl;
 		list<vertex*> path = pathfinder->algorithm_standard(adjList->getVertex(startId), adjList->getVertex(endId));
 		queue<vertex*> toVisit;
 		for (const auto &pathIterator : path) {
-	//		cout << " " << pathIterator->getIndex() << " ";
+			//		cout << " " << pathIterator->getIndex() << " ";
 			toVisit.push(static_cast<vertex*>(pathIterator));
 		}
 		adjList->resetCosts();
@@ -167,18 +166,18 @@ public:
 	} // findPath function
 
 	bool update(Model * modelData, glm::mat4 view, glm::mat4 proj, float dt, Grid* _g, Player *player, GLuint shader) {
-		
+
 		this->render(modelData, view, proj, shader);
-		
+
 		btVector3 playerPos(player->getPosition().x, player->getPosition().y, player->getPosition().z);
 		btTransform t;
 		t.setIdentity();
 		npcBody->getMotionState()->getWorldTransform(t);
 		btVector3 pos = t.getOrigin();
 
-		if (once) {
+		if (init) {
 			currentPath = findPath(_g->getAdjList(), _g->getNodeFromWorldPos(pos), _g->getNodeFromWorldPos(playerPos));
-			once = false;
+			init = false;
 		}
 		if (sqrt(pow(playerPos.x() - pos.x(), 2) + pow(playerPos.z() - pos.z(), 2)) >= this->range) { // close
 			recalcTimer -= dt;
@@ -197,7 +196,12 @@ public:
 		else {
 			//Attack player
 			//player->varyHealth(-(this->attack));
-			player->takeDamage(this->attack);
+			//TODO: MESHAL attack animation
+			if (this->attackTimer <= 0) {
+				player->takeDamage(this->attack);
+				this->attackTimer = this->attackSpeed;
+			}
+			else this->attackTimer -= dt;
 		}
 		if (findCollision(npcGhost))
 		{
@@ -208,7 +212,7 @@ public:
 	}
 
 	void render(Model * modelData, glm::mat4 view, glm::mat4 proj, GLuint shader) {
-	//	glUseProgram(shader);
+		//	glUseProgram(shader);
 		btTransform t;
 		t.setIdentity();
 		npcBody->getMotionState()->getWorldTransform(t);
@@ -237,21 +241,25 @@ public:
 		//TODO: actual model
 
 	} //TODO: actual model
-	
+
 	void setAttack(double atk) { this->attack = atk; }
-	double getAttack() { return this->attack; }	
+	double getAttack() { return this->attack; }
 	void modifyHealth(double newHp) { this->health += newHp; }
 	double getRange() { return range; }
 	void setRange(double rng) { this->range = rng; }
 	double getHealth() { return health; }
+	void setAttackSpeed(double atkspd) {
+		this->attackSpeed = atkspd;
+	}
+	double getAttackSpeed() {
+		return this->attackSpeed;
+	}
 protected:
-	//	int health;
-	//	int mana;
-		// ++
 	double health;
 	double range;
 	double attack;
-	bool once = true;
+	double attackSpeed;
+	bool init = true;
 	// (...) space to add more parameters...
 };
 

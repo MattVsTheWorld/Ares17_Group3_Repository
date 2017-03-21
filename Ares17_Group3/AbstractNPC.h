@@ -30,6 +30,8 @@ public:
 	virtual double getRange() = 0;
 	virtual void setRange(double rng) = 0;
 	virtual double getHealth() = 0;
+	virtual void setAttackSpeed(double atkspd) = 0;
+	virtual	double getAttackSpeed() = 0;
 	virtual ~AbstractNPC() {}
 };
 

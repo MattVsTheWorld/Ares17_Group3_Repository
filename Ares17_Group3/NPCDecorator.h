@@ -53,6 +53,14 @@ public:
 	double getHealth() {
 		return npc->getHealth();
 	}
+
+	void setAttackSpeed(double atkspd) {
+		npc->setAttackSpeed(atkspd);
+	}
+	double getAttackSpeed() {
+		return npc->getAttackSpeed();
+	}
+
 protected:
 	AbstractNPC * npc;
 };
@@ -63,10 +71,10 @@ public:
 	Melee(AbstractNPC *n) : NPCDecorator(n) {
 		modifyHealth(50);
 		setAttack(getAttack() + 20);
+		setAttackSpeed(getAttackSpeed() + 1.5);
 	}
 	//void render() {
 	//	// render special features 
-	//	// TODO:might change material?
 	//	// apply different texture?
 	//	Model * modelData;
 	//	NPCDecorator::render(modelData); // delegate to base class
@@ -83,11 +91,11 @@ public:
 		modifyHealth(30);
 		setAttack(getAttack() + 10);
 		setRange(getRange() + 15);
+		setAttackSpeed(getAttackSpeed() + 3.0);
 		
 	}
 	//void render() {
 	//	// render special features 
-	//	// TODO:might change material?
 	//	// apply different texture?
 	//	Model * modelData;
 	//	NPCDecorator::render(modelData); // delegate to base class
@@ -102,10 +110,10 @@ class Light : public NPCDecorator {
 public:
 	Light(AbstractNPC *n) : NPCDecorator(n) {
 		modifyHealth(10);
+		setAttackSpeed(getAttackSpeed() + 1.0);
 	}
 	//void render() {
 	//	// render special features 
-	//	// TODO:might change material?
 	//	// apply different texture?
 	//	Model * modelData;
 	//	NPCDecorator::render(modelData); // delegate to base class
@@ -121,10 +129,11 @@ public:
 	Medium(AbstractNPC *n) : NPCDecorator(n) {
 		modifyHealth(40);
 		setAttack(getAttack() + 10);
+		setAttackSpeed(getAttackSpeed() + 1.5);
+		// normal atk speed
 	}
 	//void render() {
 	//	// render special features 
-	//	// TODO:might change material?
 	//	// apply different texture?
 	//	Model * modelData;
 	//	NPCDecorator::render(modelData); // delegate to base class
@@ -140,10 +149,10 @@ public:
 	Heavy(AbstractNPC *n) : NPCDecorator(n) {
 		modifyHealth(200);
 		setAttack(getAttack() + 25);
+		setAttackSpeed(getAttackSpeed() + 3.0);
 	}
 	//void render() {
 	//	// render special features 
-	//	// TODO:might change material?
 	//	// apply different texture?
 	//	Model * modelData;
 	//	NPCDecorator::render(modelData); // delegate to base class
