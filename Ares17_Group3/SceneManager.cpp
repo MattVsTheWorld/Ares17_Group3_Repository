@@ -595,15 +595,29 @@ namespace SceneManager {
 
 	void initmodelTypes() {
 		//TODO:Player model for death or something
-		modelTypes.insert(std::pair<string, Model*>("cube", new Model("Models/cube.obj")));
-		modelTypes.insert(std::pair<string, Model*>("box", modelTypes["cube"]));
-		modelTypes.insert(std::pair<string, Model*>("sphere", new Model("Models/sphere.obj")));
-		modelTypes.insert(std::pair<string, Model*>("capsule", modelTypes["sphere"]));
-		modelTypes.insert(std::pair<string, Model*>("car", new Model("Models/Car/model.obj")));
-		modelTypes.insert(std::pair<string, Model*>("house", new Model("Models/House/houselow.obj")));
+		//Enemies
 		modelTypes.insert(std::pair<string, Model*>("robot", new Model("Models/Robot/Roboto.obj")));
-		modelTypes.insert(std::pair<string, Model*>("carpile", new Model("Models/CarPile/wasteddisplay.obj")));
-		modelTypes.insert(std::pair<string, Model*>("oiltank", new Model("Models/oiltank/Oiltank.obj")));
+		//Environment
+		modelTypes.insert(std::pair<string, Model*>("cube", new Model("Models/Environment/cube.obj")));
+		modelTypes.insert(std::pair<string, Model*>("box", modelTypes["cube"]));
+		modelTypes.insert(std::pair<string, Model*>("sphere", new Model("Models/Environment/sphere.obj")));
+		modelTypes.insert(std::pair<string, Model*>("capsule", modelTypes["sphere"]));
+		modelTypes.insert(std::pair<string, Model*>("car", new Model("Models/Environment/Car/model.obj")));
+		modelTypes.insert(std::pair<string, Model*>("house", new Model("Models/Environment/House/houselow.obj")));
+		modelTypes.insert(std::pair<string, Model*>("carpile", new Model("Models/Environment/CarPile/wasteddisplay.obj")));
+		modelTypes.insert(std::pair<string, Model*>("oiltank", new Model("Models/Environment/OilTank/Oiltank.obj")));
+		modelTypes.insert(std::pair<string, Model*>("rock", new Model("Models/Environment/Rock/model.obj")));
+		modelTypes.insert(std::pair<string, Model*>("barrier", new Model("Models/Environment/Barrier/model.obj")));
+		//Collectable
+		modelTypes.insert(std::pair<string, Model*>("heart", new Model("Models/Collectable/Heart/Heart.obj")));
+		modelTypes.insert(std::pair<string, Model*>("potion", new Model("Models/Collectable/Potion/pocion lowpoly.obj")));
+		//Guns
+		modelTypes.insert(std::pair<string, Model*>("ak47", new Model("Models/Guns/AK47/Gun_low_poly.obj")));
+		modelTypes.insert(std::pair<string, Model*>("pistol", new Model("Models/Guns/Pistol/Gun.obj")));
+		modelTypes.insert(std::pair<string, Model*>("scifigun", new Model("Models/Guns/Scifi/25ad7fc3a09f4a958dd62b5b522257ee.obj")));
+		modelTypes.insert(std::pair<string, Model*>("rifle", new Model("Models/Guns/Rifle/gun_rifle_lo.obj")));
+		modelTypes.insert(std::pair<string, Model*>("scifipistol", new Model("Models/Guns/ScifiPistol/ceeb75e9f4e34b6191d92c38a470453d.obj")));
+		modelTypes.insert(std::pair<string, Model*>("nukacola", new Model("Models/Guns/NukaCola/NukaColaGun.obj")));
 	}
 
 	void insertBounding(glm::vec3 boundingPos, glm::vec3 modelScale, glm::vec3 boundingScale, glm::vec3 modelRotation, glm::vec3 boundingRotation, float mass) {

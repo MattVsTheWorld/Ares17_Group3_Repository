@@ -3,6 +3,7 @@
 #include "AbstractNPC.h"
 
 #define PI 3.14159265359f
+#define REFRESHRATE 1.0f
 
 
 
@@ -21,8 +22,7 @@ private:
 	GLuint texture;
 	/// ++++
 	queue<vertex*> currentPath;
-	bool recalculatePath = true;
-	double recalcTimer = 2;
+	double recalcTimer = REFRESHRATE;
 	// +++++++++++++++
 	bool findCollision(btPairCachingGhostObject* ghostObject) {
 		btManifoldArray manifoldArray;
@@ -83,8 +83,8 @@ private:
 	void changeSpeed(float speed, float angle) {
 		//cout << angle << endl;
 		//TODO: fix
-		this->npcBody->setLinearVelocity(btVector3(npcBody->getLinearVelocity().x() + speed*std::sin(angle),
-			npcBody->getLinearVelocity().y(), npcBody->getLinearVelocity().z() - speed*std::cos(angle)));
+		this->npcBody->setLinearVelocity(btVector3(/*npcBody->getLinearVelocity().x() + */speed*std::cos(angle),
+			npcBody->getLinearVelocity().y(), /*npcBody->getLinearVelocity().z()*/ speed*std::sin(angle)));
 	}
 public:
 
@@ -142,15 +142,16 @@ public:
 		t.setIdentity();
 		npcBody->getMotionState()->getWorldTransform(t);
 		btVector3 pos = t.getOrigin();
-		
-		cout << "Going to: " << v->getIndex() << endl;
-		float angle = (atan2(pos.z() - goTo.z(), pos.x() - goTo.x())); // RADIANS
-		changeSpeed(3, angle);
+
+		//	cout << "Going to: " << v->getIndex() << endl;
+		float angle = (atan2(goTo.z() - pos.z(), goTo.x() - pos.x())); // RADIANS
+		changeSpeed(3, angle); 
 
 		// find angle between direction
 		//changeSpeed(newDir);
 	}
 
+	//TODO: search only if reachable
 	queue<vertex*> findPath(AdjacencyList *adjList, int startId, int endId) {
 		A_star *pathfinder = new A_star(adjList);
 		cout << "////////\n" << startId << " to " << endId << endl;
@@ -159,7 +160,7 @@ public:
 		for (const auto &pathIterator : path) {
 			cout << " " << pathIterator->getIndex() << " ";
 			toVisit.push(static_cast<vertex*>(pathIterator));
-		} 
+		}
 		adjList->resetCosts();
 		delete pathfinder;
 		return toVisit;
@@ -170,7 +171,7 @@ public:
 		t.setIdentity();
 		npcBody->getMotionState()->getWorldTransform(t);
 		btVector3 pos = t.getOrigin();
-		
+
 		if (once) {
 			currentPath = findPath(_g->getAdjList(), _g->getNodeFromWorldPos(pos), _g->getNodeFromWorldPos(playerPos));
 			once = false;
@@ -179,25 +180,14 @@ public:
 		if (recalcTimer <= 0)
 		{
 			currentPath = findPath(_g->getAdjList(), _g->getNodeFromWorldPos(pos), _g->getNodeFromWorldPos(playerPos));
-			recalcTimer = 2;
-			recalculatePath = true;
+			recalcTimer = REFRESHRATE;
 		}
 
-
-		if (recalculatePath) {
-			//TODO: pathfinding
-			//
-			if (!currentPath.empty()) {
-				if (_g->getAdjList()->getVertex(_g->getNodeFromWorldPos(pos)) == currentPath.front())
-					currentPath.pop();
-				// move to 
-				this->moveNpc(currentPath.front());
-			}//
-			
-			recalculatePath = false;
-		}
-
-		//!
+		if (!currentPath.empty())
+			if (_g->getAdjList()->getVertex(_g->getNodeFromWorldPos(pos)) == currentPath.front())
+				currentPath.pop();
+		if (!currentPath.empty())
+			this->moveNpc(currentPath.front());
 
 		if (findCollision(npcGhost))
 		{
