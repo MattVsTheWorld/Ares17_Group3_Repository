@@ -1321,7 +1321,7 @@ namespace SceneManager {
 		glm::mat4 model;
 		glm::vec3 gunPos = moveForward(glm::vec3(player->getPosition().x, player->getPosition().y - 0.15, player->getPosition().z), rotationAngles, 0.35f);
 		gunPos = moveRight(gunPos, rotationAngles.y, 0.2f);
-		cout << "gunpos: " << gunPos.x << " " << gunPos.y << " " << gunPos.z << endl;
+	//	cout << "gunpos: " << gunPos.x << " " << gunPos.y << " " << gunPos.z << endl;
 		model = glm::translate(model, gunPos);
 		float Y_axisRotation = 30.0f*DEG_TO_RADIAN;
 		model = glm::rotate(model, float(-rotationAngles.y*DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -1632,7 +1632,7 @@ namespace SceneManager {
 				// fps counter; 5 of 5
 				//h_manager->renderToHud(5, texturedProgram, modelTypes["cube"], glm::vec3(-0.0f, 0.0f, 0.9f));
 
-				renderHud(texturedProgram, modelTypes["cube"]);
+	//			renderHud(texturedProgram, modelTypes["cube"]);
 				
 				if (mode == EDIT) {
 					h_manager->renderEditHud("Bounding", currentBounding, texturedProgram, modelTypes["cube"], glm::vec3(0.7f, 0.45f, 0.9f));

@@ -96,12 +96,12 @@ void hudManager::renderPlayerHud(std::string line, double value, GLuint shader, 
 	MeshManager::setUniformMatrix4fv(shader, "projection", glm::value_ptr(glm::mat4(1.0)));
 	MeshManager::setUniformMatrix4fv(shader, "model", glm::value_ptr(id));
 	glUniform3fv(glGetUniformLocation(shader, "text_color"), 1, glm::value_ptr(color));
-	
 	modelData->Draw(shader);
+	clearTextTexture(label); // ?
 	glEnable(GL_DEPTH_TEST);//Re-enable depth test after HUD label
 
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, 0);
+//	glActiveTexture(GL_TEXTURE0);
+//	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 
