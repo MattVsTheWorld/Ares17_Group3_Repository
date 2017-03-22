@@ -111,7 +111,7 @@ Mesh Model::processMesh(GLuint MeshIndex, aiMesh* mesh, const aiScene* scene)
 		vertices.push_back(vertex);
 	}
 
-	LoadBones(MeshIndex, mesh);
+	//LoadBones(MeshIndex, mesh);
 
 	//GLuint boneIDs[NUM_BONES_PER_VERTEX];
 	//float boneWeights[NUM_BONES_PER_VERTEX];

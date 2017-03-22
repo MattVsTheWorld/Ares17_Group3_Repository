@@ -592,28 +592,28 @@ namespace SceneManager {
 		//Enemies
 	//	modelTypes.insert(std::pair<string, Model*>("robot", new Model("Models/Robot/Roboto.obj")));
 		//modelTypes.insert(std::pair<string, Model*>("dying", new Model("Models/Robot/dying.dae")));
-		modelTypes.insert(std::pair<string, Model*>("dying", new Model("Models/ArmyPilot/ArmyPilot.dae")));
+		modelTypes.insert(std::pair<string, Model*>("dying", new Model("Models/Robot/dying.dae")));
 		//Environment
 		modelTypes.insert(std::pair<string, Model*>("cube", new Model("Models/Environment/cube.obj")));
-		//modelTypes.insert(std::pair<string, Model*>("box", modelTypes["cube"]));
-		//modelTypes.insert(std::pair<string, Model*>("sphere", new Model("Models/Environment/sphere.obj")));
-		//modelTypes.insert(std::pair<string, Model*>("capsule", modelTypes["sphere"]));
-		//modelTypes.insert(std::pair<string, Model*>("car", new Model("Models/Environment/Car/model.obj")));
-		//modelTypes.insert(std::pair<string, Model*>("house", new Model("Models/Environment/House/houselow.obj")));
-		//modelTypes.insert(std::pair<string, Model*>("carpile", new Model("Models/Environment/CarPile/wasteddisplay.obj")));
-		//modelTypes.insert(std::pair<string, Model*>("oiltank", new Model("Models/Environment/OilTank/Oiltank.obj")));
-		//modelTypes.insert(std::pair<string, Model*>("rock", new Model("Models/Environment/Rock/model.obj")));
-		//modelTypes.insert(std::pair<string, Model*>("barrier", new Model("Models/Environment/Barrier/model.obj")));
-		////Collectable
-		//modelTypes.insert(std::pair<string, Model*>("heart", new Model("Models/Collectable/Heart/Heart.obj")));
-		//modelTypes.insert(std::pair<string, Model*>("potion", new Model("Models/Collectable/Potion/pocion lowpoly.obj")));		
-		////Guns
-		//modelTypes.insert(std::pair<string, Model*>("ak47", new Model("Models/Guns/AK47/Gun_low_poly.obj")));
-		//modelTypes.insert(std::pair<string, Model*>("pistol", new Model("Models/Guns/Pistol/Gun.obj")));
-		//modelTypes.insert(std::pair<string, Model*>("scifigun", new Model("Models/Guns/Scifi/25ad7fc3a09f4a958dd62b5b522257ee.obj")));
-		//modelTypes.insert(std::pair<string, Model*>("rifle", new Model("Models/Guns/Rifle/gun_rifle_lo.obj")));
-		//modelTypes.insert(std::pair<string, Model*>("scifipistol", new Model("Models/Guns/ScifiPistol/ceeb75e9f4e34b6191d92c38a470453d.obj")));
-		//modelTypes.insert(std::pair<string, Model*>("nukacola", new Model("Models/Guns/NukaCola/NukaColaGun.obj")));
+		modelTypes.insert(std::pair<string, Model*>("box", modelTypes["cube"]));
+		modelTypes.insert(std::pair<string, Model*>("sphere", new Model("models/environment/sphere.obj")));
+		modelTypes.insert(std::pair<string, Model*>("capsule", modelTypes["sphere"]));
+		modelTypes.insert(std::pair<string, Model*>("car", new Model("models/environment/car/model.obj")));
+		modelTypes.insert(std::pair<string, Model*>("house", new Model("models/environment/house/houselow.obj")));
+		modelTypes.insert(std::pair<string, Model*>("carpile", new Model("models/environment/carpile/wasteddisplay.obj")));
+		modelTypes.insert(std::pair<string, Model*>("oiltank", new Model("models/environment/oiltank/oiltank.obj")));
+		modelTypes.insert(std::pair<string, Model*>("rock", new Model("models/environment/rock/model.obj")));
+		modelTypes.insert(std::pair<string, Model*>("barrier", new Model("models/environment/barrier/model.obj")));
+		//collectable
+		modelTypes.insert(std::pair<string, Model*>("heart", new Model("models/collectable/heart/heart.obj")));
+		modelTypes.insert(std::pair<string, Model*>("potion", new Model("models/collectable/potion/pocion lowpoly.obj")));
+		//guns
+		modelTypes.insert(std::pair<string, Model*>("ak47", new Model("models/guns/ak47/gun_low_poly.obj")));
+		modelTypes.insert(std::pair<string, Model*>("pistol", new Model("models/guns/pistol/gun.obj")));
+		modelTypes.insert(std::pair<string, Model*>("scifigun", new Model("models/guns/scifi/25ad7fc3a09f4a958dd62b5b522257ee.obj")));
+		modelTypes.insert(std::pair<string, Model*>("rifle", new Model("models/guns/rifle/gun_rifle_lo.obj")));
+		modelTypes.insert(std::pair<string, Model*>("scifipistol", new Model("models/guns/scifipistol/ceeb75e9f4e34b6191d92c38a470453d.obj")));
+		modelTypes.insert(std::pair<string, Model*>("nukacola", new Model("models/guns/nukacola/nukacolagun.obj")));
 
 		//for (unsigned int i = 0; i < sizeof(m_boneLocation)/sizeof(m_boneLocation); i++) {
 		//	char Name[128];
