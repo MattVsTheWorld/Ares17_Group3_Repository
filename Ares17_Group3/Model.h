@@ -13,6 +13,7 @@ using namespace std;
 #include <glm/gtc/matrix_transform.hpp>
 #include "Mesh.h"
 
+#define NUM_BONES_PER_VERTEX 4
 class Model
 {
 public:
@@ -94,7 +95,7 @@ private:
 		unsigned int BaseVertex;
 	};
 
-	vector<VertexBoneData> Bones;
+	vector<VertexBoneData> BoneData;
 
 	map<string, GLuint> m_BoneMapping; // maps a bone name to its index
 	GLuint m_NumBones;

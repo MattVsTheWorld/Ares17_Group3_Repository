@@ -27,7 +27,7 @@ using namespace std;
 #define LOCATION_BONE_ID     5
 #define LOCATION_BONE_WEIGHT 6
 
-#define NUM_BONES_PER_VERTEX 4
+
 
 struct Vertex {
 	// Position
@@ -38,6 +38,8 @@ struct Vertex {
 	glm::vec2 TexCoords;
 	// Bone ID
 
+	float weight[4];
+	GLuint id[4];
 };
 
 struct Texture {

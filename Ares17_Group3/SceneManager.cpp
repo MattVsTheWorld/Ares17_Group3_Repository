@@ -592,7 +592,7 @@ namespace SceneManager {
 		//Enemies
 	//	modelTypes.insert(std::pair<string, Model*>("robot", new Model("Models/Robot/Roboto.obj")));
 		//modelTypes.insert(std::pair<string, Model*>("dying", new Model("Models/Robot/dying.dae")));
-		modelTypes.insert(std::pair<string, Model*>("dying", new Model("Models/Robot/dying.dae")));
+		modelTypes.insert(std::pair<string, Model*>("dying", new Model("Models/Enemies/Others/buddha.obj")));
 		//Environment
 		modelTypes.insert(std::pair<string, Model*>("cube", new Model("Models/Environment/cube.obj")));
 		modelTypes.insert(std::pair<string, Model*>("box", modelTypes["cube"]));

@@ -42,7 +42,7 @@ void Model::loadModel(string path)
 		NumVertices += scene->mMeshes[i]->mNumVertices;
 	}
 
-	Bones.resize(NumVertices);
+	BoneData.resize(NumVertices);
 	m_NumBones = 0;
 
 	// Process ASSIMP's root node recursively
@@ -52,25 +52,25 @@ void Model::loadModel(string path)
 // Processes a node in a recursive fashion. Processes each individual mesh located at the node and repeats this process on its children nodes (if any).
 void Model::processNode(aiNode* node, const aiScene* scene)
 {
-	//// Process each mesh located at the current node
-	//for (GLuint i = 0; i < node->mNumMeshes; i++)
-	//{
-	//	// The node object only contains indices to index the actual objects in the scene. 
-	//	// The scene contains all the data, node is just to keep stuff organized (like relations between nodes).
-	//	aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-	//	this->meshes.push_back(this->processMesh(mesh, scene));
-	//}
-	//// After we've processed all of the meshes (if any) we then recursively process each of the children nodes
-	//for (GLuint i = 0; i < node->mNumChildren; i++)
-	//{
-	//	this->processNode(node->mChildren[i], scene);
-	//}
+	// Process each mesh located at the current node
+	for (GLuint i = 0; i < node->mNumMeshes; i++)
+	{
+		// The node object only contains indices to index the actual objects in the scene. 
+		// The scene contains all the data, node is just to keep stuff organized (like relations between nodes).
+		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
+		this->meshes.push_back(this->processMesh(i,mesh, scene));
+	}
+	// After we've processed all of the meshes (if any) we then recursively process each of the children nodes
+	for (GLuint i = 0; i < node->mNumChildren; i++)
+	{
+		this->processNode(node->mChildren[i], scene);
+	}
 
-	for (GLuint i = 0; i < scene->mNumMeshes; i++)
-		{
-			aiMesh* mesh = scene->mMeshes[i];
-			this->meshes.push_back(this->processMesh(i, mesh, scene));
-		}
+	//for (GLuint i = 0; i < scene->mNumMeshes; i++)
+	//	{
+	//		aiMesh* mesh = scene->mMeshes[i];
+	//		this->meshes.push_back(this->processMesh(i, mesh, scene));
+	//	}
 
 }
 
@@ -92,10 +92,12 @@ Mesh Model::processMesh(GLuint MeshIndex, aiMesh* mesh, const aiScene* scene)
 		vector.z = mesh->mVertices[i].z;
 		vertex.Position = vector;
 		// Normals
-		vector.x = mesh->mNormals[i].x;
-		vector.y = mesh->mNormals[i].y;
-		vector.z = mesh->mNormals[i].z;
-		vertex.Normal = vector;
+		if (mesh->HasNormals()) {
+			vector.x = mesh->mNormals[i].x;
+			vector.y = mesh->mNormals[i].y;
+			vector.z = mesh->mNormals[i].z;
+			vertex.Normal = vector;
+		}
 		// Texture Coordinates
 		if (mesh->mTextureCoords[0]) // Does the mesh contain texture coordinates?
 		{
@@ -203,7 +205,8 @@ void Model::LoadBones(GLuint MeshIndex, const aiMesh* pMesh)
 
 			float Weight = w.mWeight;
 
-			Bones[VertexID].AddBoneData(BoneIndex, Weight);
+			BoneData[VertexID].AddBoneData(BoneIndex, Weight);
+		//	cout << "ID: " << Bones[VertexID].IDs[0] << "Weights: " << Bones[VertexID].Weights[0] << endl;
 		}
 	}
 }
