@@ -10,6 +10,28 @@ Mesh::Mesh(vector<Vertex> vertices, vector<GLuint> indices, vector<Texture> text
 	this->setupMesh();
 }
 
+//Mesh::~Mesh()
+//{
+//	Clear();
+//}
+//
+//void Mesh::Clear()
+//{
+//	if (VAO != 0) {
+//		glDeleteVertexArrays(1, &VAO);
+//		VAO = 0;
+//	}
+//	if (VBO != 0) {
+//		glDeleteVertexArrays(1, &VBO);
+//		VBO = 0;
+//	}
+//	if (EBO != 0) {
+//		glDeleteVertexArrays(1, &EBO);
+//		EBO = 0;
+//	}
+//}
+
+
 // Render the mesh
 void Mesh::Draw(GLuint shader)
 {
@@ -36,11 +58,29 @@ void Mesh::Draw(GLuint shader)
 
 	// Also set each mesh's shininess property to a default value (if you want you could extend this to another mesh property and possibly change this value)
 	glUniform1f(glGetUniformLocation(shader, "material.shininess"), 16.0f);
-
+	
 	// Draw mesh
 	glBindVertexArray(this->VAO);
 	glDrawElements(GL_TRIANGLES, this->indices.size(), GL_UNSIGNED_INT, 0);
+	//for (GLuint i = 0; i < m_Entries.size(); i++) {
+	//	//const GLuint MaterialIndex = m_Entries[i].MaterialIndex;
+
+	//	//assert(MaterialIndex < m_Textures.size());
+
+	//	//if (m_Textures[MaterialIndex]) {
+	//	//	m_Textures[MaterialIndex]->Bind(GL_TEXTURE0);
+	////	}
+
+	//	glDrawElementsBaseVertex(GL_TRIANGLES,
+	//		m_Entries[i].NumIndices,
+	//		GL_UNSIGNED_INT,
+	//		(void*)(sizeof(GLuint) * m_Entries[i].BaseIndex),
+	//		m_Entries[i].BaseVertex);
+	//}
+
+	// Make sure the VAO is not changed from the outside    
 	glBindVertexArray(0);
+
 
 	// Always good practice to set everything back to defaults once configured.
 	for (GLuint i = 0; i < this->textures.size(); i++)

@@ -8,15 +8,18 @@ Model::Model(GLchar* path)
 // Draws the model, and thus all its meshes
 void Model::Draw(GLuint shader)
 {
-	for (GLuint i = 0; i < this->meshes.size(); i++)
+	for (GLuint i = 0; i < this->meshes.size(); i++) {
 		this->meshes[i].Draw(shader);
+	}		
 }
+
 
 void Model::loadModel(string path)
 {
 	// Read file via ASSIMP
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
+	scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
+	
 	// Check for errors
 	if (!scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
 	{
@@ -26,6 +29,22 @@ void Model::loadModel(string path)
 	// Retrieve the directory path of the filepath
 	this->directory = path.substr(0, path.find_last_of('/'));
 
+	m_GlobalInverseTransform = scene->mRootNode->mTransformation;
+	m_GlobalInverseTransform.Inverse();
+
+
+	m_Entry.resize(scene->mNumMeshes);
+	GLuint NumVertices = 0;
+
+	// Count the number of vertices and indices
+	for (GLuint i = 0; i < m_Entry.size(); i++) {
+		m_Entry[i].BaseVertex = NumVertices;
+		NumVertices += scene->mMeshes[i]->mNumVertices;
+	}
+
+	Bones.resize(NumVertices);
+	m_NumBones = 0;
+
 	// Process ASSIMP's root node recursively
 	this->processNode(scene->mRootNode, scene);
 }
@@ -33,29 +52,35 @@ void Model::loadModel(string path)
 // Processes a node in a recursive fashion. Processes each individual mesh located at the node and repeats this process on its children nodes (if any).
 void Model::processNode(aiNode* node, const aiScene* scene)
 {
-	// Process each mesh located at the current node
-	for (GLuint i = 0; i < node->mNumMeshes; i++)
-	{
-		// The node object only contains indices to index the actual objects in the scene. 
-		// The scene contains all the data, node is just to keep stuff organized (like relations between nodes).
-		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-		this->meshes.push_back(this->processMesh(mesh, scene));
-	}
-	// After we've processed all of the meshes (if any) we then recursively process each of the children nodes
-	for (GLuint i = 0; i < node->mNumChildren; i++)
-	{
-		this->processNode(node->mChildren[i], scene);
-	}
+	//// Process each mesh located at the current node
+	//for (GLuint i = 0; i < node->mNumMeshes; i++)
+	//{
+	//	// The node object only contains indices to index the actual objects in the scene. 
+	//	// The scene contains all the data, node is just to keep stuff organized (like relations between nodes).
+	//	aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
+	//	this->meshes.push_back(this->processMesh(mesh, scene));
+	//}
+	//// After we've processed all of the meshes (if any) we then recursively process each of the children nodes
+	//for (GLuint i = 0; i < node->mNumChildren; i++)
+	//{
+	//	this->processNode(node->mChildren[i], scene);
+	//}
+
+	for (GLuint i = 0; i < scene->mNumMeshes; i++)
+		{
+			aiMesh* mesh = scene->mMeshes[i];
+			this->meshes.push_back(this->processMesh(i, mesh, scene));
+		}
 
 }
 
-Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
+Mesh Model::processMesh(GLuint MeshIndex, aiMesh* mesh, const aiScene* scene)
 {
 	// Data to fill
 	vector<Vertex> vertices;
 	vector<GLuint> indices;
 	vector<Texture> textures;
-
+	
 	// Walk through each of the mesh's vertices
 	for (GLuint i = 0; i < mesh->mNumVertices; i++)
 	{
@@ -85,7 +110,22 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 			vertex.TexCoords = glm::vec2(0.0f, 0.0f);
 		vertices.push_back(vertex);
 	}
-	// Now wak through each of the mesh's faces (a face is a mesh its triangle) and retrieve the corresponding vertex indices.
+
+	LoadBones(MeshIndex, mesh);
+
+	//GLuint boneIDs[NUM_BONES_PER_VERTEX];
+	//float boneWeights[NUM_BONES_PER_VERTEX];
+
+	//cout << "ss" << endl;
+	//for (unsigned int v = 0; v < Bones.size(); v++) {
+	//	for (unsigned int i = 0; i < NUM_BONES_PER_VERTEX; i++) {
+	//		boneIDs[v] = Bones[v].IDs[i];
+	//		boneWeights[v] = Bones[v].Weights[i];
+	//	}
+	//}
+	//cout << "ss2" << endl;
+
+	// Now walk through each of the mesh's faces (a face is a mesh its triangle) and retrieve the corresponding vertex indices.
 	for (GLuint i = 0; i < mesh->mNumFaces; i++)
 	{
 		aiFace face = mesh->mFaces[i];
@@ -114,6 +154,58 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 
 	// Return a mesh object created from the extracted mesh data
 	return Mesh(vertices, indices, textures);
+}
+
+void Model::VertexBoneData::AddBoneData(GLuint BoneID, float Weight)
+{
+	for (GLuint i = 0 ; i < (sizeof(IDs) / sizeof(IDs[0])) ; i++) {
+	//(sizeof(a) / sizeof(a[0]))
+	//for (GLuint i = 0; i < NUM_BONES_PER_VERTEX; i++) {
+		if (Weights[i] == 0.0) {
+			IDs[i] = BoneID;
+			Weights[i] = Weight;
+			return;
+		}
+	}
+
+	// should never get here - more bones than we have space for
+	assert(0);
+}
+
+void Model::LoadBones(GLuint MeshIndex, const aiMesh* pMesh)
+{
+	for (GLuint i = 0; i < pMesh->mNumBones; i++) {
+		aiBone* aiBone = pMesh->mBones[i];
+
+		GLuint BoneIndex = 0;
+		string BoneName(aiBone->mName.data);
+
+		if (m_BoneMapping.find(BoneName) == m_BoneMapping.end()) {
+			// Allocate an index for a new bone
+			BoneIndex = m_NumBones;
+			m_NumBones++;
+			BoneInfo bi;
+			m_BoneInfo.push_back(bi);
+			m_BoneInfo[BoneIndex].BoneOffset =  aiBone->mOffsetMatrix;
+
+			m_BoneMapping[BoneName] = BoneIndex;
+		}
+		else {
+			BoneIndex = m_BoneMapping[BoneName];
+		}
+		//cout << "BoneIndex" << BoneIndex << endl;
+		//cout << "numBones" << m_NumBones << endl;
+		for (GLuint j = 0; j < aiBone->mNumWeights; j++) {
+
+			aiVertexWeight w = aiBone->mWeights[j];
+
+			GLuint VertexID = m_Entry[MeshIndex].BaseVertex + w.mVertexId;
+
+			float Weight = w.mWeight;
+
+			Bones[VertexID].AddBoneData(BoneIndex, Weight);
+		}
+	}
 }
 
 // Checks all material textures of a given type and loads the textures if they're not loaded yet.
