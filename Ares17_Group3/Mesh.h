@@ -38,6 +38,9 @@ struct Vertex {
 	glm::vec2 TexCoords;
 	// Bone ID
 
+	float weight[4];
+	GLuint id[4];
+
 };
 
 struct Texture {
