@@ -98,7 +98,7 @@ void btShapeManager::renderCapsule(btRigidBody* capsule, glm::mat4 view, glm::ma
 		return;
 
 	float r = ((btCapsuleShape*)capsule->getCollisionShape())->getRadius();
-	float h = ((btCapsuleShape*)capsule->getCollisionShape())->getHalfHeight()*2;
+	float h = ((btCapsuleShape*)capsule->getCollisionShape())->getHalfHeight()*4;
 
 	btTransform t;
 	capsule->getMotionState()->getWorldTransform(t);
