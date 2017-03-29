@@ -42,11 +42,12 @@ void Model::loadModel(string path)
 		NumVertices += scene->mMeshes[i]->mNumVertices;
 	}
 
-	BoneData.resize(NumVertices);
+	cout << "load: " << scene->mMeshes[0]->mNumVertices << endl;
 	m_NumBones = 0;
 
 	// Process ASSIMP's root node recursively
 	this->processNode(scene->mRootNode, scene);
+
 }
 
 // Processes a node in a recursive fashion. Processes each individual mesh located at the node and repeats this process on its children nodes (if any).
@@ -69,33 +70,38 @@ void Model::processNode(aiNode* node, const aiScene* scene)
 	for (GLuint i = 0; i < scene->mNumMeshes; i++)
 	{
 		aiMesh* mesh = scene->mMeshes[i];
-		this->meshes.push_back(this->processMesh(i, mesh, scene));
+		this->meshes.push_back(this->processMesh(i, mesh));
 	}
+	cout << "bonetransform: " << scene->mMeshes[0]->mNumVertices << endl;
 
 }
 
-Mesh Model::processMesh(GLuint MeshIndex, aiMesh* mesh, const aiScene* scene)
+Mesh Model::processMesh(GLuint MeshIndex, aiMesh* mesh)
 {
 	// Data to fill
 	vector<Vertex> vertices;
 	vector<GLuint> indices;
 	vector<Texture> textures;
-
+	
 	// Walk through each of the mesh's vertices
 	for (GLuint i = 0; i < mesh->mNumVertices; i++)
 	{
 		Vertex vertex;
 		glm::vec3 vector; // We declare a placeholder vector since assimp uses its own vector class that doesn't directly convert to glm's vec3 class so we transfer the data to this placeholder glm::vec3 first.
-						  // Positions
-		vector.x = mesh->mVertices[i].x;
-		vector.y = mesh->mVertices[i].y;
-		vector.z = mesh->mVertices[i].z;
-		vertex.Position = vector;
+		// Positions
+		if (mesh->HasPositions()) {
+			vector.x = mesh->mVertices[i].x;
+			vector.y = mesh->mVertices[i].y;
+			vector.z = mesh->mVertices[i].z;
+			vertex.Position = vector;
+		}
 		// Normals
-		vector.x = mesh->mNormals[i].x;
-		vector.y = mesh->mNormals[i].y;
-		vector.z = mesh->mNormals[i].z;
-		vertex.Normal = vector;
+		if (mesh->HasNormals()) {
+			vector.x = mesh->mNormals[i].x;
+			vector.y = mesh->mNormals[i].y;
+			vector.z = mesh->mNormals[i].z;
+			vertex.Normal = vector;
+		}
 		// Texture Coordinates
 		if (mesh->mTextureCoords[0]) // Does the mesh contain texture coordinates?
 		{
@@ -111,29 +117,32 @@ Mesh Model::processMesh(GLuint MeshIndex, aiMesh* mesh, const aiScene* scene)
 		vertices.push_back(vertex);
 	}
 
-	//LoadBones(MeshIndex, mesh);
-
-	//GLuint boneIDs[NUM_BONES_PER_VERTEX];
-	//float boneWeights[NUM_BONES_PER_VERTEX];
-
-	//cout << "ss" << endl;
-	//for (unsigned int v = 0; v < Bones.size(); v++) {
-	//	for (unsigned int i = 0; i < NUM_BONES_PER_VERTEX; i++) {
-	//		boneIDs[v] = Bones[v].IDs[i];
-	//		boneWeights[v] = Bones[v].Weights[i];
-	//	}
-	//}
-	//cout << "ss2" << endl;
-
 	int boneArraysSize = mesh->mNumVertices*NUM_BONES_PER_VERTEX;
-	std::vector<int> boneIDs;
+	std::vector<GLint> boneIDs;
 	boneIDs.resize(boneArraysSize);
 	std::vector<float> boneWeights;
 	boneWeights.resize(boneArraysSize);
 
-	for (int i = 0; i < mesh->mNumBones; i++) // current bone
+	for (int i = 0; i < mesh->mNumBones; i++) 
 	{
-		aiBone* aiBone = mesh->mBones[i];
+		aiBone* aiBone = mesh->mBones[i]; // current bone
+
+		GLuint BoneIndex = 0;
+		string BoneName(aiBone->mName.data);
+		if (m_BoneMapping.find(BoneName) == m_BoneMapping.end()) {
+			// Allocate an index for a new bone
+			BoneIndex = m_NumBones;
+			m_NumBones++;
+			BoneInfo bi;
+			m_BoneInfo.push_back(bi);
+			m_BoneInfo[BoneIndex].BoneOffset = aiBone->mOffsetMatrix;
+
+			m_BoneMapping[BoneName] = BoneIndex;
+		}
+		else {
+			BoneIndex = m_BoneMapping[BoneName];
+		}
+
 		for (int j = 0; j < aiBone->mNumWeights;j++)
 		{
 			aiVertexWeight weight = aiBone->mWeights[j];
@@ -187,57 +196,6 @@ Mesh Model::processMesh(GLuint MeshIndex, aiMesh* mesh, const aiScene* scene)
 	return Mesh(vertices, indices, textures); //TODO: bonedata
 }
 
-void Model::VertexBoneData::AddBoneData(GLuint BoneID, float Weight)
-{
-	for (GLuint i = 0; i < (sizeof(IDs) / sizeof(IDs[0])); i++) {
-		//(sizeof(a) / sizeof(a[0]))
-		//for (GLuint i = 0; i < NUM_BONES_PER_VERTEX; i++) {
-		if (Weights[i] == 0.0) {
-			IDs[i] = BoneID;
-			Weights[i] = Weight;
-			return;
-		}
-	}
-
-	// should never get here - more bones than we have space for
-	assert(0);
-}
-
-void Model::LoadBones(GLuint MeshIndex, const aiMesh* pMesh)
-{
-	for (GLuint i = 0; i < pMesh->mNumBones; i++) {
-		aiBone* aiBone = pMesh->mBones[i];
-
-		GLuint BoneIndex = 0;
-		string BoneName(aiBone->mName.data);
-
-		if (m_BoneMapping.find(BoneName) == m_BoneMapping.end()) {
-			// Allocate an index for a new bone
-			BoneIndex = m_NumBones;
-			m_NumBones++;
-			BoneInfo bi;
-			m_BoneInfo.push_back(bi);
-			m_BoneInfo[BoneIndex].BoneOffset = aiBone->mOffsetMatrix;
-
-			m_BoneMapping[BoneName] = BoneIndex;
-		}
-		else {
-			BoneIndex = m_BoneMapping[BoneName];
-		}
-		//cout << "BoneIndex" << BoneIndex << endl;
-		//cout << "numBones" << m_NumBones << endl;
-		for (GLuint j = 0; j < aiBone->mNumWeights; j++) {
-
-			aiVertexWeight w = aiBone->mWeights[j];
-
-			GLuint VertexID = m_Entry[MeshIndex].BaseVertex + w.mVertexId;
-
-			float Weight = w.mWeight;
-
-			BoneData[VertexID].AddBoneData(BoneIndex, Weight);
-		}
-	}
-}
 
 // Checks all material textures of a given type and loads the textures if they're not loaded yet.
 // The required info is returned as a Texture struct.
@@ -295,4 +253,196 @@ GLint Model::TextureFromFile(const char* path, string directory)
 	glBindTexture(GL_TEXTURE_2D, 0);
 	SOIL_free_image_data(image);
 	return textureID;
+}
+
+GLuint Model::FindPosition(float AnimationTime, const aiNodeAnim* pNodeAnim)
+{
+	for (GLuint i = 0; i < pNodeAnim->mNumPositionKeys - 1; i++) {
+		if (AnimationTime < (float)pNodeAnim->mPositionKeys[i + 1].mTime) {
+			return i;
+		}
+	}
+
+	assert(0);
+
+	return 0;
+}
+
+GLuint Model::FindRotation(float AnimationTime, const aiNodeAnim* pNodeAnim)
+{
+	assert(pNodeAnim->mNumRotationKeys > 0);
+
+	for (GLuint i = 0; i < pNodeAnim->mNumRotationKeys - 1; i++) {
+		if (AnimationTime < (float)pNodeAnim->mRotationKeys[i + 1].mTime) {
+			return i;
+		}
+	}
+
+	assert(0);
+
+	return 0;
+}
+
+GLuint Model::FindScaling(float AnimationTime, const aiNodeAnim* pNodeAnim)
+{
+	assert(pNodeAnim->mNumScalingKeys > 0);
+
+	for (GLuint i = 0; i < pNodeAnim->mNumScalingKeys - 1; i++) {
+		if (AnimationTime < (float)pNodeAnim->mScalingKeys[i + 1].mTime) {
+			return i;
+		}
+	}
+
+	assert(0);
+
+	return 0;
+}
+
+void Model::CalcInterpolatedPosition(aiVector3D& Out, float AnimationTime, const aiNodeAnim* pNodeAnim)
+{
+	if (pNodeAnim->mNumPositionKeys == 1) {
+		Out = pNodeAnim->mPositionKeys[0].mValue;
+		return;
+	}
+
+	GLuint PositionIndex = FindPosition(AnimationTime, pNodeAnim);
+	GLuint NextPositionIndex = (PositionIndex + 1);
+	assert(NextPositionIndex < pNodeAnim->mNumPositionKeys);
+	float DeltaTime = (float)(pNodeAnim->mPositionKeys[NextPositionIndex].mTime - pNodeAnim->mPositionKeys[PositionIndex].mTime);
+	float Factor = (AnimationTime - (float)pNodeAnim->mPositionKeys[PositionIndex].mTime) / DeltaTime;
+	assert(Factor >= 0.0f && Factor <= 1.0f);
+	const aiVector3D& Start = pNodeAnim->mPositionKeys[PositionIndex].mValue;
+	const aiVector3D& End = pNodeAnim->mPositionKeys[NextPositionIndex].mValue;
+	aiVector3D Delta = End - Start;
+	Out = Start + Factor * Delta;
+}
+
+void Model::CalcInterpolatedRotation(aiQuaternion& Out, float AnimationTime, const aiNodeAnim* pNodeAnim)
+{
+	// we need at least two values to interpolate...
+	if (pNodeAnim->mNumRotationKeys == 1) {
+		Out = pNodeAnim->mRotationKeys[0].mValue;
+		return;
+	}
+
+	GLuint RotationIndex = FindRotation(AnimationTime, pNodeAnim);
+	GLuint NextRotationIndex = (RotationIndex + 1);
+	assert(NextRotationIndex < pNodeAnim->mNumRotationKeys);
+	float DeltaTime = (float)(pNodeAnim->mRotationKeys[NextRotationIndex].mTime - pNodeAnim->mRotationKeys[RotationIndex].mTime);
+	float Factor = (AnimationTime - (float)pNodeAnim->mRotationKeys[RotationIndex].mTime) / DeltaTime;
+	assert(Factor >= 0.0f && Factor <= 1.0f);
+	const aiQuaternion& StartRotationQ = pNodeAnim->mRotationKeys[RotationIndex].mValue;
+	const aiQuaternion& EndRotationQ = pNodeAnim->mRotationKeys[NextRotationIndex].mValue;
+	aiQuaternion::Interpolate(Out, StartRotationQ, EndRotationQ, Factor);
+	Out = Out.Normalize();
+}
+
+void Model::CalcInterpolatedScaling(aiVector3D& Out, float AnimationTime, const aiNodeAnim* pNodeAnim)
+{
+	if (pNodeAnim->mNumScalingKeys == 1) {
+		Out = pNodeAnim->mScalingKeys[0].mValue;
+		return;
+	}
+
+	GLuint ScalingIndex = FindScaling(AnimationTime, pNodeAnim);
+	GLuint NextScalingIndex = (ScalingIndex + 1);
+	assert(NextScalingIndex < pNodeAnim->mNumScalingKeys);
+	float DeltaTime = (float)(pNodeAnim->mScalingKeys[NextScalingIndex].mTime - pNodeAnim->mScalingKeys[ScalingIndex].mTime);
+	float Factor = (AnimationTime - (float)pNodeAnim->mScalingKeys[ScalingIndex].mTime) / DeltaTime;
+	assert(Factor >= 0.0f && Factor <= 1.0f);
+	const aiVector3D& Start = pNodeAnim->mScalingKeys[ScalingIndex].mValue;
+	const aiVector3D& End = pNodeAnim->mScalingKeys[NextScalingIndex].mValue;
+	aiVector3D Delta = End - Start;
+	Out = Start + Factor * Delta;
+}
+
+void Model::ReadNodeHeirarchy(float AnimationTime, const aiNode* pNode, const aiMatrix4x4& ParentTransform)
+{
+	string NodeName(pNode->mName.data);
+
+	const aiAnimation* pAnimation = scene->mAnimations[0];
+
+	aiMatrix4x4 NodeTransformation(pNode->mTransformation);
+
+	const aiNodeAnim* pNodeAnim = FindNodeAnim(pAnimation, NodeName);
+
+	if (pNodeAnim) {
+		// Interpolate scaling and generate scaling transformation matrix
+		aiVector3D Scaling;
+		CalcInterpolatedScaling(Scaling, AnimationTime, pNodeAnim);
+		aiMatrix4x4 ScalingM;
+		ScalingM[0][0] = Scaling.x; ScalingM[0][1] = 0.0f;   ScalingM[0][2] = 0.0f;   ScalingM[0][3] = 0.0f;
+		ScalingM[1][0] = 0.0f;   ScalingM[1][1] = Scaling.y; ScalingM[1][2] = 0.0f;   ScalingM[1][3] = 0.0f;
+		ScalingM[2][0] = 0.0f;   ScalingM[2][1] = 0.0f;	  ScalingM[2][2] = Scaling.z; ScalingM[2][3] = 0.0f;
+		ScalingM[3][0] = 0.0f;   ScalingM[3][1] = 0.0f;   ScalingM[3][2] = 0.0f;   ScalingM[3][3] = 1.0f;
+
+		// Interpolate rotation and generate rotation transformation matrix
+		aiQuaternion RotationQ;
+		CalcInterpolatedRotation(RotationQ, AnimationTime, pNodeAnim);
+		aiMatrix4x4 RotationM = aiMatrix4x4(RotationQ.GetMatrix());
+
+		// Interpolate translation and generate translation transformation matrix
+		aiVector3D Translation;
+		CalcInterpolatedPosition(Translation, AnimationTime, pNodeAnim);
+		aiMatrix4x4 TranslationM;
+		TranslationM[0][0] = 1.0f; TranslationM[0][1] = 0.0f; TranslationM[0][2] = 0.0f; TranslationM[0][3] = Translation.x;
+		TranslationM[1][0] = 0.0f; TranslationM[1][1] = 1.0f; TranslationM[1][2] = 0.0f; TranslationM[1][3] = Translation.y;
+		TranslationM[2][0] = 0.0f; TranslationM[2][1] = 0.0f; TranslationM[2][2] = 1.0f; TranslationM[2][3] = Translation.z;
+		TranslationM[3][0] = 0.0f; TranslationM[3][1] = 0.0f; TranslationM[3][2] = 0.0f; TranslationM[3][3] = 1.0f;
+
+		// Combine the above transformations
+		NodeTransformation = TranslationM * RotationM * ScalingM;
+	}
+
+	aiMatrix4x4 GlobalTransformation = ParentTransform * NodeTransformation;
+
+	if (m_BoneMapping.find(NodeName) != m_BoneMapping.end()) {
+		GLuint BoneIndex = m_BoneMapping[NodeName];
+		m_BoneInfo[BoneIndex].FinalTransformation = m_GlobalInverseTransform * GlobalTransformation * m_BoneInfo[BoneIndex].BoneOffset;
+	}
+
+	for (GLuint i = 0; i < pNode->mNumChildren; i++) {
+		ReadNodeHeirarchy(AnimationTime, pNode->mChildren[i], GlobalTransformation);
+	}
+}
+
+void Model::BoneTransform(float _TimeInSeconds, vector<aiMatrix4x4>& Transforms)
+{
+		aiMatrix4x4 Identity;
+		//Identity.InitIdentity();
+		//TODO:identity is right????
+		Identity[0][0] = 1.0f; Identity[0][1] = 0.0f; Identity[0][2] = 0.0f; Identity[0][3] = 0.0f;
+		Identity[1][0] = 0.0f; Identity[1][1] = 1.0f; Identity[1][2] = 0.0f; Identity[1][3] = 0.0f;
+		Identity[2][0] = 0.0f; Identity[2][1] = 0.0f; Identity[2][2] = 1.0f; Identity[2][3] = 0.0f;
+		Identity[3][0] = 0.0f; Identity[3][1] = 0.0f; Identity[3][2] = 0.0f; Identity[3][3] = 1.0f;
+
+		cout << "no meshes: " << scene->mNumMeshes << endl;
+		cout << "bonetransform: " << scene->mMeshes[0]->mNumVertices << endl;
+		//PROBLEM WITH SCENE ACCESS!!!!!
+		float TicksPerSecond = (float)(scene->mAnimations[0]->mTicksPerSecond != 0 ? scene->mAnimations[0]->mTicksPerSecond : 25.0f);
+
+		cout << "ticks2 " << TicksPerSecond << endl;
+		float TimeInTicks = _TimeInSeconds * TicksPerSecond;
+		float AnimationTime = fmod(TimeInTicks, (float)scene->mAnimations[0]->mDuration);
+
+		ReadNodeHeirarchy(AnimationTime, scene->mRootNode, Identity);
+
+		Transforms.resize(m_NumBones);
+
+		for (GLuint i = 0; i < m_NumBones; i++) {
+			Transforms[i] = m_BoneInfo[i].FinalTransformation;
+		}
+}
+
+const aiNodeAnim* Model::FindNodeAnim(const aiAnimation* pAnimation, const string NodeName)
+{
+	for (GLuint i = 0; i < pAnimation->mNumChannels; i++) {
+		const aiNodeAnim* pNodeAnim = pAnimation->mChannels[i];
+
+		if (string(pNodeAnim->mNodeName.data) == NodeName) {
+			return pNodeAnim;
+		}
+	}
+
+	return NULL;
 }

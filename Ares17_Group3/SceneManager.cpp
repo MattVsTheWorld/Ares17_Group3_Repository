@@ -81,6 +81,7 @@ namespace SceneManager {
 
 	// TEST
 	btRigidBody* playerBody;
+	Model* animated;
 	//	
 	GLuint defaultTexture;
 	GLuint groundTexture;
@@ -592,28 +593,28 @@ namespace SceneManager {
 		//Enemies
 	//	modelTypes.insert(std::pair<string, Model*>("robot", new Model("Models/Robot/Roboto.obj")));
 		//modelTypes.insert(std::pair<string, Model*>("dying", new Model("Models/Robot/dying.dae")));
-		modelTypes.insert(std::pair<string, Model*>("dying", new Model("Models/Enemies/Others/buddha.obj")));
+	//	modelTypes.insert(std::pair<string, Model*>("dying", new Model("Models/Enemies/Dying/dying.dae")));
 		//Environment
 		modelTypes.insert(std::pair<string, Model*>("cube", new Model("Models/Environment/cube.obj")));
-		modelTypes.insert(std::pair<string, Model*>("box", modelTypes["cube"]));
-		modelTypes.insert(std::pair<string, Model*>("sphere", new Model("models/environment/sphere.obj")));
-		modelTypes.insert(std::pair<string, Model*>("capsule", modelTypes["sphere"]));
-		modelTypes.insert(std::pair<string, Model*>("car", new Model("models/environment/car/model.obj")));
-		modelTypes.insert(std::pair<string, Model*>("house", new Model("models/environment/house/houselow.obj")));
-		modelTypes.insert(std::pair<string, Model*>("carpile", new Model("models/environment/carpile/wasteddisplay.obj")));
-		modelTypes.insert(std::pair<string, Model*>("oiltank", new Model("models/environment/oiltank/oiltank.obj")));
-		modelTypes.insert(std::pair<string, Model*>("rock", new Model("models/environment/rock/model.obj")));
-		modelTypes.insert(std::pair<string, Model*>("barrier", new Model("models/environment/barrier/model.obj")));
-		//collectable
-		modelTypes.insert(std::pair<string, Model*>("heart", new Model("models/collectable/heart/heart.obj")));
-		modelTypes.insert(std::pair<string, Model*>("potion", new Model("models/collectable/potion/pocion lowpoly.obj")));
-		//guns
-		modelTypes.insert(std::pair<string, Model*>("ak47", new Model("models/guns/ak47/gun_low_poly.obj")));
-		modelTypes.insert(std::pair<string, Model*>("pistol", new Model("models/guns/pistol/gun.obj")));
-		modelTypes.insert(std::pair<string, Model*>("scifigun", new Model("models/guns/scifi/25ad7fc3a09f4a958dd62b5b522257ee.obj")));
-		modelTypes.insert(std::pair<string, Model*>("rifle", new Model("models/guns/rifle/gun_rifle_lo.obj")));
-		modelTypes.insert(std::pair<string, Model*>("scifipistol", new Model("models/guns/scifipistol/ceeb75e9f4e34b6191d92c38a470453d.obj")));
-		modelTypes.insert(std::pair<string, Model*>("nukacola", new Model("models/guns/nukacola/nukacolagun.obj")));
+		//modelTypes.insert(std::pair<string, Model*>("box", modelTypes["cube"]));
+		//modelTypes.insert(std::pair<string, Model*>("sphere", new Model("models/environment/sphere.obj")));
+		//modelTypes.insert(std::pair<string, Model*>("capsule", modelTypes["sphere"]));
+		//modelTypes.insert(std::pair<string, Model*>("car", new Model("models/environment/car/model.obj")));
+		//modelTypes.insert(std::pair<string, Model*>("house", new Model("models/environment/house/houselow.obj")));
+		//modelTypes.insert(std::pair<string, Model*>("carpile", new Model("models/environment/carpile/wasteddisplay.obj")));
+		//modelTypes.insert(std::pair<string, Model*>("oiltank", new Model("models/environment/oiltank/oiltank.obj")));
+		//modelTypes.insert(std::pair<string, Model*>("rock", new Model("models/environment/rock/model.obj")));
+		//modelTypes.insert(std::pair<string, Model*>("barrier", new Model("models/environment/barrier/model.obj")));
+		////collectable
+		//modelTypes.insert(std::pair<string, Model*>("heart", new Model("models/collectable/heart/heart.obj")));
+		//modelTypes.insert(std::pair<string, Model*>("potion", new Model("models/collectable/potion/pocion lowpoly.obj")));
+		////guns
+		//modelTypes.insert(std::pair<string, Model*>("ak47", new Model("models/guns/ak47/gun_low_poly.obj")));
+		//modelTypes.insert(std::pair<string, Model*>("pistol", new Model("models/guns/pistol/gun.obj")));
+		//modelTypes.insert(std::pair<string, Model*>("scifigun", new Model("models/guns/scifi/25ad7fc3a09f4a958dd62b5b522257ee.obj")));
+		//modelTypes.insert(std::pair<string, Model*>("rifle", new Model("models/guns/rifle/gun_rifle_lo.obj")));
+		//modelTypes.insert(std::pair<string, Model*>("scifipistol", new Model("models/guns/scifipistol/ceeb75e9f4e34b6191d92c38a470453d.obj")));
+		//modelTypes.insert(std::pair<string, Model*>("nukacola", new Model("models/guns/nukacola/nukacolagun.obj")));
 
 		//for (unsigned int i = 0; i < sizeof(m_boneLocation)/sizeof(m_boneLocation); i++) {
 		//	char Name[128];
@@ -740,6 +741,7 @@ namespace SceneManager {
 		//s_manager->loadSample("Sounds/wilhelm.wav");
 
 		initmodelTypes();
+		animated = new Model("Models/Enemies/Dying/dying.dae");
 
 		defaultTexture = loadBitmap::loadBitmap("wall.bmp");
 		groundTexture = loadBitmap::loadBitmap("terrain.bmp");
@@ -1274,16 +1276,42 @@ namespace SceneManager {
 		glBindTexture(GL_TEXTURE_2D, texture);
 		glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
 
-		//vector<aiMatrix4x4> Transforms;
-		//float runningTime = gameTime();
-		//modelData->BoneTransform(runningTime, Transforms);
-
-		//for (GLuint i = 0; i < Transforms.size(); i++) {
-		//	SetBoneTransform(i, Transforms[i]);
-		//}
-
 		modelData->Draw(shader);
 		
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+
+	void renderAnimatedObject(glm::mat4 proj, glm::vec3 pos, glm::vec3 scale, GLuint shader, GLuint texture) {
+
+		glm::mat4 model;
+		model = glm::translate(model, pos);
+		//model = glm::rotate(model, float(-rotationAngles.y*DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
+		//model = glm::rotate(model, float(180 * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
+		//model = glm::rotate(model, float(rotation.y * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
+		/*glm::vec3 eulerRotation;
+		toEulerianAngle(rotation, eulerRotation);
+		model = glm::rotate(model, eulerRotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, eulerRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, eulerRotation.z, glm:l:vec3(0.0f, 0.0f, 1.0f));*/
+		model = glm::scale(model, scale);	// It's a bit too big for our scene, so scale it down
+											//model = glm::scale(model, glm::vec3(0.05f, 0.05f, 0.05f));	// for gun]
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
+
+		//if (modelData == modelTypes["dying"]) {
+		vector<aiMatrix4x4> Transforms;
+
+		float RunningTime = gameTime();
+
+		//if(anima) 
+		animated->BoneTransform(RunningTime, Transforms);
+
+		for (GLuint i = 0; i < Transforms.size(); i++) {
+			SetBoneTransform(i, Transforms[i]);
+		}
+		animated->Draw(shader);
+		//	}
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
@@ -1504,7 +1532,7 @@ namespace SceneManager {
 		}
 		///+++++++++++++++
 		// RENDERING modelTypes
-
+		renderAnimatedObject(projection, glm::vec3(0.0,0.0,0.0), glm::vec3(0.02, 0.02, 0.02), shader, groundTexture);
 
 		//if (pointOfView == THIRD_PERSON)
 		//	renderObject(projection, modelTypes["nanosuit"], glm::vec3(player->getPosition().x, player->getPosition().y - 1.75, player->getPosition().z), glm::vec3(0.2, 0.2, 0.2), glm::vec3(0.0, -yaw, 0.0), shader, 0);

@@ -32,7 +32,7 @@ public:
 	GLuint FindPosition(float AnimationTime, const aiNodeAnim* pNodeAnim);
 	const aiNodeAnim* FindNodeAnim(const aiAnimation* pAnimation, const string NodeName);
 	void ReadNodeHeirarchy(float AnimationTime, const aiNode* pNode, const aiMatrix4x4& ParentTransform);
-	void LoadBones(GLuint MeshIndex, const aiMesh* paiMesh);
+
 
 	void BoneTransform(float TimeInSeconds, vector<aiMatrix4x4>& Transforms);
 
@@ -44,6 +44,17 @@ public:
 		BoneInfo()
 		{
 			//initialise everything to zero
+			/*or is it:
+			BoneOffset[0][0] = 1.0f; BoneOffset[0][1] = 0.0f; BoneOffset[0][2] = 0.0f; BoneOffset[0][3] = 0.0f;
+			BoneOffset[1][0] = 0.0f; BoneOffset[1][1] = 1.0f; BoneOffset[1][2] = 0.0f; BoneOffset[1][3] = 0.0f;
+			BoneOffset[2][0] = 0.0f; BoneOffset[2][1] = 0.0f; BoneOffset[2][2] = 1.0f; BoneOffset[2][3] = 0.0f;
+			BoneOffset[3][0] = 0.0f; BoneOffset[3][1] = 0.0f; BoneOffset[3][2] = 0.0f; BoneOffset[3][3] = 1.0f;
+
+			FinalTransformation[0][0] = 1.0f; FinalTransformation[0][1] = 0.0f; FinalTransformation[0][2] = 0.0f; FinalTransformation[0][3] = 0.0f;
+			FinalTransformation[1][0] = 0.0f; FinalTransformation[1][1] = 1.0f; FinalTransformation[1][2] = 0.0f; FinalTransformation[1][3] = 0.0f;
+			FinalTransformation[2][0] = 0.0f; FinalTransformation[2][1] = 0.0f; FinalTransformation[2][2] = 1.0f; FinalTransformation[2][3] = 0.0f;
+			FinalTransformation[3][0] = 0.0f; FinalTransformation[3][1] = 0.0f; FinalTransformation[3][2] = 0.0f; FinalTransformation[3][3] = 1.0f;
+			*/
 			for (int x = 0; x < NUM_BONES_PER_VERTEX; x++) {
 				for (int y = 0; y < NUM_BONES_PER_VERTEX; y++) {
 					BoneOffset[x][y] = 0.0f;
@@ -60,29 +71,6 @@ public:
 	}
 	//	void Clear();
 
-	struct VertexBoneData
-	{
-		GLuint IDs[NUM_BONES_PER_VERTEX];
-		float Weights[NUM_BONES_PER_VERTEX];
-
-		VertexBoneData()
-		{
-			Reset();
-		};
-
-		void Reset()
-		{
-			//initialise everything to zero
-			for (int i = 0; i < NUM_BONES_PER_VERTEX; i++) {
-				IDs[i] = 0;
-				Weights[i] = 0.0f;
-			}
-		}
-
-		void AddBoneData(GLuint BoneID, float Weight);
-	};
-
-
 private:
 	
 	/*  Model Data  */
@@ -94,8 +82,6 @@ private:
 
 		unsigned int BaseVertex;
 	};
-
-	vector<VertexBoneData> BoneData;
 
 	map<string, GLuint> m_BoneMapping; // maps a bone name to its index
 	GLuint m_NumBones;
@@ -114,7 +100,7 @@ private:
 	void loadModel(string path);
 	// Processes a node in a recursive fashion. Processes each individual mesh located at the node and repeats this process on its children nodes (if any).
 	void Model::processNode(aiNode* node, const aiScene* scene);
-	Mesh processMesh(GLuint MeshIndex, aiMesh* mesh, const aiScene* scene);
+	Mesh processMesh(GLuint MeshIndex, aiMesh* mesh);
 	// Checks all material textures of a given type and loads the textures if they're not loaded yet.
 	// The required info is returned as a Texture struct.
 	vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, string typeName);

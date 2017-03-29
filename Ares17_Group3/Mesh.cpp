@@ -89,5 +89,12 @@ void Mesh::setupMesh()
 	glEnableVertexAttribArray(LOCATION_TEXCOORD);
 	glVertexAttribPointer(LOCATION_TEXCOORD, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, TexCoords));
 
+	glEnableVertexAttribArray(LOCATION_BONE_ID);
+	//glVertexAttribIPointer(LOCATION_BONE_ID, 4, GL_INT, sizeof(Vertex), (const GLvoid*)0);
+	glVertexAttribIPointer(LOCATION_BONE_ID, 4, GL_INT, sizeof(Vertex), (GLvoid*)offsetof(Vertex, id));
+	glEnableVertexAttribArray(LOCATION_BONE_WEIGHT);
+	//glVertexAttribPointer(LOCATION_BONE_WEIGHT, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid*)16);
+	glVertexAttribPointer(LOCATION_BONE_WEIGHT, 4, GL_FLOAT, GL_TRUE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, weight));
+
 	glBindVertexArray(0);
 }
