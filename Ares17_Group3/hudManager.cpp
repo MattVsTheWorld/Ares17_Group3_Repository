@@ -83,12 +83,12 @@ void hudManager::renderPlayerHud(std::string line, double value, valType _type, 
 	glDisable(GL_DEPTH_TEST);//Disable depth test for HUD label
 	
 	if (_type == HEALTH && _current.health != value){
-		label = changeLabel(line, value);
+		labelHP = changeLabel(line, value);
 		_current.health = value;
 	}
 	if ((_type == ARMOR && _current.armor != value)) {
-		label = changeLabel(line, value);
-		_current.health = value;
+		labelArmor = changeLabel(line, value);
+		_current.armor = value;
 	}
 	/*std::string str = line;
 	int val = value;
@@ -98,7 +98,10 @@ void hudManager::renderPlayerHud(std::string line, double value, valType _type, 
 	glUseProgram(shader); //texture-only shader will be used for teture rendering
 	//label = textToTexture(cstr, label);
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, label);
+	if(_type == HEALTH)
+		glBindTexture(GL_TEXTURE_2D, labelHP);
+	if (_type == ARMOR)
+		glBindTexture(GL_TEXTURE_2D, labelArmor);
 	// transformations
 	id = glm::translate(id, pos);
 	id = glm::scale(id, glm::vec3(0.1f, -0.075f, 0.075f));

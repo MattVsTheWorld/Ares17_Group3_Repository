@@ -31,6 +31,7 @@ public:
 private:
 	TTF_Font * textFont;
 	GLuint label;
+	GLuint labelHP, labelArmor;
 	currentVals _current;
 
 	GLuint changeLabel(string line, double value) {
