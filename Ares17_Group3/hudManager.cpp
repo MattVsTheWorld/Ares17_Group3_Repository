@@ -24,6 +24,8 @@ GLuint hudManager::textToTexture(const char * str, GLuint textID) {
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, stringImage->w, stringImage->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, stringImage->pixels);
 	glBindTexture(GL_TEXTURE_2D, NULL);
 
+	//cout << "buh why";
+
 	SDL_FreeSurface(stringImage);
 	return texture;
 }
@@ -47,7 +49,6 @@ hudManager::hudManager() {
 	label = 0;
 
 }
-
 
 // Requires change ***
 
@@ -78,22 +79,29 @@ hudManager::hudManager() {
 }*/
 
 
-void hudManager::renderPlayerHud(std::string line, double value, GLuint shader, Model *modelData, glm::vec3 pos, glm::vec3 color) {
+void hudManager::renderPlayerHud(std::string line, double value, valType _type, GLuint shader, Model *modelData, glm::vec3 pos, glm::vec3 color) {
 	glDisable(GL_DEPTH_TEST);//Disable depth test for HUD label
-	std::string str = line;
+	
+	if (_type == HEALTH && _current.health != value){
+		label = changeLabel(line, value);
+		_current.health = value;
+	}
+	if ((_type == ARMOR && _current.armor != value)) {
+		label = changeLabel(line, value);
+		_current.health = value;
+	}
+	/*std::string str = line;
 	int val = value;
 	str.append(std::to_string(val));
-	const char *cstr = str.c_str();
+	const char *cstr = str.c_str();*/
 	glm::mat4 id = glm::mat4();
 	glUseProgram(shader); //texture-only shader will be used for teture rendering
-	label = textToTexture(cstr, label);
+	//label = textToTexture(cstr, label);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, label);
 	// transformations
 	id = glm::translate(id, pos);
 	id = glm::scale(id, glm::vec3(0.1f, -0.075f, 0.075f));
-	MeshManager::setUniformMatrix4fv(shader, "view", glm::value_ptr(glm::mat4(1.0)));
-	MeshManager::setUniformMatrix4fv(shader, "projection", glm::value_ptr(glm::mat4(1.0)));
 	MeshManager::setUniformMatrix4fv(shader, "model", glm::value_ptr(id));
 	glUniform3fv(glGetUniformLocation(shader, "text_color"), 1, glm::value_ptr(color));
 	modelData->Draw(shader);
@@ -119,8 +127,6 @@ void hudManager::renderEditHud(std::string line, std::string value, GLuint shade
 	// transformations
 	id = glm::translate(id, pos);
 	id = glm::scale(id, glm::vec3(0.1f, -0.075f, 0.075f));
-	MeshManager::setUniformMatrix4fv(shader, "view", glm::value_ptr(glm::mat4(1.0)));
-	MeshManager::setUniformMatrix4fv(shader, "projection", glm::value_ptr(glm::mat4(1.0)));
 	MeshManager::setUniformMatrix4fv(shader, "model", glm::value_ptr(id));
 	modelData->Draw(shader);
 	glEnable(GL_DEPTH_TEST);//Re-enable depth test after HUD label

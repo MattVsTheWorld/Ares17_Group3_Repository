@@ -595,7 +595,7 @@ namespace SceneManager {
 	void initmodelTypes() {
 		//TODO:Player model for death or something
 		//Enemies
-		modelTypes.insert(std::pair<string, Model*>("robot", new Model("Models/Robot/Roboto.obj")));
+		modelTypes.insert(std::pair<string, Model*>("robot", new Model("Models/Enemies/Robot/Roboto.obj")));
 		//Environment
 		modelTypes.insert(std::pair<string, Model*>("cube", new Model("Models/Environment/cube.obj")));
 		modelTypes.insert(std::pair<string, Model*>("box", modelTypes["cube"]));
@@ -1581,10 +1581,10 @@ namespace SceneManager {
 
 	void renderHud(GLuint shader, Model *modelData) {
 		// HP
-		h_manager->renderPlayerHud("Health: ", player->getHealth(), shader, modelData, glm::vec3(-0.875f, 0.925f, 1.0f), glm::vec3(0.6275,0.4,0.0));
+		h_manager->renderPlayerHud("Health: ", player->getHealth(), HEALTH, shader, modelData, glm::vec3(-0.875f, 0.925f, 1.0f), glm::vec3(0.6275,0.4,0.0));
 
 		// Armor
-		h_manager->renderPlayerHud("Armor: ", player->getArmor(), shader, modelData, glm::vec3(-0.65f, 0.925f, 1.0f), glm::vec3(0, 0, 0.4));
+		h_manager->renderPlayerHud("Armor: ", player->getArmor(), ARMOR, shader, modelData, glm::vec3(-0.65f, 0.925f, 1.0f), glm::vec3(0, 0, 0.4));
 	}
 
 	void draw(SDL_Window * window) { //, int fps) { // fps counter; 4 of 5
@@ -1632,7 +1632,7 @@ namespace SceneManager {
 				// fps counter; 5 of 5
 				//h_manager->renderToHud(5, texturedProgram, modelTypes["cube"], glm::vec3(-0.0f, 0.0f, 0.9f));
 
-	//			renderHud(texturedProgram, modelTypes["cube"]);
+				renderHud(texturedProgram, modelTypes["cube"]);
 				
 				if (mode == EDIT) {
 					h_manager->renderEditHud("Bounding", currentBounding, texturedProgram, modelTypes["cube"], glm::vec3(0.7f, 0.45f, 0.9f));
