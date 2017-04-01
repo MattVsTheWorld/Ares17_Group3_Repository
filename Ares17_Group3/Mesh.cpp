@@ -41,12 +41,7 @@ void Mesh::Draw(GLuint shader)
 	glBindVertexArray(this->VAO);
 	glDrawElements(GL_TRIANGLES, this->indices.size(), GL_UNSIGNED_INT, 0);
 
-	//	glDrawElementsBaseVertex(GL_TRIANGLES,
-	//		m_Entries[i].NumIndices,
-	//		GL_UNSIGNED_INT,
-	//		(void*)(sizeof(GLuint) * m_Entries[i].BaseIndex),
-	//		m_Entries[i].BaseVertex);
-	//}
+	//glDrawElementsBaseVertex(GL_TRIANGLES, m_Entry[i].NumIndices,	GL_UNSIGNED_INT, (void*)(sizeof(GLuint) * m_Entry[i].BaseIndex),	m_Entry[i].BaseVertex);
 
 	// Make sure the VAO is not changed from the outside    
 	glBindVertexArray(0);
@@ -88,13 +83,12 @@ void Mesh::setupMesh()
 	// Vertex Texture Coords
 	glEnableVertexAttribArray(LOCATION_TEXCOORD);
 	glVertexAttribPointer(LOCATION_TEXCOORD, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, TexCoords));
-
+	// Vertex Bone IDs
 	glEnableVertexAttribArray(LOCATION_BONE_ID);
-	//glVertexAttribIPointer(LOCATION_BONE_ID, 4, GL_INT, sizeof(Vertex), (const GLvoid*)0);
 	glVertexAttribIPointer(LOCATION_BONE_ID, 4, GL_INT, sizeof(Vertex), (GLvoid*)offsetof(Vertex, id));
+	// Vertex Weights
 	glEnableVertexAttribArray(LOCATION_BONE_WEIGHT);
-	//glVertexAttribPointer(LOCATION_BONE_WEIGHT, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid*)16);
 	glVertexAttribPointer(LOCATION_BONE_WEIGHT, 4, GL_FLOAT, GL_TRUE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, weight));
-
+	
 	glBindVertexArray(0);
 }

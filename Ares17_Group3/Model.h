@@ -31,20 +31,19 @@ public:
 	GLuint FindRotation(float AnimationTime, const aiNodeAnim* pNodeAnim);
 	GLuint FindPosition(float AnimationTime, const aiNodeAnim* pNodeAnim);
 	const aiNodeAnim* FindNodeAnim(const aiAnimation* pAnimation, const string NodeName);
-	void ReadNodeHeirarchy(float AnimationTime, const aiNode* pNode, const aiMatrix4x4& ParentTransform);
+	void ReadNodeHeirarchy(float AnimationTime, const aiNode* pNode, const glm::mat4& ParentTransform);
 
-
-	void BoneTransform(float TimeInSeconds, vector<aiMatrix4x4>& Transforms);
+	void BoneTransform(float TimeInSeconds, vector<glm::mat4>& Transforms);
 
 	struct BoneInfo
 	{
-		aiMatrix4x4 BoneOffset;
-		aiMatrix4x4 FinalTransformation;
+		glm::mat4 BoneOffset;
+		glm::mat4 FinalTransformation;
 
 		BoneInfo()
 		{
 			//initialise everything to zero
-			/*or is it:
+			//or is it:
 			BoneOffset[0][0] = 1.0f; BoneOffset[0][1] = 0.0f; BoneOffset[0][2] = 0.0f; BoneOffset[0][3] = 0.0f;
 			BoneOffset[1][0] = 0.0f; BoneOffset[1][1] = 1.0f; BoneOffset[1][2] = 0.0f; BoneOffset[1][3] = 0.0f;
 			BoneOffset[2][0] = 0.0f; BoneOffset[2][1] = 0.0f; BoneOffset[2][2] = 1.0f; BoneOffset[2][3] = 0.0f;
@@ -54,16 +53,41 @@ public:
 			FinalTransformation[1][0] = 0.0f; FinalTransformation[1][1] = 1.0f; FinalTransformation[1][2] = 0.0f; FinalTransformation[1][3] = 0.0f;
 			FinalTransformation[2][0] = 0.0f; FinalTransformation[2][1] = 0.0f; FinalTransformation[2][2] = 1.0f; FinalTransformation[2][3] = 0.0f;
 			FinalTransformation[3][0] = 0.0f; FinalTransformation[3][1] = 0.0f; FinalTransformation[3][2] = 0.0f; FinalTransformation[3][3] = 1.0f;
-			*/
-			for (int x = 0; x < NUM_BONES_PER_VERTEX; x++) {
-				for (int y = 0; y < NUM_BONES_PER_VERTEX; y++) {
-					BoneOffset[x][y] = 0.0f;
-					FinalTransformation[x][y] = 0.0f;
+			
+			//for (int x = 0; x < NUM_BONES_PER_VERTEX; x++) {
+			//	for (int y = 0; y < NUM_BONES_PER_VERTEX; y++) {
+			//		BoneOffset[x][y] = 0.0f;
+			//		FinalTransformation[x][y] = 0.0f;
 
-				}
-			}
+			//	}
+			//}
 		}
 	};
+
+	static glm::mat4 AiToGLMMat4(aiMatrix4x4 in_mat)
+	{
+		glm::mat4 tmp;
+		tmp[0][0] = in_mat.a1;
+		tmp[1][0] = in_mat.b1;
+		tmp[2][0] = in_mat.c1;
+		tmp[3][0] = in_mat.d1;
+
+		tmp[0][1] = in_mat.a2;
+		tmp[1][1] = in_mat.b2;
+		tmp[2][1] = in_mat.c2;
+		tmp[3][1] = in_mat.d2;
+
+		tmp[0][2] = in_mat.a3;
+		tmp[1][2] = in_mat.b3;
+		tmp[2][2] = in_mat.c3;
+		tmp[3][2] = in_mat.d3;
+
+		tmp[0][3] = in_mat.a4;
+		tmp[1][3] = in_mat.b4;
+		tmp[2][3] = in_mat.c4;
+		tmp[3][3] = in_mat.d4;
+		return tmp;
+	}
 
 	GLuint NumBones() const
 	{
@@ -77,10 +101,14 @@ private:
 	struct MeshEntry {
 		MeshEntry()
 		{
+			NumIndices = 0;
 			BaseVertex = 0;
+			BaseIndex = 0;
 		}
 
+		unsigned int NumIndices;
 		unsigned int BaseVertex;
+		unsigned int BaseIndex;
 	};
 
 	map<string, GLuint> m_BoneMapping; // maps a bone name to its index
@@ -88,11 +116,18 @@ private:
 	vector<BoneInfo> m_BoneInfo;
 
 	vector<MeshEntry> m_Entry;
-	aiMatrix4x4 m_GlobalInverseTransform;
+	glm::mat4 m_GlobalInverseTransform;
 	
 	/*  Model Data  */
+	Assimp::Importer importer;
 	const aiScene* scene;
 	vector<Mesh> meshes;
+
+	//std::vector<aiNode*> ai_nodes;
+	//std::map<const aiNode*, std::pair<string, glm::mat4>> ai_nodes_names;
+	//std::vector<aiNodeAnim*> ai_nodes_anim;
+	//vector<Animations*> animations;
+
 	string directory;
 	vector<Texture> textures_loaded;	// Stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
 	/*  Functions   */

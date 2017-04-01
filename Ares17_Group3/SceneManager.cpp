@@ -21,6 +21,7 @@ namespace SceneManager {
 //	GLuint shaderProgram;
 	GLuint texturedProgram;
 	GLuint modelProgram;
+	//GLuint animatedModelProgram;
 
 	hudManager *h_manager;
 	Skybox *skybox;
@@ -597,7 +598,7 @@ namespace SceneManager {
 		//Environment
 		modelTypes.insert(std::pair<string, Model*>("cube", new Model("Models/Environment/cube.obj")));
 		//modelTypes.insert(std::pair<string, Model*>("box", modelTypes["cube"]));
-		//modelTypes.insert(std::pair<string, Model*>("sphere", new Model("models/environment/sphere.obj")));
+		modelTypes.insert(std::pair<string, Model*>("sphere", new Model("models/environment/sphere.obj")));
 		//modelTypes.insert(std::pair<string, Model*>("capsule", modelTypes["sphere"]));
 		//modelTypes.insert(std::pair<string, Model*>("car", new Model("models/environment/car/model.obj")));
 		//modelTypes.insert(std::pair<string, Model*>("house", new Model("models/environment/house/houselow.obj")));
@@ -742,6 +743,22 @@ namespace SceneManager {
 
 		initmodelTypes();
 		animated = new Model("Models/Enemies/Dying/dying.dae");
+
+		//makes locations for gBones[1] e.t.c.
+		for (unsigned int i = 0; i < (sizeof(m_boneLocation)/sizeof(m_boneLocation[0])); i++) {
+			char Name[128];
+			memset(Name, 0, sizeof(Name));
+			snprintf(Name, sizeof(Name), "gBones[%d]", i);
+			m_boneLocation[i] = glGetUniformLocation(modelProgram, Name);
+		}
+		//SAME THING??????
+		//for (unsigned int i = 0; i < MAX_BONES; i++) {
+		//	char Name[128];
+		//	//memset(Name, 0, sizeof(Name));
+		//	snprintf(Name, 128, "gBones[%d]", i);
+		//	m_boneLocation[i] = glGetUniformLocation(modelProgram, Name);
+		//}
+
 
 		defaultTexture = loadBitmap::loadBitmap("wall.bmp");
 		groundTexture = loadBitmap::loadBitmap("terrain.bmp");
@@ -1244,17 +1261,10 @@ namespace SceneManager {
 	}
 
 
-	void SetBoneTransform(GLuint Index, const aiMatrix4x4& Transform)
+	void SetBoneTransform(GLuint Index, const glm::mat4& Transform)
 	{
-		glm::mat4 t;
-		for (int x = 0; x < 4; x++) {
-			for (int y = 0; y < 4; y++) {
-				t[x][y] = Transform[x][y];
-			}
-		}
 		assert(Index < MAX_BONES);
-		
-		glUniformMatrix4fv(m_boneLocation[Index], 1, GL_TRUE, (const GLfloat*)glm::value_ptr(t));
+		glUniformMatrix4fv(m_boneLocation[Index], 1, GL_TRUE, (const GLfloat*)glm::value_ptr(Transform));
 	}
 
 
@@ -1275,12 +1285,13 @@ namespace SceneManager {
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texture);
 		glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
-
+		glUniform1i(glGetUniformLocation(shader, "animated"), 0); //zero is no animations
 		modelData->Draw(shader);
 		
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
+	float RunningTime = 0.0f;
 	void renderAnimatedObject(glm::mat4 proj, glm::vec3 pos, glm::vec3 scale, GLuint shader, GLuint texture) {
 
 		glm::mat4 model;
@@ -1299,19 +1310,16 @@ namespace SceneManager {
 		glBindTexture(GL_TEXTURE_2D, texture);
 		glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
 
-		//if (modelData == modelTypes["dying"]) {
-		vector<aiMatrix4x4> Transforms;
+		glUniform1i(glGetUniformLocation(shader, "animated"), 1); //one means there is animations
 
-		float RunningTime = gameTime();
-
-		//if(anima) 
+		vector<glm::mat4> Transforms;
+		RunningTime += gameTime();
 		animated->BoneTransform(RunningTime, Transforms);
-
 		for (GLuint i = 0; i < Transforms.size(); i++) {
-			SetBoneTransform(i, Transforms[i]);
+			SetBoneTransform(i, Transforms[i]);			
 		}
+
 		animated->Draw(shader);
-		//	}
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
@@ -1532,7 +1540,7 @@ namespace SceneManager {
 		}
 		///+++++++++++++++
 		// RENDERING modelTypes
-		renderAnimatedObject(projection, glm::vec3(0.0,0.0,0.0), glm::vec3(0.02, 0.02, 0.02), shader, groundTexture);
+		renderAnimatedObject(projection, glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.02, 0.02, 0.02), shader, groundTexture);
 
 		//if (pointOfView == THIRD_PERSON)
 		//	renderObject(projection, modelTypes["nanosuit"], glm::vec3(player->getPosition().x, player->getPosition().y - 1.75, player->getPosition().z), glm::vec3(0.2, 0.2, 0.2), glm::vec3(0.0, -yaw, 0.0), shader, 0);

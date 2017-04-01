@@ -177,7 +177,7 @@ GLuint initShaders(const char *vertFile, const char *fragFile, const char *geomF
 	glBindAttribLocation(p, LOCATION_NORMAL, "in_Normal");
 	glBindAttribLocation(p, LOCATION_TEXCOORD, "in_TexCoord");
 	glBindAttribLocation(p, LOCATION_BONEID, "in_BoneID");
-	glBindAttribLocation(p, LOCATION_BONEWEIGHT, "in_BoneWeigh t");
+	glBindAttribLocation(p, LOCATION_BONEWEIGHT, "in_BoneWeight");
 
 	glLinkProgram(p);
 	glUseProgram(p);
