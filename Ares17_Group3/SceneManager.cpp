@@ -113,9 +113,21 @@ namespace SceneManager {
 		//cout << "z" << -d*std::cos(rotationAngles.y*DEG_TO_RADIAN) << endl;
 		return glm::vec3(pos.x + d*std::sin(rotationAngles.y*DEG_TO_RADIAN), pos.y - d*std::sin(rotationAngles.x), pos.z - d*std::cos(rotationAngles.y*DEG_TO_RADIAN));
 	}
+
+
 	glm::vec3 moveRight(glm::vec3 pos, GLfloat angle, GLfloat d) {
 		return glm::vec3(pos.x + d*std::cos(rotationAngles.y*DEG_TO_RADIAN), pos.y, pos.z + d*std::sin(rotationAngles.y*DEG_TO_RADIAN));
 	}
+	glm::vec3 shiftForward(glm::vec3 pos, glm::vec3 angle, GLfloat d) {
+		return glm::vec3(pos.x + d*std::sin(angle.y*DEG_TO_RADIAN), pos.y - d*std::sin(angle.x*DEG_TO_RADIAN), pos.z - d*std::cos(angle.y*DEG_TO_RADIAN));
+	}
+
+	glm::vec3 shiftRight(glm::vec3 pos, glm::vec3 angle, GLfloat d) {
+		return glm::vec3(pos.x + d*std::cos(angle.y*DEG_TO_RADIAN), pos.y, pos.z + d*std::sin(angle.y*DEG_TO_RADIAN));
+	}
+
+
+	// 		projectile_manager->addProjectile(moveForward(player->getPosition(), rotationAngles, 1.0f), PROJ_SPEED, (rotationAngles.y*DEG_TO_RADIAN), rotationAngles.x); //!++!
 
 	static btVector3 getLinearVelocityInBodyFrame(btRigidBody* body)
 	{
@@ -873,7 +885,7 @@ namespace SceneManager {
 						leftClick = true;
 						coolDown = COOL_TIME;
 						//			cout << "Attempting to shoot bullet." << endl;
-						projectile_manager->addProjectile(moveForward(player->getPosition(), rotationAngles, 1.0f), PROJ_SPEED, (rotationAngles.y*DEG_TO_RADIAN), rotationAngles.x); //!++!
+						projectile_manager->addProjectile(moveForward(glm::vec3(player->getPosition().x, player->getPosition().y - 0.6, player->getPosition().z), rotationAngles, 1.0f), PROJ_SPEED, (rotationAngles.y*DEG_TO_RADIAN), rotationAngles.x); //!++!
 						//s_manager->playSound(s_manager->getSound(2), 2, 1);
 						//TODO: Enable sound
 						//cout << rotationAngles.x << "\n";
@@ -1320,10 +1332,17 @@ namespace SceneManager {
 	void renderWeapon(glm::mat4 proj, Model *modelData, GLuint shader, glm::vec3 scale) {
 		glDisable(GL_CULL_FACE);
 		glm::mat4 model;
-		glm::vec3 gunPos = moveForward(glm::vec3(player->getPosition().x, player->getPosition().y - 0.15, player->getPosition().z), rotationAngles, 0.35f);
-		gunPos = moveRight(gunPos, rotationAngles.y, 0.2f);
+		//glm::vec3 gunPos = moveForward(glm::vec3(player->getPosition().x, player->getPosition().y - 0.15, player->getPosition().z), 0, 0.35f);
+		//glm::vec3 gunPos = glm::vec3(player->getPosition().x, player->getPosition().y, player->getPosition().z);
+		glm::vec3 gunPos = shiftForward(glm::vec3(player->getPosition().x, player->getPosition().y-0.6, player->getPosition().z), rotationAngles, 0.2f);
+		gunPos = shiftRight(gunPos, rotationAngles, 0.5f);
 	//	cout << "gunpos: " << gunPos.x << " " << gunPos.y << " " << gunPos.z << endl;
 		model = glm::translate(model, gunPos);
+		//model = glm::translate(model, glm::vec3(0.5, -0.5, 0.0));
+		model = glm::rotate(model, -rotationAngles.y*DEG_TO_RADIAN, glm::vec3(0.0, 1.0, 0.0));
+		//model = glm::rotate(model, rotationAngles.x*DEG_TO_RADIAN, glm::vec3(1.0, 0.0, 0.0));
+		//model = glm::rotate(model, rotationAngles.x*DEG_TO_RADIAN, glm::vec3(0.0, 0.0, 1.0));
+		model = glm::rotate(model, float(70 * DEG_TO_RADIAN), glm::vec3(0.0, 1.0, 0.0));
 		//float Y_axisRotation = 30.0f*DEG_TO_RADIAN;
 		//model = glm::rotate(model, float(-rotationAngles.y*DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
 		//model = glm::rotate(model, float(rotationAngles.x*DEG_TO_RADIAN), glm::vec3(1.0f, 0.0f, 0.0f));
