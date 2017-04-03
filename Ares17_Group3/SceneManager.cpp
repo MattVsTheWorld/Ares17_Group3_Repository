@@ -885,6 +885,7 @@ namespace SceneManager {
 						leftClick = true;
 						coolDown = COOL_TIME;
 						//			cout << "Attempting to shoot bullet." << endl;
+						//TODO: change offset
 						projectile_manager->addProjectile(moveForward(glm::vec3(player->getPosition().x, player->getPosition().y - 0.6, player->getPosition().z), rotationAngles, 1.0f), PROJ_SPEED, (rotationAngles.y*DEG_TO_RADIAN), rotationAngles.x); //!++!
 						//s_manager->playSound(s_manager->getSound(2), 2, 1);
 						//TODO: Enable sound
