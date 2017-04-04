@@ -52,7 +52,7 @@ void Projectile::renderProjectiles(glm::mat4 view, glm::mat4 proj, Model * model
 	while (liveProjectiles.size() > 0 && i < liveProjectiles.size())
 	{
 		liveProjectiles[i] = make_tuple(get<0>(liveProjectiles[i]), get<1>(liveProjectiles[i]) - time_step, get<2>(liveProjectiles[i]));
-		// update ghsot
+		// update ghost
 		get<2>(liveProjectiles[i])->setWorldTransform(get<0>(liveProjectiles[i])->getWorldTransform());
 
 		if (findCollision(get<2>(liveProjectiles[i])))

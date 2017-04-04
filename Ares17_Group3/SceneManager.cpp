@@ -118,8 +118,9 @@ namespace SceneManager {
 	glm::vec3 moveRight(glm::vec3 pos, GLfloat angle, GLfloat d) {
 		return glm::vec3(pos.x + d*std::cos(rotationAngles.y*DEG_TO_RADIAN), pos.y, pos.z + d*std::sin(rotationAngles.y*DEG_TO_RADIAN));
 	}
+	
 	glm::vec3 shiftForward(glm::vec3 pos, glm::vec3 angle, GLfloat d) {
-		return glm::vec3(pos.x + d*std::sin(angle.y*DEG_TO_RADIAN), pos.y - d*std::sin(angle.x*DEG_TO_RADIAN), pos.z - d*std::cos(angle.y*DEG_TO_RADIAN));
+		return glm::vec3(pos.x + d*std::sin(angle.y*DEG_TO_RADIAN), pos.y - d*std::sin(angle.x), pos.z - d*std::cos(angle.y*DEG_TO_RADIAN));
 	}
 
 	glm::vec3 shiftRight(glm::vec3 pos, glm::vec3 angle, GLfloat d) {
@@ -886,7 +887,8 @@ namespace SceneManager {
 						coolDown = COOL_TIME;
 						//			cout << "Attempting to shoot bullet." << endl;
 						//TODO: change offset
-						projectile_manager->addProjectile(moveForward(glm::vec3(player->getPosition().x, player->getPosition().y - 0.6, player->getPosition().z), rotationAngles, 1.0f), PROJ_SPEED, (rotationAngles.y*DEG_TO_RADIAN), rotationAngles.x); //!++!
+						projectile_manager->addProjectile(shiftRight(moveForward(glm::vec3(player->getPosition().x, player->getPosition().y - 0.35, player->getPosition().z), 
+							rotationAngles, 1.0f),rotationAngles, 0.5), PROJ_SPEED, (rotationAngles.y*DEG_TO_RADIAN), rotationAngles.x); //!++!
 						//s_manager->playSound(s_manager->getSound(2), 2, 1);
 						//TODO: Enable sound
 						//cout << rotationAngles.x << "\n";
@@ -1270,11 +1272,10 @@ namespace SceneManager {
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
+	//TODO: delete
 	void renderPlayer(glm::mat4 proj, Model *modelData, glm::vec3 pos, glm::vec3 scale, glm::vec3 rotation, GLuint shader, GLuint texture) {
 		glm::mat4 model;
 		model = glm::translate(model, pos);
-		//model = glm::rotate(model, float(-rotationAngles.y*DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
-		//model = glm::rotate(model, float(180 * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::rotate(model, float(rotation.y * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, scale);	// It's a bit too big for our scene, so scale it down
 											//model = glm::scale(model, glm::vec3(0.05f, 0.05f, 0.05f));	// for gun]
@@ -1286,73 +1287,24 @@ namespace SceneManager {
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
-	/*void renderWeapon(glm::mat4 proj, Model *modelData, GLuint shader) {
-		//glUseProgram(modelProgram);
-		glDisable(GL_DEPTH_TEST);//Disable depth test for HUD label
-		//mvStack.push(glm::mat4(1.0));// push modelview to stack
-									//		glCullFace(GL_BACK);
-	//	MeshManager::setLight(modelProgram, testLight);
-	//	MeshManager::setMaterial(modelProgram, redMaterial);
-	//	MeshManager::setUniformMatrix4fv(modelProgram, "projection", glm::value_ptr(proj));
-		MeshManager::setUniformMatrix4fv(shader, "view", glm::value_ptr(glm::mat4(1.0)));
-		//	mvStack.top() = glm::translate(mvStack.top(), glm::vec3(-10.0f, -0.1f, -10.0f));
-		// Draw the loaded model
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, defaultTexture);
-		glm::mat4 model;
-
-		if (rightClick) {
-			glm::vec3 gun_pos(0.0f, -2.0f, -5.0f);
-			float Y_axisRotation = -85.0f*DEG_TO_RADIAN;
-			float Z_axisRotation = -25.0f*DEG_TO_RADIAN;
-			model = glm::translate(model, gun_pos);
-			model = glm::rotate(model, Y_axisRotation, glm::vec3(0.0f, 1.0f, 0.0f)); // Rotate in y axis
-		//	model = glm::rotate(model, Z_axisRotation, glm::vec3(0.0f, 0.0f, 1.0f)); // Rotate in z axis
-		}
-		//	else {
-		glm::vec3 gun_pos(2.5f, -2.5f, -5.0f);
-		float Y_axisRotation = 30.0f*DEG_TO_RADIAN;
-		model = glm::translate(model, gun_pos);
-		//model = glm::rotate(model, float(-rotationAngles.y*DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
-		model = glm::rotate(model, float(180 * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
-		model = glm::rotate(model, Y_axisRotation, glm::vec3(0.0f, 1.0f, 0.0f)); // Rotate in y axis
-		//model = glm::rotate(model, Z_axisRotation, glm::vec3(0.0f, 0.0f, 1.0f)); // Rotate in z axis
-		model = glm::scale(model, glm::vec3(0.05f, 0.05f, 0.05f));
-//	}
-		//model = glm::scale(model, glm::vec3(0.005f, 0.005f, 0.005f));	// It's a bit too big for our scene, so scale it down
-
-		glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
-		modelData->Draw(shader);
-
-		//	mvStack.pop();
-			//	glCullFace(GL_BACK);
-		glEnable(GL_DEPTH_TEST);//Re-enable depth test after HUD label
-		glDepthMask(GL_TRUE);
-	}*/
 
 	void renderWeapon(glm::mat4 proj, Model *modelData, GLuint shader, glm::vec3 scale) {
 		glDisable(GL_CULL_FACE);
 		glm::mat4 model;
-		//glm::vec3 gunPos = moveForward(glm::vec3(player->getPosition().x, player->getPosition().y - 0.15, player->getPosition().z), 0, 0.35f);
-		//glm::vec3 gunPos = glm::vec3(player->getPosition().x, player->getPosition().y, player->getPosition().z);
-		glm::vec3 gunPos = shiftForward(glm::vec3(player->getPosition().x, player->getPosition().y-0.6, player->getPosition().z), rotationAngles, 0.2f);
+		float local_pitch = -(rotationAngles.x + 0.1);
+		if (local_pitch >= 1)
+			local_pitch = 1;
+		if (local_pitch <= -1)
+			local_pitch = -1;
+		glm::vec3 gunPos;
+		gunPos = shiftForward(glm::vec3(player->getPosition().x, player->getPosition().y-0.5, player->getPosition().z), rotationAngles, 0.075f);	
 		gunPos = shiftRight(gunPos, rotationAngles, 0.5f);
-	//	cout << "gunpos: " << gunPos.x << " " << gunPos.y << " " << gunPos.z << endl;
 		model = glm::translate(model, gunPos);
-		//model = glm::translate(model, glm::vec3(0.5, -0.5, 0.0));
 		model = glm::rotate(model, -rotationAngles.y*DEG_TO_RADIAN, glm::vec3(0.0, 1.0, 0.0));
-		//model = glm::rotate(model, rotationAngles.x*DEG_TO_RADIAN, glm::vec3(1.0, 0.0, 0.0));
-		//model = glm::rotate(model, rotationAngles.x*DEG_TO_RADIAN, glm::vec3(0.0, 0.0, 1.0));
-		model = glm::rotate(model, float(70 * DEG_TO_RADIAN), glm::vec3(0.0, 1.0, 0.0));
-		//float Y_axisRotation = 30.0f*DEG_TO_RADIAN;
-		//model = glm::rotate(model, float(-rotationAngles.y*DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
-		//model = glm::rotate(model, float(rotationAngles.x*DEG_TO_RADIAN), glm::vec3(1.0f, 0.0f, 0.0f));
-		//model = glm::rotate(model, float(rotationAngles.*DEG_TO_RADIAN), glm::vec3(0.0f, 0.0f, 1.0f));
-		//model = glm::rotate(model, float(260 * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
-//		model = glm::rotate(model, Y_axisRotation, glm::vec3(0.0f, 1.0f, 0.0f));
-		//model = glm::scale(model, scale);
-		model = glm::scale(model, glm::vec3(0.175f, 0.175f, 0.175f));	// It's a bit too big for our scene, so scale it down
-																	//model = glm::scale(model, glm::vec3(0.05f, 0.05f, 0.05f));	// for gun
+		model = glm::rotate(model, local_pitch, glm::vec3(1.0, 0.0, 0.0));
+		model = glm::rotate(model, float(80 * DEG_TO_RADIAN), glm::vec3(0.0, 1.0, 0.0));
+		model = glm::scale(model, glm::vec3(0.25f, 0.25f, 0.25f));
+		//TODO: I can't fix this. If you want, give it a try. good luck.
 		glUniformMatrix4fv(glGetUniformLocation(shader, "projection"), 1, GL_FALSE, glm::value_ptr(glm::mat4()));
 		glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
 		modelData->Draw(shader);
