@@ -395,153 +395,63 @@ namespace SceneManager {
 								variables = 20;
 								float digit = stof(asString);
 								switch (i) {
-								case 2:
-									position.x = digit;
-									break;
-								case 3:
-									position.y = digit;
-									break;
-								case 4:
-									position.z = digit;
-									break;
-								case 5:
-									boundingScale.x = digit;
-									break;
-								case 6:
-									boundingScale.y = digit;
-									break;
-								case 7:
-									boundingScale.z = digit;;
-									break;
-								case 8:
-									modelScale.x = digit;
-									break;
-								case 9:
-									modelScale.y = digit;
-									break;
-								case 10:
-									modelScale.z = digit;
-									break;
-								case 11:
-									modelRotation.z = digit;
-									break;
-								case 12:
-									modelRotation.z = digit;
-									break;
-								case 13:
-									modelRotation.z = digit;
-									break;
-								case 14:
-									boundingRotation.x = digit;
-									break;
-								case 15:
-									boundingRotation.y = digit;
-									break;
-								case 16:
-									boundingRotation.z = digit;
-									break;
-								case 17:
-									offset.x = digit;
-									break;
-								case 18:
-									offset.y = digit;
-									break;
-								case 19:
-									offset.z = digit;
-									break;
-								case 20:
-									mass = digit;
-									break;
+								case 2: position.x = digit;				break;
+								case 3: position.y = digit;				break;
+								case 4: position.z = digit;				break;
+								case 5: boundingScale.x = digit;		break;
+								case 6:	boundingScale.y = digit;		break;
+								case 7: boundingScale.z = digit;		break;
+								case 8: modelScale.x = digit;			break;
+								case 9: modelScale.y = digit;			break;
+								case 10: modelScale.z = digit;			break;
+								case 11: modelRotation.z = digit;		break;
+								case 12: modelRotation.z = digit;		break;
+								case 13: modelRotation.z = digit;		break;
+								case 14: boundingRotation.x = digit;	break;
+								case 15: boundingRotation.y = digit;	break;
+								case 16: boundingRotation.z = digit;	break;
+								case 17: offset.x = digit;				break;
+								case 18: offset.y = digit;				break;
+								case 19: offset.z = digit;				break;
+								case 20: mass = digit;					break;
 								}
 							}
 							else if (key.find("sphere") != std::string::npos) {
 								variables = 9;
 								float digit = stof(asString);
 								switch (i) {
-								case 2:
-									position.x = digit;
-									break;
-								case 3:
-									position.y = digit;
-									break;
-								case 4:
-									position.z = digit;
-									break;
-								case 5:
-									radius = digit;
-									break;
-								case 6:
-									modelScale.x = digit;
-									break;
-								case 7:
-									modelScale.y = digit;
-									break;
-								case 8:
-									modelScale.z = digit;
-									break;
-								case 9:
-									mass = digit;
-									break;
+								case 2:	position.x = digit;				break;
+								case 3:	position.y = digit;				break;
+								case 4:	position.z = digit;				break;
+								case 5:	radius = digit;					break;
+								case 6:	modelScale.x = digit;			break;
+								case 7:	modelScale.y = digit;			break;
+								case 8:	modelScale.z = digit;			break;
+								case 9:	mass = digit;					break;
 								}
 							}
 							else if (key.find("capsule") != std::string::npos) {
 								variables = 19;
 								float digit = stof(asString);
 								switch (i) {
-								case 2:
-									position.x = digit;
-									break;
-								case 3:
-									position.y = digit;
-									break;
-								case 4:
-									position.z = digit;
-									break;
-								case 5:
-									radius = digit;
-									break;
-								case 6:
-									height = digit;
-									break;
-								case 7:
-									modelScale.x = digit;
-									break;
-								case 8:
-									modelScale.y = digit;
-									break;
-								case 9:
-									modelScale.z = digit;
-									break;
-								case 10:
-									modelRotation.x = digit;
-									break;
-								case 11:
-									modelRotation.y = digit;
-									break;
-								case 12:
-									modelRotation.z = digit;
-									break;
-								case 13:
-									boundingRotation.x = digit;
-									break;
-								case 14:
-									boundingRotation.y = digit;
-									break;
-								case 15:
-									boundingRotation.z = digit;
-									break;
-								case 16:
-									offset.x = digit;
-									break;
-								case 17:
-									offset.y = digit;
-									break;
-								case 18:
-									offset.z = digit;
-									break;
-								case 19:
-									mass = digit;
-									break;
+								case 2:	position.x = digit;				break;
+								case 3:	position.y = digit;				break;
+								case 4:	position.z = digit;				break;
+								case 5:	radius = digit;					break;
+								case 6:	height = digit;					break;
+								case 7:	modelScale.x = digit;			break;
+								case 8:	modelScale.y = digit;			break;
+								case 9:	modelScale.z = digit;			break;
+								case 10: modelRotation.x = digit;		break;
+								case 11: modelRotation.y = digit;		break;
+								case 12: modelRotation.z = digit;		break;
+								case 13: boundingRotation.x = digit;	break;
+								case 14: boundingRotation.y = digit;	break;
+								case 15: boundingRotation.z = digit;	break;
+								case 16: offset.x = digit;				break;
+								case 17: offset.y = digit;				break;
+								case 18: offset.z = digit;				break;
+								case 19: mass = digit;					break;
 								}
 							}
 						}//else
