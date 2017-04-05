@@ -93,6 +93,7 @@ namespace SceneManager {
 	//	
 	GLuint defaultTexture;
 	GLuint groundTexture;
+	GLuint heartTexture;
 
 	glm::mat4 view;
 
@@ -533,6 +534,8 @@ namespace SceneManager {
 		//Collectable
 		modelTypes.insert(std::pair<string, Model*>("heart", new Model("Models/Collectable/Heart/Heart.obj")));
 		modelTypes.insert(std::pair<string, Model*>("potion", new Model("Models/Collectable/Potion/pocion lowpoly.obj")));
+		modelTypes.insert(std::pair<string, Model*>("shield", new Model("Models/Collectable/Shield/shield.obj")));
+
 		//Guns
 		modelTypes.insert(std::pair<string, Model*>("ak47", new Model("Models/Guns/AK47/Gun_low_poly.obj")));
 		modelTypes.insert(std::pair<string, Model*>("pistol", new Model("Models/Guns/Pistol/Gun.obj")));
@@ -660,8 +663,9 @@ namespace SceneManager {
 
 		initmodelTypes();
 
-		defaultTexture = loadBitmap::loadBitmap("wall.bmp");
-		groundTexture = loadBitmap::loadBitmap("terrain.bmp");
+		defaultTexture = loadBitmap::loadBitmap("Textures/wall.bmp");
+		groundTexture = loadBitmap::loadBitmap("Textures/terrain.bmp");
+		heartTexture = loadBitmap::loadBitmap("Textures/ruby.bmp");
 
 		initPlayer(1.0f, 1.5f, 40.0f);
 		initBoxes();
@@ -1359,29 +1363,35 @@ namespace SceneManager {
 			btQuaternion rotation = bodies[id_pair.first]->getWorldTransform().getRotation().normalized();
 
 			if (id_pair.second->getCollisionShape()->getShapeType() == BOX_SHAPE_PROXYTYPE) {
-				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			/*	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 				glDisable(GL_CULL_FACE);
 				bt_manager->renderBox(bodies[id_pair.first], view, projection, modelTypes["cube"], shader, groundTexture);
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-				glEnable(GL_CULL_FACE);
-				renderObject(projection, modelTypes[get<0>(models[id_pair.first])], position, get<1>(models[id_pair.first]), rotation, shader, groundTexture);
+				glEnable(GL_CULL_FACE);*/
+				//cout << modelTypes[get<0>(models[id_pair.first])] << endl;
+				//cout << models[id_pair.first] << endl;
+
+				if (modelTypes[get<0>(models[id_pair.first])] == modelTypes["heart"])
+					renderObject(projection, modelTypes[get<0>(models[id_pair.first])], position, get<1>(models[id_pair.first]), rotation, shader, heartTexture);
+				else
+					renderObject(projection, modelTypes[get<0>(models[id_pair.first])], position, get<1>(models[id_pair.first]), rotation, shader, groundTexture);
 			}
 
 			if (id_pair.second->getCollisionShape()->getShapeType() == SPHERE_SHAPE_PROXYTYPE) {
-				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+				/*glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 				glDisable(GL_CULL_FACE);
 				bt_manager->renderSphere(bodies[id_pair.first], view, projection, modelTypes["sphere"], shader, defaultTexture);
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-				glEnable(GL_CULL_FACE);
+				glEnable(GL_CULL_FACE);*/
 				renderObject(projection, modelTypes[get<0>(models[id_pair.first])], spherePosition, get<1>(models[id_pair.first]), rotation, shader, defaultTexture);
 			}
 
 			if (id_pair.second->getCollisionShape()->getShapeType() == CAPSULE_SHAPE_PROXYTYPE) {
-				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			/*	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 				glDisable(GL_CULL_FACE);
 				bt_manager->renderCapsule(bodies[id_pair.first], view, projection, modelTypes["capsule"], shader, defaultTexture);
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-				glEnable(GL_CULL_FACE);
+				glEnable(GL_CULL_FACE);*/
 				renderObject(projection, modelTypes[get<0>(models[id_pair.first])], spherePosition, get<1>(models[id_pair.first]), rotation, shader, defaultTexture);
 			}
 			//	i++;

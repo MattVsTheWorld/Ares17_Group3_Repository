@@ -31,7 +31,7 @@
 #define BOUNDING_SCALING 0.01f
 
 #define SPEED_CAP_XZ 8.0
-#define FRICTION 8.0
+#define FRICTION 6.0
 #define SPEED_CAP_Y 3.0
 
 #define AMBIENT_FACTOR 1.0f
