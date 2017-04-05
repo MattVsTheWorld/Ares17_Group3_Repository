@@ -82,7 +82,7 @@ namespace SceneManager {
 
 	map<std::string, std::tuple<string, glm::vec3, glm::vec3, glm::vec3>> models; //objType, <modelName, scale, rotation, offset>
 	map<std::string, btRigidBody*> bodies;
-	vector<btPairCachingGhostObject*> collectables;
+	vector<tuple <btPairCachingGhostObject*, string, string>> collectables;
 
 	tuple<std::string, glm::vec3, glm::vec3, glm::vec3> temp[2]; //name, position, scale, rotation
 
@@ -470,7 +470,7 @@ namespace SceneManager {
 						tempGhost->setCollisionShape(temp->getCollisionShape());
 						tempGhost->setWorldTransform(temp->getWorldTransform());
 						tempGhost->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);
-						collectables.push_back(tempGhost);
+						collectables.push_back(make_tuple(tempGhost, key, modelName));
 						bt_manager->addGhostToWorld(tempGhost, COL_COLLECTABLE, COL_PLAYER);	
 					}
 					else
@@ -1268,6 +1268,29 @@ namespace SceneManager {
 		return dt_secs;
 	}
 
+	void updateCollectables() {
+		int max = collectables.size();
+		//	for (const auto it : collectables)
+
+		for (int i = 0; i < max; i++) {
+			if (findCollision(get<0>(collectables[i]))) {
+				if (get<2>(collectables[i]) == "heart")
+					player->setHealth(player->getHealth() + 50);
+				else if (get<2>(collectables[i]) == "shield")
+					player->setArmor(player->getArmor() + 50);
+
+				bt_manager->removeObject(bodies[get<1>(collectables[i])]);
+				bt_manager->removeObject(get<0>(collectables[i]));
+				bodies.erase(get<1>(collectables[i]));
+				collectables.erase(remove(collectables.begin(), collectables.end(), collectables[i]), collectables.end());
+				max--;
+				//TODO: check if bugs
+				//add something (hp / armor)
+				//remove from world
+			}
+		}
+	}
+
 	void update(SDL_Window * window, SDL_Event sdlEvent) {
 		controls(window, sdlEvent);
 		dt_secs = gameTime();
@@ -1277,14 +1300,8 @@ namespace SceneManager {
 		if (player->getState() == JUMPING)
 			if(findCollision(ghostObject))
 				player->setState(ON_GROUND);
-
-		for (const auto it : collectables)
-			if (findCollision(it)) {
-				//cout << "LEEEE" << endl;
-				//Delete;
-				//add something (hp / armor)
-				//remove from world
-			}
+		updateCollectables();
+		
 		bt_manager->update();
 
 
