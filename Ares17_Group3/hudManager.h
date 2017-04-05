@@ -29,12 +29,14 @@ public:
 	void renderEditHud(std::string line, std::string value, GLuint shader, Model *modelData, glm::vec3 pos);
 
 	void renderPause(GLuint shader, Model *modelData);
+	void renderLoading(GLuint shader, Model *modelData);
 
 private:
 	TTF_Font * textFont;
 	GLuint label;
 	GLuint labelHP, labelArmor;
 	GLuint pauseLabel;
+	GLuint loadingScreen;
 	currentVals _current;
 
 	GLuint changeLabel(string line, double value) {

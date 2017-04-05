@@ -94,7 +94,7 @@ int main(int argc, char *argv[]) {
 	}
 	cout << glGetString(GL_VERSION) << endl;
 	
-	SceneManager::init();
+	SceneManager::init(hWindow);
 	// fps counter; 1 of 5
 	//fpsinit();
 	// ---

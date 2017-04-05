@@ -51,6 +51,8 @@ hudManager::hudManager() {
 	std::string str = "Game paused";
 	const char *cstr = str.c_str();
 	pauseLabel = textToTexture(cstr, pauseLabel);
+	// https://dribbble.com/shots/897447-Ares-Logo-Mark
+	loadingScreen = loadBitmap::loadBitmap("Textures/loading.bmp");
 }
 
 // Requires change ***
@@ -158,6 +160,22 @@ void hudManager::renderPause(GLuint shader, Model *modelData) {
 
 	glEnable(GL_DEPTH_TEST);//Re-enable depth test after HUD label
 
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void hudManager::renderLoading(GLuint shader, Model *modelData) {
+	glDisable(GL_DEPTH_TEST);//Disable depth test for HUD label
+	glm::mat4 id = glm::mat4();
+	glUseProgram(shader); //texture-only shader will be used for teture rendering
+	// transformations
+	id = glm::scale(id, glm::vec3(1.0f, -1.0f, 1.0f));
+	//I though this was purple but good enough ¯\_(?)_/¯
+	MeshManager::setUniformMatrix4fv(shader, "model", glm::value_ptr(id));
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, loadingScreen);
+	modelData->Draw(shader);
+	glEnable(GL_DEPTH_TEST);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }

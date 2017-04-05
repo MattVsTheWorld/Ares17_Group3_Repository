@@ -54,7 +54,7 @@ enum gameState {
 };
 namespace SceneManager {
 
-	void init(void);
+	void init(SDL_Window * window);
 	void update(SDL_Window *window, SDL_Event sdlEvent);
 	//fps counter; 3 of 5
 	void draw(SDL_Window *window);//, int fps);

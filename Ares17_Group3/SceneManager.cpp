@@ -539,8 +539,6 @@ namespace SceneManager {
 		//Enemies
 		modelTypes.insert(std::pair<string, Model*>("robot", new Model("Models/Enemies/Robot/Roboto.obj")));
 		//Environment
-		modelTypes.insert(std::pair<string, Model*>("cube", new Model("Models/Environment/cube.obj")));
-		modelTypes.insert(std::pair<string, Model*>("box", modelTypes["cube"]));
 		modelTypes.insert(std::pair<string, Model*>("sphere", new Model("Models/Environment/sphere.obj")));
 		modelTypes.insert(std::pair<string, Model*>("capsule", modelTypes["sphere"]));
 		modelTypes.insert(std::pair<string, Model*>("car", new Model("Models/Environment/Car/model.obj")));
@@ -667,10 +665,18 @@ namespace SceneManager {
 		return false;
 	}
 
-	void init(void) {
+	void init(SDL_Window * window) {
 
-		//	shaderProgram = ShaderManager::initShaders("Shaders/phong-tex.vert", "Shaders/phong-tex.frag");
+		// Preliminary loading for loading screen
 		texturedProgram = ShaderManager::initShaders("Shaders/textured.vert", "Shaders/textured.frag");
+		h_manager = new hudManager();
+		modelTypes.insert(std::pair<string, Model*>("cube", new Model("Models/Environment/cube.obj")));
+		modelTypes.insert(std::pair<string, Model*>("box", modelTypes["cube"]));
+		h_manager->renderLoading(texturedProgram, modelTypes["cube"]);
+		SDL_GL_SwapWindow(window); // swap buffers once
+		
+
+		initmodelTypes();
 		modelProgram = ShaderManager::initShaders("Shaders/modelLoading.vert", "Shaders/modelLoading.frag");
 		//+++
 		depthShaderProgram = ShaderManager::initShaders("Shaders/simpleShadowMap.vert", "Shaders/simpleShadowMap.frag", "Shaders/simpleShadowMap.gs");
@@ -680,9 +686,6 @@ namespace SceneManager {
 		//!!
 		sound_manager = new SoundManager();
 		//sound_manager->loadSample("Sounds/wilhelm.wav");
-
-		initmodelTypes();
-
 		defaultTexture = loadBitmap::loadBitmap("Textures/wall.bmp");
 		groundTexture = loadBitmap::loadBitmap("Textures/terrain.bmp");
 		heartTexture = loadBitmap::loadBitmap("Textures/ruby.bmp");
@@ -692,7 +695,7 @@ namespace SceneManager {
 		temp[0] = std::make_tuple(currentModel, at, glm::vec3(0.02, 0.02, 0.02), glm::vec3(0.0f, rotationAngles.y, 0.0f));
 		temp[1] = std::make_tuple(currentBounding, std::get<1>(temp[0]), glm::vec3(0.2, 0.2, 0.2), glm::vec3(0.0f, rotationAngles.y, 0.0f));
 
-		h_manager = new hudManager();
+
 		skybox = new Skybox(skyTexFiles);
 
 		glm::mat4 projection;
