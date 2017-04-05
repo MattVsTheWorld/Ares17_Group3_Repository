@@ -96,6 +96,9 @@
     <ClCompile Include="MeshManager.cpp">
       <Filter>To be deleted / redone</Filter>
     </ClCompile>
+    <ClCompile Include="Grid.cpp">
+      <Filter>Being worked on\February\AI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ShaderManager.h">

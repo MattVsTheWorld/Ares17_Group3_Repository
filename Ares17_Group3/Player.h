@@ -12,7 +12,10 @@
 
 #define SPEED_CAP_XZ 8.0
 #define FRICTION 6.0
-#define SPEED_CAP_Y 3.0
+#define SPEED_CAP_Y 2.25f
+
+#define HEALTH_CAP 300
+#define ARMOR_CAP 100
 
 enum playerState { ON_GROUND, JUMPING };
 

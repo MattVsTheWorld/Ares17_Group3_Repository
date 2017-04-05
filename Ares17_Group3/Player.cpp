@@ -18,6 +18,12 @@ void Player::update(float dt) {
 			this->invincible = false;
 		}
 	}
+
+	if (this->health >= HEALTH_CAP)
+		this->health = HEALTH_CAP;
+
+	if (this->armor >= ARMOR_CAP)
+		this->armor = ARMOR_CAP;
 }
 
 

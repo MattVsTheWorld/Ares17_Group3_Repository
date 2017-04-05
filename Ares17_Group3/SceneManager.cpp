@@ -29,6 +29,10 @@ namespace SceneManager {
 	Projectile *projectile_manager; // !++!
 	SoundManager *sound_manager; // ++!
 
+	gameState currentState = RUNNING;
+	float pauseTimeout = 1.0f;
+	bool clickable = true;
+
 	unsigned int lastTime = 0, currentTime;
 	float dt_secs;
 	float theta = 0;
@@ -777,17 +781,21 @@ namespace SceneManager {
 		int MidX = SCREENWIDTH / 2;
 		int MidY = SCREENHEIGHT / 2;
 
-		SDL_ShowCursor(SDL_DISABLE);
-		int tmpx, tmpy;
-		SDL_GetMouseState(&tmpx, &tmpy);
-		rotationAngles.y -= 0.1f*(MidX - tmpx); //for y
-		rotationAngles.x -= 0.1f*(MidY - tmpy) / 10.0f; //for x
-		lockCamera();
+		if (currentState == RUNNING) {
+			SDL_ShowCursor(SDL_DISABLE);
+			int tmpx, tmpy;
+			SDL_GetMouseState(&tmpx, &tmpy);
+			rotationAngles.y -= 0.1f*(MidX - tmpx); //for y
+			rotationAngles.x -= 0.1f*(MidY - tmpy) / 10.0f; //for x
+			lockCamera();
 
-		//rotate the camera (move everything in the opposit direction)
-		glRotatef(-rotationAngles.x, 1.0, 0.0, 0.0); //basically glm::rotate
-		glRotatef(-rotationAngles.y, 0.0, 1.0, 0.0);
-		SDL_WarpMouseInWindow(window, MidX, MidY);
+			//rotate the camera (move everything in the opposit direction)
+			glRotatef(-rotationAngles.x, 1.0, 0.0, 0.0); //basically glm::rotate
+			glRotatef(-rotationAngles.y, 0.0, 1.0, 0.0);
+
+			SDL_WarpMouseInWindow(window, MidX, MidY);
+		} else if (currentState == PAUSE)
+			SDL_ShowCursor(SDL_ENABLE);
 
 		//MOUSECLICK
 
@@ -801,6 +809,24 @@ namespace SceneManager {
 		motion->setWorldTransform(t);
 
 		const Uint8 *keys = SDL_GetKeyboardState(NULL);
+
+		if (keys[SDL_SCANCODE_P] && clickable)
+		{
+			cout << "LUL";
+			clickable = false;
+			if (currentState == RUNNING)
+				currentState = PAUSE;
+			else if (currentState = PAUSE)
+				currentState = RUNNING;
+		}
+		//
+		pauseTimeout -= dt_secs;
+		if (pauseTimeout <= 0)
+		{
+			pauseTimeout = 1.0f;
+			clickable = true;
+		}
+		//
 		if (keys[SDL_SCANCODE_LEFTBRACKET]) {
 			mode = PLAY;
 		}
@@ -1278,6 +1304,8 @@ namespace SceneManager {
 					player->setHealth(player->getHealth() + 50);
 				else if (get<2>(collectables[i]) == "shield")
 					player->setArmor(player->getArmor() + 50);
+
+				//TODO: play sound
 
 				bt_manager->removeObject(bodies[get<1>(collectables[i])]);
 				bt_manager->removeObject(get<0>(collectables[i]));

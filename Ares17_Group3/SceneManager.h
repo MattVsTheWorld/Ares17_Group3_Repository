@@ -49,7 +49,11 @@ struct PointLight {
 	glm::vec3 specular;
 };
 
+enum gameState {
+	RUNNING, PAUSE
+};
 namespace SceneManager {
+
 	void init(void);
 	void update(SDL_Window *window, SDL_Event sdlEvent);
 	//fps counter; 3 of 5

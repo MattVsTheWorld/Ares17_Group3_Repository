@@ -158,6 +158,7 @@
     <ClCompile Include="AdjacencyList.cpp" />
     <ClCompile Include="A_star.cpp" />
     <ClCompile Include="btShapeManager.cpp" />
+    <ClCompile Include="Grid.cpp" />
     <ClCompile Include="hudManager.cpp" />
     <ClCompile Include="loadBitmap.cpp" />
     <ClCompile Include="main.cpp" />

@@ -4,6 +4,13 @@
 
 #define PI 3.14159265359f
 #define REFRESHRATE 1.0f
+#define DEFAULT_LOS 20.0f
+
+enum npcState {
+	IDLE,		//Hasn't seen player
+	TRIGGERED,	//Player seen
+	PAUSED		//Game paused
+};
 
 // NPC implements AbstractNPC - all methods defined inline
 class NonPC : public AbstractNPC {
@@ -175,39 +182,45 @@ public:
 		npcBody->getMotionState()->getWorldTransform(t);
 		btVector3 pos = t.getOrigin();
 
-		if (init) {
-			currentPath = findPath(_g->getAdjList(), _g->getNodeFromWorldPos(pos), _g->getNodeFromWorldPos(playerPos));
-			init = false;
-		}
-		if (sqrt(pow(playerPos.x() - pos.x(), 2) + pow(playerPos.z() - pos.z(), 2)) >= this->range) { // close
-			recalcTimer -= dt;
-			if (recalcTimer <= 0)
-			{
+		if (sqrt(pow(playerPos.x() - pos.x(), 2) + pow(playerPos.z() - pos.z(), 2)) <= DEFAULT_LOS && this->currentState != PAUSED)
+			this->currentState = TRIGGERED;
+
+		if (this->currentState == TRIGGERED) {
+			if (init) {
 				currentPath = findPath(_g->getAdjList(), _g->getNodeFromWorldPos(pos), _g->getNodeFromWorldPos(playerPos));
-				recalcTimer = REFRESHRATE;
+				init = false;
+			}
+			if (sqrt(pow(playerPos.x() - pos.x(), 2) + pow(playerPos.z() - pos.z(), 2)) >= this->range) { // distance
+				recalcTimer -= dt;
+				if (recalcTimer <= 0)
+				{
+					currentPath = findPath(_g->getAdjList(), _g->getNodeFromWorldPos(pos), _g->getNodeFromWorldPos(playerPos));
+					recalcTimer = REFRESHRATE;
+				}
+
+				if (!currentPath.empty())
+					if (_g->getAdjList()->getVertex(_g->getNodeFromWorldPos(pos)) == currentPath.front())
+						currentPath.pop();
+				if (!currentPath.empty())
+					this->moveNpc(currentPath.front());
+			}
+			else {
+				//Attack player
+				//player->varyHealth(-(this->attack));
+				//TODO: MESHAL attack animation
+				if (this->attackTimer <= 0) {
+					player->takeDamage(this->attack);
+					this->attackTimer = this->attackSpeed;
+				}
+				else this->attackTimer -= dt;
+			}
+		}
+			if (findCollision(npcGhost))
+			{
+				this->health -= 10;
+				cout << "HIT! Health = " << this->health << endl;
 			}
 
-			if (!currentPath.empty())
-				if (_g->getAdjList()->getVertex(_g->getNodeFromWorldPos(pos)) == currentPath.front())
-					currentPath.pop();
-			if (!currentPath.empty())
-				this->moveNpc(currentPath.front());
-		}
-		else {
-			//Attack player
-			//player->varyHealth(-(this->attack));
-			//TODO: MESHAL attack animation
-			if (this->attackTimer <= 0) {
-				player->takeDamage(this->attack);
-				this->attackTimer = this->attackSpeed;
-			}
-			else this->attackTimer -= dt;
-		}
-		if (findCollision(npcGhost))
-		{
-			this->health -= 10;
-			cout << "HIT! Health = " << this->health << endl;
-		}
 		return true;
 	}
 
@@ -260,6 +273,7 @@ protected:
 	double attack;
 	double attackSpeed;
 	bool init = true;
+	npcState currentState = IDLE;
 	// (...) space to add more parameters...
 };
 
