@@ -14,6 +14,12 @@ using std::cout;
 using std::endl;
 using std::cin;
 
+enum npcState {
+	IDLE,		//Hasn't seen player
+	TRIGGERED,	//Player seen
+	PAUSED		//Game paused
+};
+
 // Abstract base class: no implementation
 class AbstractNPC {
 public:
@@ -32,6 +38,8 @@ public:
 	virtual double getHealth() = 0;
 	virtual void setAttackSpeed(double atkspd) = 0;
 	virtual	double getAttackSpeed() = 0;
+	virtual void setState(npcState newState) = 0;
+	virtual npcState getState() = 0;
 	virtual ~AbstractNPC() {}
 };
 

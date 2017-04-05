@@ -70,7 +70,7 @@ namespace SceneManager {
 
 	// +++ \_/
 	//TODO: vector
-	vector <AbstractNPC *>enemies;
+	vector <AbstractNPC *> enemies;
 	// +++ /-\
 
 	const char *testTexFiles[6] = {
@@ -814,10 +814,17 @@ namespace SceneManager {
 		{
 			cout << "LUL";
 			clickable = false;
-			if (currentState == RUNNING)
+			if (currentState == RUNNING) {
+				for (const auto it : enemies)
+					it->setState(PAUSED);
+
 				currentState = PAUSE;
-			else if (currentState = PAUSE)
+			}
+			else if (currentState = PAUSE) {
+				for (const auto it : enemies)
+					it->setState(IDLE);
 				currentState = RUNNING;
+			}
 		}
 		//
 		pauseTimeout -= dt_secs;
@@ -838,7 +845,7 @@ namespace SceneManager {
 		if (mode == PLAY) {
 			if (sdlEvent.type == SDL_MOUSEBUTTONDOWN) { // && pointOfView == FIRST_PERSON) {
 				if (sdlEvent.button.button == SDL_BUTTON_LEFT) {
-					if (coolDown <= 0.0f) {
+					if (coolDown <= 0.0f && currentState == RUNNING) {
 						leftClick = true;
 						coolDown = COOL_TIME;
 						//			cout << "Attempting to shoot bullet." << endl;

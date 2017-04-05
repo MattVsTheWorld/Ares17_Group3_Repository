@@ -61,6 +61,13 @@ public:
 		return npc->getAttackSpeed();
 	}
 
+	void setState(npcState newState) { 
+		npc->setState(newState);
+	}
+	npcState getState() { 
+		return npc->getState();
+	}
+
 protected:
 	AbstractNPC * npc;
 };

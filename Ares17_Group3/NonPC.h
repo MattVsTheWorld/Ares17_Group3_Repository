@@ -6,12 +6,6 @@
 #define REFRESHRATE 1.0f
 #define DEFAULT_LOS 20.0f
 
-enum npcState {
-	IDLE,		//Hasn't seen player
-	TRIGGERED,	//Player seen
-	PAUSED		//Game paused
-};
-
 // NPC implements AbstractNPC - all methods defined inline
 class NonPC : public AbstractNPC {
 private:
@@ -176,6 +170,7 @@ public:
 
 		this->render(modelData, view, proj, shader);
 
+		//TODO: unstuck
 		btVector3 playerPos(player->getPosition().x, player->getPosition().y, player->getPosition().z);
 		btTransform t;
 		t.setIdentity();
@@ -267,6 +262,9 @@ public:
 	double getAttackSpeed() {
 		return this->attackSpeed;
 	}
+
+	void setState(npcState newState) { this->currentState = newState; }
+	npcState getState() { return this->currentState; }
 protected:
 	double health;
 	double range;
