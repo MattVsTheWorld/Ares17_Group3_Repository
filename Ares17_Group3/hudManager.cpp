@@ -48,6 +48,9 @@ hudManager::hudManager() {
 	// initialization of variables
 	label = 0;
 
+	std::string str = "Game paused";
+	const char *cstr = str.c_str();
+	pauseLabel = textToTexture(cstr, pauseLabel);
 }
 
 // Requires change ***
@@ -140,20 +143,19 @@ void hudManager::renderEditHud(std::string line, std::string value, GLuint shade
 
 void hudManager::renderPause(GLuint shader, Model *modelData) {
 	glDisable(GL_DEPTH_TEST);//Disable depth test for HUD label
-	std::string str = "PAUSE TEST";
-	const char *cstr = str.c_str();
 	glm::mat4 id = glm::mat4();
 	glUseProgram(shader); //texture-only shader will be used for teture rendering
-	pauseLabel = textToTexture(cstr, pauseLabel);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, pauseLabel);
 	// transformations
-	//id = glm::translate(id, pos);
-	id = glm::scale(id, glm::vec3(1.0f, -1.0f, 1.0f));
+	id = glm::translate(id, glm::vec3(0.0,0.5,0.0));
+	id = glm::scale(id, glm::vec3(0.2f, -0.25f, 1.0f));
 	//I though this was purple but good enough ¯\_(?)_/¯
 	glUniform3fv(glGetUniformLocation(shader, "text_color"), 1, glm::value_ptr(glm::vec3(0.183, 0.045, 0.087))); 
 	MeshManager::setUniformMatrix4fv(shader, "model", glm::value_ptr(id));
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, pauseLabel);
 	modelData->Draw(shader);
+
 	glEnable(GL_DEPTH_TEST);//Re-enable depth test after HUD label
 
 	glActiveTexture(GL_TEXTURE0);

@@ -87,9 +87,6 @@
     <ClCompile Include="AdjacencyList.cpp">
       <Filter>Being worked on\Game\AI</Filter>
     </ClCompile>
-    <ClCompile Include="MeshManager.cpp">
-      <Filter>To be deleted / redone</Filter>
-    </ClCompile>
     <ClCompile Include="Grid.cpp">
       <Filter>Being worked on\Game\AI</Filter>
     </ClCompile>
@@ -109,6 +106,9 @@
       <Filter>Being worked on\Game\Entities</Filter>
     </ClCompile>
     <ClCompile Include="SDLmanager.cpp">
+      <Filter>Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="MeshManager.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
   </ItemGroup>
@@ -143,9 +143,6 @@
     <ClInclude Include="NonPC.h">
       <Filter>Being worked on\Game\Entities headers\NPC headers</Filter>
     </ClInclude>
-    <ClInclude Include="MeshManager.h">
-      <Filter>To be deleted / redone</Filter>
-    </ClInclude>
     <ClInclude Include="Grid.h">
       <Filter>Being worked on\Game\AI headers</Filter>
     </ClInclude>
@@ -174,6 +171,9 @@
       <Filter>Being worked on\Game\Entities headers</Filter>
     </ClInclude>
     <ClInclude Include="SDLmanager.h">
+      <Filter>Engine headers</Filter>
+    </ClInclude>
+    <ClInclude Include="MeshManager.h">
       <Filter>Engine headers</Filter>
     </ClInclude>
   </ItemGroup>
