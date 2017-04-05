@@ -27,11 +27,13 @@ public:
 	void renderPlayerHud(std::string line, double value, valType _type, GLuint shader, Model *modelData, glm::vec3 pos, glm::vec3 color);
 	void renderEditHud(std::string line, std::string value, GLuint shader, Model *modelData, glm::vec3 pos);
 
+	void renderPause(GLuint shader, Model *modelData);
 
 private:
 	TTF_Font * textFont;
 	GLuint label;
 	GLuint labelHP, labelArmor;
+	GLuint pauseLabel;
 	currentVals _current;
 
 	GLuint changeLabel(string line, double value) {

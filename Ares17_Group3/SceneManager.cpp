@@ -817,7 +817,6 @@ namespace SceneManager {
 			if (currentState == RUNNING) {
 				for (const auto it : enemies)
 					it->setState(PAUSED);
-
 				currentState = PAUSE;
 			}
 			else if (currentState = PAUSE) {
@@ -1329,15 +1328,17 @@ namespace SceneManager {
 	void update(SDL_Window * window, SDL_Event sdlEvent) {
 		controls(window, sdlEvent);
 		dt_secs = gameTime();
-		coolDown -= dt_secs;
-		updatePlayer(dt_secs);
-		theta += 0.1;
-		if (player->getState() == JUMPING)
-			if(findCollision(ghostObject))
-				player->setState(ON_GROUND);
-		updateCollectables();
-		
-		bt_manager->update();
+		coolDown -= dt_secs;	
+		if (currentState == RUNNING) {
+			updatePlayer(dt_secs);
+			if (player->getState() == JUMPING)
+				if (findCollision(ghostObject))
+					player->setState(ON_GROUND);
+			updateCollectables();
+			theta += 0.1;
+			bt_manager->update();
+		}
+
 
 
 		//world->stepSimulation(1/60.0); // 1 divided by frames per second
@@ -1557,6 +1558,9 @@ namespace SceneManager {
 
 		// Armor
 		h_manager->renderPlayerHud("Armor: ", player->getArmor(), ARMOR, shader, modelData, glm::vec3(-0.65f, 0.925f, 1.0f), glm::vec3(0, 0, 0.4));
+
+		if (currentState == PAUSE)
+			h_manager->renderPause(texturedProgram, modelTypes["cube"]);
 	}
 
 	void draw(SDL_Window * window) { //, int fps) { // fps counter; 4 of 5
