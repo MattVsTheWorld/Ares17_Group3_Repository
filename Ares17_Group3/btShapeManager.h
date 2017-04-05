@@ -16,7 +16,8 @@ enum collisiontype {
 	COL_DEFAULT = BIT(0),
 	COL_PLAYER = BIT(1),
 	COL_BULLET = BIT(2),
-	COL_ENEMY = BIT(3)
+	COL_ENEMY = BIT(3),
+	COL_COLLECTABLE = BIT(4)
 
 	
 	//(...)
@@ -38,6 +39,7 @@ public:
 	btShapeManager();
 	void update();
 	btRigidBody* addBox(float width, float height, float depth, float x, float y, float z, float mass);
+	btRigidBody* addBox(float width, float height, float depth, float x, float y, float z, float mass, collisiontype group, collisiontype mask);
 	btRigidBody* addSphere(float rad, float x, float y, float z, float mass);
 	btRigidBody* addCapsule(float rad, float height, float x, float y, float z, float mass);
 	void renderSphere(btRigidBody* sphere, glm::mat4 view, glm::mat4 proj, Model *modelData, GLuint shader, GLuint texture);

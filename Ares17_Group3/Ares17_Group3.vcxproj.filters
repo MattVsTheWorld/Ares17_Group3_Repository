@@ -57,9 +57,6 @@
     <ClCompile Include="loadBitmap.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
-    <ClCompile Include="MeshManager.cpp">
-      <Filter>Engine</Filter>
-    </ClCompile>
     <ClCompile Include="ShaderManager.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
@@ -96,12 +93,12 @@
     <ClCompile Include="AdjacencyList.cpp">
       <Filter>Being worked on\February\AI</Filter>
     </ClCompile>
+    <ClCompile Include="MeshManager.cpp">
+      <Filter>To be deleted / redone</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ShaderManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MeshManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="loadBitmap.h">
@@ -160,6 +157,9 @@
     </ClInclude>
     <ClInclude Include="Grid.h">
       <Filter>Being worked on\February\AI</Filter>
+    </ClInclude>
+    <ClInclude Include="MeshManager.h">
+      <Filter>To be deleted / redone</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

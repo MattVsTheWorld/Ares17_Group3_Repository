@@ -27,10 +27,11 @@ namespace SceneManager {
 	Skybox *skybox;
 	btShapeManager *bt_manager;
 	Projectile *projectile_manager; // !++!
-	SoundManager *s_manager; // ++!
+	SoundManager *sound_manager; // ++!
 
 	unsigned int lastTime = 0, currentTime;
 	float dt_secs;
+	float theta = 0;
 	//	enum pov { FIRST_PERSON, THIRD_PERSON };
 	//	pov pointOfView = FIRST_PERSON;
 	enum modes { PLAY, EDIT };
@@ -81,6 +82,7 @@ namespace SceneManager {
 
 	map<std::string, std::tuple<string, glm::vec3, glm::vec3, glm::vec3>> models; //objType, <modelName, scale, rotation, offset>
 	map<std::string, btRigidBody*> bodies;
+	vector<btPairCachingGhostObject*> collectables;
 
 	tuple<std::string, glm::vec3, glm::vec3, glm::vec3> temp[2]; //name, position, scale, rotation
 
@@ -142,10 +144,10 @@ namespace SceneManager {
 	btVector3 speedForward(GLfloat _speed, GLfloat angle, bool concurrent) {
 		btVector3 speed = getLinearVelocityInBodyFrame(playerBody);
 
-		if (!concurrent && speed.absolute().x() <= SPEED_CAP_XZ && speed.absolute().z() <= SPEED_CAP_XZ)
+		if (!concurrent && speed.absolute().x() <= player->getSpeed() && speed.absolute().z() <= player->getSpeed())
 			speed = btVector3(speed.x() + _speed*std::sin(angle*DEG_TO_RADIAN), speed.y(), speed.z() - _speed*std::cos(angle*DEG_TO_RADIAN));
 		else if (concurrent)
-			speed = btVector3(speed.x() + (speed.absolute().x() > SPEED_CAP_XZ ? 0 : _speed*std::sin(angle*DEG_TO_RADIAN)), speed.y(), speed.z() - (speed.absolute().z() > SPEED_CAP_XZ ? 0 : _speed*std::cos(angle*DEG_TO_RADIAN)));
+			speed = btVector3(speed.x() + (speed.absolute().x() > player->getSpeed() ? 0 : _speed*std::sin(angle*DEG_TO_RADIAN)), speed.y(), speed.z() - (speed.absolute().z() > player->getSpeed() ? 0 : _speed*std::cos(angle*DEG_TO_RADIAN)));
 		return speed;
 	}
 
@@ -153,10 +155,10 @@ namespace SceneManager {
 
 		//playerBody->getVelocityInLocalPoint();
 		btVector3 speed = getLinearVelocityInBodyFrame(playerBody);
-		if (!concurrent && speed.absolute().x() <= SPEED_CAP_XZ && speed.absolute().z() <= SPEED_CAP_XZ)
+		if (!concurrent && speed.absolute().x() <= player->getSpeed() && speed.absolute().z() <= player->getSpeed())
 			speed = btVector3(speed.x() + _speed*std::cos(angle*DEG_TO_RADIAN), speed.y(), speed.z() + _speed*std::sin(angle*DEG_TO_RADIAN));
 		else if (concurrent)
-			speed = btVector3(speed.x() + (speed.absolute().x() > SPEED_CAP_XZ ? 0 : _speed*std::cos(angle*DEG_TO_RADIAN)), speed.y(), speed.z() + (speed.absolute().z() > SPEED_CAP_XZ ? 0 : _speed*std::sin(angle*DEG_TO_RADIAN)));
+			speed = btVector3(speed.x() + (speed.absolute().x() > player->getSpeed() ? 0 : _speed*std::cos(angle*DEG_TO_RADIAN)), speed.y(), speed.z() + (speed.absolute().z() > player->getSpeed() ? 0 : _speed*std::sin(angle*DEG_TO_RADIAN)));
 		return speed;
 	}
 	//TODO: fix when gameplay done ||TRIGGERED||
@@ -460,19 +462,31 @@ namespace SceneManager {
 					bodyNo++;
 				}
 				if (key.find("box") != std::string::npos) {
-					bodies.insert(std::pair<string, btRigidBody*>(key, bt_manager->addBox(boundingScale.x, boundingScale.y, boundingScale.z, position.x, position.y, position.z, mass)));
+					if (modelName == "heart" || modelName == "shield") {
+						btRigidBody *temp = bt_manager->addBox(boundingScale.x, boundingScale.y, boundingScale.z, position.x, position.y, position.z, mass, COL_COLLECTABLE, COL_PLAYER);
+						temp->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);
+						bodies.insert(std::pair<string, btRigidBody*>(key, temp));
+						btPairCachingGhostObject* tempGhost = new btPairCachingGhostObject();
+						tempGhost->setCollisionShape(temp->getCollisionShape());
+						tempGhost->setWorldTransform(temp->getWorldTransform());
+						tempGhost->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);
+						collectables.push_back(tempGhost);
+						bt_manager->addGhostToWorld(tempGhost, COL_COLLECTABLE, COL_PLAYER);	
+					}
+					else
+						bodies.insert(std::pair<string, btRigidBody*>(key, bt_manager->addBox(boundingScale.x, boundingScale.y, boundingScale.z, position.x, position.y, position.z, mass)));
 					models.insert(std::pair<string, std::tuple<string, glm::vec3, glm::vec3, glm::vec3>>(key, std::make_tuple(modelName, modelScale, modelRotation, offset)));
-					cout << "Box Added\n";
+					//cout << "Box Added\n";
 				}
 				else if (key.find("sphere") != std::string::npos) {
 					bodies.insert(std::pair<string, btRigidBody*>(key, bt_manager->addSphere(radius, position.x, position.y, position.z, mass)));
 					models.insert(std::pair<string, std::tuple<string, glm::vec3, glm::vec3, glm::vec3>>(key, std::make_tuple(modelName, modelScale, glm::vec3(0., 0., 0.), offset)));
-					cout << "Sphere Added\n";
+					//cout << "Sphere Added\n";
 				}
 				else if (key.find("capsule") != std::string::npos) {
 					bodies.insert(std::pair<string, btRigidBody*>(key, bt_manager->addCapsule(radius, height, position.x, position.y, position.z, mass)));
 					models.insert(std::pair<string, std::tuple<string, glm::vec3, glm::vec3, glm::vec3>>(key, std::make_tuple(modelName, modelScale, modelRotation, offset)));
-					cout << "Sphere Added\n";
+					//cout << "Sphere Added\n";
 				}
 
 			}//while loop
@@ -598,7 +612,7 @@ namespace SceneManager {
 
 		playerBody = new btRigidBody(info);
 		playerBody->setAngularFactor(0); // Doesn't fall sideways
-		int playerCollidesWith = COL_DEFAULT | COL_ENEMY;
+		int playerCollidesWith = COL_DEFAULT | COL_ENEMY | COL_COLLECTABLE;
 		// body, group, mask
 		bt_manager->addToWorld(playerBody, COL_PLAYER, playerCollidesWith);
 		playerBody->setActivationState(DISABLE_DEACTIVATION);
@@ -614,7 +628,7 @@ namespace SceneManager {
 
 	}
 
-	void findCollision(btPairCachingGhostObject* ghostObject) { // ignore player?
+	bool findCollision(btPairCachingGhostObject* ghostObject) { // ignore player?
 		btManifoldArray manifoldArray;
 		btBroadphasePairArray& pairArray =
 			ghostObject->getOverlappingPairCache()->getOverlappingPairArray();
@@ -639,12 +653,14 @@ namespace SceneManager {
 						const btVector3& normalOnB = pt.m_normalWorldOnB;
 						// <START>  handle collisions here
 				//		cout << "Player colliding with something while jumping." << endl;
-						player->setState(ON_GROUND);
+						return true;
+						//player->setState(ON_GROUND);
 						//  <END>   handle collisions here
 					}
 				}
 			}
 		}
+		return false;
 	}
 
 	void init(void) {
@@ -658,8 +674,8 @@ namespace SceneManager {
 		bt_manager = new btShapeManager();
 		projectile_manager = new Projectile(bt_manager);
 		//!!
-		s_manager = new SoundManager();
-		//s_manager->loadSample("Sounds/wilhelm.wav");
+		sound_manager = new SoundManager();
+		//sound_manager->loadSample("Sounds/wilhelm.wav");
 
 		initmodelTypes();
 
@@ -803,7 +819,7 @@ namespace SceneManager {
 						//TODO: change offset
 						projectile_manager->addProjectile(shiftRight(moveForward(glm::vec3(player->getPosition().x, player->getPosition().y - 0.35, player->getPosition().z), 
 							rotationAngles, 1.0f),rotationAngles, 0.5), PROJ_SPEED, (rotationAngles.y*DEG_TO_RADIAN), rotationAngles.x); //!++!
-						//s_manager->playSound(s_manager->getSound(2), 2, 1);
+						//sound_manager->playSound(sound_manager->getSound(2), 2, 1);
 						//TODO: Enable sound
 						//cout << rotationAngles.x << "\n";
 																																						  //		Projectile* bullet = new Projectile(bt_manager, glm::vec3(0, 0, 0), 1);
@@ -1164,7 +1180,7 @@ namespace SceneManager {
 	}
 
 
-	void renderObject(glm::mat4 proj, Model *modelData, glm::vec3 pos, glm::vec3 scale, btQuaternion& rotation, GLuint shader, GLuint texture) {
+	void renderObject(glm::mat4 proj, Model *modelData, glm::vec3 pos, glm::vec3 scale, btQuaternion& rotation, GLuint shader, GLuint texture, bool spin) {
 
 		glm::mat4 model;
 		model = glm::translate(model, pos);
@@ -1176,6 +1192,8 @@ namespace SceneManager {
 		model = glm::rotate(model, eulerRotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
 		model = glm::rotate(model, eulerRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::rotate(model, eulerRotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+		if (spin)
+			model = glm::rotate(model, theta, glm::vec3(0.0, 1.0, 0.0));
 		model = glm::scale(model, scale);	// It's a bit too big for our scene, so scale it down
 		//model = glm::scale(model, glm::vec3(0.05f, 0.05f, 0.05f));	// for gun]
 		glActiveTexture(GL_TEXTURE0);
@@ -1252,17 +1270,23 @@ namespace SceneManager {
 
 	void update(SDL_Window * window, SDL_Event sdlEvent) {
 		controls(window, sdlEvent);
-
 		dt_secs = gameTime();
-		//cout << dt_secs;
 		coolDown -= dt_secs;
-
-		// 18/01
 		updatePlayer(dt_secs);
-
-		bt_manager->update();
+		theta += 0.1;
 		if (player->getState() == JUMPING)
-			findCollision(ghostObject);
+			if(findCollision(ghostObject))
+				player->setState(ON_GROUND);
+
+		for (const auto it : collectables)
+			if (findCollision(it)) {
+				//cout << "LEEEE" << endl;
+				//Delete;
+				//add something (hp / armor)
+				//remove from world
+			}
+		bt_manager->update();
+
 
 		//world->stepSimulation(1/60.0); // 1 divided by frames per second
 		// would need to delete dispatcher, collisionconfig, solver, world, broadphase in main
@@ -1371,10 +1395,10 @@ namespace SceneManager {
 				//cout << modelTypes[get<0>(models[id_pair.first])] << endl;
 				//cout << models[id_pair.first] << endl;
 
-				if (modelTypes[get<0>(models[id_pair.first])] == modelTypes["heart"])
-					renderObject(projection, modelTypes[get<0>(models[id_pair.first])], position, get<1>(models[id_pair.first]), rotation, shader, heartTexture);
+				if (modelTypes[get<0>(models[id_pair.first])] == modelTypes["heart"] || modelTypes[get<0>(models[id_pair.first])] == modelTypes["shield"])
+					renderObject(projection, modelTypes[get<0>(models[id_pair.first])], position, get<1>(models[id_pair.first]), rotation, shader, heartTexture, true);
 				else
-					renderObject(projection, modelTypes[get<0>(models[id_pair.first])], position, get<1>(models[id_pair.first]), rotation, shader, groundTexture);
+					renderObject(projection, modelTypes[get<0>(models[id_pair.first])], position, get<1>(models[id_pair.first]), rotation, shader, groundTexture, false);
 			}
 
 			if (id_pair.second->getCollisionShape()->getShapeType() == SPHERE_SHAPE_PROXYTYPE) {
@@ -1383,7 +1407,7 @@ namespace SceneManager {
 				bt_manager->renderSphere(bodies[id_pair.first], view, projection, modelTypes["sphere"], shader, defaultTexture);
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 				glEnable(GL_CULL_FACE);*/
-				renderObject(projection, modelTypes[get<0>(models[id_pair.first])], spherePosition, get<1>(models[id_pair.first]), rotation, shader, defaultTexture);
+				renderObject(projection, modelTypes[get<0>(models[id_pair.first])], spherePosition, get<1>(models[id_pair.first]), rotation, shader, defaultTexture, false);
 			}
 
 			if (id_pair.second->getCollisionShape()->getShapeType() == CAPSULE_SHAPE_PROXYTYPE) {
@@ -1392,7 +1416,7 @@ namespace SceneManager {
 				bt_manager->renderCapsule(bodies[id_pair.first], view, projection, modelTypes["capsule"], shader, defaultTexture);
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 				glEnable(GL_CULL_FACE);*/
-				renderObject(projection, modelTypes[get<0>(models[id_pair.first])], spherePosition, get<1>(models[id_pair.first]), rotation, shader, defaultTexture);
+				renderObject(projection, modelTypes[get<0>(models[id_pair.first])], spherePosition, get<1>(models[id_pair.first]), rotation, shader, defaultTexture, false);
 			}
 			//	i++;
 		}

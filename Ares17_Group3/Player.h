@@ -10,51 +10,33 @@
 
 #define INVINC_TIME 0.5f
 
+#define SPEED_CAP_XZ 8.0
+#define FRICTION 6.0
+#define SPEED_CAP_Y 3.0
+
 enum playerState { ON_GROUND, JUMPING };
 
 class Player {
 public:
 	Player(glm::vec3 _eye);
-
-	void update(float dt) {
-		if (this->invincible)
-		{
-			invincibility_f -= dt;
-			if (invincibility_f <= 0) {
-				invincibility_f = INVINC_TIME;
-				this->invincible = false;
-	//			std::cout << "NOT ANYMORE" << std::endl;
-			}
-		}
-	}
-
+	void update(float dt);
 	void setPosition(glm::vec3 newEye);
 	glm::vec3 getPosition();
 	playerState getState();
 	void setState(playerState newState);
-
-	double getHealth() { return this->health; }
-	double getArmor() { return this->armor; }
-	void setHealth(double hp) { this->health = hp; }
-	void setArmor(double arm) { this->armor = arm; }
-	void takeDamage(double damage) {
-		if (!this->invincible)
-		{
-			this->invincible = true;
-	//		std::cout << "NO DAMGIO" << std::endl;
-			if (this->armor > 0)
-				this->armor -= (damage / 2);
-			else
-				this->health -= damage;
-		//	std::cout << "Took a hit! Hp now: " << this->health << std::endl;
-		}
-		
-	}
+	double getHealth();
+	double getArmor();
+	double getSpeed();
+	void setHealth(double hp);
+	void setArmor(double arm);
+	void takeDamage(double damage);
+	void setSpeed(double sp);
 protected:
 
 private:
 	glm::vec3 eye;
 	playerState currentState;
+	double speed;
 	double health;
 	double armor;
 	bool invincible;

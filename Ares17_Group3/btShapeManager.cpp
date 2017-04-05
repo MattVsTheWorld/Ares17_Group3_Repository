@@ -34,6 +34,28 @@ btRigidBody* btShapeManager::addBox(float width, float height, float depth, floa
 	return body;
 }
 
+btRigidBody* btShapeManager::addBox(float width, float height, float depth, float x, float y, float z, float mass, collisiontype group, collisiontype mask)
+{
+	btTransform t;
+	t.setIdentity();
+	t.setOrigin(btVector3(x, y, z));
+	btBoxShape* box = new btBoxShape(btVector3(width, height, depth));
+
+	btVector3 inertia(0, 0, 0);
+	if (mass != 0.0)
+		box->calculateLocalInertia(mass, inertia);
+	btMotionState* motion = new btDefaultMotionState(t);
+
+	btRigidBody::btRigidBodyConstructionInfo info(mass, motion, box, inertia);
+
+	btRigidBody* body = new btRigidBody(info);
+	btSettings.world->addRigidBody(body, group, mask);
+	//bodies.push_back(body);
+
+	return body;
+}
+
+
 btRigidBody* btShapeManager::addSphere(float rad, float x, float y, float z, float mass)
 {
 	btTransform t;
