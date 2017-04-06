@@ -83,6 +83,9 @@ namespace SceneManager {
 	// TEST
 	btRigidBody* playerBody;
 	Model* animated;
+	Model* animated2;
+
+	int run = 0;
 	//	
 	GLuint defaultTexture;
 	GLuint groundTexture;
@@ -592,13 +595,18 @@ namespace SceneManager {
 	void initmodelTypes() {
 		//TODO:Player model for death or something
 		//Enemies
-	//	modelTypes.insert(std::pair<string, Model*>("robot", new Model("Models/Robot/Roboto.obj")));
-		//modelTypes.insert(std::pair<string, Model*>("dying", new Model("Models/Robot/dying.dae")));
-	//	modelTypes.insert(std::pair<string, Model*>("dying", new Model("Models/Enemies/Dying/dying.dae")));
+		modelTypes.insert(std::pair<string, Model*>("enforcerAttack", new Model("Models/Enemies/Enforcer/Attack/standing_melee_attack_downward.dae")));
+		modelTypes.insert(std::pair<string, Model*>("enforcerRun", new Model("Models/Enemies/Enforcer/Run/running.dae")));
+		modelTypes.insert(std::pair<string, Model*>("enforcerDie", new Model("Models/Enemies/Enforcer/Die/falling_back_death.dae")));
+
+		modelTypes.insert(std::pair<string, Model*>("assaultAttack", new Model("Models/Enemies/Assault/Attack/running.dae")));
+		modelTypes.insert(std::pair<string, Model*>("assaultRun", new Model("Models/Enemies/Assault/Run/running.dae")));
+		modelTypes.insert(std::pair<string, Model*>("assaultDie", new Model("Models/Enemies/Assault/Die/falling_back_death.dae")));
+
 		//Environment
-		modelTypes.insert(std::pair<string, Model*>("cube", new Model("Models/Environment/cube.obj")));
+		modelTypes.insert(std::pair<string, Model*>("cube", new Model("Models/environment/cube.obj")));
 		//modelTypes.insert(std::pair<string, Model*>("box", modelTypes["cube"]));
-		modelTypes.insert(std::pair<string, Model*>("sphere", new Model("models/environment/sphere.obj")));
+		modelTypes.insert(std::pair<string, Model*>("sphere", new Model("Models/Environment/sphere.obj")));
 		//modelTypes.insert(std::pair<string, Model*>("capsule", modelTypes["sphere"]));
 		//modelTypes.insert(std::pair<string, Model*>("car", new Model("models/environment/car/model.obj")));
 		//modelTypes.insert(std::pair<string, Model*>("house", new Model("models/environment/house/houselow.obj")));
@@ -606,6 +614,7 @@ namespace SceneManager {
 		//modelTypes.insert(std::pair<string, Model*>("oiltank", new Model("models/environment/oiltank/oiltank.obj")));
 		//modelTypes.insert(std::pair<string, Model*>("rock", new Model("models/environment/rock/model.obj")));
 		//modelTypes.insert(std::pair<string, Model*>("barrier", new Model("models/environment/barrier/model.obj")));
+		
 		////collectable
 		//modelTypes.insert(std::pair<string, Model*>("heart", new Model("models/collectable/heart/heart.obj")));
 		//modelTypes.insert(std::pair<string, Model*>("potion", new Model("models/collectable/potion/pocion lowpoly.obj")));
@@ -616,13 +625,6 @@ namespace SceneManager {
 		//modelTypes.insert(std::pair<string, Model*>("rifle", new Model("models/guns/rifle/gun_rifle_lo.obj")));
 		//modelTypes.insert(std::pair<string, Model*>("scifipistol", new Model("models/guns/scifipistol/ceeb75e9f4e34b6191d92c38a470453d.obj")));
 		//modelTypes.insert(std::pair<string, Model*>("nukacola", new Model("models/guns/nukacola/nukacolagun.obj")));
-
-		//for (unsigned int i = 0; i < sizeof(m_boneLocation)/sizeof(m_boneLocation); i++) {
-		//	char Name[128];
-		//	memset(Name, 0, sizeof(Name));
-		////	SNPRINTF(Name, sizeof(Name), "gBones[%d]", i);
-		//	m_boneLocation[i] = glGetUniformLocation(Name);
-		//}
 	}
 
 	void insertBounding(glm::vec3 boundingPos, glm::vec3 modelScale, glm::vec3 boundingScale, glm::vec3 modelRotation, glm::vec3 boundingRotation, float mass) {
@@ -742,7 +744,6 @@ namespace SceneManager {
 		//s_manager->loadSample("Sounds/wilhelm.wav");
 
 		initmodelTypes();
-		animated = new Model("Models/Enemies/Dying/dying.dae");
 
 		//makes locations for gBones[1] e.t.c.
 		for (unsigned int i = 0; i < (sizeof(m_boneLocation)/sizeof(m_boneLocation[0])); i++) {
@@ -758,7 +759,6 @@ namespace SceneManager {
 		//	snprintf(Name, 128, "gBones[%d]", i);
 		//	m_boneLocation[i] = glGetUniformLocation(modelProgram, Name);
 		//}
-
 
 		defaultTexture = loadBitmap::loadBitmap("wall.bmp");
 		groundTexture = loadBitmap::loadBitmap("terrain.bmp");
@@ -925,6 +925,16 @@ namespace SceneManager {
 			else if (keys[SDL_SCANCODE_D]) {
 				//player->setPosition(moveRight(player->getPosition(), rotationAngles.y, 0.1f));
 				playerBody->setLinearVelocity(speedRight(increase, rotationAngles.y, (keys[SDL_SCANCODE_W] == SDL_PRESSED || keys[SDL_SCANCODE_S] == SDL_PRESSED)));
+			}
+
+			if (keys[SDL_SCANCODE_C]) {
+				run = 0;
+			}
+			if (keys[SDL_SCANCODE_V]) {
+				run = 1;
+			}
+			if (keys[SDL_SCANCODE_B]) {
+				run = 2;
 			}
 
 			if (keys[SDL_SCANCODE_SPACE]) {
@@ -1261,10 +1271,10 @@ namespace SceneManager {
 	}
 
 
-	void SetBoneTransform(GLuint Index, const glm::mat4& Transform)
+	void SetBoneTransform(GLuint Index, const Matrix4f& Transform)
 	{
 		assert(Index < MAX_BONES);
-		glUniformMatrix4fv(m_boneLocation[Index], 1, GL_TRUE, (const GLfloat*)glm::value_ptr(Transform));
+		glUniformMatrix4fv(m_boneLocation[Index], 1, GL_TRUE, (const GLfloat*)Transform);
 	}
 
 
@@ -1296,30 +1306,30 @@ namespace SceneManager {
 
 		glm::mat4 model;
 		model = glm::translate(model, pos);
-		//model = glm::rotate(model, float(-rotationAngles.y*DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
-		//model = glm::rotate(model, float(180 * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
-		//model = glm::rotate(model, float(rotation.y * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
-		/*glm::vec3 eulerRotation;
-		toEulerianAngle(rotation, eulerRotation);
-		model = glm::rotate(model, eulerRotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
-		model = glm::rotate(model, eulerRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
-		model = glm::rotate(model, eulerRotation.z, glm:l:vec3(0.0f, 0.0f, 1.0f));*/
 		model = glm::scale(model, scale);	// It's a bit too big for our scene, so scale it down
-											//model = glm::scale(model, glm::vec3(0.05f, 0.05f, 0.05f));	// for gun]
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texture);
 		glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
-
 		glUniform1i(glGetUniformLocation(shader, "animated"), 1); //one means there is animations
-
-		vector<glm::mat4> Transforms;
+		
+		vector<Matrix4f> Transforms;
 		RunningTime += gameTime();
-		animated->BoneTransform(RunningTime, Transforms);
+		Model* temp = modelTypes["assaultRun"];
+		if (run == 0) {
+			temp = modelTypes["assaultRun"];
+		}
+		else if (run == 1){
+			temp = modelTypes["assaultDie"];
+		}
+		/*else if (run == 2) {
+			temp = modelTypes["enforcerDie"];
+		}*/
+		temp->BoneTransform(RunningTime, Transforms);
 		for (GLuint i = 0; i < Transforms.size(); i++) {
 			SetBoneTransform(i, Transforms[i]);			
 		}
 
-		animated->Draw(shader);
+		temp->Draw(shader);
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
@@ -1540,7 +1550,8 @@ namespace SceneManager {
 		}
 		///+++++++++++++++
 		// RENDERING modelTypes
-		renderAnimatedObject(projection, glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.02, 0.02, 0.02), shader, groundTexture);
+
+		renderAnimatedObject(projection, glm::vec3(0.0, 0.0, 0.0), glm::vec3(1.0, 1.0, 1.0), shader, groundTexture);
 
 		//if (pointOfView == THIRD_PERSON)
 		//	renderObject(projection, modelTypes["nanosuit"], glm::vec3(player->getPosition().x, player->getPosition().y - 1.75, player->getPosition().z), glm::vec3(0.2, 0.2, 0.2), glm::vec3(0.0, -yaw, 0.0), shader, 0);

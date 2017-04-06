@@ -10,10 +10,81 @@ using namespace std;
 // GL Includes
 #include <GL/glew.h> // Contains all the necessery OpenGL includes
 #include <glm/glm.hpp>
+#include <glm/gtx/quaternion.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include "Mesh.h"
 
 #define NUM_BONES_PER_VERTEX 4
+
+class Matrix4f
+{
+public:
+	float m[4][4];
+
+	Matrix4f()
+	{
+	}
+
+	// constructor from Assimp matrix
+	Matrix4f(const aiMatrix4x4& AssimpMatrix)
+	{
+		m[0][0] = AssimpMatrix.a1; m[0][1] = AssimpMatrix.a2; m[0][2] = AssimpMatrix.a3; m[0][3] = AssimpMatrix.a4;
+		m[1][0] = AssimpMatrix.b1; m[1][1] = AssimpMatrix.b2; m[1][2] = AssimpMatrix.b3; m[1][3] = AssimpMatrix.b4;
+		m[2][0] = AssimpMatrix.c1; m[2][1] = AssimpMatrix.c2; m[2][2] = AssimpMatrix.c3; m[2][3] = AssimpMatrix.c4;
+		m[3][0] = AssimpMatrix.d1; m[3][1] = AssimpMatrix.d2; m[3][2] = AssimpMatrix.d3; m[3][3] = AssimpMatrix.d4;
+	}
+
+	Matrix4f(const aiMatrix3x3& AssimpMatrix)
+	{
+		m[0][0] = AssimpMatrix.a1; m[0][1] = AssimpMatrix.a2; m[0][2] = AssimpMatrix.a3; m[0][3] = 0.0f;
+		m[1][0] = AssimpMatrix.b1; m[1][1] = AssimpMatrix.b2; m[1][2] = AssimpMatrix.b3; m[1][3] = 0.0f;
+		m[2][0] = AssimpMatrix.c1; m[2][1] = AssimpMatrix.c2; m[2][2] = AssimpMatrix.c3; m[2][3] = 0.0f;
+		m[3][0] = 0.0f; m[3][1] = 0.0f; m[3][2] = 0.0f; m[3][3] = 1.0f;
+	}
+
+	inline void InitIdentity()
+	{
+		m[0][0] = 1.0f; m[0][1] = 0.0f; m[0][2] = 0.0f; m[0][3] = 0.0f;
+		m[1][0] = 0.0f; m[1][1] = 1.0f; m[1][2] = 0.0f; m[1][3] = 0.0f;
+		m[2][0] = 0.0f; m[2][1] = 0.0f; m[2][2] = 1.0f; m[2][3] = 0.0f;
+		m[3][0] = 0.0f; m[3][1] = 0.0f; m[3][2] = 0.0f; m[3][3] = 1.0f;
+	}
+
+	inline Matrix4f operator*(const Matrix4f& Right) const
+	{
+		Matrix4f Ret;
+
+		for (unsigned int i = 0; i < 4; i++) {
+			for (unsigned int j = 0; j < 4; j++) {
+				Ret.m[i][j] = m[i][0] * Right.m[0][j] +
+					m[i][1] * Right.m[1][j] +
+					m[i][2] * Right.m[2][j] +
+					m[i][3] * Right.m[3][j];
+			}
+		}
+
+		return Ret;
+	}
+
+	operator const float*() const
+	{
+		return &(m[0][0]);
+	}
+
+	void InitScaleTransform(float ScaleX, float ScaleY, float ScaleZ) {
+		m[0][0] = ScaleX; m[0][1] = 0.0f;   m[0][2] = 0.0f;   m[0][3] = 0.0f;
+		m[1][0] = 0.0f;   m[1][1] = ScaleY; m[1][2] = 0.0f;   m[1][3] = 0.0f;
+		m[2][0] = 0.0f;   m[2][1] = 0.0f;   m[2][2] = ScaleZ; m[2][3] = 0.0f;
+		m[3][0] = 0.0f;   m[3][1] = 0.0f;   m[3][2] = 0.0f;   m[3][3] = 1.0f;
+	}
+	void InitTranslationTransform(float x, float y, float z) {
+		m[0][0] = 1.0f; m[0][1] = 0.0f; m[0][2] = 0.0f; m[0][3] = x;
+		m[1][0] = 0.0f; m[1][1] = 1.0f; m[1][2] = 0.0f; m[1][3] = y;
+		m[2][0] = 0.0f; m[2][1] = 0.0f; m[2][2] = 1.0f; m[2][3] = z;
+		m[3][0] = 0.0f; m[3][1] = 0.0f; m[3][2] = 0.0f; m[3][3] = 1.0f;
+	}
+};
+
 class Model
 {
 public:
@@ -31,69 +102,31 @@ public:
 	GLuint FindRotation(float AnimationTime, const aiNodeAnim* pNodeAnim);
 	GLuint FindPosition(float AnimationTime, const aiNodeAnim* pNodeAnim);
 	const aiNodeAnim* FindNodeAnim(const aiAnimation* pAnimation, const string NodeName);
-	void ReadNodeHeirarchy(float AnimationTime, const aiNode* pNode, const glm::mat4& ParentTransform);
+	void ReadNodeHeirarchy(float AnimationTime, const aiNode* pNode, const Matrix4f& ParentTransform);
 
-	void BoneTransform(float TimeInSeconds, vector<glm::mat4>& Transforms);
+	void BoneTransform(float TimeInSeconds, vector<Matrix4f>& Transforms);
 
 	struct BoneInfo
 	{
-		glm::mat4 BoneOffset;
-		glm::mat4 FinalTransformation;
+		Matrix4f BoneOffset;
+		Matrix4f FinalTransformation;
 
 		BoneInfo()
 		{
 			//initialise everything to zero
-			//or is it:
-			BoneOffset[0][0] = 1.0f; BoneOffset[0][1] = 0.0f; BoneOffset[0][2] = 0.0f; BoneOffset[0][3] = 0.0f;
-			BoneOffset[1][0] = 0.0f; BoneOffset[1][1] = 1.0f; BoneOffset[1][2] = 0.0f; BoneOffset[1][3] = 0.0f;
-			BoneOffset[2][0] = 0.0f; BoneOffset[2][1] = 0.0f; BoneOffset[2][2] = 1.0f; BoneOffset[2][3] = 0.0f;
-			BoneOffset[3][0] = 0.0f; BoneOffset[3][1] = 0.0f; BoneOffset[3][2] = 0.0f; BoneOffset[3][3] = 1.0f;
-
-			FinalTransformation[0][0] = 1.0f; FinalTransformation[0][1] = 0.0f; FinalTransformation[0][2] = 0.0f; FinalTransformation[0][3] = 0.0f;
-			FinalTransformation[1][0] = 0.0f; FinalTransformation[1][1] = 1.0f; FinalTransformation[1][2] = 0.0f; FinalTransformation[1][3] = 0.0f;
-			FinalTransformation[2][0] = 0.0f; FinalTransformation[2][1] = 0.0f; FinalTransformation[2][2] = 1.0f; FinalTransformation[2][3] = 0.0f;
-			FinalTransformation[3][0] = 0.0f; FinalTransformation[3][1] = 0.0f; FinalTransformation[3][2] = 0.0f; FinalTransformation[3][3] = 1.0f;
-			
-			//for (int x = 0; x < NUM_BONES_PER_VERTEX; x++) {
-			//	for (int y = 0; y < NUM_BONES_PER_VERTEX; y++) {
-			//		BoneOffset[x][y] = 0.0f;
-			//		FinalTransformation[x][y] = 0.0f;
-
-			//	}
-			//}
+			for (int x = 0; x < NUM_BONES_PER_VERTEX; x++) {
+				for (int y = 0; y < NUM_BONES_PER_VERTEX; y++) {
+					BoneOffset.m[x][y] = 0.0f;
+					FinalTransformation.m[x][y] = 0.0f;
+				}
+			}
 		}
 	};
-
-	static glm::mat4 AiToGLMMat4(aiMatrix4x4 in_mat)
-	{
-		glm::mat4 tmp;
-		tmp[0][0] = in_mat.a1;
-		tmp[1][0] = in_mat.b1;
-		tmp[2][0] = in_mat.c1;
-		tmp[3][0] = in_mat.d1;
-
-		tmp[0][1] = in_mat.a2;
-		tmp[1][1] = in_mat.b2;
-		tmp[2][1] = in_mat.c2;
-		tmp[3][1] = in_mat.d2;
-
-		tmp[0][2] = in_mat.a3;
-		tmp[1][2] = in_mat.b3;
-		tmp[2][2] = in_mat.c3;
-		tmp[3][2] = in_mat.d3;
-
-		tmp[0][3] = in_mat.a4;
-		tmp[1][3] = in_mat.b4;
-		tmp[2][3] = in_mat.c4;
-		tmp[3][3] = in_mat.d4;
-		return tmp;
-	}
 
 	GLuint NumBones() const
 	{
 		return m_NumBones;
 	}
-	//	void Clear();
 
 private:
 	
@@ -115,18 +148,14 @@ private:
 	GLuint m_NumBones;
 	vector<BoneInfo> m_BoneInfo;
 
-	vector<MeshEntry> m_Entry;
-	glm::mat4 m_GlobalInverseTransform;
+	vector<MeshEntry> m_Entries;
+	Matrix4f m_GlobalInverseTransform;
+	std::map<string, aiNodeAnim*> nodeAnims;
 	
 	/*  Model Data  */
 	Assimp::Importer importer;
 	const aiScene* scene;
 	vector<Mesh> meshes;
-
-	//std::vector<aiNode*> ai_nodes;
-	//std::map<const aiNode*, std::pair<string, glm::mat4>> ai_nodes_names;
-	//std::vector<aiNodeAnim*> ai_nodes_anim;
-	//vector<Animations*> animations;
 
 	string directory;
 	vector<Texture> textures_loaded;	// Stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.

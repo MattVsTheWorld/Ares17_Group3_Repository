@@ -1,3 +1,4 @@
 BoundingName | ModelName | Positions | BoundingScale | ModelScale | Model Rotation | Bounding Rotation | Offset | Mass 	//numberOfBodies on first line
 2#
 box0,cube,0,0,0,50,0.075,50,50,0.1,50,0,0,0,0,0,0,1.49012e-08,0,0,0,
+box1,cube,-3.05048,1.54488,-32.6176,0.2,0.2,0.2,0.02,0.02,0.02,0,0,0,0,0,0,0,0,0,0,

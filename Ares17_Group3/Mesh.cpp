@@ -37,11 +37,10 @@ void Mesh::Draw(GLuint shader)
 	// Also set each mesh's shininess property to a default value (if you want you could extend this to another mesh property and possibly change this value)
 	glUniform1f(glGetUniformLocation(shader, "material.shininess"), 16.0f);
 	
-	// Draw mesh
+	//// Draw mesh
 	glBindVertexArray(this->VAO);
-	glDrawElements(GL_TRIANGLES, this->indices.size(), GL_UNSIGNED_INT, 0);
 
-	//glDrawElementsBaseVertex(GL_TRIANGLES, m_Entry[i].NumIndices,	GL_UNSIGNED_INT, (void*)(sizeof(GLuint) * m_Entry[i].BaseIndex),	m_Entry[i].BaseVertex);
+	glDrawElements(GL_TRIANGLES, this->indices.size(), GL_UNSIGNED_INT, 0);
 
 	// Make sure the VAO is not changed from the outside    
 	glBindVertexArray(0);
