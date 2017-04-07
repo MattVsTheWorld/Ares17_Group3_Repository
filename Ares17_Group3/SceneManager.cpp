@@ -9,7 +9,7 @@ namespace SceneManager {
 
 	Player *player;
 	PointLight mainLight{
-		glm::vec3(0.0f, 20.0f, 0.0f),
+		glm::vec3(0.0f, 25.0f, 0.0f),
 
 		ATTENUATION_CONST, ATTENUATION_LINEAR, ATTENUATION_QUAD,
 
@@ -1322,10 +1322,7 @@ namespace SceneManager {
 		glm::mat4 model;
 		model = glm::translate(model, pos);
 		model = glm::scale(model, scale);	// It's a bit too big for our scene, so scale it down
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, texture);
-		glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
-		glUniform1i(glGetUniformLocation(shader, "animated"), 1); //one means there is animations
+
 		
 		vector<Matrix4f> Transforms;
 		RunningTime += gameTime();
@@ -1347,6 +1344,11 @@ namespace SceneManager {
 		for (GLuint i = 0; i < Transforms.size(); i++) {
 			SetBoneTransform(i, Transforms[i]);			
 		}
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		glUniform1i(glGetUniformLocation(shader, "animated"), 1); //one means there is animations
 
 		temp->Draw(shader);
 		glBindTexture(GL_TEXTURE_2D, 0);
@@ -1582,7 +1584,6 @@ namespace SceneManager {
 		///+++++++++++++++
 		// RENDERING modelTypes
 
-		renderAnimatedObject(projection, glm::vec3(0.0, 0.0, 0.0), glm::vec3(1.0, 1.0, 1.0), shader, groundTexture);
 
 
 		//	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -1612,6 +1613,8 @@ namespace SceneManager {
 
 		//!++!
 		projectile_manager->renderProjectiles(view, projection, modelTypes["sphere"], shader, defaultTexture, dt_secs);
+
+		renderAnimatedObject(projection, glm::vec3(0.0, 0.0, 0.0), glm::vec3(1.0, 1.0, 1.0), shader, groundTexture);
 	}
 
 	// main render function, sets up the shaders and then calls all other functions

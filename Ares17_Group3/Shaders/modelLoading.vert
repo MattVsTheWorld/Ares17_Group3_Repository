@@ -30,9 +30,9 @@ void main()
 		BoneTransform     += gBones[boneIDs[3]] * weights[3];
 		//we = weights;	//to show wieghts
 
-		vec4 PosL    = BoneTransform * vec4(position, 1.0);
+		vec4 PosL    = BoneTransform * vec4(position, 1.0f);
 		gl_Position = projection * view * model * PosL;
-		vs_out.Normal = (transpose(inverse(mat4(model))) * (BoneTransform * vec4(normal, 0.0))).xyz;
+		vs_out.Normal = (transpose(inverse(mat3(model))) * (mat3(BoneTransform) * vec3(normal)).xyz).xyz;
 		vs_out.FragPos = vec3(model * PosL);
 	}
 	else {
