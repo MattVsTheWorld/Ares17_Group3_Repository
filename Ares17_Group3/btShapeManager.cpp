@@ -109,6 +109,7 @@ void btShapeManager::renderSphere(btRigidBody* sphere, glm::mat4 view, glm::mat4
 	glBindTexture(GL_TEXTURE_2D, texture);
 
 	model = glm::scale(model, glm::vec3(r, r, r));
+	glUniform1i(glGetUniformLocation(shader, "animated"), 0); //zero is no animations
 	glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
 	modelData->Draw(shader);
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -131,6 +132,7 @@ void btShapeManager::renderCapsule(btRigidBody* capsule, glm::mat4 view, glm::ma
 	glBindTexture(GL_TEXTURE_2D, texture);
 
 	model = glm::scale(model, glm::vec3(r, h, r));
+	glUniform1i(glGetUniformLocation(shader, "animated"), 0); //zero is no animations
 	glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
 	modelData->Draw(shader);
 
@@ -153,6 +155,7 @@ void btShapeManager::renderBox(btRigidBody* box, glm::mat4 view, glm::mat4 proj,
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture);
 
+	glUniform1i(glGetUniformLocation(shader, "animated"), 0); //zero is no animations
 	glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
 	modelData->Draw(shader);
 

@@ -40,6 +40,5 @@ void main()
 		vs_out.FragPos = vec3(model * vec4(position, 1.0));
 		vs_out.Normal = transpose(inverse(mat3(model))) * normal;
 	}
-	anim = animated;
 	vs_out.TexCoords = texCoords;
 }

@@ -1387,6 +1387,7 @@ namespace SceneManager {
 		//TODO: I can't fix this. If you want, give it a try. good luck.
 		glUniformMatrix4fv(glGetUniformLocation(shader, "projection"), 1, GL_FALSE, glm::value_ptr(glm::mat4()));
 		glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		glUniform1i(glGetUniformLocation(shader, "animated"), 0); //zero is no animations
 		modelData->Draw(shader);
 		glEnable(GL_CULL_FACE);
 
@@ -1581,7 +1582,7 @@ namespace SceneManager {
 		///+++++++++++++++
 		// RENDERING modelTypes
 
-		//renderAnimatedObject(projection, glm::vec3(0.0, 0.0, 0.0), glm::vec3(1.0, 1.0, 1.0), shader, groundTexture);
+		renderAnimatedObject(projection, glm::vec3(0.0, 0.0, 0.0), glm::vec3(1.0, 1.0, 1.0), shader, groundTexture);
 
 
 		//	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);

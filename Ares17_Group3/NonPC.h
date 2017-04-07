@@ -242,6 +242,7 @@ public:
 											//model = glm::scale(model, glm::vec3(0.05f, 0.05f, 0.05f));	// for gun]
 	//	glActiveTexture(GL_TEXTURE0);
 	//	glBindTexture(GL_TEXTURE_2D, texture);
+		glUniform1i(glGetUniformLocation(shader, "animated"), 0); //zero is no animations
 		glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
 		modelData->Draw(shader);
 
