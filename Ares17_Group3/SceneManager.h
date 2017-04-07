@@ -50,7 +50,7 @@ struct PointLight {
 };
 
 enum gameState {
-	RUNNING, PAUSE
+	RUNNING, PAUSE, MENU
 };
 namespace SceneManager {
 

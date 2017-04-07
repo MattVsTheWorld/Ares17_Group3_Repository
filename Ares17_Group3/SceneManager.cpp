@@ -29,7 +29,7 @@ namespace SceneManager {
 	Projectile *projectile_manager; // !++!
 	SoundManager *sound_manager; // ++!
 
-	gameState currentState = RUNNING;
+	gameState currentState = PAUSE;
 	float pauseTimeout = 1.0f;
 	bool clickable = true;
 
@@ -797,7 +797,7 @@ namespace SceneManager {
 			glRotatef(-rotationAngles.y, 0.0, 1.0, 0.0);
 
 			SDL_WarpMouseInWindow(window, MidX, MidY);
-		} else if (currentState == PAUSE)
+		} else if (currentState == PAUSE || currentState == MENU)
 			SDL_ShowCursor(SDL_ENABLE);
 
 		//MOUSECLICK
@@ -815,14 +815,15 @@ namespace SceneManager {
 
 		if (keys[SDL_SCANCODE_P] && clickable)
 		{
-			cout << "LUL";
 			clickable = false;
+			// Pause
 			if (currentState == RUNNING) {
 				for (const auto it : enemies)
 					it->setState(PAUSED);
 				currentState = PAUSE;
 			}
-			else if (currentState = PAUSE) {
+			// Unpause
+			else if (currentState == PAUSE) {
 				for (const auto it : enemies)
 					it->setState(IDLE);
 				currentState = RUNNING;
@@ -1197,19 +1198,30 @@ namespace SceneManager {
 		//	else pointOfView = FIRST_PERSON;
 		//}
 
-		if (keys[SDL_SCANCODE_1]) {
-			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-			glDisable(GL_CULL_FACE);
-		}
-		if (keys[SDL_SCANCODE_2]) {
-			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-			glEnable(GL_CULL_FACE);
-		}
+		//if (keys[SDL_SCANCODE_1]) {
+		//	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		//	glDisable(GL_CULL_FACE);
+		//}
+		//if (keys[SDL_SCANCODE_2]) {
+		//	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		//	glEnable(GL_CULL_FACE);
+		//}
 
 		//	if (keys[SDL_SCANCODE_3]) bodies[4]->setLinearVelocity(btVector3(0.0, 0.0, 4.0));
-		if (keys[SDL_SCANCODE_ESCAPE]) {
-			exit(0);
+		if (keys[SDL_SCANCODE_1]) {
+			currentState = PAUSE;
 		}
+		if (keys[SDL_SCANCODE_2]) {
+			;; //TODO: Fill menu
+		}
+		if (keys[SDL_SCANCODE_ESCAPE]) {
+			if (currentState == PAUSE)
+				currentState = MENU;
+		}
+
+		//if (keys[SDL_SCANCODE_ESCAPE]) {
+		//	exit(0);
+		//}
 
 		//	if (keys[SDL_SCANCODE_5])cout << bullet.size() << endl;
 	}
@@ -1564,6 +1576,8 @@ namespace SceneManager {
 
 		if (currentState == PAUSE)
 			h_manager->renderPause(texturedProgram, modelTypes["cube"]);
+		if (currentState == MENU)
+			h_manager->renderMenu(texturedProgram, modelTypes["cube"]);
 	}
 
 	void draw(SDL_Window * window) { //, int fps) { // fps counter; 4 of 5

@@ -2,9 +2,8 @@
 
 // functions provided in the labs
 // allow to render text to a texture
-GLuint hudManager::textToTexture(const char * str, GLuint textID) {
+GLuint hudManager::textToTexture(const char * str, GLuint textID, TTF_Font* font) {
 	GLuint texture = textID;
-	TTF_Font * font = textFont;
 
 	SDL_Surface * stringImage = TTF_RenderText_Blended(font, str, { 255, 255, 255 });
 
@@ -45,13 +44,41 @@ hudManager::hudManager() {
 	if (textFont == NULL)
 		std::cout << "Failed to open font." << std::endl;
 
+	menuFont = TTF_OpenFont("Roboto-Black.ttf", 24);
+	if (menuFont == NULL)
+		std::cout << "Failed to open font." << std::endl;
+
 	// initialization of variables
 	label = 0;
 
+
 	std::string str = "Game paused";
 	const char *cstr = str.c_str();
-	pauseLabel = textToTexture(cstr, pauseLabel);
+	pauseLabel[0] = textToTexture(cstr, pauseLabel[0], textFont);
+	
+	str = "[P] Resume";
+	cstr = str.c_str();
+	pauseLabel[1] = textToTexture(cstr, pauseLabel[1], textFont);
+
+	str = "[Esc] Back to menu";
+	cstr = str.c_str();
+	pauseLabel[2] = textToTexture(cstr, pauseLabel[2], textFont);
+
+	str = "Ares 17";
+	cstr = str.c_str();
+	menuLabel[0] = textToTexture(cstr, menuLabel[0], menuFont);
+	
+	str = "[1] Play";
+	cstr = str.c_str();
+	menuLabel[1] = textToTexture(cstr, menuLabel[1], menuFont);
+
+	str = "[2] <Blank>";
+	cstr = str.c_str();
+	menuLabel[2] = textToTexture(cstr, menuLabel[2], menuFont);
+
+
 	// https://dribbble.com/shots/897447-Ares-Logo-Mark
+	menuScreen = loadBitmap::loadBitmap("Textures/menu.bmp");
 	loadingScreen = loadBitmap::loadBitmap("Textures/loading.bmp");
 }
 
@@ -129,7 +156,7 @@ void hudManager::renderEditHud(std::string line, std::string value, GLuint shade
 	const char *cstr = str.c_str();
 	glm::mat4 id = glm::mat4();
 	glUseProgram(shader); //texture-only shader will be used for teture rendering
-	label = textToTexture(cstr, label);
+	label = textToTexture(cstr, label, textFont);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, label);
 	// transformations
@@ -149,13 +176,26 @@ void hudManager::renderPause(GLuint shader, Model *modelData) {
 	glUseProgram(shader); //texture-only shader will be used for teture rendering
 	// transformations
 	id = glm::translate(id, glm::vec3(0.0,0.5,0.0));
-	id = glm::scale(id, glm::vec3(0.2f, -0.25f, 1.0f));
+	id = glm::scale(id, glm::vec3(0.4f, -0.25f, 1.0f));
 	//I though this was purple but good enough ¯\_(?)_/¯
 	glUniform3fv(glGetUniformLocation(shader, "text_color"), 1, glm::value_ptr(glm::vec3(0.183, 0.045, 0.087))); 
 	MeshManager::setUniformMatrix4fv(shader, "model", glm::value_ptr(id));
 
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, pauseLabel);
+	glBindTexture(GL_TEXTURE_2D, pauseLabel[0]);
+	modelData->Draw(shader);
+
+	id = glm::translate(id, glm::vec3(0.0, 1.5, 0.0));
+	id = glm::scale(id, glm::vec3(0.5f, 0.5f, 1.0f));
+	MeshManager::setUniformMatrix4fv(shader, "model", glm::value_ptr(id));
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, pauseLabel[1]);
+	modelData->Draw(shader);
+
+	id = glm::translate(id, glm::vec3(0.0, 2.0, 0.0));
+	MeshManager::setUniformMatrix4fv(shader, "model", glm::value_ptr(id));
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, pauseLabel[2]);
 	modelData->Draw(shader);
 
 	glEnable(GL_DEPTH_TEST);//Re-enable depth test after HUD label
@@ -170,11 +210,48 @@ void hudManager::renderLoading(GLuint shader, Model *modelData) {
 	glUseProgram(shader); //texture-only shader will be used for teture rendering
 	// transformations
 	id = glm::scale(id, glm::vec3(1.0f, -1.0f, 1.0f));
-	//I though this was purple but good enough ¯\_(?)_/¯
 	MeshManager::setUniformMatrix4fv(shader, "model", glm::value_ptr(id));
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, loadingScreen);
 	modelData->Draw(shader);
+	glEnable(GL_DEPTH_TEST);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void hudManager::renderMenu(GLuint shader, Model *modelData) {
+	glDisable(GL_DEPTH_TEST);//Disable depth test for HUD label
+	glm::mat4 id = glm::mat4();
+	glUseProgram(shader); //texture-only shader will be used for teture rendering
+						  // transformations
+	id = glm::scale(id, glm::vec3(1.0f, -1.0f, 1.0f));
+	glUniform3fv(glGetUniformLocation(shader, "text_color"), 1, glm::value_ptr(glm::vec3(0.0,0.0,0.0)));
+	MeshManager::setUniformMatrix4fv(shader, "model", glm::value_ptr(id));
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, menuScreen);
+	modelData->Draw(shader);
+
+	id = glm::translate(id, glm::vec3(0.0, -0.65, 0.0));
+	id = glm::scale(id, glm::vec3(0.2f, 0.1f, 1.0f));
+	MeshManager::setUniformMatrix4fv(shader, "model", glm::value_ptr(id));
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, menuLabel[0]);
+	modelData->Draw(shader);
+
+	id = glm::translate(id, glm::vec3(0.0, 3.0, 0.0));
+	id = glm::scale(id, glm::vec3(0.8f, 0.8f, 1.0f));
+	MeshManager::setUniformMatrix4fv(shader, "model", glm::value_ptr(id));
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, menuLabel[1]);
+	modelData->Draw(shader);
+
+	id = glm::translate(id, glm::vec3(0.0, 2.5, 0.0));
+	MeshManager::setUniformMatrix4fv(shader, "model", glm::value_ptr(id));
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, menuLabel[2]);
+	modelData->Draw(shader);
+
+
 	glEnable(GL_DEPTH_TEST);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, 0);
