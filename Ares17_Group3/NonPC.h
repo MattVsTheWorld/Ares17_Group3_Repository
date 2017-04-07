@@ -3,6 +3,8 @@
 #include "AbstractNPC.h"
 
 #define PI 3.14159265359f
+#define REFRESHRATE 1.0f
+#define DEFAULT_LOS 20.0f
 
 // NPC implements AbstractNPC - all methods defined inline
 class NonPC : public AbstractNPC {
@@ -15,9 +17,12 @@ private:
 	//
 	Model * boundingModel;
 	// Model
-	GLuint shader;
+	//GLuint shader;
 	GLuint texture;
-
+	/// ++++
+	queue<vertex*> currentPath;
+	double recalcTimer = REFRESHRATE;
+	double attackTimer = 0;
 	// +++++++++++++++
 	bool findCollision(btPairCachingGhostObject* ghostObject) {
 		btManifoldArray manifoldArray;
@@ -75,6 +80,12 @@ private:
 		rotation.z = atan2(2 * q.x()*q.w() - 2 * q.y()*q.z(), 1 - 2 * sqx - 2 * sqz);
 	}
 
+	void changeSpeed(float speed, float angle) {
+		//cout << angle << endl;
+		//TODO: fix
+		this->npcBody->setLinearVelocity(btVector3(/*npcBody->getLinearVelocity().x() + */speed*std::cos(angle),
+			npcBody->getLinearVelocity().y(), /*npcBody->getLinearVelocity().z()*/ speed*std::sin(angle)));
+	}
 public:
 
 	btRigidBody* addBoundingCapsule(float rad, float height, float x, float y, float z, float mass) {
@@ -90,7 +101,7 @@ public:
 		btMotionState* motion = new btDefaultMotionState(t);
 		btRigidBody::btRigidBodyConstructionInfo info(mass, motion, capsule, inertia);
 		btRigidBody* body = new btRigidBody(info);
-		body->setAngularFactor(0);
+		body->setAngularFactor(btVector3(0, 1, 0));
 		shapeManager->addToWorld(body, COL_ENEMY, COL_BULLET | COL_PLAYER | COL_DEFAULT); // Can add COL_ENEMY for enemy to enemy collision
 
 		return body;
@@ -102,7 +113,7 @@ public:
 		range = _r;
 		shapeManager = _sm;
 		boundingModel = _bmodel;
-		shader = _shader;
+		//shader = _shader;
 		texture = _text;
 		// Construct body
 		btRigidBody *temp = addBoundingCapsule(radius, height, spawn.x, spawn.y, spawn.z, mass);
@@ -113,15 +124,103 @@ public:
 		shapeManager->addGhostToWorld(tempGhost, COL_ENEMY, COL_BULLET); // Can add COL_ENEMY for enemy to enemy collision
 		npcBody = temp;
 		npcGhost = tempGhost;
+
 	}
-	void render(Model * modelData, glm::mat4 view, glm::mat4 proj) {
 
-		if (findCollision(npcGhost))
-		{
-			this->health -= 10;
-			cout << "HIT! Health = " << this->health << endl;
+	~NonPC() {
+		shapeManager->removeObject(npcBody);
+		shapeManager->removeObject(npcGhost);
+		//	delete shapeManager;
+		delete npcBody;
+		delete npcGhost;
+		cout << "Done deleting enemy object" << endl;
+	}
+
+	void moveNpc(vertex* v) {
+		btVector3 goTo(v->getCoords().first, 0, v->getCoords().second);
+		btTransform t;
+		t.setIdentity();
+		npcBody->getMotionState()->getWorldTransform(t);
+		btVector3 pos = t.getOrigin();
+
+		//	cout << "Going to: " << v->getIndex() << endl;
+		float angle = (atan2(goTo.z() - pos.z(), goTo.x() - pos.x())); // RADIANS
+		changeSpeed(3, angle);
+
+		// find angle between direction
+		//changeSpeed(newDir);
+	}
+
+	//TODO: search only if reachable
+	queue<vertex*> findPath(AdjacencyList *adjList, int startId, int endId) {
+		A_star *pathfinder = new A_star(adjList);
+		//	cout << "////////\n" << startId << " to " << endId << endl;
+		list<vertex*> path = pathfinder->algorithm_standard(adjList->getVertex(startId), adjList->getVertex(endId));
+		queue<vertex*> toVisit;
+		for (const auto &pathIterator : path) {
+			//		cout << " " << pathIterator->getIndex() << " ";
+			toVisit.push(static_cast<vertex*>(pathIterator));
 		}
+		adjList->resetCosts();
+		delete pathfinder;
+		return toVisit;
+	} // findPath function
 
+	bool update(Model * modelData, glm::mat4 view, glm::mat4 proj, float dt, Grid* _g, Player *player, GLuint shader) {
+
+		this->render(modelData, view, proj, shader);
+
+		//TODO: unstuck
+		btVector3 playerPos(player->getPosition().x, player->getPosition().y, player->getPosition().z);
+		btTransform t;
+		t.setIdentity();
+		npcBody->getMotionState()->getWorldTransform(t);
+		btVector3 pos = t.getOrigin();
+
+		if (sqrt(pow(playerPos.x() - pos.x(), 2) + pow(playerPos.z() - pos.z(), 2)) <= DEFAULT_LOS && this->currentState != PAUSED)
+			this->currentState = TRIGGERED;
+
+		if (this->currentState == TRIGGERED) {
+			if (init) {
+				currentPath = findPath(_g->getAdjList(), _g->getNodeFromWorldPos(pos), _g->getNodeFromWorldPos(playerPos));
+				init = false;
+			}
+			if (sqrt(pow(playerPos.x() - pos.x(), 2) + pow(playerPos.z() - pos.z(), 2)) >= this->range) { // distance
+				recalcTimer -= dt;
+				if (recalcTimer <= 0)
+				{
+					currentPath = findPath(_g->getAdjList(), _g->getNodeFromWorldPos(pos), _g->getNodeFromWorldPos(playerPos));
+					recalcTimer = REFRESHRATE;
+				}
+
+				if (!currentPath.empty())
+					if (_g->getAdjList()->getVertex(_g->getNodeFromWorldPos(pos)) == currentPath.front())
+						currentPath.pop();
+				if (!currentPath.empty())
+					this->moveNpc(currentPath.front());
+			}
+			else {
+				//Attack player
+				//player->varyHealth(-(this->attack));
+				//TODO: MESHAL attack animation
+				if (this->attackTimer <= 0) {
+					player->takeDamage(this->attack);
+					this->attackTimer = this->attackSpeed;
+				}
+				else this->attackTimer -= dt;
+			}
+		}
+			if (findCollision(npcGhost))
+			{
+				this->health -= 10;
+				cout << "HIT! Health = " << this->health << endl;
+			}
+
+		return true;
+	}
+
+	void render(Model * modelData, glm::mat4 view, glm::mat4 proj, GLuint shader) {
+		//	glUseProgram(shader);
 		btTransform t;
 		t.setIdentity();
 		npcBody->getMotionState()->getWorldTransform(t);
@@ -151,16 +250,28 @@ public:
 
 	} //TODO: actual model
 
-	void setHealth(double newHp) { this->health += newHp; }
+	void setAttack(double atk) { this->attack = atk; }
+	double getAttack() { return this->attack; }
+	void modifyHealth(double newHp) { this->health += newHp; }
 	double getRange() { return range; }
+	void setRange(double rng) { this->range = rng; }
 	double getHealth() { return health; }
-	~NonPC() { /*cout << "Deleting NPC object " << name << endl;*/ } //TODO: destructor
+	void setAttackSpeed(double atkspd) {
+		this->attackSpeed = atkspd;
+	}
+	double getAttackSpeed() {
+		return this->attackSpeed;
+	}
+
+	void setState(npcState newState) { this->currentState = newState; }
+	npcState getState() { return this->currentState; }
 protected:
-	//	int health;
-	//	int mana;
-		// ++
 	double health;
 	double range;
+	double attack;
+	double attackSpeed;
+	bool init = true;
+	npcState currentState = IDLE;
 	// (...) space to add more parameters...
 };
 

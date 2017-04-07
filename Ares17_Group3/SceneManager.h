@@ -22,17 +22,13 @@
 #include "Projectile.h"
 #include "NPCDecorator.h"
 //+++
+
 #define DEG_TO_RADIAN 0.017453293f
 #define PI 3.14159265359f
 
 #define COOL_TIME 0.2f
 #define MODEL_SCALING 0.01f
 #define BOUNDING_SCALING 0.05f
-
-
-#define SPEED_CAP_XZ 8.0
-#define FRICTION 8.0
-#define SPEED_CAP_Y 3.0
 
 #define AMBIENT_FACTOR 1.0f
 #define DIFFUSE_FACTOR 0.9f
@@ -53,8 +49,12 @@ struct PointLight {
 	glm::vec3 specular;
 };
 
+enum gameState {
+	RUNNING, PAUSE, MENU
+};
 namespace SceneManager {
-	void init(void);
+
+	void init(SDL_Window * window);
 	void update(SDL_Window *window, SDL_Event sdlEvent);
 	//fps counter; 3 of 5
 	void draw(SDL_Window *window);//, int fps);

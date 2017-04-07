@@ -155,7 +155,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AdjacencyList.cpp" />
+    <ClCompile Include="A_star.cpp" />
     <ClCompile Include="btShapeManager.cpp" />
+    <ClCompile Include="Grid.cpp" />
     <ClCompile Include="hudManager.cpp" />
     <ClCompile Include="loadBitmap.cpp" />
     <ClCompile Include="main.cpp" />
@@ -171,9 +174,12 @@
     <ClCompile Include="SoundManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AdjacencyList.h" />
+    <ClInclude Include="A_star.h" />
     <ClInclude Include="bass.h" />
     <ClInclude Include="btShapeManager.h" />
     <ClInclude Include="AbstractNPC.h" />
+    <ClInclude Include="Grid.h" />
     <ClInclude Include="hudManager.h" />
     <ClInclude Include="loadBitmap.h" />
     <ClInclude Include="main.h" />
