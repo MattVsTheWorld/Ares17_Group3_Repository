@@ -599,8 +599,8 @@ namespace SceneManager {
 		modelTypes.insert(std::pair<string, Model*>("enforcerRun", new Model("Models/Enemies/Enforcer/Run/running.dae")));
 		modelTypes.insert(std::pair<string, Model*>("enforcerDie", new Model("Models/Enemies/Enforcer/Die/falling_back_death.dae")));
 
-		modelTypes.insert(std::pair<string, Model*>("assaultAttack", new Model("Models/Enemies/Assault/Attack/running.dae")));
-		modelTypes.insert(std::pair<string, Model*>("assaultRun", new Model("Models/Enemies/Assault/Run/running.dae")));
+		modelTypes.insert(std::pair<string, Model*>("assaultAttack", new Model("Models/Enemies/Assault/Attack/gunplay.dae")));
+		modelTypes.insert(std::pair<string, Model*>("assaultRun", new Model("Models/Enemies/Assault/Run/run_with_sword.dae")));
 		modelTypes.insert(std::pair<string, Model*>("assaultDie", new Model("Models/Enemies/Assault/Die/falling_back_death.dae")));
 
 		//Environment
@@ -1314,17 +1314,21 @@ namespace SceneManager {
 		
 		vector<Matrix4f> Transforms;
 		RunningTime += gameTime();
+		int speed = 1;
 		Model* temp = modelTypes["assaultRun"];
 		if (run == 0) {
 			temp = modelTypes["assaultRun"];
+			speed = 2;
 		}
 		else if (run == 1){
-			temp = modelTypes["assaultDie"];
+			temp = modelTypes["assaultAttack"];
+			speed = 3;
 		}
-		/*else if (run == 2) {
-			temp = modelTypes["enforcerDie"];
-		}*/
-		temp->BoneTransform(RunningTime, Transforms);
+		else if (run == 2) {
+			temp = modelTypes["assaultDie"];
+			speed = 2;
+		}
+		temp->BoneTransform(RunningTime, Transforms, speed);
 		for (GLuint i = 0; i < Transforms.size(); i++) {
 			SetBoneTransform(i, Transforms[i]);			
 		}

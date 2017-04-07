@@ -330,8 +330,8 @@ void Model::ReadNodeHeirarchy(float AnimationTime, const aiNode* pNode, const Ma
 	string NodeName(pNode->mName.data);
 	const aiAnimation* pAnimation = scene->mAnimations[0];
 	Matrix4f NodeTransformation(pNode->mTransformation);
-	const aiNodeAnim* pNodeAnim = FindNodeAnim(pAnimation, NodeName);
-	//const aiNodeAnim* pNodeAnim = nodeAnims[NodeName];
+	//const aiNodeAnim* pNodeAnim = FindNodeAnim(pAnimation, NodeName);
+	const aiNodeAnim* pNodeAnim = nodeAnims[NodeName];
 
 	if (pNodeAnim) {
 		// Interpolate scaling and generate scaling transformation matrix
@@ -368,13 +368,13 @@ void Model::ReadNodeHeirarchy(float AnimationTime, const aiNode* pNode, const Ma
 }
 
 
-void Model::BoneTransform(float TimeInSeconds, vector<Matrix4f>& Transforms)
+void Model::BoneTransform(float TimeInSeconds, vector<Matrix4f>& Transforms, int speed)
 {
 	Matrix4f Identity;
 	Identity.InitIdentity();
 
 	float TicksPerSecond = (float)(scene->mAnimations[0]->mTicksPerSecond != 0 ? scene->mAnimations[0]->mTicksPerSecond : 25.0f);
-	float TimeInTicks = TimeInSeconds * TicksPerSecond;
+	float TimeInTicks = TimeInSeconds * TicksPerSecond * speed;
 	float AnimationTime = fmod(TimeInTicks, (float)scene->mAnimations[0]->mDuration);
 
 	ReadNodeHeirarchy(AnimationTime, scene->mRootNode, Identity);

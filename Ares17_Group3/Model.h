@@ -104,7 +104,7 @@ public:
 	const aiNodeAnim* FindNodeAnim(const aiAnimation* pAnimation, const string NodeName);
 	void ReadNodeHeirarchy(float AnimationTime, const aiNode* pNode, const Matrix4f& ParentTransform);
 
-	void BoneTransform(float TimeInSeconds, vector<Matrix4f>& Transforms);
+	void BoneTransform(float TimeInSeconds, vector<Matrix4f>& Transforms, int speed);
 
 	struct BoneInfo
 	{
