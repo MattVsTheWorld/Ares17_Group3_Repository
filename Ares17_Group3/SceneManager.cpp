@@ -29,7 +29,7 @@ namespace SceneManager {
 	Projectile *projectile_manager; // !++!
 	SoundManager *sound_manager; // ++!
 
-	gameState currentState = PAUSE;
+	gameState currentState = MENU;
 	float pauseTimeout = 1.0f;
 	bool clickable = true;
 
@@ -818,7 +818,7 @@ namespace SceneManager {
 			clickable = false;
 			// Pause
 			if (currentState == RUNNING) {
-				for (const auto it : enemies)
+				for (const auto it : enemies) 
 					it->setState(PAUSED);
 				currentState = PAUSE;
 			}
@@ -1209,10 +1209,10 @@ namespace SceneManager {
 
 		//	if (keys[SDL_SCANCODE_3]) bodies[4]->setLinearVelocity(btVector3(0.0, 0.0, 4.0));
 		if (keys[SDL_SCANCODE_1]) {
-			currentState = PAUSE;
+			currentState = RUNNING;
 		}
 		if (keys[SDL_SCANCODE_2]) {
-			;; //TODO: Fill menu
+			exit(0);
 		}
 		if (keys[SDL_SCANCODE_ESCAPE]) {
 			if (currentState == PAUSE)
