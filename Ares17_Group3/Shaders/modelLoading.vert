@@ -20,9 +20,6 @@ out VS_OUT {
     vec2 TexCoords;
 } vs_out;
 
-//out vec4 we;
-out int anim;
-
 	
 void main()
 {

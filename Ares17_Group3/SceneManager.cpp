@@ -1405,8 +1405,8 @@ namespace SceneManager {
 	}
 
 
-	void updateCollectables() {
-		int max = collectables.size();
+	void updateCollectables() { //TODO: change
+		unsigned int max = collectables.size();
 		//	for (const auto it : collectables)
 
 		for (int i = 0; i < max; i++) {
@@ -1581,7 +1581,7 @@ namespace SceneManager {
 		///+++++++++++++++
 		// RENDERING modelTypes
 
-		renderAnimatedObject(projection, glm::vec3(0.0, 0.0, 0.0), glm::vec3(1.0, 1.0, 1.0), shader, groundTexture);
+		//renderAnimatedObject(projection, glm::vec3(0.0, 0.0, 0.0), glm::vec3(1.0, 1.0, 1.0), shader, groundTexture);
 
 
 		//	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
