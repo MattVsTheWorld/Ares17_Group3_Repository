@@ -27,8 +27,8 @@
 #define PI 3.14159265359f
 
 #define COOL_TIME 0.2f
-#define MODEL_SCALING 0.001f
-#define BOUNDING_SCALING 0.01f
+#define MODEL_SCALING 0.01f
+#define BOUNDING_SCALING 0.05f
 
 #define AMBIENT_FACTOR 1.0f
 #define DIFFUSE_FACTOR 0.9f

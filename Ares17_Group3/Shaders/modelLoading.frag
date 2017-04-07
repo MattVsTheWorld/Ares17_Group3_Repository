@@ -2,6 +2,10 @@
 
 out vec4 FragColor;
 
+//show weights
+in vec4 we;
+in int anim; //to show wieghts or not
+
 in VS_OUT {
     vec3 FragPos;
     vec3 Normal;
@@ -81,8 +85,15 @@ void main()
     vec3 normal = normalize(fs_in.Normal);
 	vec3 viewDir = normalize(viewPos - fs_in.FragPos);
 	float shadow = ShadowCalculation(fs_in.FragPos, pointLight.position, depthMap);
-	vec3 result = CalcPointLight(pointLight, normal, fs_in.FragPos, viewDir, shadow);   
-	FragColor = vec4(result, 1.0f);
+	vec3 result = CalcPointLight(pointLight, normal, fs_in.FragPos, viewDir, shadow);  
+	//show weights
+	if(anim == 2) {
+		vec4 weightsColor = vec4(we.xyz,1.0);
+		FragColor = weightsColor;
+	}
+	else {
+		FragColor = vec4(result, 1.0f);
+	}	
 }  
 
 

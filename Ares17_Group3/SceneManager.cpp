@@ -22,6 +22,7 @@ namespace SceneManager {
 //	GLuint shaderProgram;
 	GLuint texturedProgram;
 	GLuint modelProgram;
+	//GLuint animatedModelProgram;
 
 	hudManager *h_manager;
 	Skybox *skybox;
@@ -96,6 +97,10 @@ namespace SceneManager {
 
 	// TEST
 	btRigidBody* playerBody;
+	Model* animated;
+	Model* animated2;
+
+	int run = 0;
 	//	
 	GLuint defaultTexture;
 	GLuint groundTexture;
@@ -165,7 +170,7 @@ namespace SceneManager {
 			speed = btVector3(speed.x() + (speed.absolute().x() > player->getSpeed() ? 0 : _speed*std::cos(angle*DEG_TO_RADIAN)), speed.y(), speed.z() + (speed.absolute().z() > player->getSpeed() ? 0 : _speed*std::sin(angle*DEG_TO_RADIAN)));
 		return speed;
 	}
-	//TODO: fix when gameplay done ||TRIGGERED||
+
 	btVector3 jump(GLfloat _speed) {
 		btVector3 speed = getLinearVelocityInBodyFrame(playerBody);
 		if (player->getState() != JUMPING) {
@@ -534,9 +539,20 @@ namespace SceneManager {
 		*/
 	}
 
+	static const GLuint MAX_BONES = 100;
+	GLuint m_boneLocation[MAX_BONES];
+
 	void initmodelTypes() {
 		//TODO:Player model for death or something
 		//Enemies
+		modelTypes.insert(std::pair<string, Model*>("enforcerAttack", new Model("Models/Enemies/Enforcer/Attack/standing_melee_attack_downward.dae")));
+		modelTypes.insert(std::pair<string, Model*>("enforcerRun", new Model("Models/Enemies/Enforcer/Run/running.dae")));
+		modelTypes.insert(std::pair<string, Model*>("enforcerDie", new Model("Models/Enemies/Enforcer/Die/falling_back_death.dae")));
+
+		modelTypes.insert(std::pair<string, Model*>("assaultAttack", new Model("Models/Enemies/Assault/Attack/gunplay.dae")));
+		modelTypes.insert(std::pair<string, Model*>("assaultRun", new Model("Models/Enemies/Assault/Run/run_with_sword.dae")));
+		modelTypes.insert(std::pair<string, Model*>("assaultDie", new Model("Models/Enemies/Assault/Die/falling_back_death.dae")));
+  // Robotto
 		modelTypes.insert(std::pair<string, Model*>("robot", new Model("Models/Enemies/Robot/Roboto.obj")));
 		//Environment
 		modelTypes.insert(std::pair<string, Model*>("sphere", new Model("Models/Environment/sphere.obj")));
@@ -654,6 +670,8 @@ namespace SceneManager {
 						const btVector3& ptB = pt.getPositionWorldOnB();
 						const btVector3& normalOnB = pt.m_normalWorldOnB;
 						// <START>  handle collisions here
+					//	cout << "Player colliding with something while jumping." << endl;
+						player->setState(ON_GROUND);
 				//		cout << "Player colliding with something while jumping." << endl;
 						return true;
 						//player->setState(ON_GROUND);
@@ -684,12 +702,29 @@ namespace SceneManager {
 		bt_manager = new btShapeManager();
 		projectile_manager = new Projectile(bt_manager);
 		//!!
+
+
+		//makes locations for gBones[1] e.t.c.
+		for (unsigned int i = 0; i < (sizeof(m_boneLocation)/sizeof(m_boneLocation[0])); i++) {
+			char Name[128];
+			memset(Name, 0, sizeof(Name));
+			snprintf(Name, sizeof(Name), "gBones[%d]", i);
+			m_boneLocation[i] = glGetUniformLocation(modelProgram, Name);
+		}
+		//SAME THING??????
+		//for (unsigned int i = 0; i < MAX_BONES; i++) {
+		//	char Name[128];
+		//	//memset(Name, 0, sizeof(Name));
+		//	snprintf(Name, 128, "gBones[%d]", i);
+		//	m_boneLocation[i] = glGetUniformLocation(modelProgram, Name);
+		//}
+
 		sound_manager = new SoundManager();
 		//sound_manager->loadSample("Sounds/wilhelm.wav");
 		defaultTexture = loadBitmap::loadBitmap("Textures/wall.bmp");
 		groundTexture = loadBitmap::loadBitmap("Textures/terrain.bmp");
 		heartTexture = loadBitmap::loadBitmap("Textures/ruby.bmp");
-
+    
 		initPlayer(1.0f, 1.5f, 40.0f);
 		initBoxes();
 		temp[0] = std::make_tuple(currentModel, at, glm::vec3(0.02, 0.02, 0.02), glm::vec3(0.0f, rotationAngles.y, 0.0f));
@@ -706,7 +741,6 @@ namespace SceneManager {
 		//	enemies.push_back(new Melee(new NonPC(100, 10, bt_manager, glm::vec3(2, 10, 0), 1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture)));
 			//}
 			// +++ /-\
-
 
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_BLEND);
@@ -766,6 +800,18 @@ namespace SceneManager {
 		if (rotationAngles.y > 360.0)
 			rotationAngles.y -= 360;
 
+	}
+
+	float gameTime() {
+		currentTime = clock();
+
+		unsigned int dt = currentTime - lastTime;
+		float dt_secs = (float)dt / 1000;
+		if (dt_secs > 0.017f) dt_secs = 0.017f; // first value is off ( 5.5~)
+
+		lastTime = currentTime;
+
+		return dt_secs;
 	}
 
 	float mass = 0;
@@ -852,6 +898,7 @@ namespace SceneManager {
 						leftClick = true;
 						coolDown = COOL_TIME;
 						//			cout << "Attempting to shoot bullet." << endl;
+
 						//TODO: change offset
 						projectile_manager->addProjectile(shiftRight(moveForward(glm::vec3(player->getPosition().x, player->getPosition().y - 0.35, player->getPosition().z), 
 							rotationAngles, 1.0f),rotationAngles, 0.5), PROJ_SPEED, (rotationAngles.y*DEG_TO_RADIAN), rotationAngles.x); //!++!
@@ -887,6 +934,16 @@ namespace SceneManager {
 				playerBody->setLinearVelocity(speedRight(increase, rotationAngles.y, (keys[SDL_SCANCODE_W] == SDL_PRESSED || keys[SDL_SCANCODE_S] == SDL_PRESSED)));
 			}
 
+			if (keys[SDL_SCANCODE_C]) {
+				run = 0;
+			}
+			if (keys[SDL_SCANCODE_V]) {
+				run = 1;
+			}
+			if (keys[SDL_SCANCODE_B]) {
+				run = 2;
+			}
+
 			if (keys[SDL_SCANCODE_SPACE]) {
 				playerBody->setLinearVelocity(jump(SPEED_CAP_Y));
 			}
@@ -906,7 +963,7 @@ namespace SceneManager {
 
 			btTransform t;
 			t.setIdentity();
-
+			
 			if (sdlEvent.type == SDL_MOUSEBUTTONDOWN) { // && pointOfView == FIRST_PERSON) {
 				if (sdlEvent.button.button == SDL_BUTTON_LEFT) {
 					if (coolDown <= 0.0f) {
@@ -986,6 +1043,13 @@ namespace SceneManager {
 				std::cout << "Bounding Type: CAPSULE" << std::endl;
 			}
 
+			/*if (keys[SDL_SCANCODE_R]) {
+				double x = -3.05048;
+				double y = 3;
+				double z = -30.6176;
+				t.setOrigin(btVector3(x, y, z));
+				playerBody->setWorldTransform(t);
+			}*/
 
 			if (creation == true) {
 				if (keys[SDL_SCANCODE_KP_8]) {
@@ -1170,13 +1234,6 @@ namespace SceneManager {
 			}
 		}
 
-		if (keys[SDL_SCANCODE_R]) {
-			//cout << getLinearVelocityInBodyFrame(playerBody).x() << " " << getLinearVelocityInBodyFrame(playerBody).y() << " " << getLinearVelocityInBodyFrame(playerBody).z() << "\n";
-			player->setPosition(glm::vec3(player->getPosition().x, player->getPosition().y + 0.1, player->getPosition().z));
-		}
-		else if (keys[SDL_SCANCODE_F]) {
-			player->setPosition(glm::vec3(player->getPosition().x, player->getPosition().y - 0.1, player->getPosition().z));
-		}
 		//++++
 		if (keys[SDL_SCANCODE_M]) {
 			//	cout << "Curiously cinnamon\n";
@@ -1219,6 +1276,7 @@ namespace SceneManager {
 				currentState = MENU;
 		}
 
+
 		//if (keys[SDL_SCANCODE_ESCAPE]) {
 		//	exit(0);
 		//}
@@ -1226,6 +1284,12 @@ namespace SceneManager {
 		//	if (keys[SDL_SCANCODE_5])cout << bullet.size() << endl;
 	}
 
+
+	void SetBoneTransform(GLuint Index, const Matrix4f& Transform)
+	{
+		assert(Index < MAX_BONES);
+		glUniformMatrix4fv(m_boneLocation[Index], 1, GL_TRUE, (const GLfloat*)Transform);
+	}
 
 	void renderObject(glm::mat4 proj, Model *modelData, glm::vec3 pos, glm::vec3 scale, btQuaternion& rotation, GLuint shader, GLuint texture, bool spin) {
 
@@ -1246,8 +1310,45 @@ namespace SceneManager {
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texture);
 		glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		glUniform1i(glGetUniformLocation(shader, "animated"), 0); //zero is no animations
 		modelData->Draw(shader);
+		
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
 
+	float RunningTime = 0.0f;
+	void renderAnimatedObject(glm::mat4 proj, glm::vec3 pos, glm::vec3 scale, GLuint shader, GLuint texture) {
+
+		glm::mat4 model;
+		model = glm::translate(model, pos);
+		model = glm::scale(model, scale);	// It's a bit too big for our scene, so scale it down
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
+		glUniform1i(glGetUniformLocation(shader, "animated"), 1); //one means there is animations
+		
+		vector<Matrix4f> Transforms;
+		RunningTime += gameTime();
+		int speed = 1;
+		Model* temp = modelTypes["assaultRun"];
+		if (run == 0) {
+			temp = modelTypes["assaultRun"];
+			speed = 2;
+		}
+		else if (run == 1){
+			temp = modelTypes["assaultAttack"];
+			speed = 3;
+		}
+		else if (run == 2) {
+			temp = modelTypes["assaultDie"];
+			speed = 2;
+		}
+		temp->BoneTransform(RunningTime, Transforms, speed);
+		for (GLuint i = 0; i < Transforms.size(); i++) {
+			SetBoneTransform(i, Transforms[i]);			
+		}
+
+		temp->Draw(shader);
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
@@ -1303,17 +1404,6 @@ namespace SceneManager {
 		//cout << getLinearVelocityInBodyFrame(playerBody).y();
 	}
 
-	float gameTime() {
-		currentTime = clock();
-
-		unsigned int dt = currentTime - lastTime;
-		float dt_secs = (float)dt / 1000;
-		if (dt_secs > 0.017f) dt_secs = 0.017f; // first value is off ( 5.5~)
-
-		lastTime = currentTime;
-
-		return dt_secs;
-	}
 
 	void updateCollectables() {
 		int max = collectables.size();
@@ -1432,6 +1522,7 @@ namespace SceneManager {
 		///+++++++++++++++
 
 
+
 		btVector3 playerPos(player->getPosition().x, player->getPosition().y, player->getPosition().z);
 		//++! \_/
 		//TODO: Finish enemies
@@ -1444,7 +1535,6 @@ namespace SceneManager {
 			}
 		}
 
-		//int i = 0;
 		for (const auto& id_pair : bodies) {
 			// First = name / key
 			id_pair.first; // string
@@ -1491,6 +1581,7 @@ namespace SceneManager {
 		///+++++++++++++++
 		// RENDERING modelTypes
 
+		renderAnimatedObject(projection, glm::vec3(0.0, 0.0, 0.0), glm::vec3(1.0, 1.0, 1.0), shader, groundTexture);
 
 
 		//	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
