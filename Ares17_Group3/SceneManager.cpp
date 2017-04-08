@@ -65,10 +65,10 @@ namespace SceneManager {
 	};
 
 	// Load modelTypes
-	map<string, Model*> modelTypes;
+	unordered_map<string, Model*> modelTypes;
 
-	map<std::string, std::tuple<string, glm::vec3, glm::vec3, glm::vec3>> models; //objType, <modelName, scale, rotation, offset>
-	map<std::string, btRigidBody*> bodies;
+	unordered_map<std::string, std::tuple<string, glm::vec3, glm::vec3, glm::vec3>> models; //objType, <modelName, scale, rotation, offset>
+	unordered_map<std::string, btRigidBody*> bodies;
 	vector<tuple <btPairCachingGhostObject*, string, string>> collectables;
 
 	tuple<std::string, glm::vec3, glm::vec3, glm::vec3> temp[2]; //name, position, scale, rotation
@@ -467,7 +467,7 @@ namespace SceneManager {
 				if (key.find("box") != std::string::npos) {
 					if (modelName == "heart" || modelName == "shield") {
 						btRigidBody *temp = globalData->bt_manager->addBox(boundingScale.x, boundingScale.y, boundingScale.z, position.x, position.y, position.z, mass, COL_COLLECTABLE, COL_PLAYER);
-						temp->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);
+						//temp->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);
 						bodies.insert(std::pair<string, btRigidBody*>(key, temp));
 						btPairCachingGhostObject* tempGhost = new btPairCachingGhostObject();
 						tempGhost->setCollisionShape(temp->getCollisionShape());
@@ -510,7 +510,7 @@ namespace SceneManager {
 			if (id_pair.second->getCollisionShape()->getShapeType() == BOX_SHAPE_PROXYTYPE) {
 				key = "box";
 				key.append(to_string(boxNo));
-				bodies[key]->setActivationState(DISABLE_DEACTIVATION);
+				//bodies[key]->setActivationState(DISABLE_DEACTIVATION);
 				boxNo++;
 			}
 			else if (id_pair.second->getCollisionShape()->getShapeType() == SPHERE_SHAPE_PROXYTYPE) {
@@ -533,7 +533,7 @@ namespace SceneManager {
 		*/
 	}
 
-	static const GLuint MAX_BONES = 100;
+	static const GLuint MAX_BONES = 30;
 	GLuint m_boneLocation[MAX_BONES];
 
 	void initmodelTypes() {
@@ -602,7 +602,7 @@ namespace SceneManager {
 			bodies[key]->setAngularFactor(0); // Doesn't fall sideways
 		}
 		bodies[key]->setFriction(8);
-		bodies[key]->setActivationState(DISABLE_DEACTIVATION);
+	//	bodies[key]->setActivationState(DISABLE_DEACTIVATION);
 		models.insert(std::pair<string, std::tuple<string, glm::vec3, glm::vec3, glm::vec3>>(key, make_tuple(currentModel, modelScale, modelRotation, glm::vec3(0.0f, 0.0f, 0.0f))));
 	}
 
@@ -665,7 +665,7 @@ namespace SceneManager {
 						const btVector3& normalOnB = pt.m_normalWorldOnB;
 						// <START>  handle collisions here
 					//	cout << "Player colliding with something while jumping." << endl;
-						globalData->player->setState(ON_GROUND);
+						//globalData->player->setState(ON_GROUND);
 				//		cout << "Player colliding with something while jumping." << endl;
 						return true;
 						//player->setState(ON_GROUND);
@@ -1278,10 +1278,12 @@ namespace SceneManager {
 		glm::vec3 eulerRotation;
 		toEulerianAngle(rotation, eulerRotation);
 		model = glm::rotate(model, eulerRotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
-		model = glm::rotate(model, eulerRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
-		model = glm::rotate(model, eulerRotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
 		if (spin)
-			model = glm::rotate(model, theta, glm::vec3(0.0, 1.0, 0.0));
+			model = glm::rotate(model, eulerRotation.y+theta, glm::vec3(0.0f, 1.0f, 0.0f));
+		else
+			model = glm::rotate(model, eulerRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, eulerRotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+		
 		model = glm::scale(model, scale);	// It's a bit too big for our scene, so scale it down
 		//model = glm::scale(model, glm::vec3(0.05f, 0.05f, 0.05f));	// for gun]
 		glActiveTexture(GL_TEXTURE0);
@@ -1419,7 +1421,8 @@ namespace SceneManager {
 			if (globalData->player->getState() == JUMPING)
 				if (findCollision(ghostObject))
 					globalData->player->setState(ON_GROUND);
-				updateCollectables();
+				
+			updateCollectables();
 			theta += 0.1;
 			globalData->bt_manager->update();
 		}
@@ -1525,11 +1528,11 @@ namespace SceneManager {
 			btQuaternion rotation = bodies[id_pair.first]->getWorldTransform().getRotation().normalized();
 
 			if (id_pair.second->getCollisionShape()->getShapeType() == BOX_SHAPE_PROXYTYPE) {
-			/*	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-				glDisable(GL_CULL_FACE);
-				bt_manager->renderBox(bodies[id_pair.first], view, projection, modelTypes["cube"], shader, groundTexture);
-				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-				glEnable(GL_CULL_FACE);*/
+				//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+				//glDisable(GL_CULL_FACE);
+				//globalData->bt_manager->renderBox(bodies[id_pair.first], view, projection, modelTypes["cube"], shader, groundTexture);
+				//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+				//glEnable(GL_CULL_FACE);
 				//cout << modelTypes[get<0>(models[id_pair.first])] << endl;
 				//cout << models[id_pair.first] << endl;
 
