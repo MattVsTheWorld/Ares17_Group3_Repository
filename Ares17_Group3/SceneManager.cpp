@@ -539,42 +539,36 @@ namespace SceneManager {
 		*/
 	}
 
-	static const GLuint MAX_BONES = 100;
-	GLuint m_boneLocation[MAX_BONES];
-
 	void initmodelTypes() {
 		//TODO:Player model for death or something
 		//Enemies
-		modelTypes.insert(std::pair<string, Model*>("enforcerAttack", new Model("Models/Enemies/Enforcer/Attack/standing_melee_attack_downward.dae")));
-		modelTypes.insert(std::pair<string, Model*>("enforcerRun", new Model("Models/Enemies/Enforcer/Run/running.dae")));
-		modelTypes.insert(std::pair<string, Model*>("enforcerDie", new Model("Models/Enemies/Enforcer/Die/falling_back_death.dae")));
+		//modelTypes.insert(std::pair<string, Model*>("enforcerAttack", new Model("Models/Enemies/Enforcer/Attack/standing_melee_attack_downward.dae")));
+		//modelTypes.insert(std::pair<string, Model*>("enforcerRun", new Model("Models/Enemies/Enforcer/Run/running.dae")));
+		//modelTypes.insert(std::pair<string, Model*>("enforcerDie", new Model("Models/Enemies/Enforcer/Die/falling_back_death.dae")));
 
 		modelTypes.insert(std::pair<string, Model*>("assaultAttack", new Model("Models/Enemies/Assault/Attack/gunplay.dae")));
 		modelTypes.insert(std::pair<string, Model*>("assaultRun", new Model("Models/Enemies/Assault/Run/run_with_sword.dae")));
 		modelTypes.insert(std::pair<string, Model*>("assaultDie", new Model("Models/Enemies/Assault/Die/falling_back_death.dae")));
-  // Robotto
+		
+		// Robotto
 		modelTypes.insert(std::pair<string, Model*>("robot", new Model("Models/Enemies/Robot/Roboto.obj")));
 		//Environment
 		modelTypes.insert(std::pair<string, Model*>("sphere", new Model("Models/Environment/sphere.obj")));
 		modelTypes.insert(std::pair<string, Model*>("capsule", modelTypes["sphere"]));
-		modelTypes.insert(std::pair<string, Model*>("car", new Model("Models/Environment/Car/model.obj")));
 		modelTypes.insert(std::pair<string, Model*>("house", new Model("Models/Environment/House/houselow.obj")));
 		modelTypes.insert(std::pair<string, Model*>("carpile", new Model("Models/Environment/CarPile/wasteddisplay.obj")));
 		modelTypes.insert(std::pair<string, Model*>("oiltank", new Model("Models/Environment/OilTank/Oiltank.obj")));
-		modelTypes.insert(std::pair<string, Model*>("rock", new Model("Models/Environment/Rock/model.obj")));
+		//modelTypes.insert(std::pair<string, Model*>("rock", new Model("Models/Environment/Rock/model.obj")));
 		modelTypes.insert(std::pair<string, Model*>("barrier", new Model("Models/Environment/Barrier/model.obj")));
 		//Collectable
 		modelTypes.insert(std::pair<string, Model*>("heart", new Model("Models/Collectable/Heart/Heart.obj")));
-		modelTypes.insert(std::pair<string, Model*>("potion", new Model("Models/Collectable/Potion/pocion lowpoly.obj")));
+		//modelTypes.insert(std::pair<string, Model*>("potion", new Model("Models/Collectable/Potion/pocion lowpoly.obj")));
 		modelTypes.insert(std::pair<string, Model*>("shield", new Model("Models/Collectable/Shield/shield.obj")));
 
 		//Guns
-		modelTypes.insert(std::pair<string, Model*>("ak47", new Model("Models/Guns/AK47/Gun_low_poly.obj")));
-		modelTypes.insert(std::pair<string, Model*>("pistol", new Model("Models/Guns/Pistol/Gun.obj")));
-		modelTypes.insert(std::pair<string, Model*>("scifigun", new Model("Models/Guns/Scifi/25ad7fc3a09f4a958dd62b5b522257ee.obj")));
-		modelTypes.insert(std::pair<string, Model*>("rifle", new Model("Models/Guns/Rifle/gun_rifle_lo.obj")));
+		//modelTypes.insert(std::pair<string, Model*>("pistol", new Model("Models/Guns/Pistol/Gun.obj")));
 		modelTypes.insert(std::pair<string, Model*>("scifipistol", new Model("Models/Guns/ScifiPistol/ceeb75e9f4e34b6191d92c38a470453d.obj")));
-		modelTypes.insert(std::pair<string, Model*>("nukacola", new Model("Models/Guns/NukaCola/NukaColaGun.obj")));
+		//modelTypes.insert(std::pair<string, Model*>("nukacola", new Model("Models/Guns/NukaCola/NukaColaGun.obj")));
 	}
 
 	void insertBounding(glm::vec3 boundingPos, glm::vec3 modelScale, glm::vec3 boundingScale, glm::vec3 modelRotation, glm::vec3 boundingRotation, float mass) {
@@ -683,6 +677,9 @@ namespace SceneManager {
 		return false;
 	}
 
+	static const GLuint MAX_BONES = 30;
+	GLuint m_boneLocation[MAX_BONES];
+
 	void init(SDL_Window * window) {
 
 		// Preliminary loading for loading screen
@@ -705,19 +702,19 @@ namespace SceneManager {
 
 
 		//makes locations for gBones[1] e.t.c.
-		for (unsigned int i = 0; i < (sizeof(m_boneLocation)/sizeof(m_boneLocation[0])); i++) {
-			char Name[128];
-			memset(Name, 0, sizeof(Name));
-			snprintf(Name, sizeof(Name), "gBones[%d]", i);
-			m_boneLocation[i] = glGetUniformLocation(modelProgram, Name);
-		}
-		//SAME THING??????
-		//for (unsigned int i = 0; i < MAX_BONES; i++) {
-		//	char Name[128];
-		//	//memset(Name, 0, sizeof(Name));
-		//	snprintf(Name, 128, "gBones[%d]", i);
+		//for (unsigned int i = 0; i < (sizeof(m_boneLocation)/sizeof(m_boneLocation[0])); i++) {
+		//	char Name[40];
+		//	memset(Name, 0, sizeof(Name));
+		//	snprintf(Name, sizeof(Name), "gBones[%d]", i);
 		//	m_boneLocation[i] = glGetUniformLocation(modelProgram, Name);
 		//}
+		//SAME THING??????
+		for (unsigned int i = 0; i < MAX_BONES; i++) {
+			char Name[MAX_BONES];
+			//memset(Name, 0, sizeof(Name));
+			snprintf(Name, MAX_BONES, "gBones[%d]", i);
+			m_boneLocation[i] = glGetUniformLocation(modelProgram, Name);
+		}
 
 		sound_manager = new SoundManager();
 		//sound_manager->loadSample("Sounds/wilhelm.wav");
@@ -813,6 +810,8 @@ namespace SceneManager {
 
 		return dt_secs;
 	}
+
+	float RunningTime = 0.0f;
 
 	float mass = 0;
 	unsigned int objectID = 0;
@@ -935,12 +934,15 @@ namespace SceneManager {
 			}
 
 			if (keys[SDL_SCANCODE_C]) {
+				RunningTime = 0.0f;
 				run = 0;
 			}
 			if (keys[SDL_SCANCODE_V]) {
+				RunningTime = 0.0f;
 				run = 1;
 			}
 			if (keys[SDL_SCANCODE_B]) {
+				RunningTime = 0.0f;
 				run = 2;
 			}
 
@@ -1316,7 +1318,6 @@ namespace SceneManager {
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
-	float RunningTime = 0.0f;
 	void renderAnimatedObject(glm::mat4 proj, glm::vec3 pos, glm::vec3 scale, GLuint shader, GLuint texture) {
 
 		glm::mat4 model;
@@ -1330,12 +1331,8 @@ namespace SceneManager {
 		vector<Matrix4f> Transforms;
 		RunningTime += gameTime();
 		int speed = 1;
-		Model* temp = modelTypes["assaultRun"];
-		if (run == 0) {
-			temp = modelTypes["assaultRun"];
-			speed = 2;
-		}
-		else if (run == 1){
+		Model* temp;
+		if (run == 1){
 			temp = modelTypes["assaultAttack"];
 			speed = 3;
 		}
@@ -1343,6 +1340,11 @@ namespace SceneManager {
 			temp = modelTypes["assaultDie"];
 			speed = 2;
 		}
+		else {
+			temp = modelTypes["assaultRun"];
+			speed = 2;
+		}
+
 		temp->BoneTransform(RunningTime, Transforms, speed);
 		for (GLuint i = 0; i < Transforms.size(); i++) {
 			SetBoneTransform(i, Transforms[i]);			
@@ -1582,7 +1584,7 @@ namespace SceneManager {
 		///+++++++++++++++
 		// RENDERING modelTypes
 
-		renderAnimatedObject(projection, glm::vec3(0.0, 0.0, 0.0), glm::vec3(1.0, 1.0, 1.0), shader, groundTexture);
+		renderAnimatedObject(projection, glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.7, 0.7, 0.7), shader, groundTexture);
 
 
 		//	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);

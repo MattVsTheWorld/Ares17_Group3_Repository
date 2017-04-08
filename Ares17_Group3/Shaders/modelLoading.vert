@@ -9,7 +9,7 @@ uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
-const int MAX_BONES = 100;
+const int MAX_BONES = 30;
 uniform mat4 gBones[MAX_BONES];
 
 uniform int animated;
@@ -28,17 +28,19 @@ void main()
 		BoneTransform     += gBones[boneIDs[1]] * weights[1];
 		BoneTransform     += gBones[boneIDs[2]] * weights[2];
 		BoneTransform     += gBones[boneIDs[3]] * weights[3];
-		//we = weights;	//to show wieghts
 
 		vec4 PosL    = BoneTransform * vec4(position, 1.0);
 		gl_Position = projection * view * model * PosL;
-		vs_out.Normal = (transpose(inverse(mat4(model))) * (BoneTransform * vec4(normal, 0.0))).xyz;
-		vs_out.FragPos = vec3(model * PosL);
+		//vs_out.Normal = (transpose(inverse(mat4(model))) * (BoneTransform * vec4(normal, 0.0))).xyz;
+		//vs_out.FragPos = vec3(model * PosL);
 	}
 	else {
 		gl_Position = projection * view * model * vec4(position, 1.0f);
-		vs_out.FragPos = vec3(model * vec4(position, 1.0));
-		vs_out.Normal = transpose(inverse(mat3(model))) * normal;
+		//vs_out.FragPos = vec3(model * vec4(position, 1.0));
+		//vs_out.Normal = transpose(inverse(mat3(model))) * normal;
 	}
+
+	vs_out.FragPos = vec3(model * vec4(position, 1.0));
+	vs_out.Normal = transpose(inverse(mat3(model))) * normal;
 	vs_out.TexCoords = texCoords;
 }
