@@ -7,6 +7,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
+#include "btShapeManager.h"
 
 #define INVINC_TIME 0.5f
 
@@ -22,7 +23,7 @@ enum lifeState { ALIVE, DEAD };
 
 class Player {
 public:
-	Player(glm::vec3 _eye);
+	Player(glm::vec3 _eye, float rad, float height, float mass, btShapeManager *_btMan);
 	void update(float dt);
 	void setPosition(glm::vec3 newEye);
 	glm::vec3 getPosition();
@@ -38,6 +39,11 @@ public:
 	void setSpeed(double sp);
 
 	void restart();
+
+	btRigidBody* playerBody;
+
+	btPairCachingGhostObject* playerGhost;
+
 protected:
 
 private:
@@ -49,6 +55,10 @@ private:
 	double armor;
 	bool invincible;
 	float invincibility_f;
+
+	btShapeManager *bt_manager;
+
+
 
 };
 

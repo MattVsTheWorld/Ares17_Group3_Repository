@@ -67,6 +67,9 @@ public:
 	npcState getState() { 
 		return npc->getState();
 	}
+	void reset() {
+		return npc->reset();
+	}
 
 protected:
 	AbstractNPC * npc;

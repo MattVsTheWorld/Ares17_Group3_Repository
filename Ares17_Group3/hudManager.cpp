@@ -263,7 +263,6 @@ void hudManager::renderMenu(GLuint shader, Model *modelData) {
 	glBindTexture(GL_TEXTURE_2D, menuLabel[3]);
 	modelData->Draw(shader);
 
-
 	glEnable(GL_DEPTH_TEST);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, 0);

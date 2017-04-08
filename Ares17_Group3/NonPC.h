@@ -9,20 +9,7 @@
 // NPC implements AbstractNPC - all methods defined inline
 class NonPC : public AbstractNPC {
 private:
-	//string name;
-	// ++
-	btShapeManager *shapeManager;
-	btRigidBody* npcBody;
-	btPairCachingGhostObject* npcGhost;
-	//
-	Model * boundingModel;
-	// Model
-	//GLuint shader;
-	GLuint texture;
-	/// ++++
-	queue<vertex*> currentPath;
-	double recalcTimer = REFRESHRATE;
-	double attackTimer = 0;
+
 	// +++++++++++++++
 	bool findCollision(btPairCachingGhostObject* ghostObject) {
 		btManifoldArray manifoldArray;
@@ -107,12 +94,15 @@ public:
 		return body;
 	}
 
-	NonPC(double _h, double _r, btShapeManager* _sm, glm::vec3 spawn, float radius, float height, float mass,
+	NonPC(double _h, double _r, btShapeManager* _sm, glm::vec3 _spawn, float radius, float height, float mass,
 		Model* _bmodel, GLuint _shader, GLuint _text /*other parameters*/) {
 		health = _h;
+		max_hp = _h;
 		range = _r;
 		shapeManager = _sm;
 		boundingModel = _bmodel;
+
+		spawn = _spawn;
 		//shader = _shader;
 		texture = _text;
 		// Construct body
@@ -266,7 +256,32 @@ public:
 
 	void setState(npcState newState) { this->currentState = newState; }
 	npcState getState() { return this->currentState; }
+
+	void reset() {
+		this->health = this->max_hp;
+		btTransform t;
+		t.setIdentity();
+		t.setOrigin(btVector3(spawn.x, spawn.x, -spawn.x));
+		npcBody->setWorldTransform(t);
+		//;
+	}
 protected:
+	//string name;
+	// ++
+	btShapeManager *shapeManager;
+	btRigidBody* npcBody;
+	btPairCachingGhostObject* npcGhost;
+	//
+	Model * boundingModel;
+	// Model
+	//GLuint shader;
+	GLuint texture;
+	/// ++++
+	queue<vertex*> currentPath;
+	double recalcTimer = REFRESHRATE;
+	double attackTimer = 0;
+	glm::vec3 spawn;
+	double max_hp;
 	double health;
 	double range;
 	double attack;
