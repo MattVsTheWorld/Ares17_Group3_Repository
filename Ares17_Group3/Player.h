@@ -11,7 +11,7 @@
 #define INVINC_TIME 0.5f
 
 #define SPEED_CAP_XZ 8.0
-#define FRICTION 4.0
+#define FRICTION 5.6
 #define SPEED_CAP_Y 2.5f
 
 #define HEALTH_CAP 300

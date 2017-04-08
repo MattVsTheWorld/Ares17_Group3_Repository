@@ -9,27 +9,14 @@ namespace SceneManager {
 	std::shared_ptr<GlobalData> globalData;
 
 	//Player *player;
-	PointLight mainLight{
-		glm::vec3(0.0f, 25.0f, 0.0f),
 
-		ATTENUATION_CONST, ATTENUATION_LINEAR, ATTENUATION_QUAD,
-
-		glm::vec3(AMBIENT_FACTOR,AMBIENT_FACTOR,AMBIENT_FACTOR),
-		glm::vec3(DIFFUSE_FACTOR,DIFFUSE_FACTOR,DIFFUSE_FACTOR),
-		glm::vec3(SPECULAR_FACTOR,SPECULAR_FACTOR,SPECULAR_FACTOR)
-	};
 
 	// Shaders
 //	GLuint shaderProgram;
 	GLuint texturedProgram;
 	GLuint modelProgram;
 	//GLuint animatedModelProgram;
-
-	//hudManager *h_manager;
 	Skybox *skybox;
-	//btShapeManager *bt_manager;
-	//Projectile *projectile_manager;
-	//SoundManager *sound_manager;
 
 	gameState currentState = MENU;
 	float pauseTimeout = 1.0f;
@@ -40,7 +27,6 @@ namespace SceneManager {
 	float theta = 0;
 	//	enum pov { FIRST_PERSON, THIRD_PERSON };
 	//	pov pointOfView = FIRST_PERSON;
-	enum modes { PLAY, EDIT };
 	modes mode = PLAY;
 
 	bound boundingType = BOX;
@@ -66,9 +52,7 @@ namespace SceneManager {
 	//////////////////
 	/// End
 	//////////////////
-
 	// +++ \_/
-	//TODO: vector
 	vector <AbstractNPC *> enemies;
 	// +++ /-\
 
@@ -88,7 +72,6 @@ namespace SceneManager {
 	vector<tuple <btPairCachingGhostObject*, string, string>> collectables;
 
 	tuple<std::string, glm::vec3, glm::vec3, glm::vec3> temp[2]; //name, position, scale, rotation
-
 
 	string currentModel = "box";
 	string currentBounding = "box";
@@ -111,6 +94,19 @@ namespace SceneManager {
 	glm::vec3 eye(2.0f, 3.0f, -6.0f);
 	glm::vec3 at(0.0f, 0.5f, -1.0f);
 	glm::vec3 up(0.0f, 1.0f, 0.0f);
+
+
+	float mass = 0;
+	unsigned int objectID = 0;
+	unsigned int worldObjectID = 0;
+	std::string selectedKey = "";
+	std::string selectedPrev = "";
+
+	bool leftClick = false;
+	bool rightClick = false;
+	bool creation = false;
+	float coolDown = 0.0f; //wait between shots
+	bool shiftPressed = true;
 
 	// Old movement methods, used in edit mode (?)
 	glm::vec3 moveForward(glm::vec3 pos, GLfloat angle, GLfloat d) {
@@ -684,6 +680,7 @@ namespace SceneManager {
 	void init(SDL_Window * window) {
 
 		globalData = make_shared<GlobalData>(eye);
+
 		//cout << globalData->foo << endl;
 		// Preliminary loading for loading screen
 		texturedProgram = ShaderManager::initShaders("Shaders/textured.vert", "Shaders/textured.frag");
@@ -805,17 +802,6 @@ namespace SceneManager {
 		return dt_secs;
 	}
 
-	float mass = 0;
-	unsigned int objectID = 0;
-	unsigned int worldObjectID = 0;
-	std::string selectedKey = "";
-	std::string selectedPrev = "";
-
-	bool leftClick = false;
-	bool rightClick = false;
-	bool creation = false;
-	float coolDown = 0.0f; //wait between shots
-	bool shiftPressed = true;
 	//*****************************CONTROLS********************
 	void controls(SDL_Window * window, SDL_Event sdlEvent) {
 		int MidX = SCREENWIDTH / 2;
@@ -853,7 +839,7 @@ namespace SceneManager {
 		if (keys[SDL_SCANCODE_P] && clickable)
 		{
 			clickable = false;
-			// Pause
+			// Pausee
 			if (currentState == RUNNING) {
 				for (const auto it : enemies) 
 					it->setState(PAUSED);
@@ -1433,7 +1419,7 @@ namespace SceneManager {
 			if (globalData->player->getState() == JUMPING)
 				if (findCollision(ghostObject))
 					globalData->player->setState(ON_GROUND);
-			updateCollectables();
+				updateCollectables();
 			theta += 0.1;
 			globalData->bt_manager->update();
 		}
@@ -1470,36 +1456,36 @@ namespace SceneManager {
 		GLuint uniformIndex = glGetUniformLocation(shader, "viewPos");
 		glUniform3fv(uniformIndex, 1, glm::value_ptr(globalData->player->getPosition()));
 		uniformIndex = glGetUniformLocation(shader, "pointLight.position");
-		glUniform3f(uniformIndex, mainLight.position.x, mainLight.position.y, mainLight.position.z);
+		glUniform3f(uniformIndex, globalData->mainLight.position.x, globalData->mainLight.position.y, globalData->mainLight.position.z);
 		uniformIndex = glGetUniformLocation(shader, "pointLight.ambient");
-		glUniform3f(uniformIndex, mainLight.ambient.r, mainLight.ambient.g, mainLight.ambient.b);
+		glUniform3f(uniformIndex, globalData->mainLight.ambient.r, globalData->mainLight.ambient.g, globalData->mainLight.ambient.b);
 		uniformIndex = glGetUniformLocation(shader, "pointLight.diffuse");
-		glUniform3f(uniformIndex, mainLight.diffuse.r, mainLight.diffuse.g, mainLight.diffuse.b);
+		glUniform3f(uniformIndex, globalData->mainLight.diffuse.r, globalData->mainLight.diffuse.g, globalData->mainLight.diffuse.b);
 		uniformIndex = glGetUniformLocation(shader, "pointLight.specular");
-		glUniform3f(uniformIndex, mainLight.specular.r, mainLight.specular.g, mainLight.specular.b);
+		glUniform3f(uniformIndex, globalData->mainLight.specular.r, globalData->mainLight.specular.g, globalData->mainLight.specular.b);
 		uniformIndex = glGetUniformLocation(shader, "pointLight.constant");
-		glUniform1f(uniformIndex, mainLight.att_constant);
+		glUniform1f(uniformIndex, globalData->mainLight.att_constant);
 		uniformIndex = glGetUniformLocation(shader, "pointLight.linear");
-		glUniform1f(uniformIndex, mainLight.att_linear);
+		glUniform1f(uniformIndex, globalData->mainLight.att_linear);
 		uniformIndex = glGetUniformLocation(shader, "pointLight.quadratic");
-		glUniform1f(uniformIndex, mainLight.att_quadratic);
+		glUniform1f(uniformIndex, globalData->mainLight.att_quadratic);
 	}
 
 	void pointShadow(GLuint shader) {
 		glm::mat4 shadowProj = glm::perspective(float(90.0f*DEG_TO_RADIAN), aspect, near_plane, far_plane); //perspective projection is the best suited for this
 		std::vector<glm::mat4> shadowTransforms;
 		shadowTransforms.push_back(shadowProj *
-			glm::lookAt(mainLight.position, mainLight.position + glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0)));
+			glm::lookAt((globalData->mainLight).position, globalData->mainLight.position + glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0)));
 		shadowTransforms.push_back(shadowProj *
-			glm::lookAt(mainLight.position, mainLight.position + glm::vec3(-1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0)));
+			glm::lookAt((globalData->mainLight).position, globalData->mainLight.position + glm::vec3(-1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0)));
 		shadowTransforms.push_back(shadowProj *
-			glm::lookAt(mainLight.position, mainLight.position + glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0, 0.0, 1.0)));
+			glm::lookAt((globalData->mainLight).position, globalData->mainLight.position + glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0, 0.0, 1.0)));
 		shadowTransforms.push_back(shadowProj *
-			glm::lookAt(mainLight.position, mainLight.position + glm::vec3(0.0, -1.0, 0.0), glm::vec3(0.0, 0.0, -1.0)));
+			glm::lookAt((globalData->mainLight).position, globalData->mainLight.position + glm::vec3(0.0, -1.0, 0.0), glm::vec3(0.0, 0.0, -1.0)));
 		shadowTransforms.push_back(shadowProj *
-			glm::lookAt(mainLight.position, mainLight.position + glm::vec3(0.0, 0.0, 1.0), glm::vec3(0.0, -1.0, 0.0)));
+			glm::lookAt((globalData->mainLight).position, globalData->mainLight.position + glm::vec3(0.0, 0.0, 1.0), glm::vec3(0.0, -1.0, 0.0)));
 		shadowTransforms.push_back(shadowProj *
-			glm::lookAt(mainLight.position, mainLight.position + glm::vec3(0.0, 0.0, -1.0), glm::vec3(0.0, -1.0, 0.0)));
+			glm::lookAt((globalData->mainLight).position, globalData->mainLight.position + glm::vec3(0.0, 0.0, -1.0), glm::vec3(0.0, -1.0, 0.0)));
 
 		for (int k = 0; k < 6; ++k)
 			glUniformMatrix4fv(glGetUniformLocation(shader, ("shadowMatrices[" + std::to_string(k) + "]").c_str()), 1, GL_FALSE, glm::value_ptr(shadowTransforms[k]));

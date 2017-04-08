@@ -35,24 +35,6 @@
 #define MODEL_SCALING 0.01f
 #define BOUNDING_SCALING 0.05f
 
-#define AMBIENT_FACTOR 1.0f
-#define DIFFUSE_FACTOR 0.9f
-#define SPECULAR_FACTOR 1.0f
-#define ATTENUATION_CONST 0.035f
-#define ATTENUATION_LINEAR 0.0065f
-#define ATTENUATION_QUAD 0.0024f
-
-struct PointLight {
-	glm::vec3 position;
-
-	float att_constant;
-	float att_linear;
-	float att_quadratic;
-
-	glm::vec3 ambient;
-	glm::vec3 diffuse;
-	glm::vec3 specular;
-};
 
 enum gameState {
 	RUNNING, PAUSE, MENU
