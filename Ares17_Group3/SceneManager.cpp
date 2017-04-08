@@ -1263,20 +1263,31 @@ namespace SceneManager {
 		if (keys[SDL_SCANCODE_1]) {
 			if (currentState == MENU)
 				currentState = PAUSE;
+			if (currentState == RUNNING)
+				globalData->player->setWeapon(PISTOL);
 		}
-		if (keys[SDL_SCANCODE_2])
+		if (keys[SDL_SCANCODE_2]) {
 			if (currentState == MENU) {
 				reset(); //TODO: SK 2
 				currentState = PAUSE;
 			}
+			if (currentState == RUNNING)
+				globalData->player->setWeapon(NUKA);
+		}
 		if (keys[SDL_SCANCODE_3]) {
-			exit(0);
+			if (currentState == MENU)
+				exit(0);
+			if (currentState == RUNNING)
+				globalData->player->setWeapon(RIFLE);
+
 		}
 		if (keys[SDL_SCANCODE_ESCAPE]) {
 			if (currentState == PAUSE)
 				currentState = MENU;
 		}
 
+		if (keys[SDL_SCANCODE_6])
+			exit(0);
 		//if (keys[SDL_SCANCODE_ESCAPE]) {
 		//	exit(0);
 		//}
@@ -1387,7 +1398,7 @@ namespace SceneManager {
 		model = glm::rotate(model, -rotationAngles.y*DEG_TO_RADIAN, glm::vec3(0.0, 1.0, 0.0));
 		model = glm::rotate(model, local_pitch, glm::vec3(1.0, 0.0, 0.0));
 		model = glm::rotate(model, float(80 * DEG_TO_RADIAN), glm::vec3(0.0, 1.0, 0.0));
-		model = glm::scale(model, glm::vec3(0.25f, 0.25f, 0.25f));
+		model = glm::scale(model,scale);
 		//TODO: I can't fix this. If you want, give it a try. good luck.
 		glUniformMatrix4fv(glGetUniformLocation(shader, "projection"), 1, GL_FALSE, glm::value_ptr(glm::mat4()));
 		glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
@@ -1461,18 +1472,8 @@ namespace SceneManager {
 			if (defeatTime <= 0) {
 				reset();
 			}
-
-
-			//
-			//need restart rest
-			//
 		}
 
-
-
-		//world->stepSimulation(1/60.0); // 1 divided by frames per second
-		// would need to delete dispatcher, collisionconfig, solver, world, broadphase in main
-		// +++++
 	}
 
 	void camera() {
@@ -1753,7 +1754,22 @@ namespace SceneManager {
 				// fps counter; 5 of 5
 				//h_manager->renderToHud(5, texturedProgram, modelTypes["cube"], glm::vec3(-0.0f, 0.0f, 0.9f));
 
-				renderWeapon(projection, modelTypes["scifipistol"], modelProgram, glm::vec3(0.05, 0.05, 0.05)); //TODO: Render current weapon
+				string wepType;
+				glm::vec3 wepScale;
+				if (globalData->player->getWeapon() == PISTOL) {
+					wepType = "scifipistol";
+					wepScale = glm::vec3(0.25f, 0.25f, 0.25f);
+				}
+				else if (globalData->player->getWeapon() == NUKA) {
+					wepType = "nukacola";
+					wepScale = glm::vec3(0.003f, 0.004f, 0.003f);
+				}
+				else if (globalData->player->getWeapon() == RIFLE) {
+					wepType = "ak47";
+					wepScale = glm::vec3(0.075f, 0.075f, 0.075f);
+				}
+
+				renderWeapon(projection, modelTypes[wepType], modelProgram, wepScale); //TODO: Render current weapon
 				renderHud(texturedProgram, modelTypes["cube"]);
 				
 				if (mode == EDIT) {

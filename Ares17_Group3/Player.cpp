@@ -8,6 +8,7 @@ Player::Player(glm::vec3 _eye, float rad, float height, float mass, btShapeManag
 	invincible = false;
 	speed = SPEED_CAP_XZ;
 	vitState = ALIVE;
+	currentWep = PISTOL;
 
 	bt_manager = _btMan;
 
@@ -88,6 +89,8 @@ lifeState Player::getLifeState() { return this->vitState; }
 void Player::setHealth(double hp) { this->health = hp; }
 void Player::setArmor(double arm) { this->armor = arm; }
 void Player::setSpeed(double sp) { this->speed = sp; }
+void Player::setWeapon(equippedWep newWep) { this->currentWep = newWep; }
+equippedWep Player::getWeapon() { return this->currentWep; }
 
 void Player::takeDamage(double damage) {
 	if (!this->invincible)

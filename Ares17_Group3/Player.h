@@ -20,6 +20,7 @@
 
 enum playerState { ON_GROUND, JUMPING };
 enum lifeState { ALIVE, DEAD };
+enum equippedWep { PISTOL, NUKA, RIFLE };
 
 class Player {
 public:
@@ -33,6 +34,8 @@ public:
 	double getArmor();
 	double getSpeed();
 	lifeState getLifeState();
+	void setWeapon(equippedWep newWep);
+	equippedWep getWeapon();
 	void setHealth(double hp);
 	void setArmor(double arm);
 	void takeDamage(double damage);
@@ -50,6 +53,7 @@ private:
 	glm::vec3 eye;
 	playerState currentState;
 	lifeState vitState;
+	equippedWep currentWep;
 	double speed;
 	double health;
 	double armor;
@@ -57,7 +61,6 @@ private:
 	float invincibility_f;
 
 	btShapeManager *bt_manager;
-
 
 
 };
