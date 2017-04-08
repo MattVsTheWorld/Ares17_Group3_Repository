@@ -7,6 +7,7 @@ Player::Player(glm::vec3 _eye) {
 	armor = 100;
 	invincible = false;
 	speed = SPEED_CAP_XZ;
+	vitState = ALIVE;
 }
 
 void Player::update(float dt) {
@@ -18,12 +19,12 @@ void Player::update(float dt) {
 			this->invincible = false;
 		}
 	}
-
 	if (this->health >= HEALTH_CAP)
 		this->health = HEALTH_CAP;
-
 	if (this->armor >= ARMOR_CAP)
 		this->armor = ARMOR_CAP;
+	if (this->health <= 0)
+		this->vitState = DEAD;
 }
 
 
@@ -45,6 +46,7 @@ void Player::setState(playerState newState) {
 double Player::getHealth() { return this->health; }
 double Player::getArmor() { return this->armor; }
 double Player::getSpeed() { return this->speed; }
+lifeState Player::getLifeState() { return this->vitState; }
 void Player::setHealth(double hp) { this->health = hp; }
 void Player::setArmor(double arm) { this->armor = arm; }
 void Player::setSpeed(double sp) { this->speed = sp; }
@@ -53,12 +55,21 @@ void Player::takeDamage(double damage) {
 	if (!this->invincible)
 	{
 		this->invincible = true;
-		//		std::cout << "NO DAMGIO" << std::endl;
+		//	std::cout << "NO DAMGIO" << std::endl;
 		if (this->armor > 0)
 			this->armor -= (damage / 2);
-		else
+		else {
 			this->health -= damage;
+			if (this->health <= 0)
+				this->health = 0;
+		}
 		//	std::cout << "Took a hit! Hp now: " << this->health << std::endl;
 	}
 
+}
+
+void Player::restart() {
+	this->vitState = ALIVE;
+	this->health = 200;
+	this->armor = 100;
 }

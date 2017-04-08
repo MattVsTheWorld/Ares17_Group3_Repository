@@ -33,6 +33,8 @@ public:
 
 	void renderMenu(GLuint shader, Model *modelData);
 
+	void renderDefeat(GLuint shader, Model *modelData);
+
 private:
 	TTF_Font * textFont, * menuFont;
 	GLuint label;
@@ -40,7 +42,8 @@ private:
 	GLuint pauseLabel[3];
 	GLuint loadingScreen;
 	GLuint menuScreen;
-	GLuint menuLabel[3];
+	GLuint defeatScreen;
+	GLuint menuLabel[4];
 	currentVals _current;
 
 	GLuint changeLabel(string line, double value) {

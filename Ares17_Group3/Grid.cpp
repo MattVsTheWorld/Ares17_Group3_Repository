@@ -54,7 +54,7 @@ Grid::Grid() {
 		}
 	}
 
-	cout << "Index no :" << index << endl;
+	//cout << "Index no :" << index << endl;
 	//for (const auto &it : grid)
 	//	it
 	//grid[i][j] = new Node(true, glm::vec3(i, 0, j));

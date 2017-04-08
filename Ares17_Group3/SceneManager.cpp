@@ -108,6 +108,8 @@ namespace SceneManager {
 	float coolDown = 0.0f; //wait between shots
 	bool shiftPressed = true;
 
+	float defeatTime = 3.0f;
+
 	// Old movement methods, used in edit mode (?)
 	glm::vec3 moveForward(glm::vec3 pos, GLfloat angle, GLfloat d) {
 		return glm::vec3(pos.x + d*std::sin(rotationAngles.y*DEG_TO_RADIAN), pos.y, pos.z - d*std::cos(rotationAngles.y*DEG_TO_RADIAN));
@@ -1243,16 +1245,18 @@ namespace SceneManager {
 
 		//	if (keys[SDL_SCANCODE_3]) bodies[4]->setLinearVelocity(btVector3(0.0, 0.0, 4.0));
 		if (keys[SDL_SCANCODE_1]) {
-			currentState = RUNNING;
+			if (currentState == MENU)
+				currentState = PAUSE;
 		}
-		if (keys[SDL_SCANCODE_2]) {
+		if (keys[SDL_SCANCODE_2])
+			; //TODO: SK 2
+		if (keys[SDL_SCANCODE_3]) {
 			exit(0);
 		}
 		if (keys[SDL_SCANCODE_ESCAPE]) {
 			if (currentState == PAUSE)
 				currentState = MENU;
 		}
-
 
 		//if (keys[SDL_SCANCODE_ESCAPE]) {
 		//	exit(0);
@@ -1383,6 +1387,8 @@ namespace SceneManager {
 		globalData->player->setPosition(glm::vec3(pos.x(), pos.y(), pos.z()));
 		ghostObject->setWorldTransform(t);
 		globalData->player->update(dt);
+
+
 		//cout << getLinearVelocityInBodyFrame(playerBody).y();
 	}
 
@@ -1425,6 +1431,21 @@ namespace SceneManager {
 			updateCollectables();
 			theta += 0.1;
 			globalData->bt_manager->update();
+		}
+
+		if (globalData->player->getLifeState() == DEAD)
+		{
+			currentState = DEFEAT;
+
+			defeatTime -= dt_secs;
+			if (defeatTime <= 0) {
+				currentState = MENU;
+				globalData->player->restart();
+				defeatTime = 3.0f;
+			}
+			//
+			//need restart rest
+			//
 		}
 
 
@@ -1643,16 +1664,21 @@ namespace SceneManager {
 	}
 
 	void renderHud(GLuint shader, Model *modelData) {
-		// HP
-		globalData->h_manager->renderPlayerHud("Health: ", globalData->player->getHealth(), HEALTH, shader, modelData, glm::vec3(-0.875f, 0.925f, 1.0f), glm::vec3(0.6275,0.4,0.0));
-
-		// Armor
-		globalData->h_manager->renderPlayerHud("Armor: ", globalData->player->getArmor(), ARMOR, shader, modelData, glm::vec3(-0.65f, 0.925f, 1.0f), glm::vec3(0, 0, 0.4));
-
+	
 		if (currentState == PAUSE)
 			globalData->h_manager->renderPause(texturedProgram, modelTypes["cube"]);
-		if (currentState == MENU)
+		else if (currentState == MENU)
 			globalData->h_manager->renderMenu(texturedProgram, modelTypes["cube"]);
+		else if (currentState == DEFEAT)
+			globalData->h_manager->renderDefeat(texturedProgram, modelTypes["cube"]);
+		else {
+			// HP
+			globalData->h_manager->renderPlayerHud("Health: ", globalData->player->getHealth(), HEALTH, shader, modelData, glm::vec3(-0.875f, 0.925f, 1.0f), glm::vec3(0.6275, 0.4, 0.0));
+
+			// Armor
+			globalData->h_manager->renderPlayerHud("Armor: ", globalData->player->getArmor(), ARMOR, shader, modelData, glm::vec3(-0.65f, 0.925f, 1.0f), glm::vec3(0, 0, 0.4));
+
+		}
 	}
 
 	void draw(SDL_Window * window) { //, int fps) { // fps counter; 4 of 5

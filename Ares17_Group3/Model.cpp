@@ -29,7 +29,7 @@ void Model::loadModel(string path)
 
 	m_GlobalInverseTransform = scene->mRootNode->mTransformation;
 
-	cout << "load: " << scene->mMeshes[0]->mNumVertices << endl;
+	//cout << "load: " << scene->mMeshes[0]->mNumVertices << endl;
 
 	m_NumBones = 0;
 	

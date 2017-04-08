@@ -38,7 +38,7 @@
 
 
 enum gameState {
-	RUNNING, PAUSE, MENU
+	RUNNING, PAUSE, MENU, DEFEAT
 };
 
 enum bound { 

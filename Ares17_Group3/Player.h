@@ -18,6 +18,7 @@
 #define ARMOR_CAP 100
 
 enum playerState { ON_GROUND, JUMPING };
+enum lifeState { ALIVE, DEAD };
 
 class Player {
 public:
@@ -30,15 +31,19 @@ public:
 	double getHealth();
 	double getArmor();
 	double getSpeed();
+	lifeState getLifeState();
 	void setHealth(double hp);
 	void setArmor(double arm);
 	void takeDamage(double damage);
 	void setSpeed(double sp);
+
+	void restart();
 protected:
 
 private:
 	glm::vec3 eye;
 	playerState currentState;
+	lifeState vitState;
 	double speed;
 	double health;
 	double armor;
