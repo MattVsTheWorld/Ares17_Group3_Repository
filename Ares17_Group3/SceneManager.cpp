@@ -660,8 +660,17 @@ namespace SceneManager {
 
 	void initEnemies() {
 		enemies.insert(new Melee(new NonPC(100, 5,
-			globalData->bt_manager, glm::vec3(0, 10, 0), 
+			globalData->bt_manager, glm::vec3(0, 5, 0), 
 			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture)));
+
+		enemies.insert(new Melee(new NonPC(100, 5,
+			globalData->bt_manager, glm::vec3(25, 10, 0),
+			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture)));
+
+		enemies.insert(new Melee(new NonPC(100, 5,
+			globalData->bt_manager, glm::vec3(0, 10, -10),
+			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture)));
+
 	}
 	void init(SDL_Window * window) {
 
@@ -1404,6 +1413,25 @@ namespace SceneManager {
 		}
 	}
 
+	void reset() {
+		currentState = MENU;
+		globalData->player->restart();
+		defeatTime = 3.0f;
+
+		for (auto it = enemies.begin(); it != enemies.end(); )
+			it = enemies.erase(it);
+		initEnemies();
+
+		for (const auto it : bodies)
+			globalData->bt_manager->removeObject(it.second);
+		for (const auto it : collectables)
+			globalData->bt_manager->removeObject(get<0>(it));
+
+		collectables.clear();
+		bodies.clear();
+		initBoxes();
+
+	}
 	void update(SDL_Window * window, SDL_Event sdlEvent) {
 		controls(window, sdlEvent);
 		dt_secs = gameTime();
@@ -1425,14 +1453,7 @@ namespace SceneManager {
 
 			defeatTime -= dt_secs;
 			if (defeatTime <= 0) {
-				currentState = MENU;
-				globalData->player->restart();
-				defeatTime = 3.0f;
-
-				for (auto it = enemies.begin(); it != enemies.end(); )
-					it = enemies.erase(it);
-				initEnemies();
-
+				reset();
 			}
 
 

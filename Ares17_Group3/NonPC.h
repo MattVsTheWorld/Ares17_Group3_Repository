@@ -89,7 +89,7 @@ public:
 		btRigidBody::btRigidBodyConstructionInfo info(mass, motion, capsule, inertia);
 		btRigidBody* body = new btRigidBody(info);
 		body->setAngularFactor(btVector3(0, 1, 0));
-		shapeManager->addToWorld(body, COL_ENEMY, COL_BULLET | COL_PLAYER | COL_DEFAULT); // Can add COL_ENEMY for enemy to enemy collision
+		shapeManager->addToWorld(body, COL_ENEMY, COL_BULLET | COL_PLAYER | COL_DEFAULT | COL_ENEMY); // Can add COL_ENEMY for enemy to enemy collision
 
 		return body;
 	}
@@ -111,7 +111,7 @@ public:
 		tempGhost->setCollisionShape(temp->getCollisionShape());
 		tempGhost->setWorldTransform(temp->getWorldTransform());
 		tempGhost->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);
-		shapeManager->addGhostToWorld(tempGhost, COL_ENEMY, COL_BULLET); // Can add COL_ENEMY for enemy to enemy collision
+		shapeManager->addGhostToWorld(tempGhost, COL_ENEMY, COL_BULLET);
 		npcBody = temp;
 		npcGhost = tempGhost;
 
