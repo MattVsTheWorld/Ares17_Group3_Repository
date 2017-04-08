@@ -7,41 +7,24 @@ typedef std::pair<string, btRigidBody*> bodyID;
 namespace SceneManager {
 
 	std::shared_ptr<GlobalData> globalData;
-
-	//Player *player;
-
-
 	// Shaders
-//	GLuint shaderProgram;
 	GLuint texturedProgram;
 	GLuint modelProgram;
-	//GLuint animatedModelProgram;
 	Skybox *skybox;
-
 	gameState currentState = MENU;
 	float pauseTimeout = 1.0f;
 	bool clickable = true;
-
 	unsigned int lastTime = 0, currentTime;
 	float dt_secs;
 	float theta = 0;
-	//	enum pov { FIRST_PERSON, THIRD_PERSON };
-	//	pov pointOfView = FIRST_PERSON;
 	modes mode = PLAY;
-
 	bound boundingType = BOX;
-
 	editStages stage = MODEL;
 
 	// SHADOWS
 	GLuint depthShaderProgram; //shader to create shadow cubemaps
-
-	//////////////////
-	/// FBO globals
-	//////////////////
 	GLuint depthMapFBO; // FBO
 	GLuint depthCubemap;
-	//GLuint depthMap;	// FBO texture
 	const GLuint SHADOW_WIDTH = 1440, SHADOW_HEIGHT = 1440;
 	GLfloat aspect = (GLfloat)SHADOW_WIDTH / (GLfloat)SHADOW_HEIGHT;
 	// near and far act the same as near and far plane for camera, but this is for shadows
@@ -50,11 +33,7 @@ namespace SceneManager {
 	GLfloat near_plane = 0.01f;
 	GLfloat far_plane = 60.0f;
 	//////////////////
-	/// End
-	//////////////////
-	// +++ \_/
-	vector <AbstractNPC *> enemies;
-	// +++ /-\
+	unordered_set<AbstractNPC *> enemies;
 
 	const char *testTexFiles[6] = {
 		"Town-skybox/Town_bk.bmp", "Town-skybox/Town_ft.bmp", "Town-skybox/Town_rt.bmp", "Town-skybox/Town_lf.bmp", "Town-skybox/Town_up.bmp", "Town-skybox/Town_dn.bmp"
@@ -679,6 +658,11 @@ namespace SceneManager {
 		return false;
 	}
 
+	void initEnemies() {
+		enemies.insert(new Melee(new NonPC(100, 5,
+			globalData->bt_manager, glm::vec3(0, 10, 0), 
+			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture)));
+	}
 	void init(SDL_Window * window) {
 
 		globalData = make_shared<GlobalData>(eye);
@@ -729,7 +713,8 @@ namespace SceneManager {
 		// +++ \_/
 		// health, range, manager, sp, radius, height, mass, model, shader, textuer
 		//for (int i = 0; i < 3; i++) {
-		enemies.push_back(new Melee(new NonPC(100, 5, globalData->bt_manager, glm::vec3(0, 10, 0), 1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture)));
+		initEnemies();
+		
 		//	enemies.push_back(new Melee(new NonPC(100, 10, bt_manager, glm::vec3(2, 10, 0), 1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture)));
 			//}
 			// +++ /-\
@@ -799,6 +784,7 @@ namespace SceneManager {
 		float dt_secs = (float)dt / 1000;
 		if (dt_secs > 0.017f) dt_secs = 0.017f; // first value is off ( 5.5~)
 
+	
 		lastTime = currentTime;
 
 		return dt_secs;
@@ -1443,8 +1429,9 @@ namespace SceneManager {
 				globalData->player->restart();
 				defeatTime = 3.0f;
 
-				for (const auto i : enemies)
-					i->reset();
+				for (auto it = enemies.begin(); it != enemies.end(); )
+					it = enemies.erase(it);
+				initEnemies();
 
 			}
 
@@ -1538,11 +1525,19 @@ namespace SceneManager {
 		//TODO: Finish enemies
 		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		//glDisable(GL_CULL_FACE);
-		for (int i = 0; i < enemies.size(); i++) {
-			if (!enemies[i]->update(modelTypes["robot"], view, projection, dt_secs, globalData->level1Grid, globalData->player, shader)) {
-				enemies.erase(remove(enemies.begin(), enemies.end(), enemies[i]), enemies.end());
-				//TODO: space to add stuff
-			}
+		//for (int i = 0; i < enemies.size(); i++) {
+			//for (auto i : enemies){
+			//if (!i->update(modelTypes["robot"], view, projection, dt_secs, globalData->level1Grid, globalData->player, shader)) {
+			//	enemies.erase(remove(enemies.begin(), enemies.end(), i), enemies.end());
+			//	//TODO: space to add stuff
+			//}
+
+
+			for (auto it = enemies.begin(); it != enemies.end(); ) {
+				if (!(*it)->update(modelTypes["robot"], view, projection, dt_secs, globalData->level1Grid, globalData->player, shader))
+					it = enemies.erase(it);
+				else
+					++it;
 		}
 
 		for (const auto& id_pair : bodies) {

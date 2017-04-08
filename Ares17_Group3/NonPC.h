@@ -258,11 +258,13 @@ public:
 	npcState getState() { return this->currentState; }
 
 	void reset() {
-		this->health = this->max_hp;
+	/*	this->health = this->max_hp;
 		btTransform t;
 		t.setIdentity();
-		t.setOrigin(btVector3(spawn.x, spawn.x, -spawn.x));
-		npcBody->setWorldTransform(t);
+		npcBody->getMotionState()->getWorldTransform(t);
+		t.setOrigin(btVector3(spawn.x, spawn.y, spawn.z));
+		this->npcBody->setWorldTransform(t);
+		this->npcBody->setLinearVelocity(btVector3(0.5, -0.5, 0.0));*/
 		//;
 	}
 protected:
