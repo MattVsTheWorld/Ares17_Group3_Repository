@@ -179,6 +179,7 @@
     <ClInclude Include="bass.h" />
     <ClInclude Include="btShapeManager.h" />
     <ClInclude Include="AbstractNPC.h" />
+    <ClInclude Include="GlobalData.h" />
     <ClInclude Include="Grid.h" />
     <ClInclude Include="hudManager.h" />
     <ClInclude Include="loadBitmap.h" />

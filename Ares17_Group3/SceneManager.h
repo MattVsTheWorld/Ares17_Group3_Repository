@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef SCENEMANAGER
 #define SCENEMANAGER
 
@@ -22,6 +24,9 @@
 #include "Projectile.h"
 #include "NPCDecorator.h"
 //+++
+
+// !!!
+#include "GlobalData.h"
 
 #define DEG_TO_RADIAN 0.017453293f
 #define PI 3.14159265359f
@@ -52,6 +57,19 @@ struct PointLight {
 enum gameState {
 	RUNNING, PAUSE, MENU
 };
+
+enum bound { 
+	BOX, SPHERE, CAPSULE 
+};
+
+enum editStages { 
+	MODEL, BOUNDING 
+};
+
+enum modes { 
+	PLAY, EDIT
+};
+
 namespace SceneManager {
 
 	void init(SDL_Window * window);

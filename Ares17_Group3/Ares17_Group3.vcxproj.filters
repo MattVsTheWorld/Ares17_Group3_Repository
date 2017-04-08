@@ -176,6 +176,9 @@
     <ClInclude Include="MeshManager.h">
       <Filter>Engine headers</Filter>
     </ClInclude>
+    <ClInclude Include="GlobalData.h">
+      <Filter>Being worked on</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\cubeMap.frag">
