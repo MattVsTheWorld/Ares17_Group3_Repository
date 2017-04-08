@@ -72,7 +72,7 @@ hudManager::hudManager() {
 	cstr = str.c_str();
 	menuLabel[1] = textToTexture(cstr, menuLabel[1], menuFont);
 
-	str = "[2] Options";
+	str = "[2] Restart";
 	cstr = str.c_str();
 	menuLabel[2] = textToTexture(cstr, menuLabel[2], menuFont);
 

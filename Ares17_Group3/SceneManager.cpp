@@ -672,6 +672,27 @@ namespace SceneManager {
 			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture)));
 
 	}
+
+	void reset() {
+		currentState = MENU;
+		globalData->player->restart();
+		defeatTime = 3.0f;
+
+		for (auto it = enemies.begin(); it != enemies.end(); )
+			it = enemies.erase(it);
+		initEnemies();
+
+		for (const auto it : bodies)
+			globalData->bt_manager->removeObject(it.second);
+		for (const auto it : collectables)
+			globalData->bt_manager->removeObject(get<0>(it));
+
+		collectables.clear();
+		bodies.clear();
+		initBoxes();
+
+	}
+
 	void init(SDL_Window * window) {
 
 		globalData = make_shared<GlobalData>(eye);
@@ -1244,7 +1265,10 @@ namespace SceneManager {
 				currentState = PAUSE;
 		}
 		if (keys[SDL_SCANCODE_2])
-			; //TODO: SK 2
+			if (currentState == MENU) {
+				reset(); //TODO: SK 2
+				currentState = PAUSE;
+			}
 		if (keys[SDL_SCANCODE_3]) {
 			exit(0);
 		}
@@ -1413,25 +1437,7 @@ namespace SceneManager {
 		}
 	}
 
-	void reset() {
-		currentState = MENU;
-		globalData->player->restart();
-		defeatTime = 3.0f;
-
-		for (auto it = enemies.begin(); it != enemies.end(); )
-			it = enemies.erase(it);
-		initEnemies();
-
-		for (const auto it : bodies)
-			globalData->bt_manager->removeObject(it.second);
-		for (const auto it : collectables)
-			globalData->bt_manager->removeObject(get<0>(it));
-
-		collectables.clear();
-		bodies.clear();
-		initBoxes();
-
-	}
+	
 	void update(SDL_Window * window, SDL_Event sdlEvent) {
 		controls(window, sdlEvent);
 		dt_secs = gameTime();
