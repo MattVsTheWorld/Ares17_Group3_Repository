@@ -77,7 +77,7 @@ namespace SceneManager {
 	string currentBounding = "box";
 
 	// TEST
-	btRigidBody* playerBody;
+	//btRigidBody* playerBody;
 	Model* animated;
 	Model* animated2;
 
@@ -147,7 +147,7 @@ namespace SceneManager {
 	// Speedforward/right allow moving the player in camera direction
 	// Also remembered as that one time I managed to fit a conditional operator somewhere
 	btVector3 speedForward(GLfloat _speed, GLfloat angle, bool concurrent) {
-		btVector3 speed = getLinearVelocityInBodyFrame(playerBody);
+		btVector3 speed = getLinearVelocityInBodyFrame(globalData->player->playerBody);
 
 		if (!concurrent && speed.absolute().x() <= globalData->player->getSpeed() && speed.absolute().z() <= globalData->player->getSpeed())
 			speed = btVector3(speed.x() + _speed*std::sin(angle*DEG_TO_RADIAN), speed.y(), speed.z() - _speed*std::cos(angle*DEG_TO_RADIAN));
@@ -159,7 +159,7 @@ namespace SceneManager {
 	btVector3 speedRight(GLfloat _speed, GLfloat angle, bool concurrent) {
 
 		//playerBody->getVelocityInLocalPoint();
-		btVector3 speed = getLinearVelocityInBodyFrame(playerBody);
+		btVector3 speed = getLinearVelocityInBodyFrame(globalData->player->playerBody);
 		if (!concurrent && speed.absolute().x() <= globalData->player->getSpeed() && speed.absolute().z() <= globalData->player->getSpeed())
 			speed = btVector3(speed.x() + _speed*std::cos(angle*DEG_TO_RADIAN), speed.y(), speed.z() + _speed*std::sin(angle*DEG_TO_RADIAN));
 		else if (concurrent)
@@ -168,7 +168,7 @@ namespace SceneManager {
 	}
 
 	btVector3 jump(GLfloat _speed) {
-		btVector3 speed = getLinearVelocityInBodyFrame(playerBody);
+		btVector3 speed = getLinearVelocityInBodyFrame(globalData->player->playerBody);
 		if (globalData->player->getState() != JUMPING) {
 			speed = btVector3(speed.x(), speed.y() + _speed, speed.z());
 			globalData->player->setState(JUMPING);
@@ -609,38 +609,38 @@ namespace SceneManager {
 	}
 
 	// +++!
-	btPairCachingGhostObject* ghostObject;
+	//btPairCachingGhostObject* ghostObject;
 
-	void initPlayer(float rad, float height, float mass) {
-		//player = new Player(eye);
+	//void initPlayer(float rad, float height, float mass) {
+	//	//player = new Player(eye);
 
-		btTransform t;
-		t.setIdentity();
-		t.setOrigin(btVector3(globalData->player->getPosition().x, globalData->player->getPosition().y, globalData->player->getPosition().z));
-		btCapsuleShape* playerShape = new btCapsuleShape(rad, height);
-		btVector3 inertia(0, 0, 0);
-		if (mass != 0.0)
-			playerShape->calculateLocalInertia(mass, inertia);
-		btMotionState* motion = new btDefaultMotionState(t);
-		btRigidBody::btRigidBodyConstructionInfo info(mass, motion, playerShape, inertia);
+	//	btTransform t;
+	//	t.setIdentity();
+	//	t.setOrigin(btVector3(globalData->player->getPosition().x, globalData->player->getPosition().y, globalData->player->getPosition().z));
+	//	btCapsuleShape* playerShape = new btCapsuleShape(rad, height);
+	//	btVector3 inertia(0, 0, 0);
+	//	if (mass != 0.0)
+	//		playerShape->calculateLocalInertia(mass, inertia);
+	//	btMotionState* motion = new btDefaultMotionState(t);
+	//	btRigidBody::btRigidBodyConstructionInfo info(mass, motion, playerShape, inertia);
 
-		playerBody = new btRigidBody(info);
-		playerBody->setAngularFactor(0); // Doesn't fall sideways
-		int playerCollidesWith = COL_DEFAULT | COL_ENEMY | COL_COLLECTABLE;
-		// body, group, mask
-		globalData->bt_manager->addToWorld(playerBody, COL_PLAYER, playerCollidesWith);
-		playerBody->setActivationState(DISABLE_DEACTIVATION);
-		playerBody->setFriction(FRICTION);
+	//	playerBody = new btRigidBody(info);
+	//	playerBody->setAngularFactor(0); // Doesn't fall sideways
+	//	int playerCollidesWith = COL_DEFAULT | COL_ENEMY | COL_COLLECTABLE;
+	//	// body, group, mask
+	//	globalData->bt_manager->addToWorld(playerBody, COL_PLAYER, playerCollidesWith);
+	//	playerBody->setActivationState(DISABLE_DEACTIVATION);
+	//	playerBody->setFriction(FRICTION);
 
-		// Now ghost
-		ghostObject = new btPairCachingGhostObject();								// create object
-		ghostObject->setCollisionShape(playerShape);								// set shape
-		ghostObject->setWorldTransform(t);											// set world transform	
-		ghostObject->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);  // disable collision response // could also add CF_CHARACTER_OBJECT // If I knew what that flag did...
+	//	// Now ghost
+	//	ghostObject = new btPairCachingGhostObject();								// create object
+	//	ghostObject->setCollisionShape(playerShape);								// set shape
+	//	ghostObject->setWorldTransform(t);											// set world transform	
+	//	ghostObject->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);  // disable collision response // could also add CF_CHARACTER_OBJECT // If I knew what that flag did...
 
-		globalData->bt_manager->addGhostToWorld(ghostObject, COL_PLAYER, playerCollidesWith);
+	//	globalData->bt_manager->addGhostToWorld(ghostObject, COL_PLAYER, playerCollidesWith);
 
-	}
+	//}
 
 	bool findCollision(btPairCachingGhostObject* ghostObject) { // ignore player?
 		btManifoldArray manifoldArray;
@@ -717,7 +717,7 @@ namespace SceneManager {
 		groundTexture = loadBitmap::loadBitmap("Textures/terrain.bmp");
 		heartTexture = loadBitmap::loadBitmap("Textures/ruby.bmp");
     
-		initPlayer(1.0f, 1.5f, 40.0f);
+		//initPlayer(1.0f, 1.5f, 40.0f);
 		initBoxes();
 		temp[0] = std::make_tuple(currentModel, at, glm::vec3(0.02, 0.02, 0.02), glm::vec3(0.0f, rotationAngles.y, 0.0f));
 		temp[1] = std::make_tuple(currentBounding, std::get<1>(temp[0]), glm::vec3(0.2, 0.2, 0.2), glm::vec3(0.0f, rotationAngles.y, 0.0f));
@@ -899,18 +899,18 @@ namespace SceneManager {
 				increase = 1.0f;
 			else increase = 0.3f;
 			if (keys[SDL_SCANCODE_W]) {
-				playerBody->setLinearVelocity(speedForward(increase, rotationAngles.y, (keys[SDL_SCANCODE_A] == SDL_PRESSED || keys[SDL_SCANCODE_D] == SDL_PRESSED)));
+				globalData->player->playerBody->setLinearVelocity(speedForward(increase, rotationAngles.y, (keys[SDL_SCANCODE_A] == SDL_PRESSED || keys[SDL_SCANCODE_D] == SDL_PRESSED)));
 			}
 			else if (keys[SDL_SCANCODE_S]) {
-				playerBody->setLinearVelocity(speedForward(-increase, rotationAngles.y, (keys[SDL_SCANCODE_A] == SDL_PRESSED || keys[SDL_SCANCODE_D] == SDL_PRESSED)));
+				globalData->player->playerBody->setLinearVelocity(speedForward(-increase, rotationAngles.y, (keys[SDL_SCANCODE_A] == SDL_PRESSED || keys[SDL_SCANCODE_D] == SDL_PRESSED)));
 			}
 			if (keys[SDL_SCANCODE_A]) {
 				//player->setPosition(moveRight(player->getPosition(), rotationAngles.y, -0.1f));
-				playerBody->setLinearVelocity(speedRight(-increase, rotationAngles.y, (keys[SDL_SCANCODE_W] == SDL_PRESSED || keys[SDL_SCANCODE_S] == SDL_PRESSED)));
+				globalData->player->playerBody->setLinearVelocity(speedRight(-increase, rotationAngles.y, (keys[SDL_SCANCODE_W] == SDL_PRESSED || keys[SDL_SCANCODE_S] == SDL_PRESSED)));
 			}
 			else if (keys[SDL_SCANCODE_D]) {
 				//player->setPosition(moveRight(player->getPosition(), rotationAngles.y, 0.1f));
-				playerBody->setLinearVelocity(speedRight(increase, rotationAngles.y, (keys[SDL_SCANCODE_W] == SDL_PRESSED || keys[SDL_SCANCODE_S] == SDL_PRESSED)));
+				globalData->player->playerBody->setLinearVelocity(speedRight(increase, rotationAngles.y, (keys[SDL_SCANCODE_W] == SDL_PRESSED || keys[SDL_SCANCODE_S] == SDL_PRESSED)));
 			}
 
 			if (keys[SDL_SCANCODE_C]) {
@@ -924,7 +924,7 @@ namespace SceneManager {
 			}
 
 			if (keys[SDL_SCANCODE_SPACE]) {
-				playerBody->setLinearVelocity(jump(SPEED_CAP_Y));
+				globalData->player->playerBody->setLinearVelocity(jump(SPEED_CAP_Y));
 			}
 
 			if (keys[SDL_SCANCODE_KP_8])
@@ -938,7 +938,7 @@ namespace SceneManager {
 		}
 		else if (mode == EDIT) {
 
-			btVector3 playerPos = playerBody->getWorldTransform().getOrigin();
+			btVector3 playerPos = globalData->player->playerBody->getWorldTransform().getOrigin();
 
 			btTransform t;
 			t.setIdentity();
@@ -975,22 +975,22 @@ namespace SceneManager {
 			if (keys[SDL_SCANCODE_W]) {
 				glm::vec3 move = moveForward(glm::vec3(playerPos.x(), playerPos.y(), playerPos.z()), rotationAngles.y, 0.1f);
 				t.setOrigin(btVector3(move.x, move.y, move.z));
-				playerBody->setWorldTransform(t);
+				globalData->player->playerBody->setWorldTransform(t);
 			}
 			else if (keys[SDL_SCANCODE_S]) {
 				glm::vec3 move = moveForward(glm::vec3(playerPos.x(), playerPos.y(), playerPos.z()), rotationAngles.y, -0.1f);
 				t.setOrigin(btVector3(move.x, move.y, move.z));
-				playerBody->setWorldTransform(t);
+				globalData->player->playerBody->setWorldTransform(t);
 			}
 			if (keys[SDL_SCANCODE_A]) {
 				glm::vec3 move = moveRight(glm::vec3(playerPos.x(), playerPos.y(), playerPos.z()), rotationAngles.y, -0.1f);
 				t.setOrigin(btVector3(move.x, move.y, move.z));
-				playerBody->setWorldTransform(t);
+				globalData->player->playerBody->setWorldTransform(t);
 			}
 			else if (keys[SDL_SCANCODE_D]) {
 				glm::vec3 move = moveRight(glm::vec3(playerPos.x(), playerPos.y(), playerPos.z()), rotationAngles.y, 0.1f);
 				t.setOrigin(btVector3(move.x, move.y, move.z));
-				playerBody->setWorldTransform(t);
+				globalData->player->playerBody->setWorldTransform(t);
 			}
 			if (keys[SDL_SCANCODE_LSHIFT]) {
 				shiftPressed = true;
@@ -1379,13 +1379,13 @@ namespace SceneManager {
 	}
 
 	void updatePlayer(float dt) {
-		btTransform t;
-		t.setIdentity();
-		playerBody->getMotionState()->getWorldTransform(t);
+		//btTransform t;
+		//t.setIdentity();
+		//playerBody->getMotionState()->getWorldTransform(t);
 		//	playerBody->getMotionState();
-		btVector3 pos = t.getOrigin();
-		globalData->player->setPosition(glm::vec3(pos.x(), pos.y(), pos.z()));
-		ghostObject->setWorldTransform(t);
+		//btVector3 pos = t.getOrigin();
+		//globalData->player->setPosition(glm::vec3(pos.x(), pos.y(), pos.z()));
+		//ghostObject->setWorldTransform(t);
 		globalData->player->update(dt);
 
 
@@ -1425,7 +1425,7 @@ namespace SceneManager {
 		if (currentState == RUNNING) {
 			updatePlayer(dt_secs);
 			if (globalData->player->getState() == JUMPING)
-				if (findCollision(ghostObject))
+				if (findCollision(globalData->player->playerGhost))
 					globalData->player->setState(ON_GROUND);
 				
 			updateCollectables();
@@ -1442,7 +1442,13 @@ namespace SceneManager {
 				currentState = MENU;
 				globalData->player->restart();
 				defeatTime = 3.0f;
+
+				for (const auto i : enemies)
+					i->reset();
+
 			}
+
+
 			//
 			//need restart rest
 			//
@@ -1627,7 +1633,6 @@ namespace SceneManager {
 		// if cubemap translates into "if rendering to the depthmap"
 		if (cubemap)
 			pointShadow(shader);
-
 
 		uniformIndex = glGetUniformLocation(shader, "far_plane");
 		glUniform1f(uniformIndex, far_plane);

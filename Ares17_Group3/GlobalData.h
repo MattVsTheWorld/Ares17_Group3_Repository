@@ -26,10 +26,10 @@ struct PointLight {
 
 class GlobalData {
 public:
-	GlobalData(glm::vec3 eye) {
-		player = new Player(eye);
+	GlobalData(glm::vec3 eye) {	
 		h_manager = new hudManager();
 		bt_manager = new btShapeManager();
+		player = new Player(eye, 1.0f, 1.5f, 40.0f, bt_manager);
 		projectile_manager = new Projectile(bt_manager);
 		sound_manager = new SoundManager();
 
