@@ -17,7 +17,8 @@ using std::cin;
 enum npcState {
 	IDLE,		//Hasn't seen player
 	TRIGGERED,	//Player seen
-	PAUSED		//Game paused
+	PAUSED,		//Game paused
+	DYING
 };
 
 // Abstract base class: no implementation

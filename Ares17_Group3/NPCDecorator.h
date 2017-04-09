@@ -6,19 +6,6 @@
 class NPCDecorator : public AbstractNPC {
 private:
 	float timer = 3.0f;
-	unsigned int lastTime = 0, currentTime = 0;
-	
-	float gameTime() {
-		currentTime = clock();
-
-		unsigned int dt = currentTime - lastTime;
-		float dt_secs = (float)dt / 1000;
-		if (dt_secs > 0.017f) dt_secs = 0.017f; // first value is off ( 5.5~)
-
-		lastTime = currentTime;
-
-		return dt_secs;
-	}
 public:
 	NPCDecorator(AbstractNPC *n) { npc = n; }
 	~NPCDecorator() {
@@ -33,7 +20,7 @@ public:
 
 		if (npc->getHealth() <= 0) {
 
-
+			npc->setState(DYING);
 			// if (animationRunning)
 			// { death animation // some sort of timer
 			// npc->currentState =  PAUSED;
@@ -41,9 +28,9 @@ public:
 			//}	
 			// else if (!aniamtionRunning)
 			if (timer > 0.0f) {
-				npc->setState(PAUSED);
+				
 				npc->update(modelDatas, view, proj, dt, _g, player, shader);
-				timer -= gameTime();
+				timer -= dt;
 				return true;
 			}
 			else {

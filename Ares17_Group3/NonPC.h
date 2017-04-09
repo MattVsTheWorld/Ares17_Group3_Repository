@@ -168,7 +168,7 @@ public:
 
 		Model* currentAnimation = get<2>(modelDatas);
 
-		if (sqrt(pow(playerPos.x() - pos.x(), 2) + pow(playerPos.z() - pos.z(), 2)) <= DEFAULT_LOS && this->currentState != PAUSED)
+		if (DEFAULT_LOS && (this->currentState != PAUSED || this->currentState != DYING) && sqrt(pow(playerPos.x() - pos.x(), 2) + pow(playerPos.z() - pos.z(), 2) <= DEFAULT_LOS))
 			this->currentState = TRIGGERED;
 
 		if (this->currentState == TRIGGERED) {
@@ -205,7 +205,7 @@ public:
 				else this->attackTimer -= dt;
 			}
 		}
-		else {
+		if (currentState == DYING){
 			currentAnimation = get<2>(modelDatas);
 		}
 
