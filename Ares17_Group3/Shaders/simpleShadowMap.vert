@@ -7,10 +7,9 @@
 layout (location = 0) in vec3 position;
 layout (location = 5) in ivec4 boneIDs;
 layout (location = 6) in vec4 weights;
-
 uniform mat4 model;
 
-const int MAX_BONES = 100;
+const int MAX_BONES = 30;
 uniform mat4 gBones[MAX_BONES];
 
 uniform int animated;
@@ -23,9 +22,9 @@ void main()
 		BoneTransform     += gBones[boneIDs[2]] * weights[2];
 		BoneTransform     += gBones[boneIDs[3]] * weights[3];
 
-		vec4 PosL = BoneTransform * vec4(position, 1.0);
+		vec4 PosL    = BoneTransform * vec4(position, 1.0);
 		gl_Position = model * PosL;
 	}
-	else 
+	else
 		gl_Position = model * vec4(position, 1.0);
 }  

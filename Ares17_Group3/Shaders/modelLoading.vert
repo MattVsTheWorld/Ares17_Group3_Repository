@@ -9,7 +9,7 @@ uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
-const int MAX_BONES = 100;
+const int MAX_BONES = 30;
 uniform mat4 gBones[MAX_BONES];
 
 uniform int animated;
@@ -39,6 +39,7 @@ void main()
 		//vs_out.FragPos = vec3(model * vec4(position, 1.0));
 		//vs_out.Normal = transpose(inverse(mat3(model))) * normal;
 	}
+
 	vs_out.FragPos = vec3(model * vec4(position, 1.0));
 	vs_out.Normal = transpose(inverse(mat3(model))) * normal;
 	vs_out.TexCoords = texCoords;
