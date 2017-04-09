@@ -1578,7 +1578,7 @@ namespace SceneManager {
 
 
 			for (auto it = enemies.begin(); it != enemies.end(); ) {
-				if (!(*it)->update((make_tuple(modelTypes["assaultRun"], modelTypes["assaultAttack"], modelTypes["assaultDie"]), view, projection, dt_secs, globalData->level1Grid, globalData->player, shader))
+				if (!(*it)->update((make_tuple(modelTypes["assaultRun"], modelTypes["assaultAttack"], modelTypes["assaultDie"])), view, projection, dt_secs, globalData->level1Grid, globalData->player, shader))
 					it = enemies.erase(it);
 				else
 					++it;
