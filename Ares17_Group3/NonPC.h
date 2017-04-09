@@ -206,6 +206,7 @@ public:
 			}
 		}
 		if (currentState == DYING){
+		//	cout << "Doing ma ting";
 			currentAnimation = get<2>(modelDatas);
 		}
 
