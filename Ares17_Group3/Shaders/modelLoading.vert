@@ -29,10 +29,8 @@ void main()
 		BoneTransform     += gBones[boneIDs[2]] * weights[2];
 		BoneTransform     += gBones[boneIDs[3]] * weights[3];
 
-		vec4 PosL    = BoneTransform * vec4(position, 1.0);
+		vec4 PosL    = BoneTransform * vec4(position, 1.0f);
 		gl_Position = projection * view * model * PosL;
-		//vs_out.Normal = (transpose(inverse(mat4(model))) * (BoneTransform * vec4(normal, 0.0))).xyz;
-		//vs_out.FragPos = vec3(model * PosL);
 	}
 	else {
 		gl_Position = projection * view * model * vec4(position, 1.0f);

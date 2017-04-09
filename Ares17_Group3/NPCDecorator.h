@@ -33,6 +33,7 @@ public:
 
 		if (npc->getHealth() <= 0) {
 
+
 			// if (animationRunning)
 			// { death animation // some sort of timer
 			// npc->currentState =  PAUSED;
@@ -98,6 +99,9 @@ public:
 	npcState getState() { 
 		return npc->getState();
 	}
+	void reset() {
+		return npc->reset();
+	}
 
 protected:
 	AbstractNPC * npc;
@@ -111,12 +115,6 @@ public:
 		setAttack(getAttack() + 20);
 		setAttackSpeed(getAttackSpeed() + 1.5);
 	}
-	//void render() {
-	//	// render special features 
-	//	// apply different texture?
-	//	Model * modelData;
-	//	NPCDecorator::render(modelData); // delegate to base class
-	//}
 	void modifyHealth(double newHp) { this->npc->modifyHealth(newHp); }
 	double getRange() { return NPCDecorator::getRange(); } //TODO: maybe return a fixed melee range instead?
 	double getHealth() { return NPCDecorator::getHealth(); }
@@ -132,12 +130,6 @@ public:
 		setAttackSpeed(getAttackSpeed() + 3.0);
 		
 	}
-	//void render() {
-	//	// render special features 
-	//	// apply different texture?
-	//	Model * modelData;
-	//	NPCDecorator::render(modelData); // delegate to base class
-	//}
 	void modifyHealth(double newHp) { this->npc->modifyHealth(newHp); }
 	double getRange() { return NPCDecorator::getRange(); }
 	double getHealth() { return NPCDecorator::getHealth(); }
@@ -150,12 +142,6 @@ public:
 		modifyHealth(10);
 		setAttackSpeed(getAttackSpeed() + 1.0);
 	}
-	//void render() {
-	//	// render special features 
-	//	// apply different texture?
-	//	Model * modelData;
-	//	NPCDecorator::render(modelData); // delegate to base class
-	//}
 	void modifyHealth(double newHp) { this->npc->modifyHealth(newHp); }
 	double getRange() { return NPCDecorator::getRange(); }
 	double getHealth() { return NPCDecorator::getHealth();/* + 10; */ }
@@ -170,12 +156,6 @@ public:
 		setAttackSpeed(getAttackSpeed() + 1.5);
 		// normal atk speed
 	}
-	//void render() {
-	//	// render special features 
-	//	// apply different texture?
-	//	Model * modelData;
-	//	NPCDecorator::render(modelData); // delegate to base class
-	//}
 	void modifyHealth(double newHp) { this->npc->modifyHealth(newHp); }
 	double getRange() { return NPCDecorator::getRange(); }
 	double getHealth() { return NPCDecorator::getHealth(); }
@@ -189,12 +169,6 @@ public:
 		setAttack(getAttack() + 25);
 		setAttackSpeed(getAttackSpeed() + 3.0);
 	}
-	//void render() {
-	//	// render special features 
-	//	// apply different texture?
-	//	Model * modelData;
-	//	NPCDecorator::render(modelData); // delegate to base class
-	//}
 	void modifyHealth(double newHp) { this->npc->modifyHealth(newHp); }
 	double getRange() { return NPCDecorator::getRange(); }
 	double getHealth() { return NPCDecorator::getHealth(); }

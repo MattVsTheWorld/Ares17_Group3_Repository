@@ -27,6 +27,7 @@ void Model::loadModel(string path)
 	// Retrieve the directory path of the filepath
 	this->directory = path.substr(0, path.find_last_of('/'));
 
+
 	if (scene->HasAnimations()) {
 		for (GLuint i = 0; i < scene->mAnimations[0]->mNumChannels; i++) {
 			nodeAnims.insert(make_pair(scene->mAnimations[0]->mChannels[i]->mNodeName.data, scene->mAnimations[0]->mChannels[i]));
@@ -194,7 +195,6 @@ vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type,
 	return textures;
 }
 
-//Needed by others; was originally outside the class, but we were drowned by linker errors
 GLint Model::TextureFromFile(const char* path, string directory)
 {
 	//Generate texture ID and load texture data 

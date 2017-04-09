@@ -179,6 +179,7 @@
     <ClInclude Include="bass.h" />
     <ClInclude Include="btShapeManager.h" />
     <ClInclude Include="AbstractNPC.h" />
+    <ClInclude Include="GlobalData.h" />
     <ClInclude Include="Grid.h" />
     <ClInclude Include="hudManager.h" />
     <ClInclude Include="loadBitmap.h" />
@@ -195,6 +196,7 @@
     <ClInclude Include="ShaderManager.h" />
     <ClInclude Include="Skybox.h" />
     <ClInclude Include="SoundManager.h" />
+    <ClInclude Include="Weapon.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\cubeMap.frag" />

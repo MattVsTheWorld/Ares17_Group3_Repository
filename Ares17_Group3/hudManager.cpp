@@ -35,7 +35,7 @@ void hudManager::clearTextTexture(GLuint textID) {
 }
 
 // initialize hud manager, open font
-hudManager::hudManager() {
+hudManager::hudManager(bool shadows) {
 	// set up TrueType / SDL_ttf
 	if (TTF_Init() == -1)
 		std::cout << "TTF failed to initialise." << std::endl;
@@ -44,7 +44,7 @@ hudManager::hudManager() {
 	if (textFont == NULL)
 		std::cout << "Failed to open font." << std::endl;
 
-	menuFont = TTF_OpenFont("Roboto-Black.ttf", 24);
+	menuFont = TTF_OpenFont("Roboto-Black.ttf", 32);
 	if (menuFont == NULL)
 		std::cout << "Failed to open font." << std::endl;
 
@@ -72,14 +72,24 @@ hudManager::hudManager() {
 	cstr = str.c_str();
 	menuLabel[1] = textToTexture(cstr, menuLabel[1], menuFont);
 
-	str = "[2] Quit";
+	str = "[2] Restart";
 	cstr = str.c_str();
 	menuLabel[2] = textToTexture(cstr, menuLabel[2], menuFont);
 
+	str = "[3] Shadows - ";
+	str.append(shadows ? "ON" : "OFF");
+	cstr = str.c_str();
+	menuLabel[3] = textToTexture(cstr, menuLabel[3], menuFont);
 
+	str = "[4] Quit";
+	cstr = str.c_str();
+	menuLabel[4] = textToTexture(cstr, menuLabel[4], menuFont);
+
+	crosshair = TextureFromFile("crosshair.png", "Textures");
 	// https://dribbble.com/shots/897447-Ares-Logo-Mark
 	menuScreen = loadBitmap::loadBitmap("Textures/menu.bmp");
 	loadingScreen = loadBitmap::loadBitmap("Textures/loading.bmp");
+	defeatScreen = loadBitmap::loadBitmap("Textures/defeat.bmp");
 }
 
 // Requires change ***
@@ -170,6 +180,29 @@ void hudManager::renderEditHud(std::string line, std::string value, GLuint shade
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+void hudManager::renderCrosshair(GLuint shader, Model *modelData) {
+	glDisable(GL_DEPTH_TEST);//Disable depth test for HUD label
+	glm::mat4 id = glm::mat4();
+	glUseProgram(shader); //texture-only shader will be used for teture rendering
+						  // transformations
+	
+	id = glm::translate(id, glm::vec3(0.075, -0.1, 0.0));
+	id = glm::scale(id, glm::vec3(0.0325f, -0.05f, 1.0f));
+	glUniform3fv(glGetUniformLocation(shader, "text_color"), 1, glm::value_ptr(glm::vec3(0, 0, 0)));
+	MeshManager::setUniformMatrix4fv(shader, "model", glm::value_ptr(id));
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, crosshair);
+	modelData->Draw(shader);
+
+
+	glEnable(GL_DEPTH_TEST);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+
+
 void hudManager::renderPause(GLuint shader, Model *modelData) {
 	glDisable(GL_DEPTH_TEST);//Disable depth test for HUD label
 	glm::mat4 id = glm::mat4();
@@ -219,7 +252,7 @@ void hudManager::renderLoading(GLuint shader, Model *modelData) {
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void hudManager::renderMenu(GLuint shader, Model *modelData) {
+void hudManager::renderMenu(GLuint shader, Model *modelData, bool shadows) {
 	glDisable(GL_DEPTH_TEST);//Disable depth test for HUD label
 	glm::mat4 id = glm::mat4();
 	glUseProgram(shader); //texture-only shader will be used for teture rendering
@@ -239,19 +272,57 @@ void hudManager::renderMenu(GLuint shader, Model *modelData) {
 	modelData->Draw(shader);
 
 	id = glm::translate(id, glm::vec3(0.0, 3.0, 0.0));
-	id = glm::scale(id, glm::vec3(0.8f, 0.8f, 1.0f));
+	id = glm::scale(id, glm::vec3(0.6f, 0.8f, 1.0f));
 	MeshManager::setUniformMatrix4fv(shader, "model", glm::value_ptr(id));
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, menuLabel[1]);
 	modelData->Draw(shader);
 
 	id = glm::translate(id, glm::vec3(0.0, 2.5, 0.0));
+	id = glm::scale(id, glm::vec3(1.3f, 1.0f, 1.0f));
 	MeshManager::setUniformMatrix4fv(shader, "model", glm::value_ptr(id));
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, menuLabel[2]);
 	modelData->Draw(shader);
 
+	
+	string str = "[3] Shadows - ";
+	str.append(shadows ? "ON" : "OFF");
+	const char* cstr = str.c_str();
+	menuLabel[3] = textToTexture(cstr, menuLabel[3], menuFont);
+	
+	id = glm::translate(id, glm::vec3(0.0, 2.5, 0.0));
+	id = glm::scale(id, glm::vec3(1.2f, 1.0f, 1.0f));
+	MeshManager::setUniformMatrix4fv(shader, "model", glm::value_ptr(id));
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, menuLabel[3]);
+	modelData->Draw(shader);
 
+	id = glm::translate(id, glm::vec3(0.0, 2.5, 0.0));
+	//id = glm::scale(id, glm::vec3(1.7f, 1.0f, 1.0f));
+	id = glm::scale(id, glm::vec3(0.5f, 1.0f, 1.0f));
+	MeshManager::setUniformMatrix4fv(shader, "model", glm::value_ptr(id));
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, menuLabel[4]);
+	modelData->Draw(shader);
+
+	glEnable(GL_DEPTH_TEST);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+
+void hudManager::renderDefeat(GLuint shader, Model *modelData) {
+	glDisable(GL_DEPTH_TEST);//Disable depth test for HUD label
+	glm::mat4 id = glm::mat4();
+	glUseProgram(shader); //texture-only shader will be used for teture rendering
+						  // transformations
+	id = glm::scale(id, glm::vec3(1.0f, -1.0f, 1.0f));
+	glUniform3fv(glGetUniformLocation(shader, "text_color"), 1, glm::value_ptr(glm::vec3(0.0, 0.0, 0.0)));
+	MeshManager::setUniformMatrix4fv(shader, "model", glm::value_ptr(id));
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, defeatScreen);
+	modelData->Draw(shader);
 	glEnable(GL_DEPTH_TEST);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, 0);

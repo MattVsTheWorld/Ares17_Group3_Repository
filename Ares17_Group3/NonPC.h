@@ -9,20 +9,7 @@
 // NPC implements AbstractNPC - all methods defined inline
 class NonPC : public AbstractNPC {
 private:
-	//string name;
-	// ++
-	btShapeManager *shapeManager;
-	btRigidBody* npcBody;
-	btPairCachingGhostObject* npcGhost;
-	//
-	Model * boundingModel;
-	// Model
-	//GLuint shader;
-	GLuint texture;
-	/// ++++
-	queue<vertex*> currentPath;
-	double recalcTimer = REFRESHRATE;
-	double attackTimer = 0;
+
 	float angle;
 	// +++++++++++++++
 	bool findCollision(btPairCachingGhostObject* ghostObject) {
@@ -103,17 +90,20 @@ public:
 		btRigidBody::btRigidBodyConstructionInfo info(mass, motion, capsule, inertia);
 		btRigidBody* body = new btRigidBody(info);
 		body->setAngularFactor(btVector3(0, 1, 0));
-		shapeManager->addToWorld(body, COL_ENEMY, COL_BULLET | COL_PLAYER | COL_DEFAULT); // Can add COL_ENEMY for enemy to enemy collision
+		shapeManager->addToWorld(body, COL_ENEMY, COL_BULLET | COL_PLAYER | COL_DEFAULT | COL_ENEMY); // Can add COL_ENEMY for enemy to enemy collision
 
 		return body;
 	}
 
-	NonPC(double _h, double _r, btShapeManager* _sm, glm::vec3 spawn, float radius, float height, float mass,
+	NonPC(double _h, double _r, btShapeManager* _sm, glm::vec3 _spawn, float radius, float height, float mass,
 		Model* _bmodel, GLuint _shader, GLuint _text /*other parameters*/) {
 		health = _h;
+		max_hp = _h;
 		range = _r;
 		shapeManager = _sm;
 		boundingModel = _bmodel;
+
+		spawn = _spawn;
 		//shader = _shader;
 		texture = _text;
 		// Construct body
@@ -122,7 +112,7 @@ public:
 		tempGhost->setCollisionShape(temp->getCollisionShape());
 		tempGhost->setWorldTransform(temp->getWorldTransform());
 		tempGhost->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);
-		shapeManager->addGhostToWorld(tempGhost, COL_ENEMY, COL_BULLET); // Can add COL_ENEMY for enemy to enemy collision
+		shapeManager->addGhostToWorld(tempGhost, COL_ENEMY, COL_BULLET);
 		npcBody = temp;
 		npcGhost = tempGhost;
 
@@ -223,7 +213,11 @@ public:
 
 			if (findCollision(npcGhost))
 			{
-				this->health -= 10;
+				this->health -= player->getWeapon().getDamage();
+				/*if (player->getWeapon() == PISTOL || player->getWeapon() == NUKA)
+					this->health -= 10;
+				else if (player->getWeapon() == SCIFI)
+					this->health -= 40;*/
 				cout << "HIT! Health = " << this->health << endl;
 			}
 
@@ -277,7 +271,34 @@ public:
 
 	void setState(npcState newState) { this->currentState = newState; }
 	npcState getState() { return this->currentState; }
+
+	void reset() {
+	/*	this->health = this->max_hp;
+		btTransform t;
+		t.setIdentity();
+		npcBody->getMotionState()->getWorldTransform(t);
+		t.setOrigin(btVector3(spawn.x, spawn.y, spawn.z));
+		this->npcBody->setWorldTransform(t);
+		this->npcBody->setLinearVelocity(btVector3(0.5, -0.5, 0.0));*/
+		//;
+	}
 protected:
+	//string name;
+	// ++
+	btShapeManager *shapeManager;
+	btRigidBody* npcBody;
+	btPairCachingGhostObject* npcGhost;
+	//
+	Model * boundingModel;
+	// Model
+	//GLuint shader;
+	GLuint texture;
+	/// ++++
+	queue<vertex*> currentPath;
+	double recalcTimer = REFRESHRATE;
+	double attackTimer = 0;
+	glm::vec3 spawn;
+	double max_hp;
 	double health;
 	double range;
 	double attack;

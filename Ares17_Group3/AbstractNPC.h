@@ -40,6 +40,7 @@ public:
 	virtual	double getAttackSpeed() = 0;
 	virtual void setState(npcState newState) = 0;
 	virtual npcState getState() = 0;
+	virtual void reset() = 0;
 	virtual ~AbstractNPC() {}
 };
 

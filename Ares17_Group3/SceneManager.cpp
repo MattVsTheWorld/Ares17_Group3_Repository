@@ -4,59 +4,27 @@ using namespace std;
 typedef std::pair<string, btRigidBody*> bodyID;
 
 // this class still needs a lot of work
-// gg
 namespace SceneManager {
 
-	Player *player;
-	PointLight mainLight{
-		glm::vec3(0.0f, 20.0f, 0.0f),
-
-		ATTENUATION_CONST, ATTENUATION_LINEAR, ATTENUATION_QUAD,
-
-		glm::vec3(AMBIENT_FACTOR,AMBIENT_FACTOR,AMBIENT_FACTOR),
-		glm::vec3(DIFFUSE_FACTOR,DIFFUSE_FACTOR,DIFFUSE_FACTOR),
-		glm::vec3(SPECULAR_FACTOR,SPECULAR_FACTOR,SPECULAR_FACTOR)
-	};
-
+	std::shared_ptr<GlobalData> globalData;
 	// Shaders
-//	GLuint shaderProgram;
 	GLuint texturedProgram;
 	GLuint modelProgram;
-
-	hudManager *h_manager;
 	Skybox *skybox;
-	btShapeManager *bt_manager;
-	Projectile *projectile_manager; // !++!
-	SoundManager *sound_manager; // ++!
-
 	gameState currentState = MENU;
 	float pauseTimeout = 1.0f;
 	bool clickable = true;
-
 	unsigned int lastTime = 0, currentTime;
 	float dt_secs;
 	float theta = 0;
-	//	enum pov { FIRST_PERSON, THIRD_PERSON };
-	//	pov pointOfView = FIRST_PERSON;
-	enum modes { PLAY, EDIT };
 	modes mode = PLAY;
-	enum bound { BOX, SPHERE, CAPSULE };
 	bound boundingType = BOX;
-	enum editStages { MODEL, BOUNDING };
 	editStages stage = MODEL;
-
-	//AI
-	Grid* level1Grid;
 
 	// SHADOWS
 	GLuint depthShaderProgram; //shader to create shadow cubemaps
-
-	//////////////////
-	/// FBO globals
-	//////////////////
 	GLuint depthMapFBO; // FBO
 	GLuint depthCubemap;
-	//GLuint depthMap;	// FBO texture
 	const GLuint SHADOW_WIDTH = SCREENWIDTH, SHADOW_HEIGHT = SCREENWIDTH;
 	GLfloat aspect = (GLfloat)SHADOW_WIDTH / (GLfloat)SHADOW_HEIGHT;
 	// near and far act the same as near and far plane for camera, but this is for shadows
@@ -65,13 +33,7 @@ namespace SceneManager {
 	GLfloat near_plane = 0.01f;
 	GLfloat far_plane = 60.0f;
 	//////////////////
-	/// End
-	//////////////////
-
-	// +++ \_/
-	//TODO: vector
-	vector <AbstractNPC *> enemies;
-	// +++ /-\
+	unordered_set<AbstractNPC *> enemies;
 
 	const char *testTexFiles[6] = {
 		"Town-skybox/Town_bk.bmp", "Town-skybox/Town_ft.bmp", "Town-skybox/Town_rt.bmp", "Town-skybox/Town_lf.bmp", "Town-skybox/Town_up.bmp", "Town-skybox/Town_dn.bmp"
@@ -90,12 +52,10 @@ namespace SceneManager {
 
 	tuple<std::string, glm::vec3, glm::vec3, glm::vec3> temp[2]; //name, position, scale, rotation
 
-
 	string currentModel = "box";
 	string currentBounding = "box";
 
 	// TEST
-	btRigidBody* playerBody;
 
 	int run = 0;
 	//	
@@ -110,6 +70,21 @@ namespace SceneManager {
 	glm::vec3 eye(2.0f, 3.0f, -6.0f);
 	glm::vec3 at(0.0f, 0.5f, -1.0f);
 	glm::vec3 up(0.0f, 1.0f, 0.0f);
+
+
+	float mass = 0;
+	unsigned int objectID = 0;
+	unsigned int worldObjectID = 0;
+	std::string selectedKey = "";
+	std::string selectedPrev = "";
+
+	bool leftClick = false;
+	bool rightClick = false;
+	bool creation = false;
+	float coolDown = 0.0f; //wait between shots
+	bool shiftPressed = true;
+
+	float defeatTime = 3.0f;
 
 	// Old movement methods, used in edit mode (?)
 	glm::vec3 moveForward(glm::vec3 pos, GLfloat angle, GLfloat d) {
@@ -148,31 +123,31 @@ namespace SceneManager {
 	// Speedforward/right allow moving the player in camera direction
 	// Also remembered as that one time I managed to fit a conditional operator somewhere
 	btVector3 speedForward(GLfloat _speed, GLfloat angle, bool concurrent) {
-		btVector3 speed = getLinearVelocityInBodyFrame(playerBody);
+		btVector3 speed = getLinearVelocityInBodyFrame(globalData->player->playerBody);
 
-		if (!concurrent && speed.absolute().x() <= player->getSpeed() && speed.absolute().z() <= player->getSpeed())
+		if (!concurrent && speed.absolute().x() <= globalData->player->getSpeed() && speed.absolute().z() <= globalData->player->getSpeed())
 			speed = btVector3(speed.x() + _speed*std::sin(angle*DEG_TO_RADIAN), speed.y(), speed.z() - _speed*std::cos(angle*DEG_TO_RADIAN));
 		else if (concurrent)
-			speed = btVector3(speed.x() + (speed.absolute().x() > player->getSpeed() ? 0 : _speed*std::sin(angle*DEG_TO_RADIAN)), speed.y(), speed.z() - (speed.absolute().z() > player->getSpeed() ? 0 : _speed*std::cos(angle*DEG_TO_RADIAN)));
+			speed = btVector3(speed.x() + (speed.absolute().x() >globalData->player->getSpeed() ? 0 : _speed*std::sin(angle*DEG_TO_RADIAN)), speed.y(), speed.z() - (speed.absolute().z() > globalData->player->getSpeed() ? 0 : _speed*std::cos(angle*DEG_TO_RADIAN)));
 		return speed;
 	}
 
 	btVector3 speedRight(GLfloat _speed, GLfloat angle, bool concurrent) {
 
 		//playerBody->getVelocityInLocalPoint();
-		btVector3 speed = getLinearVelocityInBodyFrame(playerBody);
-		if (!concurrent && speed.absolute().x() <= player->getSpeed() && speed.absolute().z() <= player->getSpeed())
+		btVector3 speed = getLinearVelocityInBodyFrame(globalData->player->playerBody);
+		if (!concurrent && speed.absolute().x() <= globalData->player->getSpeed() && speed.absolute().z() <= globalData->player->getSpeed())
 			speed = btVector3(speed.x() + _speed*std::cos(angle*DEG_TO_RADIAN), speed.y(), speed.z() + _speed*std::sin(angle*DEG_TO_RADIAN));
 		else if (concurrent)
-			speed = btVector3(speed.x() + (speed.absolute().x() > player->getSpeed() ? 0 : _speed*std::cos(angle*DEG_TO_RADIAN)), speed.y(), speed.z() + (speed.absolute().z() > player->getSpeed() ? 0 : _speed*std::sin(angle*DEG_TO_RADIAN)));
+			speed = btVector3(speed.x() + (speed.absolute().x() > globalData->player->getSpeed() ? 0 : _speed*std::cos(angle*DEG_TO_RADIAN)), speed.y(), speed.z() + (speed.absolute().z() > globalData->player->getSpeed() ? 0 : _speed*std::sin(angle*DEG_TO_RADIAN)));
 		return speed;
 	}
 
 	btVector3 jump(GLfloat _speed) {
-		btVector3 speed = getLinearVelocityInBodyFrame(playerBody);
-		if (player->getState() != JUMPING) {
+		btVector3 speed = getLinearVelocityInBodyFrame(globalData->player->playerBody);
+		if (globalData->player->getState() != JUMPING) {
 			speed = btVector3(speed.x(), speed.y() + _speed, speed.z());
-			player->setState(JUMPING);
+			globalData->player->setState(JUMPING);
 		}
 		return speed;
 	}
@@ -469,7 +444,8 @@ namespace SceneManager {
 				}
 				if (key.find("box") != std::string::npos) {
 					if (modelName == "heart" || modelName == "shield") {
-						btRigidBody *temp = bt_manager->addBox(boundingScale.x, boundingScale.y, boundingScale.z, position.x, position.y, position.z, mass, COL_COLLECTABLE, COL_PLAYER);
+						btRigidBody *temp = globalData->bt_manager->addBox(boundingScale.x, boundingScale.y, boundingScale.z, position.x, position.y, position.z, mass, COL_COLLECTABLE, COL_PLAYER);
+
 						//temp->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);
 						bodies.insert(std::pair<string, btRigidBody*>(key, temp));
 						btPairCachingGhostObject* tempGhost = new btPairCachingGhostObject();
@@ -477,20 +453,20 @@ namespace SceneManager {
 						tempGhost->setWorldTransform(temp->getWorldTransform());
 						tempGhost->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);
 						collectables.push_back(make_tuple(tempGhost, key, modelName));
-						bt_manager->addGhostToWorld(tempGhost, COL_COLLECTABLE, COL_PLAYER);	
+						globalData->bt_manager->addGhostToWorld(tempGhost, COL_COLLECTABLE, COL_PLAYER);
 					}
 					else
-						bodies.insert(std::pair<string, btRigidBody*>(key, bt_manager->addBox(boundingScale.x, boundingScale.y, boundingScale.z, position.x, position.y, position.z, mass)));
+						bodies.insert(std::pair<string, btRigidBody*>(key, globalData->bt_manager->addBox(boundingScale.x, boundingScale.y, boundingScale.z, position.x, position.y, position.z, mass)));
 					models.insert(std::pair<string, std::tuple<string, glm::vec3, glm::vec3, glm::vec3>>(key, std::make_tuple(modelName, modelScale, modelRotation, offset)));
 					//cout << "Box Added\n";
 				}
 				else if (key.find("sphere") != std::string::npos) {
-					bodies.insert(std::pair<string, btRigidBody*>(key, bt_manager->addSphere(radius, position.x, position.y, position.z, mass)));
+					bodies.insert(std::pair<string, btRigidBody*>(key, globalData->bt_manager->addSphere(radius, position.x, position.y, position.z, mass)));
 					models.insert(std::pair<string, std::tuple<string, glm::vec3, glm::vec3, glm::vec3>>(key, std::make_tuple(modelName, modelScale, glm::vec3(0., 0., 0.), offset)));
 					//cout << "Sphere Added\n";
 				}
 				else if (key.find("capsule") != std::string::npos) {
-					bodies.insert(std::pair<string, btRigidBody*>(key, bt_manager->addCapsule(radius, height, position.x, position.y, position.z, mass)));
+					bodies.insert(std::pair<string, btRigidBody*>(key, globalData->bt_manager->addCapsule(radius, height, position.x, position.y, position.z, mass)));
 					models.insert(std::pair<string, std::tuple<string, glm::vec3, glm::vec3, glm::vec3>>(key, std::make_tuple(modelName, modelScale, modelRotation, offset)));
 					//cout << "Sphere Added\n";
 				}
@@ -513,7 +489,7 @@ namespace SceneManager {
 			if (id_pair.second->getCollisionShape()->getShapeType() == BOX_SHAPE_PROXYTYPE) {
 				key = "box";
 				key.append(to_string(boxNo));
-				bodies[key]->setActivationState(DISABLE_DEACTIVATION);
+				//bodies[key]->setActivationState(DISABLE_DEACTIVATION);
 				boxNo++;
 			}
 			else if (id_pair.second->getCollisionShape()->getShapeType() == SPHERE_SHAPE_PROXYTYPE) {
@@ -535,6 +511,10 @@ namespace SceneManager {
 		btCollisionObject::CF_KINEMATIC_OBJECT);
 		*/
 	}
+
+  //TODO: check if needed
+	//static const GLuint MAX_BONES = 30;
+	//GLuint m_boneLocation[MAX_BONES];
 
 	void initmodelTypes() {
 		//TODO:Player model for death or something
@@ -575,14 +555,14 @@ namespace SceneManager {
 		if (boundingType == BOX) {
 			key = "box";
 			key.append(to_string(boxNo));
-			bodies.insert(std::pair<string, btRigidBody*>(key, bt_manager->addBox(boundingScale.x, boundingScale.y, boundingScale.z, boundingPos.x, boundingPos.y, boundingPos.z, mass)));
+			bodies.insert(std::pair<string, btRigidBody*>(key, globalData->bt_manager->addBox(boundingScale.x, boundingScale.y, boundingScale.z, boundingPos.x, boundingPos.y, boundingPos.z, mass)));
 			cout << key << " Added\n";
 			boxNo++;
 		}
 		if (boundingType == SPHERE) {
 			key = "sphere";
 			key.append(to_string(sphereNo));
-			bodies.insert(std::pair<string, btRigidBody*>(key, bt_manager->addSphere(boundingScale.x, boundingPos.x, boundingPos.y, boundingPos.z, mass)));
+			bodies.insert(std::pair<string, btRigidBody*>(key, globalData->bt_manager->addSphere(boundingScale.x, boundingPos.x, boundingPos.y, boundingPos.z, mass)));
 			cout << key << "Added\n";
 			sphereNo++;
 		}
@@ -590,7 +570,7 @@ namespace SceneManager {
 			key = "capsule";
 			key.append(to_string(capsuleNo));
 			//boundingScale.x = radius, .y = height
-			bodies.insert(std::pair<string, btRigidBody*>(key, bt_manager->addCapsule(boundingScale.x, boundingScale.y, boundingPos.x, boundingPos.y, boundingPos.z, mass)));
+			bodies.insert(std::pair<string, btRigidBody*>(key, globalData->bt_manager->addCapsule(boundingScale.x, boundingScale.y, boundingPos.x, boundingPos.y, boundingPos.z, mass)));
 			cout << key << "Added\n";
 			capsuleNo++;
 		}
@@ -599,43 +579,43 @@ namespace SceneManager {
 			bodies[key]->setAngularFactor(0); // Doesn't fall sideways
 		}
 		bodies[key]->setFriction(8);
-		bodies[key]->setActivationState(DISABLE_DEACTIVATION);
+	//	bodies[key]->setActivationState(DISABLE_DEACTIVATION);
 		models.insert(std::pair<string, std::tuple<string, glm::vec3, glm::vec3, glm::vec3>>(key, make_tuple(currentModel, modelScale, modelRotation, glm::vec3(0.0f, 0.0f, 0.0f))));
 	}
 
 	// +++!
-	btPairCachingGhostObject* ghostObject;
+	//btPairCachingGhostObject* ghostObject;
 
-	void initPlayer(float rad, float height, float mass) {
-		player = new Player(eye);
+	//void initPlayer(float rad, float height, float mass) {
+	//	//player = new Player(eye);
 
-		btTransform t;
-		t.setIdentity();
-		t.setOrigin(btVector3(player->getPosition().x, player->getPosition().y, player->getPosition().z));
-		btCapsuleShape* playerShape = new btCapsuleShape(rad, height);
-		btVector3 inertia(0, 0, 0);
-		if (mass != 0.0)
-			playerShape->calculateLocalInertia(mass, inertia);
-		btMotionState* motion = new btDefaultMotionState(t);
-		btRigidBody::btRigidBodyConstructionInfo info(mass, motion, playerShape, inertia);
+	//	btTransform t;
+	//	t.setIdentity();
+	//	t.setOrigin(btVector3(globalData->player->getPosition().x, globalData->player->getPosition().y, globalData->player->getPosition().z));
+	//	btCapsuleShape* playerShape = new btCapsuleShape(rad, height);
+	//	btVector3 inertia(0, 0, 0);
+	//	if (mass != 0.0)
+	//		playerShape->calculateLocalInertia(mass, inertia);
+	//	btMotionState* motion = new btDefaultMotionState(t);
+	//	btRigidBody::btRigidBodyConstructionInfo info(mass, motion, playerShape, inertia);
 
-		playerBody = new btRigidBody(info);
-		playerBody->setAngularFactor(0); // Doesn't fall sideways
-		int playerCollidesWith = COL_DEFAULT | COL_ENEMY | COL_COLLECTABLE;
-		// body, group, mask
-		bt_manager->addToWorld(playerBody, COL_PLAYER, playerCollidesWith);
-		playerBody->setActivationState(DISABLE_DEACTIVATION);
-		playerBody->setFriction(FRICTION);
+	//	playerBody = new btRigidBody(info);
+	//	playerBody->setAngularFactor(0); // Doesn't fall sideways
+	//	int playerCollidesWith = COL_DEFAULT | COL_ENEMY | COL_COLLECTABLE;
+	//	// body, group, mask
+	//	globalData->bt_manager->addToWorld(playerBody, COL_PLAYER, playerCollidesWith);
+	//	playerBody->setActivationState(DISABLE_DEACTIVATION);
+	//	playerBody->setFriction(FRICTION);
 
-		// Now ghost
-		ghostObject = new btPairCachingGhostObject();								// create object
-		ghostObject->setCollisionShape(playerShape);								// set shape
-		ghostObject->setWorldTransform(t);											// set world transform	
-		ghostObject->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);  // disable collision response // could also add CF_CHARACTER_OBJECT // If I knew what that flag did...
+	//	// Now ghost
+	//	ghostObject = new btPairCachingGhostObject();								// create object
+	//	ghostObject->setCollisionShape(playerShape);								// set shape
+	//	ghostObject->setWorldTransform(t);											// set world transform	
+	//	ghostObject->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);  // disable collision response // could also add CF_CHARACTER_OBJECT // If I knew what that flag did...
 
-		bt_manager->addGhostToWorld(ghostObject, COL_PLAYER, playerCollidesWith);
+	//	globalData->bt_manager->addGhostToWorld(ghostObject, COL_PLAYER, playerCollidesWith);
 
-	}
+	//}
 
 	bool findCollision(btPairCachingGhostObject* ghostObject) { // ignore player?
 		btManifoldArray manifoldArray;
@@ -646,7 +626,7 @@ namespace SceneManager {
 		for (int i = 0; i < numPairs; ++i) {
 			manifoldArray.clear();
 			const btBroadphasePair& pair = pairArray[i];
-			btBroadphasePair* collisionPair = bt_manager->findWorldPair(pair);
+			btBroadphasePair* collisionPair = globalData->bt_manager->findWorldPair(pair);
 			if (!collisionPair) continue;
 			if (collisionPair->m_algorithm)
 				collisionPair->m_algorithm->getAllContactManifolds(manifoldArray);
@@ -662,8 +642,6 @@ namespace SceneManager {
 						const btVector3& normalOnB = pt.m_normalWorldOnB;
 						// <START>  handle collisions here
 					//	cout << "Player colliding with something while jumping." << endl;
-						//player->setState(ON_GROUND);
-				//		cout << "Player colliding with something while jumping." << endl;
 						return true;
 						//player->setState(ON_GROUND);
 						//  <END>   handle collisions here
@@ -674,17 +652,53 @@ namespace SceneManager {
 		return false;
 	}
 
+	void initEnemies() {
+		enemies.insert(new Melee(new NonPC(100, 5,
+			globalData->bt_manager, glm::vec3(0, 5, 0), 
+			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture)));
+
+		enemies.insert(new Melee(new NonPC(100, 5,
+			globalData->bt_manager, glm::vec3(25, 10, 0),
+			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture)));
+
+		enemies.insert(new Melee(new NonPC(100, 5,
+			globalData->bt_manager, glm::vec3(0, 10, -10),
+			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture)));
+
+	}
+
+	void reset() {
+		currentState = MENU;
+		globalData->player->restart();
+		defeatTime = 3.0f;
+
+		for (auto it = enemies.begin(); it != enemies.end(); )
+			it = enemies.erase(it);
+		initEnemies();
+
+		for (const auto it : bodies)
+			globalData->bt_manager->removeObject(it.second);
+		for (const auto it : collectables)
+			globalData->bt_manager->removeObject(get<0>(it));
+
+		collectables.clear();
+		bodies.clear();
+		initBoxes();
+
+	}
 	static const GLuint MAX_BONES = 30;
 	GLuint m_boneLocation[MAX_BONES];
 
 	void init(SDL_Window * window) {
 
+		globalData = make_shared<GlobalData>(eye);
+
+		//cout << globalData->foo << endl;
 		// Preliminary loading for loading screen
 		texturedProgram = ShaderManager::initShaders("Shaders/textured.vert", "Shaders/textured.frag");
-		h_manager = new hudManager();
 		modelTypes.insert(std::pair<string, Model*>("cube", new Model("Models/Environment/cube.obj")));
 		modelTypes.insert(std::pair<string, Model*>("box", modelTypes["cube"]));
-		h_manager->renderLoading(texturedProgram, modelTypes["cube"]);
+		globalData->h_manager->renderLoading(texturedProgram, modelTypes["cube"]);
 		SDL_GL_SwapWindow(window); // swap buffers once
 		
 
@@ -692,11 +706,6 @@ namespace SceneManager {
 		modelProgram = ShaderManager::initShaders("Shaders/modelLoading.vert", "Shaders/modelLoading.frag");
 		//+++
 		depthShaderProgram = ShaderManager::initShaders("Shaders/simpleShadowMap.vert", "Shaders/simpleShadowMap.frag", "Shaders/simpleShadowMap.gs");
-		//+++
-		bt_manager = new btShapeManager();
-		projectile_manager = new Projectile(bt_manager);
-		//!!
-
 
 		//makes locations for gBones[1] e.t.c.
 		//for (unsigned int i = 0; i < (sizeof(m_boneLocation)/sizeof(m_boneLocation[0])); i++) {
@@ -713,13 +722,12 @@ namespace SceneManager {
 			m_boneLocation[i] = glGetUniformLocation(modelProgram, Name);
 		}
 
-		sound_manager = new SoundManager();
 		//sound_manager->loadSample("Sounds/wilhelm.wav");
 		defaultTexture = loadBitmap::loadBitmap("Textures/wall.bmp");
 		groundTexture = loadBitmap::loadBitmap("Textures/terrain.bmp");
 		heartTexture = loadBitmap::loadBitmap("Textures/ruby.bmp");
     
-		initPlayer(1.0f, 1.5f, 40.0f);
+		//initPlayer(1.0f, 1.5f, 40.0f);
 		initBoxes();
 		temp[0] = std::make_tuple(currentModel, at, glm::vec3(0.02, 0.02, 0.02), glm::vec3(0.0f, rotationAngles.y, 0.0f));
 		temp[1] = std::make_tuple(currentBounding, std::get<1>(temp[0]), glm::vec3(0.2, 0.2, 0.2), glm::vec3(0.0f, rotationAngles.y, 0.0f));
@@ -731,7 +739,7 @@ namespace SceneManager {
 		// +++ \_/
 		// health, range, manager, sp, radius, height, mass, model, shader, textuer
 		//for (int i = 0; i < 3; i++) {
-		enemies.push_back(new Ranged(new NonPC(100, 5, bt_manager, glm::vec3(0, 10, 0), 1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture)));
+		initEnemies();
 		//	enemies.push_back(new Melee(new NonPC(100, 10, bt_manager, glm::vec3(2, 10, 0), 1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture)));
 			//}
 			// +++ /-\
@@ -740,8 +748,6 @@ namespace SceneManager {
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		// AI
-		level1Grid = new Grid();
 
 		////////////////////
 		/// FBO for shadows
@@ -803,6 +809,7 @@ namespace SceneManager {
 		float dt_secs = (float)dt / 1000;
 		if (dt_secs > 0.017f) dt_secs = 0.017f; // first value is off ( 5.5~)
 
+	
 		lastTime = currentTime;
 
 		return dt_secs;
@@ -810,17 +817,6 @@ namespace SceneManager {
 
 	float RunningTime = 0.0f;
 
-	float mass = 0;
-	unsigned int objectID = 0;
-	unsigned int worldObjectID = 0;
-	std::string selectedKey = "";
-	std::string selectedPrev = "";
-
-	bool leftClick = false;
-	bool rightClick = false;
-	bool creation = false;
-	float coolDown = 0.0f; //wait between shots
-	bool shiftPressed = true;
 	//*****************************CONTROLS********************
 	void controls(SDL_Window * window, SDL_Event sdlEvent) {
 		int MidX = SCREENWIDTH / 2;
@@ -858,7 +854,7 @@ namespace SceneManager {
 		if (keys[SDL_SCANCODE_P] && clickable)
 		{
 			clickable = false;
-			// Pause
+			// Pausee
 			if (currentState == RUNNING) {
 				for (const auto it : enemies) 
 					it->setState(PAUSED);
@@ -892,15 +888,38 @@ namespace SceneManager {
 				if (sdlEvent.button.button == SDL_BUTTON_LEFT) {
 					if (coolDown <= 0.0f && currentState == RUNNING) {
 						leftClick = true;
-						coolDown = COOL_TIME;
+						
 						//			cout << "Attempting to shoot bullet." << endl;
 
 						//TODO: change offset
-						projectile_manager->addProjectile(shiftRight(moveForward(glm::vec3(player->getPosition().x, player->getPosition().y - 0.35, player->getPosition().z), 
-							rotationAngles, 1.0f),rotationAngles, 0.5), PROJ_SPEED, (rotationAngles.y*DEG_TO_RADIAN), rotationAngles.x); //!++!
+						if (globalData->player->getWeapon().getName() == PISTOL) {
+							globalData->projectile_manager->addProjectile(shiftRight(moveForward(glm::vec3(globalData->player->getPosition().x, globalData->player->getPosition().y - 0.35, globalData->player->getPosition().z),
+								rotationAngles, 1.0f), rotationAngles, 0.5), PROJ_SPEED, (rotationAngles.y*DEG_TO_RADIAN), rotationAngles.x); //!++!
+							
+							coolDown = COOL_TIME;
 						//sound_manager->playSound(sound_manager->getSound(2), 2, 1);
+						}
+
+						if (globalData->player->getWeapon().getName() == NUKA) {
+							globalData->projectile_manager->addProjectile(shiftRight(moveForward(glm::vec3(globalData->player->getPosition().x, globalData->player->getPosition().y - 0.35, globalData->player->getPosition().z),
+								rotationAngles, 1.0f), rotationAngles, 0.5), PROJ_SPEED, (rotationAngles.y*DEG_TO_RADIAN), rotationAngles.x); //!++!
+
+							coolDown = COOL_TIME/2;
+						//sound_manager->playSound(sound_manager->getSound(2), 2, 1);																												  //sound_manager->playSound(sound_manager->getSound(2), 2, 1);
+						}
+
+						if (globalData->player->getWeapon().getName() == SCIFI) {
+							globalData->projectile_manager->addProjectile(shiftRight(moveForward(glm::vec3(globalData->player->getPosition().x, globalData->player->getPosition().y - 0.35, globalData->player->getPosition().z),
+								rotationAngles, 1.0f), rotationAngles, 0.5), PROJ_SPEED, (rotationAngles.y*DEG_TO_RADIAN), rotationAngles.x); //!++!
+
+							coolDown = COOL_TIME*2.0;
+						//sound_manager->playSound(sound_manager->getSound(2), 2, 1);																													  //sound_manager->playSound(sound_manager->getSound(2), 2, 1);
+						}
+
 						//TODO: Enable sound
-						//cout << rotationAngles.x << "\n";
+		
+
+
 																																						  //		Projectile* bullet = new Projectile(bt_manager, glm::vec3(0, 0, 0), 1);
 					}
 				}
@@ -912,22 +931,22 @@ namespace SceneManager {
 				rightClick = false;
 			}
 
-			if (player->getState() == ON_GROUND)
+			if (globalData->player->getState() == ON_GROUND)
 				increase = 1.0f;
 			else increase = 0.3f;
 			if (keys[SDL_SCANCODE_W]) {
-				playerBody->setLinearVelocity(speedForward(increase, rotationAngles.y, (keys[SDL_SCANCODE_A] == SDL_PRESSED || keys[SDL_SCANCODE_D] == SDL_PRESSED)));
+				globalData->player->playerBody->setLinearVelocity(speedForward(increase, rotationAngles.y, (keys[SDL_SCANCODE_A] == SDL_PRESSED || keys[SDL_SCANCODE_D] == SDL_PRESSED)));
 			}
 			else if (keys[SDL_SCANCODE_S]) {
-				playerBody->setLinearVelocity(speedForward(-increase, rotationAngles.y, (keys[SDL_SCANCODE_A] == SDL_PRESSED || keys[SDL_SCANCODE_D] == SDL_PRESSED)));
+				globalData->player->playerBody->setLinearVelocity(speedForward(-increase, rotationAngles.y, (keys[SDL_SCANCODE_A] == SDL_PRESSED || keys[SDL_SCANCODE_D] == SDL_PRESSED)));
 			}
 			if (keys[SDL_SCANCODE_A]) {
 				//player->setPosition(moveRight(player->getPosition(), rotationAngles.y, -0.1f));
-				playerBody->setLinearVelocity(speedRight(-increase, rotationAngles.y, (keys[SDL_SCANCODE_W] == SDL_PRESSED || keys[SDL_SCANCODE_S] == SDL_PRESSED)));
+				globalData->player->playerBody->setLinearVelocity(speedRight(-increase, rotationAngles.y, (keys[SDL_SCANCODE_W] == SDL_PRESSED || keys[SDL_SCANCODE_S] == SDL_PRESSED)));
 			}
 			else if (keys[SDL_SCANCODE_D]) {
 				//player->setPosition(moveRight(player->getPosition(), rotationAngles.y, 0.1f));
-				playerBody->setLinearVelocity(speedRight(increase, rotationAngles.y, (keys[SDL_SCANCODE_W] == SDL_PRESSED || keys[SDL_SCANCODE_S] == SDL_PRESSED)));
+				globalData->player->playerBody->setLinearVelocity(speedRight(increase, rotationAngles.y, (keys[SDL_SCANCODE_W] == SDL_PRESSED || keys[SDL_SCANCODE_S] == SDL_PRESSED)));
 			}
 
 			if (keys[SDL_SCANCODE_C]) {
@@ -944,7 +963,7 @@ namespace SceneManager {
 			}
 
 			if (keys[SDL_SCANCODE_SPACE]) {
-				playerBody->setLinearVelocity(jump(SPEED_CAP_Y));
+				globalData->player->playerBody->setLinearVelocity(jump(SPEED_CAP_Y));
 			}
 
 			if (keys[SDL_SCANCODE_KP_8])
@@ -958,7 +977,7 @@ namespace SceneManager {
 		}
 		else if (mode == EDIT) {
 
-			btVector3 playerPos = playerBody->getWorldTransform().getOrigin();
+			btVector3 playerPos = globalData->player->playerBody->getWorldTransform().getOrigin();
 
 			btTransform t;
 			t.setIdentity();
@@ -995,22 +1014,22 @@ namespace SceneManager {
 			if (keys[SDL_SCANCODE_W]) {
 				glm::vec3 move = moveForward(glm::vec3(playerPos.x(), playerPos.y(), playerPos.z()), rotationAngles.y, 0.1f);
 				t.setOrigin(btVector3(move.x, move.y, move.z));
-				playerBody->setWorldTransform(t);
+				globalData->player->playerBody->setWorldTransform(t);
 			}
 			else if (keys[SDL_SCANCODE_S]) {
 				glm::vec3 move = moveForward(glm::vec3(playerPos.x(), playerPos.y(), playerPos.z()), rotationAngles.y, -0.1f);
 				t.setOrigin(btVector3(move.x, move.y, move.z));
-				playerBody->setWorldTransform(t);
+				globalData->player->playerBody->setWorldTransform(t);
 			}
 			if (keys[SDL_SCANCODE_A]) {
 				glm::vec3 move = moveRight(glm::vec3(playerPos.x(), playerPos.y(), playerPos.z()), rotationAngles.y, -0.1f);
 				t.setOrigin(btVector3(move.x, move.y, move.z));
-				playerBody->setWorldTransform(t);
+				globalData->player->playerBody->setWorldTransform(t);
 			}
 			else if (keys[SDL_SCANCODE_D]) {
 				glm::vec3 move = moveRight(glm::vec3(playerPos.x(), playerPos.y(), playerPos.z()), rotationAngles.y, 0.1f);
 				t.setOrigin(btVector3(move.x, move.y, move.z));
-				playerBody->setWorldTransform(t);
+				globalData->player->playerBody->setWorldTransform(t);
 			}
 			if (keys[SDL_SCANCODE_LSHIFT]) {
 				shiftPressed = true;
@@ -1265,17 +1284,40 @@ namespace SceneManager {
 
 		//	if (keys[SDL_SCANCODE_3]) bodies[4]->setLinearVelocity(btVector3(0.0, 0.0, 4.0));
 		if (keys[SDL_SCANCODE_1]) {
-			currentState = RUNNING;
+			if (currentState == MENU)
+				currentState = PAUSE;
+			if (currentState == RUNNING)
+				globalData->player->setWeapon(PISTOL);
 		}
 		if (keys[SDL_SCANCODE_2]) {
-			exit(0);
+			if (currentState == MENU) {
+				reset(); //TODO: SK 2
+				currentState = PAUSE;
+			}
+			if (currentState == RUNNING)
+				globalData->player->setWeapon(NUKA);
 		}
+		if (keys[SDL_SCANCODE_3]) {
+			if (currentState == MENU && clickable == true) {
+				globalData->shadows = !globalData->shadows;
+				clickable = false;
+			}
+			if (currentState == RUNNING)
+				globalData->player->setWeapon(SCIFI);
+
+		}
+		if (keys[SDL_SCANCODE_4]) {
+			if (currentState == MENU)
+				exit(0);
+		}
+
 		if (keys[SDL_SCANCODE_ESCAPE]) {
 			if (currentState == PAUSE)
 				currentState = MENU;
 		}
 
-
+		if (keys[SDL_SCANCODE_6])
+			exit(0);
 		//if (keys[SDL_SCANCODE_ESCAPE]) {
 		//	exit(0);
 		//}
@@ -1300,10 +1342,12 @@ namespace SceneManager {
 		glm::vec3 eulerRotation;
 		toEulerianAngle(rotation, eulerRotation);
 		model = glm::rotate(model, eulerRotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
-		model = glm::rotate(model, eulerRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
-		model = glm::rotate(model, eulerRotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
 		if (spin)
-			model = glm::rotate(model, theta, glm::vec3(0.0, 1.0, 0.0));
+			model = glm::rotate(model, eulerRotation.y+theta, glm::vec3(0.0f, 1.0f, 0.0f));
+		else
+			model = glm::rotate(model, eulerRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, eulerRotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+		
 		model = glm::scale(model, scale);	// It's a bit too big for our scene, so scale it down
 		//model = glm::scale(model, glm::vec3(0.05f, 0.05f, 0.05f));	// for gun]
 		glActiveTexture(GL_TEXTURE0);
@@ -1320,10 +1364,7 @@ namespace SceneManager {
 		glm::mat4 model;
 		model = glm::translate(model, pos);
 		model = glm::scale(model, scale);	// It's a bit too big for our scene, so scale it down
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, texture);
-		glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
-		glUniform1i(glGetUniformLocation(shader, "animated"), 1); //one means there is animations
+
 		
 		modelData->Draw(shader);
 		glBindTexture(GL_TEXTURE_2D, 0);
@@ -1351,7 +1392,6 @@ namespace SceneManager {
 		for (GLuint i = 0; i < Transforms.size(); i++) {
 			SetBoneTransform(i, Transforms[i]);
 		}
-
 	}
 
 	//TODO: delete
@@ -1370,7 +1410,7 @@ namespace SceneManager {
 	}
 
 
-	void renderWeapon(glm::mat4 proj, Model *modelData, GLuint shader, glm::vec3 scale) {
+	void renderWeapon(glm::mat4 proj, Model *modelData, GLuint shader, glm::vec3 scale, bool flip) {
 		glDisable(GL_CULL_FACE);
 		glm::mat4 model;
 		float local_pitch = static_cast<float>(-(rotationAngles.x + 0.1));
@@ -1379,14 +1419,17 @@ namespace SceneManager {
 		if (local_pitch <= -1)
 			local_pitch = -1;
 		glm::vec3 gunPos;
-		gunPos = shiftForward(glm::vec3(player->getPosition().x, player->getPosition().y-0.5, player->getPosition().z), rotationAngles, 0.075f);	
+		gunPos = shiftForward(glm::vec3(globalData->player->getPosition().x, globalData->player->getPosition().y-0.5, globalData->player->getPosition().z), rotationAngles, 0.075f);
 		gunPos = shiftRight(gunPos, rotationAngles, 0.5f);
 		model = glm::translate(model, gunPos);
 		model = glm::rotate(model, -rotationAngles.y*DEG_TO_RADIAN, glm::vec3(0.0, 1.0, 0.0));
 		model = glm::rotate(model, local_pitch, glm::vec3(1.0, 0.0, 0.0));
-		model = glm::rotate(model, float(80 * DEG_TO_RADIAN), glm::vec3(0.0, 1.0, 0.0));
-		model = glm::scale(model, glm::vec3(0.25f, 0.25f, 0.25f));
-		//TODO: I can't fix this. If you want, give it a try. good luck.
+		if (!flip)
+			model = glm::rotate(model, float(80 * DEG_TO_RADIAN), glm::vec3(0.0, 1.0, 0.0));
+		else
+			model = glm::rotate(model, float(-100 * DEG_TO_RADIAN), glm::vec3(0.0, 1.0, 0.0));
+		model = glm::scale(model,scale);
+		//I can't fix this. If you want, give it a try. good luck.
 		glUniformMatrix4fv(glGetUniformLocation(shader, "projection"), 1, GL_FALSE, glm::value_ptr(glm::mat4()));
 		glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
 		glUniform1i(glGetUniformLocation(shader, "animated"), 0); //zero is no animations
@@ -1396,14 +1439,16 @@ namespace SceneManager {
 	}
 
 	void updatePlayer(float dt) {
-		btTransform t;
-		t.setIdentity();
-		playerBody->getMotionState()->getWorldTransform(t);
+		//btTransform t;
+		//t.setIdentity();
+		//playerBody->getMotionState()->getWorldTransform(t);
 		//	playerBody->getMotionState();
-		btVector3 pos = t.getOrigin();
-		player->setPosition(glm::vec3(pos.x(), pos.y(), pos.z()));
-		ghostObject->setWorldTransform(t);
-		player->update(dt);
+		//btVector3 pos = t.getOrigin();
+		//globalData->player->setPosition(glm::vec3(pos.x(), pos.y(), pos.z()));
+		//ghostObject->setWorldTransform(t);
+		globalData->player->update(dt);
+
+
 		//cout << getLinearVelocityInBodyFrame(playerBody).y();
 	}
 
@@ -1415,14 +1460,14 @@ namespace SceneManager {
 		for (unsigned int i = 0; i < max; i++) {
 			if (findCollision(get<0>(collectables[i]))) {
 				if (get<2>(collectables[i]) == "heart")
-					player->setHealth(player->getHealth() + 50);
+					globalData->player->setHealth(globalData->player->getHealth() + 50);
 				else if (get<2>(collectables[i]) == "shield")
-					player->setArmor(player->getArmor() + 50);
+					globalData->player->setArmor(globalData->player->getArmor() + 50);
 
 				//TODO: play sound
 
-				bt_manager->removeObject(bodies[get<1>(collectables[i])]);
-				bt_manager->removeObject(get<0>(collectables[i]));
+				globalData->bt_manager->removeObject(bodies[get<1>(collectables[i])]);
+				globalData->bt_manager->removeObject(get<0>(collectables[i]));
 				bodies.erase(get<1>(collectables[i]));
 				collectables.erase(remove(collectables.begin(), collectables.end(), collectables[i]), collectables.end());
 				max--;
@@ -1433,33 +1478,39 @@ namespace SceneManager {
 		}
 	}
 
-	//Model* animatedModel;
 	void update(SDL_Window * window, SDL_Event sdlEvent) {
 		controls(window, sdlEvent);
 		dt_secs = gameTime();
 		coolDown -= dt_secs;	
 		if (currentState == RUNNING) {
 			updatePlayer(dt_secs);
-			if (player->getState() == JUMPING)
-				if (findCollision(ghostObject))
-					player->setState(ON_GROUND);
+			if (globalData->player->getState() == JUMPING)
+				if (findCollision(globalData->player->playerGhost))
+					globalData->player->setState(ON_GROUND);
+				
 			updateCollectables();
 			theta += 0.1;
-			bt_manager->update();
+			globalData->bt_manager->update();
 		}
 
+		if (globalData->player->getLifeState() == DEAD)
+		{
+			currentState = DEFEAT;
 
-		//world->stepSimulation(1/60.0); // 1 divided by frames per second
-		// would need to delete dispatcher, collisionconfig, solver, world, broadphase in main
-		// +++++
+			defeatTime -= dt_secs;
+			if (defeatTime <= 0) {
+				reset();
+			}
+		}
+
 	}
 
 	void camera() {
 		//		if (pointOfView == FIRST_PERSON) {
-		at = moveForward(player->getPosition(), rotationAngles.y, 1.0f);
+		at = moveForward(globalData->player->getPosition(), rotationAngles.y, 1.0f);
 		at.y -= rotationAngles.x;
 
-		view = glm::lookAt(player->getPosition(), at, up);
+		view = glm::lookAt(globalData->player->getPosition(), at, up);
 		//mvStack.top() = glm::lookAt(player->getPosition(), at, up);
 	//}
 
@@ -1477,63 +1528,61 @@ namespace SceneManager {
 
 	void pointLight(GLuint shader) {
 		GLuint uniformIndex = glGetUniformLocation(shader, "viewPos");
-		glUniform3fv(uniformIndex, 1, glm::value_ptr(player->getPosition()));
+		glUniform3fv(uniformIndex, 1, glm::value_ptr(globalData->player->getPosition()));
 		uniformIndex = glGetUniformLocation(shader, "pointLight.position");
-		glUniform3f(uniformIndex, mainLight.position.x, mainLight.position.y, mainLight.position.z);
+		glUniform3f(uniformIndex, globalData->mainLight.position.x, globalData->mainLight.position.y, globalData->mainLight.position.z);
 		uniformIndex = glGetUniformLocation(shader, "pointLight.ambient");
-		glUniform3f(uniformIndex, mainLight.ambient.r, mainLight.ambient.g, mainLight.ambient.b);
+		glUniform3f(uniformIndex, globalData->mainLight.ambient.r, globalData->mainLight.ambient.g, globalData->mainLight.ambient.b);
 		uniformIndex = glGetUniformLocation(shader, "pointLight.diffuse");
-		glUniform3f(uniformIndex, mainLight.diffuse.r, mainLight.diffuse.g, mainLight.diffuse.b);
+		glUniform3f(uniformIndex, globalData->mainLight.diffuse.r, globalData->mainLight.diffuse.g, globalData->mainLight.diffuse.b);
 		uniformIndex = glGetUniformLocation(shader, "pointLight.specular");
-		glUniform3f(uniformIndex, mainLight.specular.r, mainLight.specular.g, mainLight.specular.b);
+		glUniform3f(uniformIndex, globalData->mainLight.specular.r, globalData->mainLight.specular.g, globalData->mainLight.specular.b);
 		uniformIndex = glGetUniformLocation(shader, "pointLight.constant");
-		glUniform1f(uniformIndex, mainLight.att_constant);
+		glUniform1f(uniformIndex, globalData->mainLight.att_constant);
 		uniformIndex = glGetUniformLocation(shader, "pointLight.linear");
-		glUniform1f(uniformIndex, mainLight.att_linear);
+		glUniform1f(uniformIndex, globalData->mainLight.att_linear);
 		uniformIndex = glGetUniformLocation(shader, "pointLight.quadratic");
-		glUniform1f(uniformIndex, mainLight.att_quadratic);
+		glUniform1f(uniformIndex, globalData->mainLight.att_quadratic);
 	}
 
 	void pointShadow(GLuint shader) {
 		glm::mat4 shadowProj = glm::perspective(float(90.0f*DEG_TO_RADIAN), aspect, near_plane, far_plane); //perspective projection is the best suited for this
 		std::vector<glm::mat4> shadowTransforms;
 		shadowTransforms.push_back(shadowProj *
-			glm::lookAt(mainLight.position, mainLight.position + glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0)));
+			glm::lookAt((globalData->mainLight).position, globalData->mainLight.position + glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0)));
 		shadowTransforms.push_back(shadowProj *
-			glm::lookAt(mainLight.position, mainLight.position + glm::vec3(-1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0)));
+			glm::lookAt((globalData->mainLight).position, globalData->mainLight.position + glm::vec3(-1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0)));
 		shadowTransforms.push_back(shadowProj *
-			glm::lookAt(mainLight.position, mainLight.position + glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0, 0.0, 1.0)));
+			glm::lookAt((globalData->mainLight).position, globalData->mainLight.position + glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0, 0.0, 1.0)));
 		shadowTransforms.push_back(shadowProj *
-			glm::lookAt(mainLight.position, mainLight.position + glm::vec3(0.0, -1.0, 0.0), glm::vec3(0.0, 0.0, -1.0)));
+			glm::lookAt((globalData->mainLight).position, globalData->mainLight.position + glm::vec3(0.0, -1.0, 0.0), glm::vec3(0.0, 0.0, -1.0)));
 		shadowTransforms.push_back(shadowProj *
-			glm::lookAt(mainLight.position, mainLight.position + glm::vec3(0.0, 0.0, 1.0), glm::vec3(0.0, -1.0, 0.0)));
+			glm::lookAt((globalData->mainLight).position, globalData->mainLight.position + glm::vec3(0.0, 0.0, 1.0), glm::vec3(0.0, -1.0, 0.0)));
 		shadowTransforms.push_back(shadowProj *
-			glm::lookAt(mainLight.position, mainLight.position + glm::vec3(0.0, 0.0, -1.0), glm::vec3(0.0, -1.0, 0.0)));
+			glm::lookAt((globalData->mainLight).position, globalData->mainLight.position + glm::vec3(0.0, 0.0, -1.0), glm::vec3(0.0, -1.0, 0.0)));
 
 		for (int k = 0; k < 6; ++k)
 			glUniformMatrix4fv(glGetUniformLocation(shader, ("shadowMatrices[" + std::to_string(k) + "]").c_str()), 1, GL_FALSE, glm::value_ptr(shadowTransforms[k]));
 	}
 
 	void renderWorldObjects(GLuint shader, glm::mat4 projection) {
-	
-		// PLAYER capsule
-		/*glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		glDisable(GL_CULL_FACE);
-		bt_manager->renderCapsule(playerBody, view, projection, modelTypes["sphere"], shader, defaultTexture);
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		glEnable(GL_CULL_FACE);*/
-		///+++++++++++++++
-
-		btVector3 playerPos(player->getPosition().x, player->getPosition().y, player->getPosition().z);
-		//++! \_/
-		//TODO: Finish enemies
+		//// PLAYER capsule
 		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		//glDisable(GL_CULL_FACE);
-		for (unsigned int i = 0; i < enemies.size(); i++) {
-			if (!enemies[i]->update(make_tuple(modelTypes["assaultRun"], modelTypes["assaultAttack"], modelTypes["assaultDie"]), view, projection, dt_secs, level1Grid, player, shader)) {
-				enemies.erase(remove(enemies.begin(), enemies.end(), enemies[i]), enemies.end());
-				//TODO: space to add stuff
-			}
+		//globalData->bt_manager->renderCapsule(globalData->player->playerBody, view, projection, modelTypes["sphere"], shader, defaultTexture);
+		//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		//glEnable(GL_CULL_FACE);
+		/////+++++++++++++++
+
+		btVector3 playerPos(globalData->player->getPosition().x, globalData->player->getPosition().y, globalData->player->getPosition().z);
+
+
+			for (auto it = enemies.begin(); it != enemies.end(); ) {
+				if (!(*it)->update((make_tuple(modelTypes["assaultRun"], modelTypes["assaultAttack"], modelTypes["assaultDie"]), view, projection, dt_secs, globalData->level1Grid, globalData->player, shader))
+					it = enemies.erase(it);
+				else
+					++it;
+
 		}
 
 		for (const auto& id_pair : bodies) {
@@ -1546,11 +1595,11 @@ namespace SceneManager {
 			btQuaternion rotation = bodies[id_pair.first]->getWorldTransform().getRotation().normalized();
 
 			if (id_pair.second->getCollisionShape()->getShapeType() == BOX_SHAPE_PROXYTYPE) {
-			/*	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-				glDisable(GL_CULL_FACE);
-				bt_manager->renderBox(bodies[id_pair.first], view, projection, modelTypes["cube"], shader, groundTexture);
-				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-				glEnable(GL_CULL_FACE);*/
+				//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+				//glDisable(GL_CULL_FACE);
+				//globalData->bt_manager->renderBox(bodies[id_pair.first], view, projection, modelTypes["cube"], shader, groundTexture);
+				//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+				//glEnable(GL_CULL_FACE);
 				//cout << modelTypes[get<0>(models[id_pair.first])] << endl;
 				//cout << models[id_pair.first] << endl;
 
@@ -1605,9 +1654,8 @@ namespace SceneManager {
 			}
 		}
 
-		projectile_manager->renderProjectiles(view, projection, modelTypes["sphere"], shader, defaultTexture, dt_secs);
-		//!++!
-	
+		globalData->projectile_manager->renderProjectiles(view, projection, modelTypes["sphere"], shader, defaultTexture, dt_secs);
+
 	}
 
 	// main render function, sets up the shaders and then calls all other functions
@@ -1620,11 +1668,10 @@ namespace SceneManager {
 		if (cubemap)
 			pointShadow(shader);
 
-
 		uniformIndex = glGetUniformLocation(shader, "far_plane");
 		glUniform1f(uniformIndex, far_plane);
 		uniformIndex = glGetUniformLocation(shader, "viewPos");
-		glUniform3fv(uniformIndex, 1, glm::value_ptr(player->getPosition()));
+		glUniform3fv(uniformIndex, 1, glm::value_ptr(globalData->player->getPosition()));
 
 		//similarly, if (!cubemap) refers to normal rendering
 		if (!cubemap) {
@@ -1657,16 +1704,24 @@ namespace SceneManager {
 	}
 
 	void renderHud(GLuint shader, Model *modelData) {
-		// HP
-		h_manager->renderPlayerHud("Health: ", player->getHealth(), HEALTH, shader, modelData, glm::vec3(-0.875f, 0.925f, 1.0f), glm::vec3(0.6275,0.4,0.0));
-
-		// Armor
-		h_manager->renderPlayerHud("Armor: ", player->getArmor(), ARMOR, shader, modelData, glm::vec3(-0.65f, 0.925f, 1.0f), glm::vec3(0, 0, 0.4));
-
+	
 		if (currentState == PAUSE)
-			h_manager->renderPause(texturedProgram, modelTypes["cube"]);
-		if (currentState == MENU)
-			h_manager->renderMenu(texturedProgram, modelTypes["cube"]);
+			globalData->h_manager->renderPause(texturedProgram, modelTypes["cube"]);
+		else if (currentState == MENU)
+			globalData->h_manager->renderMenu(texturedProgram, modelTypes["cube"], globalData->shadows);
+		else if (currentState == DEFEAT)
+			globalData->h_manager->renderDefeat(texturedProgram, modelTypes["cube"]);
+		else if (currentState == RUNNING) {
+			// HP
+			globalData->h_manager->renderPlayerHud("Health: ", globalData->player->getHealth(), HEALTH, shader, modelData, glm::vec3(-0.875f, 0.925f, 1.0f), glm::vec3(0.6275, 0.4, 0.0));
+			// Armor
+			globalData->h_manager->renderPlayerHud("Armor: ", globalData->player->getArmor(), ARMOR, shader, modelData, glm::vec3(-0.65f, 0.925f, 1.0f), glm::vec3(0, 0, 0.4));
+			// TODO: Ammo
+			;;
+			// Crosshair
+			globalData->h_manager->renderCrosshair(texturedProgram, modelTypes["cube"]);
+
+		}
 	}
 
 	void draw(SDL_Window * window) { //, int fps) { // fps counter; 4 of 5
@@ -1695,7 +1750,8 @@ namespace SceneManager {
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear FBO
 				glClear(GL_DEPTH_BUFFER_BIT);
 
-				renderShadowedScene(projection, view, depthShaderProgram, true); // render using light's point of view and simpler shader program
+				if (globalData->shadows)
+					renderShadowedScene(projection, view, depthShaderProgram, true); // render using light's point of view and simpler shader program
 
 				glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			}
@@ -1713,17 +1769,38 @@ namespace SceneManager {
 				renderShadowedScene(projection, view, modelProgram, false); // render normal scene from normal point of view
 				// fps counter; 5 of 5
 				//h_manager->renderToHud(5, texturedProgram, modelTypes["cube"], glm::vec3(-0.0f, 0.0f, 0.9f));
-				
-				animationTransforms();
-				renderWeapon(projection, modelTypes["scifipistol"], modelProgram, glm::vec3(0.05, 0.05, 0.05)); //TODO: Render current weapon
+
+				string wepType;
+				float offsetRight = 0.5f;
+				bool flip = false;
+				glm::vec3 wepScale;
+				if (globalData->player->getWeapon().getName() == PISTOL) {
+					wepType = "scifipistol";
+					wepScale = glm::vec3(0.25f, 0.25f, 0.25f);
+					flip = false;
+				}
+				else if (globalData->player->getWeapon().getName() == NUKA) {
+					wepType = "nukacola";
+					wepScale = glm::vec3(0.003f, 0.004f, 0.003f);
+					flip = false;
+				}
+				else if (globalData->player->getWeapon().getName() == SCIFI) {
+					wepType = "scifigun";
+					wepScale = glm::vec3(0.185f, 0.185f, 0.185f);
+					flip = true;
+
+				}
+	    	animationTransforms();
+				renderWeapon(projection, modelTypes[wepType], modelProgram, wepScale, flip); //TODO: Render current weapon
+
 				renderHud(texturedProgram, modelTypes["cube"]);
 				
 				
 				if (mode == EDIT) {
-					h_manager->renderEditHud("Bounding", currentBounding, texturedProgram, modelTypes["cube"], glm::vec3(0.7f, 0.45f, 0.9f));
-					h_manager->renderEditHud("Model", currentModel, texturedProgram, modelTypes["cube"], glm::vec3(0.7f, 0.35f, 0.9f));
-					h_manager->renderEditHud("Mass", to_string(trunc(mass*10.0) / 10.0), texturedProgram, modelTypes["cube"], glm::vec3(0.7f, 0.25f, 0.9f));
-					h_manager->renderEditHud("PrevAdd", selectedPrev, texturedProgram, modelTypes["cube"], glm::vec3(0.7f, -0.05f, 0.9f));
+					globalData->h_manager->renderEditHud("Bounding", currentBounding, texturedProgram, modelTypes["cube"], glm::vec3(0.7f, 0.45f, 0.9f));
+					globalData->h_manager->renderEditHud("Model", currentModel, texturedProgram, modelTypes["cube"], glm::vec3(0.7f, 0.35f, 0.9f));
+					globalData->h_manager->renderEditHud("Mass", to_string(trunc(mass*10.0) / 10.0), texturedProgram, modelTypes["cube"], glm::vec3(0.7f, 0.25f, 0.9f));
+					globalData->h_manager->renderEditHud("PrevAdd", selectedPrev, texturedProgram, modelTypes["cube"], glm::vec3(0.7f, -0.05f, 0.9f));
 					string temp = "";
 					if (stage == MODEL) {
 						temp = "model";
@@ -1731,14 +1808,14 @@ namespace SceneManager {
 					else {
 						temp = "bounding";
 					}
-					h_manager->renderEditHud("Editing", temp, texturedProgram, modelTypes["cube"], glm::vec3(0.7f, 0.15f, 0.9f));
+					globalData->h_manager->renderEditHud("Editing", temp, texturedProgram, modelTypes["cube"], glm::vec3(0.7f, 0.15f, 0.9f));
 					if (coolDown <= 0) {
 						temp = "READY";
 					}
 					else {
 						temp = "WAIT";
 					}
-					h_manager->renderEditHud("Timer", temp, texturedProgram, modelTypes["cube"], glm::vec3(0.7f, 0.05f, 0.9f));
+					globalData->h_manager->renderEditHud("Timer", temp, texturedProgram, modelTypes["cube"], glm::vec3(0.7f, 0.05f, 0.9f));
 				}
 			}
 			glDepthMask(GL_TRUE);
