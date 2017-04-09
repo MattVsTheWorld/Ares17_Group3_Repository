@@ -18,7 +18,8 @@ enum npcState {
 	IDLE,		//Hasn't seen player
 	TRIGGERED,	//Player seen
 	PAUSED,		//Game paused
-	DYING
+	DYING,
+	ATTACKING
 };
 
 // Abstract base class: no implementation

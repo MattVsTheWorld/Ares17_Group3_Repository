@@ -864,7 +864,7 @@ namespace SceneManager {
 			// Unpause
 			else if (currentState == PAUSE) {
 				for (const auto it : enemies)
-					it->setState(IDLE);
+					it->setState(TRIGGERED);
 				currentState = RUNNING;
 			}
 		}
@@ -1371,24 +1371,24 @@ namespace SceneManager {
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
-	void animationTransforms() {
+	void animationTransforms(npcState state) {
 		vector<Matrix4f> Transforms;
-		RunningTime += gameTime();
+		RunningTime += dt_secs;
 		int speed = 1;
 		//Model* temp;
-		//if (run == 1) {
+		if (state == ATTACKING) {
 			modelTypes["assaultAttack"]->BoneTransform(RunningTime, Transforms, speed);;
 			speed = 3;
-		//}
-	//	else if (run == 2) {
+		}
+		else if (state == DYING) {
 			modelTypes["assaultDie"]->BoneTransform(RunningTime, Transforms, speed);;
 			speed = 2;
-	//	}
-	//	else {
+		}
+		else if (state == TRIGGERED){
 			modelTypes["assaultRun"]->BoneTransform(RunningTime, Transforms, speed);;
 			speed = 2;
-	//	}
-
+		}
+		//SetBoneTransform
 		
 		for (GLuint i = 0; i < Transforms.size(); i++) {
 			SetBoneTransform(i, Transforms[i]);
@@ -1575,16 +1575,19 @@ namespace SceneManager {
 		//glEnable(GL_CULL_FACE);
 		/////+++++++++++++++
 
-		btVector3 playerPos(globalData->player->getPosition().x, globalData->player->getPosition().y, globalData->player->getPosition().z);
+		//btVector3 playerPos(globalData->player->getPosition().x, globalData->player->getPosition().y, globalData->player->getPosition().z);
 
 
-			for (auto it = enemies.begin(); it != enemies.end(); ) {
-				if (!(*it)->update((make_tuple(modelTypes["assaultRun"], modelTypes["assaultAttack"], modelTypes["assaultDie"])), view, projection, dt_secs, globalData->level1Grid, globalData->player, shader))
-					it = enemies.erase(it);
-				else
-					++it;
+		for (auto it = enemies.begin(); it != enemies.end(); ) {
+
+			animationTransforms((*it)->getState());
+			if (!(*it)->update((make_tuple(modelTypes["assaultRun"], modelTypes["assaultAttack"], modelTypes["assaultDie"])), view, projection, dt_secs, globalData->level1Grid, globalData->player, modelProgram))
+				it = enemies.erase(it);
+			else
+				++it;
 
 		}
+
 
 		for (const auto& id_pair : bodies) {
 			// First = name / key
@@ -1791,7 +1794,9 @@ namespace SceneManager {
 					flip = true;
 
 				}
-	    	animationTransforms();
+
+
+	    	
 				renderWeapon(projection, modelTypes[wepType], modelProgram, wepScale, flip); //TODO: Render current weapon
 
 				renderHud(texturedProgram, modelTypes["cube"]);

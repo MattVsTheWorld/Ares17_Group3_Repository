@@ -90,7 +90,7 @@ public:
 		btRigidBody::btRigidBodyConstructionInfo info(mass, motion, capsule, inertia);
 		btRigidBody* body = new btRigidBody(info);
 		body->setAngularFactor(btVector3(0, 1, 0));
-		shapeManager->addToWorld(body, COL_ENEMY, COL_BULLET | COL_PLAYER | COL_DEFAULT | COL_ENEMY); // Can add COL_ENEMY for enemy to enemy collision
+		shapeManager->addToWorld(body, COL_ENEMY, COL_PLAYER | COL_DEFAULT | COL_ENEMY); // Can add COL_ENEMY for enemy to enemy collision
 
 		return body;
 	}
@@ -168,16 +168,17 @@ public:
 
 		Model* currentAnimation = get<2>(modelDatas);
 
-		if (DEFAULT_LOS && (this->currentState != PAUSED || this->currentState != DYING) && sqrt(pow(playerPos.x() - pos.x(), 2) + pow(playerPos.z() - pos.z(), 2) <= DEFAULT_LOS))
+		if ((this->currentState != PAUSED || this->currentState != DYING) && sqrt(pow(playerPos.x() - pos.x(), 2) + pow(playerPos.z() - pos.z(), 2) <= DEFAULT_LOS))
 			this->currentState = TRIGGERED;
 
-		if (this->currentState == TRIGGERED) {
+		if (this->currentState == TRIGGERED || this->currentState == ATTACKING) {
 			
 			if (init) {
 				currentPath = findPath(_g->getAdjList(), _g->getNodeFromWorldPos(pos), _g->getNodeFromWorldPos(playerPos));
 				init = false;
 			}
 			if (sqrt(pow(playerPos.x() - pos.x(), 2) + pow(playerPos.z() - pos.z(), 2)) >= this->range) { // distance
+				this->currentState = TRIGGERED;
 				recalcTimer -= dt;
 				if (recalcTimer <= 0)
 				{
@@ -192,8 +193,8 @@ public:
 					this->moveNpc(currentPath.front());
 					currentAnimation = get<0>(modelDatas); //running animation
 				}
-			}
-			else {
+			} else {
+				this->currentState = ATTACKING;
 				//Attack player
 				//player->varyHealth(-(this->attack));
 				//TODO: MESHAL attack animation
@@ -206,7 +207,6 @@ public:
 			}
 		}
 		if (currentState == DYING){
-		//	cout << "Doing ma ting";
 			currentAnimation = get<2>(modelDatas);
 		}
 
