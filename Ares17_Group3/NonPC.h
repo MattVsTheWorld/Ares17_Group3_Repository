@@ -23,6 +23,7 @@ private:
 	queue<vertex*> currentPath;
 	double recalcTimer = REFRESHRATE;
 	double attackTimer = 0;
+	float angle;
 	// +++++++++++++++
 	bool findCollision(btPairCachingGhostObject* ghostObject) {
 		btManifoldArray manifoldArray;
@@ -144,7 +145,7 @@ public:
 		btVector3 pos = t.getOrigin();
 
 		//	cout << "Going to: " << v->getIndex() << endl;
-		float angle = (atan2(goTo.z() - pos.z(), goTo.x() - pos.x())); // RADIANS
+		angle = (atan2(goTo.z() - pos.z(), goTo.x() - pos.x())); // RADIANS
 		changeSpeed(3, angle);
 
 		// find angle between direction
@@ -166,9 +167,7 @@ public:
 		return toVisit;
 	} // findPath function
 
-	bool update(Model * modelData, glm::mat4 view, glm::mat4 proj, float dt, Grid* _g, Player *player, GLuint shader) {
-
-		this->render(modelData, view, proj, shader);
+	bool update(std::tuple<Model*, Model*, Model*> modelDatas, glm::mat4 view, glm::mat4 proj, float dt, Grid* _g, Player *player, GLuint shader) {
 
 		//TODO: unstuck
 		btVector3 playerPos(player->getPosition().x, player->getPosition().y, player->getPosition().z);
@@ -177,10 +176,13 @@ public:
 		npcBody->getMotionState()->getWorldTransform(t);
 		btVector3 pos = t.getOrigin();
 
+		Model* currentAnimation = nullptr;
+
 		if (sqrt(pow(playerPos.x() - pos.x(), 2) + pow(playerPos.z() - pos.z(), 2)) <= DEFAULT_LOS && this->currentState != PAUSED)
 			this->currentState = TRIGGERED;
 
 		if (this->currentState == TRIGGERED) {
+			
 			if (init) {
 				currentPath = findPath(_g->getAdjList(), _g->getNodeFromWorldPos(pos), _g->getNodeFromWorldPos(playerPos));
 				init = false;
@@ -196,13 +198,16 @@ public:
 				if (!currentPath.empty())
 					if (_g->getAdjList()->getVertex(_g->getNodeFromWorldPos(pos)) == currentPath.front())
 						currentPath.pop();
-				if (!currentPath.empty())
+				if (!currentPath.empty()) {
 					this->moveNpc(currentPath.front());
+					currentAnimation = get<0>(modelDatas); //running animation
+				}
 			}
 			else {
 				//Attack player
 				//player->varyHealth(-(this->attack));
 				//TODO: MESHAL attack animation
+				currentAnimation = get<1>(modelDatas); //attack animation
 				if (this->attackTimer <= 0) {
 					player->takeDamage(this->attack);
 					this->attackTimer = this->attackSpeed;
@@ -210,6 +215,12 @@ public:
 				else this->attackTimer -= dt;
 			}
 		}
+		else {
+			currentAnimation = get<2>(modelDatas);
+		}
+
+		this->render(currentAnimation, view, proj, shader);
+
 			if (findCollision(npcGhost))
 			{
 				this->health -= 10;
@@ -236,13 +247,13 @@ public:
 		glm::vec3 eulerRotation;
 		toEulerianAngle(rotation, eulerRotation);
 		model = glm::rotate(model, eulerRotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
-		model = glm::rotate(model, eulerRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, std::atan2(std::cos(angle), std::sin(angle)), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::rotate(model, eulerRotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
-		model = glm::scale(model, glm::vec3(0.15, 0.15, 0.15));	// It's a bit too big for our scene, so scale it down
-											//model = glm::scale(model, glm::vec3(0.05f, 0.05f, 0.05f));	// for gun]
+		model = glm::scale(model, glm::vec3(0.7, 0.7, 0.7));	// It's a bit too big for our scene, so scale it down
+	//	model = glm::scale(model, glm::vec3(0.05f, 0.05f, 0.05f));	// for gun]
 	//	glActiveTexture(GL_TEXTURE0);
 	//	glBindTexture(GL_TEXTURE_2D, texture);
-		glUniform1i(glGetUniformLocation(shader, "animated"), 0); //zero is no animations
+		glUniform1i(glGetUniformLocation(shader, "animated"), 1); //zero is no animations
 		glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
 		modelData->Draw(shader);
 

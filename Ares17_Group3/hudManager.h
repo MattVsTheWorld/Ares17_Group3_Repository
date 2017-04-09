@@ -45,7 +45,7 @@ private:
 
 	GLuint changeLabel(string line, double value) {
 		std::string str = line;
-		int val = value;
+		int val = static_cast<int>(value);
 		str.append(std::to_string(val));
 		const char *cstr = str.c_str();
 		return textToTexture(cstr, label, textFont);

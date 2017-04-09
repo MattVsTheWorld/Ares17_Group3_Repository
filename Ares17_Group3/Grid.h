@@ -8,7 +8,7 @@
 #include "AdjacencyList.h"
 #include "btBulletDynamicsCommon.h"
 #define DEFAULTWEIGHT 10.0f
-#define DEFAULTRADIUS 5
+#define DEFAULTRADIUS 3
 
 //Node size = 2x2 seems fair
 
@@ -26,7 +26,7 @@ protected:
 private:
 	//	glm::vec2 gridWorldSize;
 	//	float nodeMargin = 2;
-	static const int gridHalfSide = 35; //TODO change grid size
+	static const int gridHalfSide = 36; //TODO change grid size
 	int IDgrid[((gridHalfSide * 2) / DEFAULTRADIUS) + 1 ][((gridHalfSide * 2) / DEFAULTRADIUS) + 1];
 	AdjacencyList *grid;
 };

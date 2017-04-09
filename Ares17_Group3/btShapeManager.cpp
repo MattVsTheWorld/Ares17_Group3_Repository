@@ -49,7 +49,7 @@ btRigidBody* btShapeManager::addBox(float width, float height, float depth, floa
 	btRigidBody::btRigidBodyConstructionInfo info(mass, motion, box, inertia);
 
 	btRigidBody* body = new btRigidBody(info);
-	btSettings.world->addRigidBody(body, group, mask);
+	//btSettings.world->addRigidBody(body, group, mask);
 	//bodies.push_back(body);
 
 	return body;

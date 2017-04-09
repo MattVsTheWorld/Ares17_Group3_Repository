@@ -28,7 +28,7 @@ public:
 	virtual void modifyHealth(double newHp) = 0;
 	virtual void moveNpc(vertex* v) = 0;
 	virtual queue<vertex*> findPath(AdjacencyList *adjList, int startId, int endId) = 0;
-	virtual bool update(Model * modelData, glm::mat4 view, 
+	virtual bool update(std::tuple<Model*, Model*, Model*> modelDatas, glm::mat4 view,
 		glm::mat4 proj, float dt, Grid* _g, Player* player, GLuint shader) = 0;
 	//	virtual bool findCollision() = 0;
 	virtual void setAttack(double atk) = 0;

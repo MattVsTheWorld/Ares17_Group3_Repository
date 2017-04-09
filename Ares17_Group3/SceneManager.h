@@ -23,6 +23,8 @@
 #include "NPCDecorator.h"
 //+++
 
+#include <unordered_map>
+
 #define DEG_TO_RADIAN 0.017453293f
 #define PI 3.14159265359f
 

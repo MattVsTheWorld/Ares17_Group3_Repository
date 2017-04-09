@@ -27,24 +27,15 @@ void Model::loadModel(string path)
 	// Retrieve the directory path of the filepath
 	this->directory = path.substr(0, path.find_last_of('/'));
 
-	m_GlobalInverseTransform = scene->mRootNode->mTransformation;
-
-	cout << "load: " << scene->mMeshes[0]->mNumVertices << endl;
-
-	m_NumBones = 0;
-	
 	if (scene->HasAnimations()) {
 		for (GLuint i = 0; i < scene->mAnimations[0]->mNumChannels; i++) {
 			nodeAnims.insert(make_pair(scene->mAnimations[0]->mChannels[i]->mNodeName.data, scene->mAnimations[0]->mChannels[i]));
 		}
+		m_GlobalInverseTransform = scene->mRootNode->mTransformation;
+		m_NumBones = 0;
 	}
-	// Process ASSIMP's root node recursively
-	this->processNode(scene->mRootNode, scene);
-}
 
-// Processes a node in a recursive fashion. Processes each individual mesh located at the node and repeats this process on its children nodes (if any).
-void Model::processNode(aiNode* node, const aiScene* scene)
-{
+	// Process all of the meshes
 	for (GLuint i = 0; i < scene->mNumMeshes; i++)
 	{
 		aiMesh* mesh = scene->mMeshes[i];
@@ -93,44 +84,46 @@ Mesh Model::processMesh(GLuint MeshIndex, aiMesh* mesh)
 		vertices.push_back(vertex);
 	}
 
-	int boneArraysSize = mesh->mNumVertices*NUM_BONES_PER_VERTEX;
-	std::vector<GLint> boneIDs;
-	boneIDs.resize(boneArraysSize);
-	std::vector<float> boneWeights;
-	boneWeights.resize(boneArraysSize);
+	if (scene->HasAnimations()) {
+		int boneArraysSize = mesh->mNumVertices*NUM_BONES_PER_VERTEX;
+		std::vector<GLbyte> boneIDs;
+		boneIDs.resize(boneArraysSize);
+		std::vector<float> boneWeights;
+		boneWeights.resize(boneArraysSize);
 
-	for (GLuint i = 0; i < mesh->mNumBones; i++) {
-		GLuint BoneIndex = 0;
-		string BoneName(mesh->mBones[i]->mName.data);
+		for (GLuint i = 0; i < mesh->mNumBones; i++) {
+			GLbyte BoneIndex = 0;
+			string BoneName(mesh->mBones[i]->mName.data);
 
-		if (m_BoneMapping.find(BoneName) == m_BoneMapping.end()) {
-			// Allocate an index for a new bone
-			BoneIndex = m_NumBones;
-			m_NumBones++;
-			BoneInfo bi;
-			m_BoneInfo.push_back(bi);
-			m_BoneInfo[BoneIndex].BoneOffset = mesh->mBones[i]->mOffsetMatrix;
-			m_BoneMapping[BoneName] = BoneIndex;
-		}
-		else {
-			BoneIndex = m_BoneMapping[BoneName];
-		}
+			if (m_BoneMapping.find(BoneName) == m_BoneMapping.end()) {
+				// Allocate an index for a new bone
+				BoneIndex = m_NumBones;
+				m_NumBones++;
+				BoneInfo bi;
+				m_BoneInfo.push_back(bi);
+				m_BoneInfo[BoneIndex].BoneOffset = mesh->mBones[i]->mOffsetMatrix;
+				m_BoneMapping[BoneName] = BoneIndex;
+			}
+			else {
+				BoneIndex = m_BoneMapping[BoneName];
+			}
 
-		for (int j = 0; j < mesh->mBones[i]->mNumWeights;j++)
-		{
-			aiVertexWeight weight = mesh->mBones[i]->mWeights[j];
-			// where to start reading vertex weights
-			GLuint vertexStart = weight.mVertexId*NUM_BONES_PER_VERTEX;
-			// fill teh arrays
-			for (GLuint k = 0; k < NUM_BONES_PER_VERTEX; k++)
+			for (unsigned int j = 0; j < mesh->mBones[i]->mNumWeights;j++)
 			{
-				if (boneWeights.at(vertexStart + k) == 0.0f) //if 0 not filled with weight
+				aiVertexWeight weight = mesh->mBones[i]->mWeights[j];
+				// where to start reading vertex weights
+				GLuint vertexStart = weight.mVertexId*NUM_BONES_PER_VERTEX;
+				// fill teh arrays
+				for (GLuint k = 0; k < NUM_BONES_PER_VERTEX; k++)
 				{
-					boneWeights.at(vertexStart + k) = weight.mWeight;
-					boneIDs.at(vertexStart + k) = BoneIndex; // i ID of current bone
-					vertices.at(weight.mVertexId).id[k] = BoneIndex; // vertices = data?
-					vertices.at(weight.mVertexId).weight[k] = weight.mWeight;
-					break; //?
+					if (boneWeights.at(vertexStart + k) == 0.0f) //if 0 not filled with weight
+					{
+						boneWeights.at(vertexStart + k) = weight.mWeight;
+						boneIDs.at(vertexStart + k) = BoneIndex; // i ID of current bone
+						vertices.at(weight.mVertexId).id[k] = BoneIndex; // vertices = data?
+						vertices.at(weight.mVertexId).weight[k] = weight.mWeight;
+						break; //?
+					}
 				}
 			}
 		}
@@ -330,7 +323,6 @@ void Model::ReadNodeHeirarchy(float AnimationTime, const aiNode* pNode, const Ma
 	string NodeName(pNode->mName.data);
 	const aiAnimation* pAnimation = scene->mAnimations[0];
 	Matrix4f NodeTransformation(pNode->mTransformation);
-	//const aiNodeAnim* pNodeAnim = FindNodeAnim(pAnimation, NodeName);
 	const aiNodeAnim* pNodeAnim = nodeAnims[NodeName];
 
 	if (pNodeAnim) {
@@ -384,16 +376,4 @@ void Model::BoneTransform(float TimeInSeconds, vector<Matrix4f>& Transforms, int
 	for (GLuint i = 0; i < m_NumBones; i++) {
 		Transforms[i] = m_BoneInfo[i].FinalTransformation;
 	}
-}
-
-
-const aiNodeAnim* Model::FindNodeAnim(const aiAnimation* pAnimation, const string NodeName)
-{
-	for (GLuint i = 0; i < pAnimation->mNumChannels; i++) {
-		const aiNodeAnim* pNodeAnim = pAnimation->mChannels[i];
-		if (string(pNodeAnim->mNodeName.data) == NodeName) {
-			return pNodeAnim;
-		}
-	}
-	return NULL;
 }
