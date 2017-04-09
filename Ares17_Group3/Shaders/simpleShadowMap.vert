@@ -13,8 +13,8 @@ uniform mat4 model;
 const int MAX_BONES = 30;
 uniform mat4 gBones[MAX_BONES];
 
-
 uniform int animated;
+
 void main()
 {
 	if (animated == 1){

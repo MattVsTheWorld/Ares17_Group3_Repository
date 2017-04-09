@@ -39,7 +39,7 @@ struct Vertex {
 	// Bone ID
 
 	float weight[4];
-	GLuint id[4];
+	GLbyte id[4];
 
 };
 

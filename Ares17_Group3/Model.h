@@ -94,16 +94,6 @@ public:
 	// Draws the model, and thus all its meshes
 	void Draw(GLuint shader);
 
-	////////////////////////ANIMATION STUFF!!!!!/////////////////////////
-	void CalcInterpolatedScaling(aiVector3D& Out, float AnimationTime, const aiNodeAnim* pNodeAnim);
-	void CalcInterpolatedRotation(aiQuaternion& Out, float AnimationTime, const aiNodeAnim* pNodeAnim);
-	void CalcInterpolatedPosition(aiVector3D& Out, float AnimationTime, const aiNodeAnim* pNodeAnim);
-	GLuint FindScaling(float AnimationTime, const aiNodeAnim* pNodeAnim);
-	GLuint FindRotation(float AnimationTime, const aiNodeAnim* pNodeAnim);
-	GLuint FindPosition(float AnimationTime, const aiNodeAnim* pNodeAnim);
-	const aiNodeAnim* FindNodeAnim(const aiAnimation* pAnimation, const string NodeName);
-	void ReadNodeHeirarchy(float AnimationTime, const aiNode* pNode, const Matrix4f& ParentTransform);
-
 	void BoneTransform(float TimeInSeconds, vector<Matrix4f>& Transforms, int speed);
 
 	struct BoneInfo
@@ -123,32 +113,12 @@ public:
 		}
 	};
 
-	GLuint NumBones() const
-	{
-		return m_NumBones;
-	}
-
 private:
 	
-	/*  Model Data  */
-	struct MeshEntry {
-		MeshEntry()
-		{
-			NumIndices = 0;
-			BaseVertex = 0;
-			BaseIndex = 0;
-		}
-
-		unsigned int NumIndices;
-		unsigned int BaseVertex;
-		unsigned int BaseIndex;
-	};
-
 	map<string, GLuint> m_BoneMapping; // maps a bone name to its index
 	GLuint m_NumBones;
 	vector<BoneInfo> m_BoneInfo;
 
-	vector<MeshEntry> m_Entries;
 	Matrix4f m_GlobalInverseTransform;
 	std::map<string, aiNodeAnim*> nodeAnims;
 	
@@ -157,13 +127,21 @@ private:
 	const aiScene* scene;
 	vector<Mesh> meshes;
 
+	////////////////////////ANIMATION STUFF!!!!!/////////////////////////
+	void CalcInterpolatedScaling(aiVector3D& Out, float AnimationTime, const aiNodeAnim* pNodeAnim);
+	void CalcInterpolatedRotation(aiQuaternion& Out, float AnimationTime, const aiNodeAnim* pNodeAnim);
+	void CalcInterpolatedPosition(aiVector3D& Out, float AnimationTime, const aiNodeAnim* pNodeAnim);
+	GLuint FindScaling(float AnimationTime, const aiNodeAnim* pNodeAnim);
+	GLuint FindRotation(float AnimationTime, const aiNodeAnim* pNodeAnim);
+	GLuint FindPosition(float AnimationTime, const aiNodeAnim* pNodeAnim);
+	void ReadNodeHeirarchy(float AnimationTime, const aiNode* pNode, const Matrix4f& ParentTransform);
+
 	string directory;
 	vector<Texture> textures_loaded;	// Stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
 	/*  Functions   */
 	// Loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
 	void loadModel(string path);
-	// Processes a node in a recursive fashion. Processes each individual mesh located at the node and repeats this process on its children nodes (if any).
-	void Model::processNode(aiNode* node, const aiScene* scene);
+
 	Mesh processMesh(GLuint MeshIndex, aiMesh* mesh);
 	// Checks all material textures of a given type and loads the textures if they're not loaded yet.
 	// The required info is returned as a Texture struct.
