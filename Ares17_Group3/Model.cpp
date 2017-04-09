@@ -201,7 +201,6 @@ vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type,
 	return textures;
 }
 
-//Needed by others; was originally outside the class, but we were drowned by linker errors
 GLint Model::TextureFromFile(const char* path, string directory)
 {
 	//Generate texture ID and load texture data 

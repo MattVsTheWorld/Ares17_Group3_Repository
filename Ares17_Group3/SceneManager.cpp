@@ -1696,12 +1696,15 @@ namespace SceneManager {
 			globalData->h_manager->renderMenu(texturedProgram, modelTypes["cube"], globalData->shadows);
 		else if (currentState == DEFEAT)
 			globalData->h_manager->renderDefeat(texturedProgram, modelTypes["cube"]);
-		else {
+		else if (currentState == RUNNING) {
 			// HP
 			globalData->h_manager->renderPlayerHud("Health: ", globalData->player->getHealth(), HEALTH, shader, modelData, glm::vec3(-0.875f, 0.925f, 1.0f), glm::vec3(0.6275, 0.4, 0.0));
-
 			// Armor
 			globalData->h_manager->renderPlayerHud("Armor: ", globalData->player->getArmor(), ARMOR, shader, modelData, glm::vec3(-0.65f, 0.925f, 1.0f), glm::vec3(0, 0, 0.4));
+			// TODO: Ammo
+			;;
+			// Crosshair
+			globalData->h_manager->renderCrosshair(texturedProgram, modelTypes["cube"]);
 
 		}
 	}

@@ -85,6 +85,7 @@ hudManager::hudManager(bool shadows) {
 	cstr = str.c_str();
 	menuLabel[4] = textToTexture(cstr, menuLabel[4], menuFont);
 
+	crosshair = TextureFromFile("crosshair.png", "Textures");
 	// https://dribbble.com/shots/897447-Ares-Logo-Mark
 	menuScreen = loadBitmap::loadBitmap("Textures/menu.bmp");
 	loadingScreen = loadBitmap::loadBitmap("Textures/loading.bmp");
@@ -178,6 +179,29 @@ void hudManager::renderEditHud(std::string line, std::string value, GLuint shade
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
+
+void hudManager::renderCrosshair(GLuint shader, Model *modelData) {
+	glDisable(GL_DEPTH_TEST);//Disable depth test for HUD label
+	glm::mat4 id = glm::mat4();
+	glUseProgram(shader); //texture-only shader will be used for teture rendering
+						  // transformations
+	
+	id = glm::translate(id, glm::vec3(0.05, -0.18, 0.0));
+	id = glm::scale(id, glm::vec3(0.0325f, -0.05f, 1.0f));
+	glUniform3fv(glGetUniformLocation(shader, "text_color"), 1, glm::value_ptr(glm::vec3(0, 0, 0)));
+	MeshManager::setUniformMatrix4fv(shader, "model", glm::value_ptr(id));
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, crosshair);
+	modelData->Draw(shader);
+
+
+	glEnable(GL_DEPTH_TEST);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+
 
 void hudManager::renderPause(GLuint shader, Model *modelData) {
 	glDisable(GL_DEPTH_TEST);//Disable depth test for HUD label
