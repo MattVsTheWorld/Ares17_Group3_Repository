@@ -1,3 +1,5 @@
+#pragma once
+
 #ifndef SCENEMANAGER
 #define SCENEMANAGER
 
@@ -22,39 +24,37 @@
 #include "Projectile.h"
 #include "NPCDecorator.h"
 //+++
+
+#include "GlobalData.h"
+
+#include <unordered_map>
+
 #define DEG_TO_RADIAN 0.017453293f
 #define PI 3.14159265359f
 
-#define COOL_TIME 0.2f
-#define MODEL_SCALING 0.001f
-#define BOUNDING_SCALING 0.01f
+#define MODEL_SCALING 0.01f
+#define BOUNDING_SCALING 0.05f
 
 
-#define SPEED_CAP_XZ 8.0
-#define FRICTION 8.0
-#define SPEED_CAP_Y 3.0
+enum gameState {
+	RUNNING, PAUSE, MENU, DEFEAT
+};
 
-#define AMBIENT_FACTOR 1.0f
-#define DIFFUSE_FACTOR 0.9f
-#define SPECULAR_FACTOR 1.0f
-#define ATTENUATION_CONST 0.035f
-#define ATTENUATION_LINEAR 0.0065f
-#define ATTENUATION_QUAD 0.0024f
+enum bound { 
+	BOX, SPHERE, CAPSULE 
+};
 
-struct PointLight {
-	glm::vec3 position;
+enum editStages { 
+	MODEL, BOUNDING 
+};
 
-	float att_constant;
-	float att_linear;
-	float att_quadratic;
-
-	glm::vec3 ambient;
-	glm::vec3 diffuse;
-	glm::vec3 specular;
+enum modes { 
+	PLAY, EDIT
 };
 
 namespace SceneManager {
-	void init(void);
+
+	void init(SDL_Window * window);
 	void update(SDL_Window *window, SDL_Event sdlEvent);
 	//fps counter; 3 of 5
 	void draw(SDL_Window *window);//, int fps);

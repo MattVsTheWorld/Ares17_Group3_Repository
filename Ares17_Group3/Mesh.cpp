@@ -36,11 +36,15 @@ void Mesh::Draw(GLuint shader)
 
 	// Also set each mesh's shininess property to a default value (if you want you could extend this to another mesh property and possibly change this value)
 	glUniform1f(glGetUniformLocation(shader, "material.shininess"), 16.0f);
-
-	// Draw mesh
+	
+	//// Draw mesh
 	glBindVertexArray(this->VAO);
+
 	glDrawElements(GL_TRIANGLES, this->indices.size(), GL_UNSIGNED_INT, 0);
+
+	// Make sure the VAO is not changed from the outside    
 	glBindVertexArray(0);
+
 
 	// Always good practice to set everything back to defaults once configured.
 	for (GLuint i = 0; i < this->textures.size(); i++)
@@ -78,6 +82,12 @@ void Mesh::setupMesh()
 	// Vertex Texture Coords
 	glEnableVertexAttribArray(LOCATION_TEXCOORD);
 	glVertexAttribPointer(LOCATION_TEXCOORD, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, TexCoords));
-
+	// Vertex Bone IDs
+	glEnableVertexAttribArray(LOCATION_BONE_ID);
+	glVertexAttribIPointer(LOCATION_BONE_ID, 4, GL_BYTE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, id));
+	// Vertex Weights
+	glEnableVertexAttribArray(LOCATION_BONE_WEIGHT);
+	glVertexAttribPointer(LOCATION_BONE_WEIGHT, 4, GL_FLOAT, GL_TRUE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, weight));
+	
 	glBindVertexArray(0);
 }

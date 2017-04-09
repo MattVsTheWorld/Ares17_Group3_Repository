@@ -81,7 +81,7 @@ void main()
     vec3 normal = normalize(fs_in.Normal);
 	vec3 viewDir = normalize(viewPos - fs_in.FragPos);
 	float shadow = ShadowCalculation(fs_in.FragPos, pointLight.position, depthMap);
-	vec3 result = CalcPointLight(pointLight, normal, fs_in.FragPos, viewDir, shadow);   
+	vec3 result = CalcPointLight(pointLight, normal, fs_in.FragPos, viewDir, shadow);  
 	FragColor = vec4(result, 1.0f);
 }  
 

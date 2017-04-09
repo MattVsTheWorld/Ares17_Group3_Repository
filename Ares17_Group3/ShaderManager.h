@@ -10,6 +10,8 @@
 #define LOCATION_NORMAL		2
 #define LOCATION_TEXCOORD   3
 #define LOCATION_INDEX		4
+#define LOCATION_BONEID		5
+#define	LOCATION_BONEWEIGHT	6
 
 namespace ShaderManager {
 	
