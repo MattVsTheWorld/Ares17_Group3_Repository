@@ -166,7 +166,7 @@ public:
 		npcBody->getMotionState()->getWorldTransform(t);
 		btVector3 pos = t.getOrigin();
 
-		Model* currentAnimation = nullptr;
+		Model* currentAnimation = get<2>(modelDatas);
 
 		if (sqrt(pow(playerPos.x() - pos.x(), 2) + pow(playerPos.z() - pos.z(), 2)) <= DEFAULT_LOS && this->currentState != PAUSED)
 			this->currentState = TRIGGERED;
