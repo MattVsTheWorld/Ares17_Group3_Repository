@@ -891,15 +891,38 @@ namespace SceneManager {
 				if (sdlEvent.button.button == SDL_BUTTON_LEFT) {
 					if (coolDown <= 0.0f && currentState == RUNNING) {
 						leftClick = true;
-						coolDown = COOL_TIME;
+						
 						//			cout << "Attempting to shoot bullet." << endl;
 
 						//TODO: change offset
-						globalData->projectile_manager->addProjectile(shiftRight(moveForward(glm::vec3(globalData->player->getPosition().x, globalData->player->getPosition().y - 0.35, globalData->player->getPosition().z),
-							rotationAngles, 1.0f),rotationAngles, 0.5), PROJ_SPEED, (rotationAngles.y*DEG_TO_RADIAN), rotationAngles.x); //!++!
+						if (globalData->player->getWeapon().getName() == PISTOL) {
+							globalData->projectile_manager->addProjectile(shiftRight(moveForward(glm::vec3(globalData->player->getPosition().x, globalData->player->getPosition().y - 0.35, globalData->player->getPosition().z),
+								rotationAngles, 1.0f), rotationAngles, 0.5), PROJ_SPEED, (rotationAngles.y*DEG_TO_RADIAN), rotationAngles.x); //!++!
+							
+							coolDown = COOL_TIME;
 						//sound_manager->playSound(sound_manager->getSound(2), 2, 1);
+						}
+
+						if (globalData->player->getWeapon().getName() == NUKA) {
+							globalData->projectile_manager->addProjectile(shiftRight(moveForward(glm::vec3(globalData->player->getPosition().x, globalData->player->getPosition().y - 0.35, globalData->player->getPosition().z),
+								rotationAngles, 1.0f), rotationAngles, 0.5), PROJ_SPEED, (rotationAngles.y*DEG_TO_RADIAN), rotationAngles.x); //!++!
+
+							coolDown = COOL_TIME/2;
+						//sound_manager->playSound(sound_manager->getSound(2), 2, 1);																												  //sound_manager->playSound(sound_manager->getSound(2), 2, 1);
+						}
+
+						if (globalData->player->getWeapon().getName() == SCIFI) {
+							globalData->projectile_manager->addProjectile(shiftRight(moveForward(glm::vec3(globalData->player->getPosition().x, globalData->player->getPosition().y - 0.35, globalData->player->getPosition().z),
+								rotationAngles, 1.0f), rotationAngles, 0.5), PROJ_SPEED, (rotationAngles.y*DEG_TO_RADIAN), rotationAngles.x); //!++!
+
+							coolDown = COOL_TIME*2.0;
+						//sound_manager->playSound(sound_manager->getSound(2), 2, 1);																													  //sound_manager->playSound(sound_manager->getSound(2), 2, 1);
+						}
+
 						//TODO: Enable sound
-						//cout << rotationAngles.x << "\n";
+		
+
+
 																																						  //		Projectile* bullet = new Projectile(bt_manager, glm::vec3(0, 0, 0), 1);
 					}
 				}
@@ -1280,7 +1303,7 @@ namespace SceneManager {
 				clickable = false;
 			}
 			if (currentState == RUNNING)
-				globalData->player->setWeapon(RIFLE);
+				globalData->player->setWeapon(SCIFI);
 
 		}
 		if (keys[SDL_SCANCODE_4]) {
@@ -1759,17 +1782,17 @@ namespace SceneManager {
 				float offsetRight = 0.5f;
 				bool flip = false;
 				glm::vec3 wepScale;
-				if (globalData->player->getWeapon() == PISTOL) {
+				if (globalData->player->getWeapon().getName() == PISTOL) {
 					wepType = "scifipistol";
 					wepScale = glm::vec3(0.25f, 0.25f, 0.25f);
 					flip = false;
 				}
-				else if (globalData->player->getWeapon() == NUKA) {
+				else if (globalData->player->getWeapon().getName() == NUKA) {
 					wepType = "nukacola";
 					wepScale = glm::vec3(0.003f, 0.004f, 0.003f);
 					flip = false;
 				}
-				else if (globalData->player->getWeapon() == RIFLE) {
+				else if (globalData->player->getWeapon().getName() == SCIFI) {
 					wepType = "scifigun";
 					wepScale = glm::vec3(0.185f, 0.185f, 0.185f);
 					flip = true;

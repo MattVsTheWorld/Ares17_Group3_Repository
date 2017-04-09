@@ -8,6 +8,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 #include "btShapeManager.h"
+#include "Weapon.h"
 
 #define INVINC_TIME 0.5f
 
@@ -20,7 +21,6 @@
 
 enum playerState { ON_GROUND, JUMPING };
 enum lifeState { ALIVE, DEAD };
-enum equippedWep { PISTOL, NUKA, RIFLE };
 
 class Player {
 public:
@@ -34,8 +34,8 @@ public:
 	double getArmor();
 	double getSpeed();
 	lifeState getLifeState();
-	void setWeapon(equippedWep newWep);
-	equippedWep getWeapon();
+	void setWeapon(wepType newWep);
+	Weapon getWeapon();
 	void setHealth(double hp);
 	void setArmor(double arm);
 	void takeDamage(double damage);
@@ -53,7 +53,8 @@ private:
 	glm::vec3 eye;
 	playerState currentState;
 	lifeState vitState;
-	equippedWep currentWep;
+	Weapon currentWep;
+	vector<Weapon> availableWeapons;
 	double speed;
 	double health;
 	double armor;

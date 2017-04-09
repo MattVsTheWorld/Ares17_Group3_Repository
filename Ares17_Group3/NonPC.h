@@ -202,7 +202,11 @@ public:
 		}
 			if (findCollision(npcGhost))
 			{
-				this->health -= 10;
+				this->health -= player->getWeapon().getDamage();
+				/*if (player->getWeapon() == PISTOL || player->getWeapon() == NUKA)
+					this->health -= 10;
+				else if (player->getWeapon() == SCIFI)
+					this->health -= 40;*/
 				cout << "HIT! Health = " << this->health << endl;
 			}
 

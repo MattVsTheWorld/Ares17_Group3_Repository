@@ -179,6 +179,9 @@
     <ClInclude Include="GlobalData.h">
       <Filter>Being worked on</Filter>
     </ClInclude>
+    <ClInclude Include="Weapon.h">
+      <Filter>Being worked on</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\cubeMap.frag">

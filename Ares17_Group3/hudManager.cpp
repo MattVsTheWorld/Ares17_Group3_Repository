@@ -186,7 +186,7 @@ void hudManager::renderCrosshair(GLuint shader, Model *modelData) {
 	glUseProgram(shader); //texture-only shader will be used for teture rendering
 						  // transformations
 	
-	id = glm::translate(id, glm::vec3(0.05, -0.18, 0.0));
+	id = glm::translate(id, glm::vec3(0.075, -0.1, 0.0));
 	id = glm::scale(id, glm::vec3(0.0325f, -0.05f, 1.0f));
 	glUniform3fv(glGetUniformLocation(shader, "text_color"), 1, glm::value_ptr(glm::vec3(0, 0, 0)));
 	MeshManager::setUniformMatrix4fv(shader, "model", glm::value_ptr(id));
