@@ -23,7 +23,7 @@ public:
 	// functions provided in the labs
 	GLuint textToTexture(const char * str, GLuint textID, TTF_Font* font);
 	void clearTextTexture(GLuint textID);
-	hudManager(); // constructor, initializes values
+	hudManager(bool shadows); // constructor, initializes values
 	//void renderToHud(int value, GLuint shader, Model *modelData, glm::vec3 pos);
 	void renderPlayerHud(std::string line, double value, valType _type, GLuint shader, Model *modelData, glm::vec3 pos, glm::vec3 color);
 	void renderEditHud(std::string line, std::string value, GLuint shader, Model *modelData, glm::vec3 pos);
@@ -31,7 +31,7 @@ public:
 	void renderPause(GLuint shader, Model *modelData);
 	void renderLoading(GLuint shader, Model *modelData);
 
-	void renderMenu(GLuint shader, Model *modelData);
+	void renderMenu(GLuint shader, Model *modelData, bool shadows);
 
 	void renderDefeat(GLuint shader, Model *modelData);
 
@@ -43,7 +43,7 @@ private:
 	GLuint loadingScreen;
 	GLuint menuScreen;
 	GLuint defeatScreen;
-	GLuint menuLabel[4];
+	GLuint menuLabel[5];
 	currentVals _current;
 
 	GLuint changeLabel(string line, double value) {

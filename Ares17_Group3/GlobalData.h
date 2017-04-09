@@ -27,7 +27,8 @@ struct PointLight {
 class GlobalData {
 public:
 	GlobalData(glm::vec3 eye) {	
-		h_manager = new hudManager();
+		shadows = false;
+		h_manager = new hudManager(shadows);
 		bt_manager = new btShapeManager();
 		player = new Player(eye, 1.0f, 1.5f, 40.0f, bt_manager);
 		projectile_manager = new Projectile(bt_manager);
@@ -55,7 +56,7 @@ public:
 	btShapeManager *bt_manager;
 	Projectile *projectile_manager;
 	SoundManager *sound_manager;
-
+	bool shadows;
 	//AI
 	Grid* level1Grid;
 

@@ -1275,12 +1275,19 @@ namespace SceneManager {
 				globalData->player->setWeapon(NUKA);
 		}
 		if (keys[SDL_SCANCODE_3]) {
-			if (currentState == MENU)
-				exit(0);
+			if (currentState == MENU && clickable == true) {
+				globalData->shadows = !globalData->shadows;
+				clickable = false;
+			}
 			if (currentState == RUNNING)
 				globalData->player->setWeapon(RIFLE);
 
 		}
+		if (keys[SDL_SCANCODE_4]) {
+			if (currentState == MENU)
+				exit(0);
+		}
+
 		if (keys[SDL_SCANCODE_ESCAPE]) {
 			if (currentState == PAUSE)
 				currentState = MENU;
@@ -1383,7 +1390,7 @@ namespace SceneManager {
 	}
 
 
-	void renderWeapon(glm::mat4 proj, Model *modelData, GLuint shader, glm::vec3 scale) {
+	void renderWeapon(glm::mat4 proj, Model *modelData, GLuint shader, glm::vec3 scale, bool flip) {
 		glDisable(GL_CULL_FACE);
 		glm::mat4 model;
 		float local_pitch = -(rotationAngles.x + 0.1);
@@ -1397,9 +1404,12 @@ namespace SceneManager {
 		model = glm::translate(model, gunPos);
 		model = glm::rotate(model, -rotationAngles.y*DEG_TO_RADIAN, glm::vec3(0.0, 1.0, 0.0));
 		model = glm::rotate(model, local_pitch, glm::vec3(1.0, 0.0, 0.0));
-		model = glm::rotate(model, float(80 * DEG_TO_RADIAN), glm::vec3(0.0, 1.0, 0.0));
+		if (!flip)
+			model = glm::rotate(model, float(80 * DEG_TO_RADIAN), glm::vec3(0.0, 1.0, 0.0));
+		else
+			model = glm::rotate(model, float(-100 * DEG_TO_RADIAN), glm::vec3(0.0, 1.0, 0.0));
 		model = glm::scale(model,scale);
-		//TODO: I can't fix this. If you want, give it a try. good luck.
+		//I can't fix this. If you want, give it a try. good luck.
 		glUniformMatrix4fv(glGetUniformLocation(shader, "projection"), 1, GL_FALSE, glm::value_ptr(glm::mat4()));
 		glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
 		glUniform1i(glGetUniformLocation(shader, "animated"), 0); //zero is no animations
@@ -1537,28 +1547,15 @@ namespace SceneManager {
 	}
 
 	void renderWorldObjects(GLuint shader, glm::mat4 projection) {
-
-		// PLAYER capsule
-		/*glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		glDisable(GL_CULL_FACE);
-		bt_manager->renderCapsule(playerBody, view, projection, modelTypes["sphere"], shader, defaultTexture);
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		glEnable(GL_CULL_FACE);*/
-		///+++++++++++++++
-
-
-
-		btVector3 playerPos(globalData->player->getPosition().x, globalData->player->getPosition().y, globalData->player->getPosition().z);
-		//++! \_/
-		//TODO: Finish enemies
+		//// PLAYER capsule
 		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		//glDisable(GL_CULL_FACE);
-		//for (int i = 0; i < enemies.size(); i++) {
-			//for (auto i : enemies){
-			//if (!i->update(modelTypes["robot"], view, projection, dt_secs, globalData->level1Grid, globalData->player, shader)) {
-			//	enemies.erase(remove(enemies.begin(), enemies.end(), i), enemies.end());
-			//	//TODO: space to add stuff
-			//}
+		//globalData->bt_manager->renderCapsule(globalData->player->playerBody, view, projection, modelTypes["sphere"], shader, defaultTexture);
+		//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		//glEnable(GL_CULL_FACE);
+		/////+++++++++++++++
+
+		btVector3 playerPos(globalData->player->getPosition().x, globalData->player->getPosition().y, globalData->player->getPosition().z);
 
 
 			for (auto it = enemies.begin(); it != enemies.end(); ) {
@@ -1696,7 +1693,7 @@ namespace SceneManager {
 		if (currentState == PAUSE)
 			globalData->h_manager->renderPause(texturedProgram, modelTypes["cube"]);
 		else if (currentState == MENU)
-			globalData->h_manager->renderMenu(texturedProgram, modelTypes["cube"]);
+			globalData->h_manager->renderMenu(texturedProgram, modelTypes["cube"], globalData->shadows);
 		else if (currentState == DEFEAT)
 			globalData->h_manager->renderDefeat(texturedProgram, modelTypes["cube"]);
 		else {
@@ -1735,7 +1732,8 @@ namespace SceneManager {
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear FBO
 				glClear(GL_DEPTH_BUFFER_BIT);
 
-				renderShadowedScene(projection, view, depthShaderProgram, true); // render using light's point of view and simpler shader program
+				if (globalData->shadows)
+					renderShadowedScene(projection, view, depthShaderProgram, true); // render using light's point of view and simpler shader program
 
 				glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			}
@@ -1755,21 +1753,27 @@ namespace SceneManager {
 				//h_manager->renderToHud(5, texturedProgram, modelTypes["cube"], glm::vec3(-0.0f, 0.0f, 0.9f));
 
 				string wepType;
+				float offsetRight = 0.5f;
+				bool flip = false;
 				glm::vec3 wepScale;
 				if (globalData->player->getWeapon() == PISTOL) {
 					wepType = "scifipistol";
 					wepScale = glm::vec3(0.25f, 0.25f, 0.25f);
+					flip = false;
 				}
 				else if (globalData->player->getWeapon() == NUKA) {
 					wepType = "nukacola";
 					wepScale = glm::vec3(0.003f, 0.004f, 0.003f);
+					flip = false;
 				}
 				else if (globalData->player->getWeapon() == RIFLE) {
-					wepType = "ak47";
-					wepScale = glm::vec3(0.075f, 0.075f, 0.075f);
+					wepType = "scifigun";
+					wepScale = glm::vec3(0.185f, 0.185f, 0.185f);
+					flip = true;
+
 				}
 
-				renderWeapon(projection, modelTypes[wepType], modelProgram, wepScale); //TODO: Render current weapon
+				renderWeapon(projection, modelTypes[wepType], modelProgram, wepScale, flip); //TODO: Render current weapon
 				renderHud(texturedProgram, modelTypes["cube"]);
 				
 				if (mode == EDIT) {
