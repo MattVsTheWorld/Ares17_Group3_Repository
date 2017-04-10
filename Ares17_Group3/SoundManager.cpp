@@ -19,7 +19,7 @@ SoundManager::SoundManager() {
 	// https://www.freesound.org/people/juancamiloorjuela/sounds/204318/
 
 	// enemy hit
-	// --
+	// http://www.wolfensteingoodies.com/archives/olddoom/music.htm
 
 	// load sound samples
 	samples = new HSAMPLE[10];

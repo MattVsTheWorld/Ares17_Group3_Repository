@@ -933,18 +933,12 @@ namespace SceneManager {
 							coolDown = COOL_TIME*2.0;
 						globalData->sound_manager->playSound(globalData->sound_manager->getSound(WINCH), 1, 1);																													  //sound_manager->playSound(sound_manager->getSound(2), 2, 1);
 						}
-
-						//TODO: Enable sound
-		
-
-
-																																						  //		Projectile* bullet = new Projectile(bt_manager, glm::vec3(0, 0, 0), 1);
 					}
 				}
 				if (sdlEvent.button.button == SDL_BUTTON_RIGHT) rightClick = true;
 			}
 
-			if (sdlEvent.type == SDL_MOUSEBUTTONUP) { //  && pointOfView == FIRST_PERSON) {
+			if (sdlEvent.type == SDL_MOUSEBUTTONUP) {
 				leftClick = false;
 				rightClick = false;
 			}

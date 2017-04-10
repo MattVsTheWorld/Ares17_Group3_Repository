@@ -30,7 +30,7 @@ public:
 		shadows = false;
 		h_manager = new hudManager(shadows);
 		bt_manager = new btShapeManager();
-		player = new Player(eye, 1.0f, 1.5f, 40.0f, bt_manager);
+		player = new Player(eye, 1.0f, 1.5f, 80.0f, bt_manager);
 		projectile_manager = new Projectile(bt_manager);
 		sound_manager = new SoundManager();
 
