@@ -13,7 +13,11 @@ enum {
 	GOOFY,
 	WINCH,
 	LASER,
-	BULLET
+	BULLET,
+	BG_2,
+	PICKUP_HEALTH,
+	PAINED_EN,
+	PAINED_PL
 };
 
 class SoundManager
@@ -30,6 +34,13 @@ public:
 	void setVolume(float volume, int channel);
 	// returns state of background music, used to make it so it stop from repeating
 	bool getState();
+
+	// Delete current BG so you can add a new one
+	void stopBG() {
+		BASS_SampleStop(samples[BG]);
+		BASS_SampleStop(samples[BG_2]);
+	//	BASS_SampleStop(samples[BG_3]);
+	}
 private:
 	HSAMPLE *samples = NULL;
 	bool bgMusicState;

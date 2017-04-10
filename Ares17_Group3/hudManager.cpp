@@ -81,7 +81,7 @@ hudManager::hudManager(bool shadows) {
 	cstr = str.c_str();
 	menuLabel[3] = textToTexture(cstr, menuLabel[3], menuFont);
 
-	str = "[4] Quit";
+	str = "[6] Quit";
 	cstr = str.c_str();
 	menuLabel[4] = textToTexture(cstr, menuLabel[4], menuFont);
 

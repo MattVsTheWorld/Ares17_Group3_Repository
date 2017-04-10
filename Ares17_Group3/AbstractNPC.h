@@ -1,6 +1,7 @@
 #ifndef ABSTRACTNPC
 #define ABSTRACTNPC
 #include "btShapeManager.h"
+#include "SoundManager.h"
 #include <iostream>
 #include <iostream>
 
@@ -42,7 +43,6 @@ public:
 	virtual	double getAttackSpeed() = 0;
 	virtual void setState(npcState newState) = 0;
 	virtual npcState getState() = 0;
-	virtual void reset() = 0;
 	virtual void setName(string _name) = 0;
 	virtual string getName() = 0;
 	virtual ~AbstractNPC() {}
