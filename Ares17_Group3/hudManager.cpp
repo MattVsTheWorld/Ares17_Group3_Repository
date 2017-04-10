@@ -40,11 +40,11 @@ hudManager::hudManager(bool shadows) {
 	if (TTF_Init() == -1)
 		std::cout << "TTF failed to initialise." << std::endl;
 
-	textFont = TTF_OpenFont("../Ares17_Group3/Nippon_Tech.ttf", 24);
+	textFont = TTF_OpenFont("../Ares17_Group3/Fonts/Capture_it.ttf", 24);
 	if (textFont == NULL)
 		std::cout << "Failed to open font." << std::endl;
 
-	menuFont = TTF_OpenFont("../Ares17_Group3/Roboto-Black.ttf", 32);
+	menuFont = TTF_OpenFont("../Ares17_Group3/Fonts/Roboto-Black.ttf", 32);
 	if (menuFont == NULL)
 		std::cout << "Failed to open font." << std::endl;
 

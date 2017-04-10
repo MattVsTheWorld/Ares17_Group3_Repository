@@ -866,6 +866,7 @@ namespace SceneManager {
 				for (const auto it : enemies)
 					it->setState(TRIGGERED);
 				currentState = RUNNING;
+				globalData->sound_manager->playSound(globalData->sound_manager->getSound(BG), 1, 2);
 			}
 		}
 		//
@@ -898,7 +899,7 @@ namespace SceneManager {
 								rotationAngles, 1.0f), rotationAngles, 0.5), PROJ_SPEED, (rotationAngles.y*DEG_TO_RADIAN), rotationAngles.x); //!++!
 							
 							coolDown = COOL_TIME;
-						//sound_manager->playSound(sound_manager->getSound(2), 2, 1);
+						globalData->sound_manager->playSound(globalData->sound_manager->getSound(BULLET), 1, 1);
 						}
 
 						if (globalData->player->getWeapon().getName() == NUKA) {
@@ -906,7 +907,7 @@ namespace SceneManager {
 								rotationAngles, 1.0f), rotationAngles, 0.5), PROJ_SPEED, (rotationAngles.y*DEG_TO_RADIAN), rotationAngles.x); //!++!
 
 							coolDown = COOL_TIME/2;
-						//sound_manager->playSound(sound_manager->getSound(2), 2, 1);																												  //sound_manager->playSound(sound_manager->getSound(2), 2, 1);
+						globalData->sound_manager->playSound(globalData->sound_manager->getSound(LASER), 0.5, 1);																												  //sound_manager->playSound(sound_manager->getSound(2), 2, 1);
 						}
 
 						if (globalData->player->getWeapon().getName() == SCIFI) {
@@ -914,7 +915,7 @@ namespace SceneManager {
 								rotationAngles, 1.0f), rotationAngles, 0.5), PROJ_SPEED, (rotationAngles.y*DEG_TO_RADIAN), rotationAngles.x); //!++!
 
 							coolDown = COOL_TIME*2.0;
-						//sound_manager->playSound(sound_manager->getSound(2), 2, 1);																													  //sound_manager->playSound(sound_manager->getSound(2), 2, 1);
+						globalData->sound_manager->playSound(globalData->sound_manager->getSound(WINCH), 1, 1);																													  //sound_manager->playSound(sound_manager->getSound(2), 2, 1);
 						}
 
 						//TODO: Enable sound
@@ -1483,6 +1484,7 @@ namespace SceneManager {
 		controls(window, sdlEvent);
 		dt_secs = gameTime();
 		coolDown -= dt_secs;	
+		
 		if (currentState == RUNNING) {
 			updatePlayer(dt_secs);
 			if (globalData->player->getState() == JUMPING)
@@ -1580,7 +1582,7 @@ namespace SceneManager {
 
 		for (auto it = enemies.begin(); it != enemies.end(); ) {
 
-			animationTransforms((*it)->getState());
+			animationTransforms((*it)->getState()); //TODO: fix
 			if (!(*it)->update((make_tuple(modelTypes["assaultRun"], modelTypes["assaultAttack"], modelTypes["assaultDie"])), view, projection, dt_secs, globalData->level1Grid, globalData->player, modelProgram))
 				it = enemies.erase(it);
 			else

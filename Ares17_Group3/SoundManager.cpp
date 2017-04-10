@@ -6,10 +6,14 @@ SoundManager::SoundManager() {
 		std::cout << "Can't initialize device";
 
 	// load sound samples
-	samples = new HSAMPLE[4];
-	samples[1] = loadSample("../Ares17_Group3/Sounds/wilhelm.wav");
+	samples = new HSAMPLE[10];
+	samples[BG] = loadSample("../Ares17_Group3/Sounds/doot.wav");
+	samples[WILHELM] = loadSample("../Ares17_Group3/Sounds/wilhelm.wav");
 //	samples[2] = loadSample("Sounds/bull.wav");
-	samples[2] = loadSample("../Ares17_Group3/Sounds/goofy.wav");
+	samples[GOOFY] = loadSample("../Ares17_Group3/Sounds/goofy.wav");
+	samples[WINCH] = loadSample("../Ares17_Group3/Sounds/winch.wav");
+	samples[LASER] = loadSample("../Ares17_Group3/Sounds/laser.wav");
+	samples[BULLET] = loadSample("../Ares17_Group3/Sounds/bull.wav");
 	bgMusicState = true; // set music to playing at first
 }
 

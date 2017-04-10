@@ -7,6 +7,15 @@
 // simple impelementations of lab usage of bass into a class
 // more details in .cpp file
 
+enum {
+	BG,
+	WILHELM,
+	GOOFY,
+	WINCH,
+	LASER,
+	BULLET
+};
+
 class SoundManager
 {
 public:
@@ -24,7 +33,7 @@ public:
 private:
 	HSAMPLE *samples = NULL;
 	bool bgMusicState;
-	HCHANNEL ch[2];
+	HCHANNEL ch[4];
 };
 
 #endif
