@@ -532,32 +532,48 @@ namespace SceneManager {
 		//modelTypes.insert(std::pair<string, Model*>("enforcerRun", new Model("Models/Enemies/Enforcer/Run/running.dae")));
 		//modelTypes.insert(std::pair<string, Model*>("enforcerDie", new Model("Models/Enemies/Enforcer/Die/falling_back_death.dae")));
 
+		cout << "Enforcer models: " << endl;
+		modelTypes.insert(std::pair<string, Model*>("enforcerAttack", new Model("../Ares17_Group3/Models/Enemies/Enforcer/Attack/standing_melee_attack_downward.dae")));
+		modelTypes.insert(std::pair<string, Model*>("enforcerRun", new Model("../Ares17_Group3/Models/Enemies/Enforcer/Run/running.dae")));
+		modelTypes.insert(std::pair<string, Model*>("enforcerDie", new Model("../Ares17_Group3/Models/Enemies/Enforcer/Die/falling_back_death.dae")));
+		cout << "Assault models: " << endl;
 		modelTypes.insert(std::pair<string, Model*>("assaultAttack", new Model("../Ares17_Group3/Models/Enemies/Assault/Attack/gunplay.dae")));
 		modelTypes.insert(std::pair<string, Model*>("assaultRun", new Model("../Ares17_Group3/Models/Enemies/Assault/Run/run_with_sword.dae")));
 		modelTypes.insert(std::pair<string, Model*>("assaultDie", new Model("../Ares17_Group3/Models/Enemies/Assault/Die/falling_back_death.dae")));
 		
 		// Robotto
+		cout << "Robot: " << endl;
 		modelTypes.insert(std::pair<string, Model*>("robot", new Model("../Ares17_Group3/Models/Enemies/Robot/Roboto.obj")));
 		//Environment
+		cout << "sphere: " << endl;
 		modelTypes.insert(std::pair<string, Model*>("sphere", new Model("../Ares17_Group3/Models/Environment/sphere.obj")));
 		modelTypes.insert(std::pair<string, Model*>("capsule", modelTypes["sphere"]));
+		cout << "house: " << endl;
 		modelTypes.insert(std::pair<string, Model*>("house", new Model("../Ares17_Group3/Models/Environment/House/houselow.obj")));
+		cout << "carpile: " << endl;
 		modelTypes.insert(std::pair<string, Model*>("carpile", new Model("../Ares17_Group3/Models/Environment/CarPile/wasteddisplay.obj")));
+		cout << "oiltank: " << endl;
 		modelTypes.insert(std::pair<string, Model*>("oiltank", new Model("../Ares17_Group3/Models/Environment/OilTank/Oiltank.obj")));
 		modelTypes.insert(std::pair<string, Model*>("catjeep", new Model("../Ares17_Group3/Models/Environment/cyberpunk-truck/hovertruck_lowpoly.obj")));
 		modelTypes.insert(std::pair<string, Model*>("heli", new Model("../Ares17_Group3/Models/Environment/Helicopter/hheli.obj")));
 		modelTypes.insert(std::pair<string, Model*>("tower", new Model("../Ares17_Group3/Models/Environment/sci-fi-tower/building_02_fbx.FBX.obj")));
 		//modelTypes.insert(std::pair<string, Model*>("rock", new Model("../Ares17_Group3/Models/Environment/Rock/model.obj")));
+		cout << "barrier: " << endl;
 		modelTypes.insert(std::pair<string, Model*>("barrier", new Model("../Ares17_Group3/Models/Environment/Barrier/model.obj")));
 		//Collectable
+		cout << "heart: " << endl;
 		modelTypes.insert(std::pair<string, Model*>("heart", new Model("../Ares17_Group3/Models/Collectable/Heart/Heart.obj")));
 		//modelTypes.insert(std::pair<string, Model*>("potion", new Model("Models/Collectable/Potion/pocion lowpoly.obj")));
+		cout << "shield: " << endl;
 		modelTypes.insert(std::pair<string, Model*>("shield", new Model("../Ares17_Group3/Models/Collectable/Shield/shield.obj")));
 
 		//Guns
 		//modelTypes.insert(std::pair<string, Model*>("pistol", new Model("Models/Guns/Pistol/Gun.obj")));
+		cout << "scifigun: " << endl;
 		modelTypes.insert(std::pair<string, Model*>("scifigun", new Model("../Ares17_Group3/Models/Guns/Scifi/25ad7fc3a09f4a958dd62b5b522257ee.obj")));
+		cout << "scifipistol: " << endl;
 		modelTypes.insert(std::pair<string, Model*>("scifipistol", new Model("../Ares17_Group3/Models/Guns/ScifiPistol/ceeb75e9f4e34b6191d92c38a470453d.obj")));
+		cout << "nukacola: " << endl;
 		modelTypes.insert(std::pair<string, Model*>("nukacola", new Model("../Ares17_Group3/Models/Guns/NukaCola/NukaColaGun.obj")));
 	}
 
@@ -666,18 +682,30 @@ namespace SceneManager {
 	}
 
 	void initEnemies() {
-		//TODO: uncomment
-		enemies.insert(new Melee(new NonPC(100, 5,
-			globalData->bt_manager, glm::vec3(0, 3, 0), 
-			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
+		enemies.insert(new Ranged(new NonPC(100, 6,
+			globalData->bt_manager, glm::vec3(0, 5, 0), 
+			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture)));
 
-		//enemies.insert(new Melee(new NonPC(100, 5,
-		//	globalData->bt_manager, glm::vec3(25, 3, 0),
-		//	1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
+		enemies.insert(new Ranged(new NonPC(100, 6,
+			globalData->bt_manager, glm::vec3(25, 10, 0),
+			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture)));
 
-		//enemies.insert(new Melee(new NonPC(100, 5,
-		//	globalData->bt_manager, glm::vec3(0, 3, -10),
-		//	1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
+		enemies.insert(new Ranged(new NonPC(100, 6,
+			globalData->bt_manager, glm::vec3(0, 10, -10),
+			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture)));
+
+
+		enemies.insert(new Melee(new NonPC(200, 3,
+			globalData->bt_manager, glm::vec3(0, 0, 0),
+			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture)));
+
+		enemies.insert(new Melee(new NonPC(200, 3,
+			globalData->bt_manager, glm::vec3(25, 10, 5),
+			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture)));
+
+		enemies.insert(new Melee(new NonPC(200, 3,
+			globalData->bt_manager, glm::vec3(0, 5, -25),
+			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture)));
 
 	}
 
@@ -1346,6 +1374,10 @@ namespace SceneManager {
 
 		if (keys[SDL_SCANCODE_6])
 			exit(0);
+		if (keys[SDL_SCANCODE_7]) {
+			cout << "x:" << globalData->player->getPosition().x << ", y:" << globalData->player->getPosition().y << ", z:" << globalData->player->getPosition().z << endl;
+		}
+
 		//if (keys[SDL_SCANCODE_ESCAPE]) {
 		//	exit(0);
 		//}
@@ -1398,22 +1430,23 @@ namespace SceneManager {
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
-	void animationTransforms(npcState state) {
+	void animationTransforms(npcState state, string name) {
 		vector<Matrix4f> Transforms;
 		RunningTime += dt_secs;
 		int speed = 1;
 		//Model* temp;
 		if (state == ATTACKING) {
-			modelTypes["assaultAttack"]->BoneTransform(RunningTime, Transforms, speed);;
-			speed = 3;
+			name.append("Attack");
+			modelTypes[name]->BoneTransform(RunningTime, Transforms, speed);
 		}
 		else if (state == DYING) {
-			modelTypes["assaultDie"]->BoneTransform(RunningTime, Transforms, speed);;
-			speed = 2;
+			name.append("Die");
+			modelTypes[name]->BoneTransform(RunningTime, Transforms, speed);
 		}
 		else if (state == TRIGGERED){
-			modelTypes["assaultRun"]->BoneTransform(RunningTime, Transforms, speed);;
-			speed = 2;
+			name.append("Run");
+			modelTypes[name]->BoneTransform(RunningTime, Transforms, speed);
+
 		}
 		//SetBoneTransform
 		
@@ -1480,8 +1513,8 @@ namespace SceneManager {
 		//cout << getLinearVelocityInBodyFrame(playerBody).y();
 	}
 
-
 	void updateCollectables() { 
+
 		unsigned int max = collectables.size();
 		//	for (const auto it : collectables)
 
@@ -1503,6 +1536,27 @@ namespace SceneManager {
 				//remove from world
 			}
 		}
+	}
+
+	glm::vec3 randomSpawnPoint() {
+		srand(time(NULL));
+		int num = std::rand() % 4 + 1; //random int between 1 and 4
+		glm::vec3 spawnPoint1(29.6f, 2.0f, -31.02f);
+		glm::vec3 spawnPoint2(40.0f, 2.0f, 18.59f);
+		glm::vec3 spawnPoint3(-33.7f, 2.0f, 19.95f);
+		glm::vec3 spawnPoint4(-26.0f, 2.0f, -30.57f);
+		glm::vec3 def(0.0f, 0.0, 0.0f);
+		cout << "num " << num << endl;
+		if (num == 1)
+			return spawnPoint1;
+		if (num == 2)
+			return spawnPoint2;
+		if (num == 3)
+			return spawnPoint3;
+		if (num == 4)
+			return spawnPoint4;
+		else
+			return def;
 	}
 
 	void update(SDL_Window * window, SDL_Event sdlEvent) {
@@ -1531,6 +1585,21 @@ namespace SceneManager {
 			}
 		}
 
+		if (enemies.size() < 6) {
+			glm::vec3 spawnPoint = randomSpawnPoint();
+			srand(time(NULL));
+			int num = std::rand() % 2 + 1; //random int between 1 and 4
+			if (num == 1) {
+				enemies.insert(new Ranged(new NonPC(100, 10,
+								globalData->bt_manager, spawnPoint,
+								1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture)));
+			}
+			else {
+				enemies.insert(new Melee(new NonPC(200, 3,
+					globalData->bt_manager, spawnPoint,
+					1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture)));
+			}
+		}
 	}
 
 	void camera() {
@@ -1603,16 +1672,25 @@ namespace SceneManager {
 		/////+++++++++++++++
 
 		//btVector3 playerPos(globalData->player->getPosition().x, globalData->player->getPosition().y, globalData->player->getPosition().z);
-
-
 		for (auto it = enemies.begin(); it != enemies.end(); ) {
+			string name = (*it)->getName();
+			//if ((it) == enemies.begin()) {
+			//	animationTransforms((*it)->getState(), name); //TODO: fix
+			//	cout << " asdasd asd "<< endl;
+			//}
+			//else if ((*it)->getState() == ATTACKING && (*it--)->getState() != ATTACKING
+			//	|| (*it)->getState() == DYING && (*it--)->getState() != DYING
+			//	|| (*it)->getState() == TRIGGERED && (*it--)->getState() != TRIGGERED) {
+			//	cout << " a45544546546 " << endl;
+			//	animationTransforms((*it)->getState(), name); //TODO: fix
+			//}
+			animationTransforms((*it)->getState(), name); //TODO: fix
+			if (!(*it)->update((make_tuple(modelTypes[name + "Run"], modelTypes[name + "Attack"], modelTypes[name + "Die"])), view, projection, dt_secs, globalData->level1Grid, globalData->player, modelProgram))
 
-			animationTransforms((*it)->getState());
-			if (!(*it)->update((make_tuple(modelTypes["assaultRun"], modelTypes["assaultAttack"], modelTypes["assaultDie"])), view, projection, dt_secs, level1Grid, globalData->player, modelProgram))
 				it = enemies.erase(it);
 			else
 				++it;
-
+			
 		}
 
 

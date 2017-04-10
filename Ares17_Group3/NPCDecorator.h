@@ -86,6 +86,15 @@ public:
 	npcState getState() { 
 		return npc->getState();
 	}
+
+
+	string getName() {
+		return npc->getName();
+	}
+	void setName(string name) {
+		return npc->setName(name);
+	}
+
 protected:
 	AbstractNPC * npc;
 };
@@ -97,6 +106,7 @@ public:
 		modifyHealth(50);
 		setAttack(getAttack() + 20);
 		setAttackSpeed(getAttackSpeed() + 1.5);
+		setName("enforcer");
 	}
 	void modifyHealth(double newHp) { this->npc->modifyHealth(newHp); }
 	double getRange() { return NPCDecorator::getRange(); } //TODO: maybe return a fixed melee range instead?
@@ -111,7 +121,7 @@ public:
 		setAttack(getAttack() + 10);
 		setRange(getRange() + 15);
 		setAttackSpeed(getAttackSpeed() + 3.0);
-		
+		setName("assault");
 	}
 	void modifyHealth(double newHp) { this->npc->modifyHealth(newHp); }
 	double getRange() { return NPCDecorator::getRange(); }

@@ -126,6 +126,8 @@ private:
 	Assimp::Importer importer;
 	const aiScene* scene;
 	vector<Mesh> meshes;
+	int vertices;
+	int faces;
 
 	////////////////////////ANIMATION STUFF!!!!!/////////////////////////
 	void CalcInterpolatedScaling(aiVector3D& Out, float AnimationTime, const aiNodeAnim* pNodeAnim);

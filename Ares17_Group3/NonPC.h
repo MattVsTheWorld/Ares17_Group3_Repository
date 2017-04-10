@@ -136,7 +136,7 @@ public:
 
 		//	cout << "Going to: " << v->getIndex() << endl;
 		angle = (atan2(goTo.z() - pos.z(), goTo.x() - pos.x())); // RADIANS
-		changeSpeed(3, angle);
+		changeSpeed(8, angle);
 
 		// find angle between direction
 		//changeSpeed(newDir);
@@ -266,6 +266,8 @@ public:
 	double getAttackSpeed() {
 		return this->attackSpeed;
 	}
+	void setName(string _name) { name = _name; }
+	string getName() { return name; }
 
 	void setState(npcState newState) { this->currentState = newState; }
 	npcState getState() { return this->currentState; }
@@ -292,6 +294,7 @@ protected:
 	double attack;
 	double attackSpeed;
 	bool init = true;
+	string name;
 	npcState currentState = IDLE;
 	// (...) space to add more parameters...
 };
