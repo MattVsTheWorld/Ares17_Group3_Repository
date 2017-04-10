@@ -20,6 +20,7 @@ namespace SceneManager {
 	float theta = 0;
 	modes mode = PLAY;
 	bound boundingType = BOX;
+	level currentLevel = FIRST;
 	editStages stage = MODEL;
 
 	// SHADOWS
@@ -32,7 +33,7 @@ namespace SceneManager {
 	// If the level gets too big and you can see the edge of the shadowmapping, increase the far 
 	// (or consider adding multiple lights / opting for a directional light shadowmap)
 	GLfloat near_plane = 0.01f;
-	GLfloat far_plane = 60.0f;
+	GLfloat far_plane = 80.0f;
 	//////////////////
 	unordered_set<AbstractNPC *> enemies;
 
@@ -44,8 +45,11 @@ namespace SceneManager {
 		"../Ares17_Group3/star-skybox/sky_back.bmp", "../Ares17_Group3/star-skybox/sky_front.bmp", "../Ares17_Group3/star-skybox/sky_right.bmp", "../Ares17_Group3/star-skybox/sky_left.bmp", "../Ares17_Group3/star-skybox/sky_top.bmp", "../Ares17_Group3/star-skybox/sky_bot.bmp"
 	};
 
+	//const char *skyTexFiles_2[6] = {
+	//	"../Ares17_Group3/Sky_2/back.bmp", "../Ares17_Group3/Sky_2/front.bmp", "../Ares17_Group3/Sky_2/right.bmp", "../Ares17_Group3/Sky_2/left.bmp", "../Ares17_Group3/Sky_2/top.bmp", "../Ares17_Group3/Sky_2/bot.bmp"
+	//};
 	const char *skyTexFiles_2[6] = {
-		"../Ares17_Group3/Sky_2/back.bmp", "../Ares17_Group3/Sky_2/front.bmp", "../Ares17_Group3/Sky_2/right.bmp", "../Ares17_Group3/Sky_2/left.bmp", "../Ares17_Group3/Sky_2/top.bmp", "../Ares17_Group3/Sky_2/bot.bmp"
+		"../Ares17_Group3/Violent/violentdays_bk.bmp", "../Ares17_Group3/Violent/violentdays_ft.bmp", "../Ares17_Group3/Violent/violentdays_rt.bmp", "../Ares17_Group3/Violent/violentdays_lf.bmp", "../Ares17_Group3/Violent/violentdays_up.bmp", "../Ares17_Group3/Violent/violentdays_dn.bmp"
 	};
 
 	// Load modelTypes
@@ -66,6 +70,7 @@ namespace SceneManager {
 	//	
 	GLuint defaultTexture;
 	GLuint groundTexture;
+	GLuint groundTexture_2;
 	GLuint heartTexture;
 
 	glm::mat4 view;
@@ -96,10 +101,7 @@ namespace SceneManager {
 		return glm::vec3(pos.x + d*std::sin(rotationAngles.y*DEG_TO_RADIAN), pos.y, pos.z - d*std::cos(rotationAngles.y*DEG_TO_RADIAN));
 	}
 
-	glm::vec3 moveForward(glm::vec3 pos, glm::vec3 rotationAngles, GLfloat d) { // TODO: fix
-		//cout << "x" << d*std::sin(rotationAngles.y*DEG_TO_RADIAN) << endl;
-		//cout << "y" << -d*std::sin(rotationAngles.x) << endl;
-		//cout << "z" << -d*std::cos(rotationAngles.y*DEG_TO_RADIAN) << endl;
+	glm::vec3 moveForward(glm::vec3 pos, glm::vec3 rotationAngles, GLfloat d) { // TODO remove?
 		return glm::vec3(pos.x + d*std::sin(rotationAngles.y*DEG_TO_RADIAN), pos.y - d*std::sin(rotationAngles.x), pos.z - d*std::cos(rotationAngles.y*DEG_TO_RADIAN));
 	}
 
@@ -393,8 +395,8 @@ namespace SceneManager {
 								case 8: modelScale.x = digit;			break;
 								case 9: modelScale.y = digit;			break;
 								case 10: modelScale.z = digit;			break;
-								case 11: modelRotation.z = digit;		break;
-								case 12: modelRotation.z = digit;		break;
+								case 11: modelRotation.x = digit;		break;
+								case 12: modelRotation.y = digit;		break;
 								case 13: modelRotation.z = digit;		break;
 								case 14: boundingRotation.x = digit;	break;
 								case 15: boundingRotation.y = digit;	break;
@@ -517,12 +519,7 @@ namespace SceneManager {
 		*/
 	}
 
-  //TODO: check if needed
-	//static const GLuint MAX_BONES = 30;
-	//GLuint m_boneLocation[MAX_BONES];
-
 	void initmodelTypes() {
-		//TODO:Player model for death or something
 		//Enemies
 		//modelTypes.insert(std::pair<string, Model*>("enforcerAttack", new Model("Models/Enemies/Enforcer/Attack/standing_melee_attack_downward.dae")));
 		//modelTypes.insert(std::pair<string, Model*>("enforcerRun", new Model("Models/Enemies/Enforcer/Run/running.dae")));
@@ -540,6 +537,8 @@ namespace SceneManager {
 		modelTypes.insert(std::pair<string, Model*>("house", new Model("../Ares17_Group3/Models/Environment/House/houselow.obj")));
 		modelTypes.insert(std::pair<string, Model*>("carpile", new Model("../Ares17_Group3/Models/Environment/CarPile/wasteddisplay.obj")));
 		modelTypes.insert(std::pair<string, Model*>("oiltank", new Model("../Ares17_Group3/Models/Environment/OilTank/Oiltank.obj")));
+		modelTypes.insert(std::pair<string, Model*>("catjeep", new Model("../Ares17_Group3/Models/Environment/cyberpunk-truck/hovertruck_lowpoly.obj")));
+		modelTypes.insert(std::pair<string, Model*>("heli", new Model("../Ares17_Group3/Models/Environment/Helicopter/hheli.obj")));
 		//modelTypes.insert(std::pair<string, Model*>("rock", new Model("../Ares17_Group3/Models/Environment/Rock/model.obj")));
 		modelTypes.insert(std::pair<string, Model*>("barrier", new Model("../Ares17_Group3/Models/Environment/Barrier/model.obj")));
 		//Collectable
@@ -659,17 +658,18 @@ namespace SceneManager {
 	}
 
 	void initEnemies() {
+		//TODO: uncomment
 		enemies.insert(new Melee(new NonPC(100, 5,
 			globalData->bt_manager, glm::vec3(0, 3, 0), 
 			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
 
-		enemies.insert(new Melee(new NonPC(100, 5,
-			globalData->bt_manager, glm::vec3(25, 3, 0),
-			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
+		//enemies.insert(new Melee(new NonPC(100, 5,
+		//	globalData->bt_manager, glm::vec3(25, 3, 0),
+		//	1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
 
-		enemies.insert(new Melee(new NonPC(100, 5,
-			globalData->bt_manager, glm::vec3(0, 3, -10),
-			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
+		//enemies.insert(new Melee(new NonPC(100, 5,
+		//	globalData->bt_manager, glm::vec3(0, 3, -10),
+		//	1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
 
 	}
 
@@ -731,6 +731,7 @@ namespace SceneManager {
 		//sound_manager->loadSample("Sounds/wilhelm.wav");
 		defaultTexture = loadBitmap::loadBitmap("../Ares17_Group3/Textures/wall.bmp");
 		groundTexture = loadBitmap::loadBitmap("../Ares17_Group3/Textures/terrain.bmp");
+		groundTexture_2 = loadBitmap::loadBitmap("../Ares17_Group3/Textures/terrain_2.bmp");
 		heartTexture = loadBitmap::loadBitmap("../Ares17_Group3/Textures/ruby.bmp");
     
 		//initPlayer(1.0f, 1.5f, 40.0f);
@@ -906,10 +907,6 @@ namespace SceneManager {
 				if (sdlEvent.button.button == SDL_BUTTON_LEFT) {
 					if (coolDown <= 0.0f && currentState == RUNNING) {
 						leftClick = true;
-						
-						//			cout << "Attempting to shoot bullet." << endl;
-
-						//TODO: change offset
 						if (globalData->player->getWeapon().getName() == PISTOL) {
 							globalData->projectile_manager->addProjectile(shiftRight(moveForward(glm::vec3(globalData->player->getPosition().x, globalData->player->getPosition().y - 0.35, globalData->player->getPosition().z),
 								rotationAngles, 1.0f), rotationAngles, 0.5), PROJ_SPEED, (rotationAngles.y*DEG_TO_RADIAN), rotationAngles.x); //!++!
@@ -1303,7 +1300,7 @@ namespace SceneManager {
 		}
 		if (keys[SDL_SCANCODE_2]) {
 			if (currentState == MENU) {
-				reset(); //TODO: SK 2
+				reset();
 				currentState = PAUSE;
 			}
 			if (currentState == RUNNING)
@@ -1322,6 +1319,11 @@ namespace SceneManager {
 		//	//globalData->sound_manager->playSound(globalData->sound_manager->getSound(BG_2), 1, 2);
 		//	globalData->sound_manager->stopBG();
 		//}
+
+		if (keys[SDL_SCANCODE_4])
+			cout << "X: " << globalData->player->getPosition().x << "| Y: " << globalData->player->getPosition().y << "| Z: " << globalData->player->getPosition().z << endl;
+		if (keys[SDL_SCANCODE_5])
+			currentLevel = SECOND;
 
 	/*	if (keys[SDL_SCANCODE_5]) {
 			globalData->sound_manager->playSound(globalData->sound_manager->getSound(BG), 1, 2);
@@ -1470,7 +1472,7 @@ namespace SceneManager {
 	}
 
 
-	void updateCollectables() { //TODO: change
+	void updateCollectables() { 
 		unsigned int max = collectables.size();
 		//	for (const auto it : collectables)
 
@@ -1483,14 +1485,11 @@ namespace SceneManager {
 
 				globalData->sound_manager->playSound(globalData->sound_manager->getSound(PICKUP_HEALTH), 2, 1);
 
-				//TODO: play sound
-
 				globalData->bt_manager->removeObject(bodies[get<1>(collectables[i])]);
 				globalData->bt_manager->removeObject(get<0>(collectables[i]));
 				bodies.erase(get<1>(collectables[i]));
 				collectables.erase(remove(collectables.begin(), collectables.end(), collectables[i]), collectables.end());
 				max--;
-				//TODO: check if bugs
 				//add something (hp / armor)
 				//remove from world
 			}
@@ -1599,7 +1598,7 @@ namespace SceneManager {
 
 		for (auto it = enemies.begin(); it != enemies.end(); ) {
 
-			animationTransforms((*it)->getState()); //TODO: fix
+			animationTransforms((*it)->getState());
 			if (!(*it)->update((make_tuple(modelTypes["assaultRun"], modelTypes["assaultAttack"], modelTypes["assaultDie"])), view, projection, dt_secs, globalData->level1Grid, globalData->player, modelProgram))
 				it = enemies.erase(it);
 			else
@@ -1618,18 +1617,30 @@ namespace SceneManager {
 			btQuaternion rotation = bodies[id_pair.first]->getWorldTransform().getRotation().normalized();
 
 			if (id_pair.second->getCollisionShape()->getShapeType() == BOX_SHAPE_PROXYTYPE) {
-				//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-				//glDisable(GL_CULL_FACE);
-				//globalData->bt_manager->renderBox(bodies[id_pair.first], view, projection, modelTypes["cube"], shader, groundTexture);
-				//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-				//glEnable(GL_CULL_FACE);
-				//cout << modelTypes[get<0>(models[id_pair.first])] << endl;
-				//cout << models[id_pair.first] << endl;
+				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+				glDisable(GL_CULL_FACE);
+				globalData->bt_manager->renderBox(bodies[id_pair.first], view, projection, modelTypes["cube"], shader, groundTexture);
+				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+				glEnable(GL_CULL_FACE);
 
 				if (modelTypes[get<0>(models[id_pair.first])] == modelTypes["heart"] || modelTypes[get<0>(models[id_pair.first])] == modelTypes["shield"])
 					renderObject(projection, modelTypes[get<0>(models[id_pair.first])], position, get<1>(models[id_pair.first]), rotation, shader, heartTexture, true);
 				else
-					renderObject(projection, modelTypes[get<0>(models[id_pair.first])], position, get<1>(models[id_pair.first]), rotation, shader, groundTexture, false);
+				{ 
+					switch (currentLevel) {
+					case FIRST:
+						renderObject(projection, modelTypes[get<0>(models[id_pair.first])], position, get<1>(models[id_pair.first]), rotation, shader, groundTexture, false);
+						break;
+					case SECOND:
+						renderObject(projection, modelTypes[get<0>(models[id_pair.first])], position, get<1>(models[id_pair.first]), rotation, shader, groundTexture_2, false);
+						break;
+					case THIRD:
+						renderObject(projection, modelTypes[get<0>(models[id_pair.first])], position, get<1>(models[id_pair.first]), rotation, shader, groundTexture, false);
+						break;
+					}
+				
+			
+			}
 			}
 
 			if (id_pair.second->getCollisionShape()->getShapeType() == SPHERE_SHAPE_PROXYTYPE) {
@@ -1739,8 +1750,6 @@ namespace SceneManager {
 			globalData->h_manager->renderPlayerHud("Health: ", globalData->player->getHealth(), HEALTH, shader, modelData, glm::vec3(-0.875f, 0.925f, 1.0f), glm::vec3(0.6275, 0.4, 0.0));
 			// Armor
 			globalData->h_manager->renderPlayerHud("Armor: ", globalData->player->getArmor(), ARMOR, shader, modelData, glm::vec3(-0.65f, 0.925f, 1.0f), glm::vec3(0, 0, 0.4));
-			// TODO: Ammo
-			;;
 			// Crosshair
 			globalData->h_manager->renderCrosshair(texturedProgram, modelTypes["cube"]);
 
@@ -1787,8 +1796,11 @@ namespace SceneManager {
 				glEnable(GL_CULL_FACE);
 				glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
 
-				skybox->renderSkybox(projection, view, modelTypes["cube"]);
-				//skybox_2->renderSkybox(projection, view, modelTypes["cube"]);
+				//skybox->renderSkybox(projection, view, modelTypes["cube"]);
+				if (currentLevel == FIRST)
+					skybox_2->renderSkybox(projection, view, modelTypes["cube"]);
+				else if (currentLevel == SECOND)
+					skybox->renderSkybox(projection, view, modelTypes["cube"]);
 				// normal rendering
 				renderShadowedScene(projection, view, modelProgram, false); // render normal scene from normal point of view
 				// fps counter; 5 of 5
@@ -1814,10 +1826,8 @@ namespace SceneManager {
 					flip = true;
 
 				}
-
-
 	    	
-				renderWeapon(projection, modelTypes[wepType], modelProgram, wepScale, flip); //TODO: Render current weapon
+				renderWeapon(projection, modelTypes[wepType], modelProgram, wepScale, flip);
 
 				renderHud(texturedProgram, modelTypes["cube"]);
 				

@@ -43,7 +43,7 @@ private:
 			}
 		}
 		return false;
-	} //TODO: use somewhere
+	}
 
 	static void toEulerianAngle(const btQuaternion& q, glm::vec3& rotation)
 	{
@@ -70,7 +70,7 @@ private:
 
 	void changeSpeed(float speed, float angle) {
 		//cout << angle << endl;
-		//TODO: fix
+		//TODO: increase speed
 		this->npcBody->setLinearVelocity(btVector3(/*npcBody->getLinearVelocity().x() + */speed*std::cos(angle),
 			npcBody->getLinearVelocity().y(), /*npcBody->getLinearVelocity().z()*/ speed*std::sin(angle)));
 	}
@@ -195,9 +195,6 @@ public:
 				}
 			} else {
 				this->currentState = ATTACKING;
-				//Attack player
-				//player->varyHealth(-(this->attack));
-				//TODO: MESHAL attack animation
 				currentAnimation = get<1>(modelDatas); //attack animation
 				if (this->attackTimer <= 0) {
 					player->takeDamage(this->attack);
@@ -235,7 +232,6 @@ public:
 		btVector3 pos = t.getOrigin();
 		npcGhost->setWorldTransform(t);
 		// Bounding box
-		//TODO: fix (or feature)
 		//this->shapeManager->renderCapsule(npcBody, view, proj, boundingModel, shader, texture);
 
 		btQuaternion& rotation = npcBody->getWorldTransform().getRotation().normalized();
@@ -255,9 +251,8 @@ public:
 		modelData->Draw(shader);
 
 		glBindTexture(GL_TEXTURE_2D, 0);
-		//TODO: actual model
 
-	} //TODO: actual model
+	}
 
 	void setAttack(double atk) { this->attack = atk; }
 	double getAttack() { return this->attack; }
