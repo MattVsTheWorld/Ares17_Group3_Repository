@@ -22,6 +22,9 @@ namespace SceneManager {
 	bound boundingType = BOX;
 	level currentLevel = FIRST;
 	editStages stage = MODEL;
+	// AI
+	Grid* level1Grid;
+
 
 	// SHADOWS
 	GLuint depthShaderProgram; //shader to create shadow cubemaps
@@ -348,7 +351,11 @@ namespace SceneManager {
 	void readFile() {
 		// reading a text file
 		string line;
-		ifstream myfile("../Ares17_Group3/bodies.txt");
+		ifstream myfile;
+		if (currentLevel == FIRST)
+			myfile = ifstream("../Ares17_Group3/level1.txt");
+		else if (currentLevel == SECOND)
+			myfile = ifstream("../Ares17_Group3/level2.txt");
 		if (myfile.is_open())
 		{
 			int numberOfBodies;
@@ -539,6 +546,7 @@ namespace SceneManager {
 		modelTypes.insert(std::pair<string, Model*>("oiltank", new Model("../Ares17_Group3/Models/Environment/OilTank/Oiltank.obj")));
 		modelTypes.insert(std::pair<string, Model*>("catjeep", new Model("../Ares17_Group3/Models/Environment/cyberpunk-truck/hovertruck_lowpoly.obj")));
 		modelTypes.insert(std::pair<string, Model*>("heli", new Model("../Ares17_Group3/Models/Environment/Helicopter/hheli.obj")));
+		modelTypes.insert(std::pair<string, Model*>("tower", new Model("../Ares17_Group3/Models/Environment/sci-fi-tower/building_02_fbx.FBX.obj")));
 		//modelTypes.insert(std::pair<string, Model*>("rock", new Model("../Ares17_Group3/Models/Environment/Rock/model.obj")));
 		modelTypes.insert(std::pair<string, Model*>("barrier", new Model("../Ares17_Group3/Models/Environment/Barrier/model.obj")));
 		//Collectable
@@ -689,6 +697,7 @@ namespace SceneManager {
 
 		collectables.clear();
 		bodies.clear();
+		models.clear();
 		initBoxes();
 
 	}
@@ -707,7 +716,7 @@ namespace SceneManager {
 		globalData->h_manager->renderLoading(texturedProgram, modelTypes["cube"]);
 		SDL_GL_SwapWindow(window); // swap buffers once
 		
-
+		level1Grid = new Grid();
 		initmodelTypes();
 		modelProgram = ShaderManager::initShaders("../Ares17_Group3/Shaders/modelLoading.vert", "../Ares17_Group3/Shaders/modelLoading.frag");
 		//+++
@@ -1599,7 +1608,7 @@ namespace SceneManager {
 		for (auto it = enemies.begin(); it != enemies.end(); ) {
 
 			animationTransforms((*it)->getState());
-			if (!(*it)->update((make_tuple(modelTypes["assaultRun"], modelTypes["assaultAttack"], modelTypes["assaultDie"])), view, projection, dt_secs, globalData->level1Grid, globalData->player, modelProgram))
+			if (!(*it)->update((make_tuple(modelTypes["assaultRun"], modelTypes["assaultAttack"], modelTypes["assaultDie"])), view, projection, dt_secs, level1Grid, globalData->player, modelProgram))
 				it = enemies.erase(it);
 			else
 				++it;
@@ -1617,11 +1626,11 @@ namespace SceneManager {
 			btQuaternion rotation = bodies[id_pair.first]->getWorldTransform().getRotation().normalized();
 
 			if (id_pair.second->getCollisionShape()->getShapeType() == BOX_SHAPE_PROXYTYPE) {
-				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-				glDisable(GL_CULL_FACE);
-				globalData->bt_manager->renderBox(bodies[id_pair.first], view, projection, modelTypes["cube"], shader, groundTexture);
-				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-				glEnable(GL_CULL_FACE);
+				//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+				//glDisable(GL_CULL_FACE);
+				//globalData->bt_manager->renderBox(bodies[id_pair.first], view, projection, modelTypes["cube"], shader, groundTexture);
+				//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+				//glEnable(GL_CULL_FACE);
 
 				if (modelTypes[get<0>(models[id_pair.first])] == modelTypes["heart"] || modelTypes[get<0>(models[id_pair.first])] == modelTypes["shield"])
 					renderObject(projection, modelTypes[get<0>(models[id_pair.first])], position, get<1>(models[id_pair.first]), rotation, shader, heartTexture, true);

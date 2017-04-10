@@ -34,8 +34,7 @@ public:
 		projectile_manager = new Projectile(bt_manager);
 		sound_manager = new SoundManager();
 
-		// AI
-		level1Grid = new Grid();
+
 
 		mainLight = {
 			glm::vec3(0.0f, 25.0f, 0.0f),
@@ -58,7 +57,7 @@ public:
 	SoundManager *sound_manager;
 	bool shadows;
 	//AI
-	Grid* level1Grid;
+
 
 	PointLight mainLight;
 
