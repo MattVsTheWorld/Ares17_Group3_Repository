@@ -14,7 +14,10 @@ enum {
 	WINCH,
 	LASER,
 	BULLET,
-	BG_2
+	BG_2,
+	PICKUP_HEALTH,
+	PAINED_EN,
+	PAINED_PL
 };
 
 class SoundManager

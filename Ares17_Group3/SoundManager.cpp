@@ -14,6 +14,13 @@ SoundManager::SoundManager() {
 	Licensed under Creative Commons: By Attribution 3.0 License
 	http://creativecommons.org/licenses/by/3.0/
 	*/
+
+	// pickup
+	// https://www.freesound.org/people/juancamiloorjuela/sounds/204318/
+
+	// enemy hit
+	// --
+
 	// load sound samples
 	samples = new HSAMPLE[10];
 	samples[BG] = loadSample("../Ares17_Group3/Sounds/corruption.wav");
@@ -23,6 +30,10 @@ SoundManager::SoundManager() {
 	samples[WINCH] = loadSample("../Ares17_Group3/Sounds/winch.wav");
 	samples[LASER] = loadSample("../Ares17_Group3/Sounds/laser.wav");
 	samples[BULLET] = loadSample("../Ares17_Group3/Sounds/bull.wav");
+	samples[PICKUP_HEALTH] = loadSample("../Ares17_Group3/Sounds/pickup_h.wav");
+	samples[PAINED_EN] = loadSample("../Ares17_Group3/Sounds/dspepain.wav");
+	samples[PAINED_PL] = loadSample("../Ares17_Group3/Sounds/dsnoway.wav");
+	
 	bgMusicState = false; // set music to playing at first
 }
 

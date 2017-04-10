@@ -661,15 +661,15 @@ namespace SceneManager {
 	void initEnemies() {
 		enemies.insert(new Melee(new NonPC(100, 5,
 			globalData->bt_manager, glm::vec3(0, 3, 0), 
-			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture)));
+			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
 
 		enemies.insert(new Melee(new NonPC(100, 5,
 			globalData->bt_manager, glm::vec3(25, 3, 0),
-			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture)));
+			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
 
 		enemies.insert(new Melee(new NonPC(100, 5,
 			globalData->bt_manager, glm::vec3(0, 3, -10),
-			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture)));
+			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
 
 	}
 
@@ -1329,6 +1329,10 @@ namespace SceneManager {
 		//	globalData->sound_manager->stopBG();
 		//}
 
+	/*	if (keys[SDL_SCANCODE_5]) {
+			globalData->sound_manager->playSound(globalData->sound_manager->getSound(BG), 1, 2);
+		}
+*/
 
 		if (keys[SDL_SCANCODE_ESCAPE]) {
 			if (currentState == PAUSE)
@@ -1482,6 +1486,8 @@ namespace SceneManager {
 					globalData->player->setHealth(globalData->player->getHealth() + 50);
 				else if (get<2>(collectables[i]) == "shield")
 					globalData->player->setArmor(globalData->player->getArmor() + 50);
+
+				globalData->sound_manager->playSound(globalData->sound_manager->getSound(PICKUP_HEALTH), 2, 1);
 
 				//TODO: play sound
 
