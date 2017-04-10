@@ -11,6 +11,7 @@ namespace SceneManager {
 	GLuint texturedProgram;
 	GLuint modelProgram;
 	Skybox *skybox;
+	Skybox *skybox_2;
 	gameState currentState = MENU;
 	float pauseTimeout = 1.0f;
 	bool clickable = true;
@@ -41,6 +42,10 @@ namespace SceneManager {
 
 	const char *skyTexFiles[6] = {
 		"../Ares17_Group3/star-skybox/sky_back.bmp", "../Ares17_Group3/star-skybox/sky_front.bmp", "../Ares17_Group3/star-skybox/sky_right.bmp", "../Ares17_Group3/star-skybox/sky_left.bmp", "../Ares17_Group3/star-skybox/sky_top.bmp", "../Ares17_Group3/star-skybox/sky_bot.bmp"
+	};
+
+	const char *skyTexFiles_2[6] = {
+		"../Ares17_Group3/Sky_2/back.bmp", "../Ares17_Group3/Sky_2/front.bmp", "../Ares17_Group3/Sky_2/right.bmp", "../Ares17_Group3/Sky_2/left.bmp", "../Ares17_Group3/Sky_2/top.bmp", "../Ares17_Group3/Sky_2/bot.bmp"
 	};
 
 	// Load modelTypes
@@ -655,15 +660,15 @@ namespace SceneManager {
 
 	void initEnemies() {
 		enemies.insert(new Melee(new NonPC(100, 5,
-			globalData->bt_manager, glm::vec3(0, 5, 0), 
+			globalData->bt_manager, glm::vec3(0, 3, 0), 
 			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture)));
 
 		enemies.insert(new Melee(new NonPC(100, 5,
-			globalData->bt_manager, glm::vec3(25, 10, 0),
+			globalData->bt_manager, glm::vec3(25, 3, 0),
 			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture)));
 
 		enemies.insert(new Melee(new NonPC(100, 5,
-			globalData->bt_manager, glm::vec3(0, 10, -10),
+			globalData->bt_manager, glm::vec3(0, 3, -10),
 			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture)));
 
 	}
@@ -735,6 +740,7 @@ namespace SceneManager {
 
 
 		skybox = new Skybox(skyTexFiles);
+		skybox_2 = new Skybox(skyTexFiles_2);
 
 		glm::mat4 projection;
 		// +++ \_/
@@ -744,6 +750,12 @@ namespace SceneManager {
 		//	enemies.push_back(new Melee(new NonPC(100, 10, bt_manager, glm::vec3(2, 10, 0), 1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture)));
 			//}
 			// +++ /-\
+
+
+		globalData->sound_manager->playSound(globalData->sound_manager->getSound(BG), 1, 2);
+		if (!globalData->sound_manager->getState())
+			BASS_Pause();
+			//globalData->sound_manager->stopBG();
 
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_BLEND);
@@ -860,13 +872,17 @@ namespace SceneManager {
 				for (const auto it : enemies) 
 					it->setState(PAUSED);
 				currentState = PAUSE;
+				globalData->sound_manager->setState(false);
+				BASS_Pause();
 			}
 			// Unpause
 			else if (currentState == PAUSE) {
 				for (const auto it : enemies)
 					it->setState(TRIGGERED);
 				currentState = RUNNING;
-				globalData->sound_manager->playSound(globalData->sound_manager->getSound(BG), 1, 2);
+				globalData->sound_manager->setState(true);
+				BASS_Start();
+
 			}
 		}
 		//
@@ -907,7 +923,7 @@ namespace SceneManager {
 								rotationAngles, 1.0f), rotationAngles, 0.5), PROJ_SPEED, (rotationAngles.y*DEG_TO_RADIAN), rotationAngles.x); //!++!
 
 							coolDown = COOL_TIME/2;
-						globalData->sound_manager->playSound(globalData->sound_manager->getSound(LASER), 0.5, 1);																												  //sound_manager->playSound(sound_manager->getSound(2), 2, 1);
+						globalData->sound_manager->playSound(globalData->sound_manager->getSound(LASER), 1, 1);																												  //sound_manager->playSound(sound_manager->getSound(2), 2, 1);
 						}
 
 						if (globalData->player->getWeapon().getName() == SCIFI) {
@@ -1308,10 +1324,11 @@ namespace SceneManager {
 				globalData->player->setWeapon(SCIFI);
 
 		}
-		if (keys[SDL_SCANCODE_4]) {
-			if (currentState == MENU)
-				exit(0);
-		}
+		//if (keys[SDL_SCANCODE_4]) {
+		//	//globalData->sound_manager->playSound(globalData->sound_manager->getSound(BG_2), 1, 2);
+		//	globalData->sound_manager->stopBG();
+		//}
+
 
 		if (keys[SDL_SCANCODE_ESCAPE]) {
 			if (currentState == PAUSE)
@@ -1771,6 +1788,7 @@ namespace SceneManager {
 				glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
 
 				skybox->renderSkybox(projection, view, modelTypes["cube"]);
+				//skybox_2->renderSkybox(projection, view, modelTypes["cube"]);
 				// normal rendering
 				renderShadowedScene(projection, view, modelProgram, false); // render normal scene from normal point of view
 				// fps counter; 5 of 5
