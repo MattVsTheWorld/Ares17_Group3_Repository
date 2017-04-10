@@ -5,7 +5,7 @@
 // NPCDecorator implements AbstractNPC
 class NPCDecorator : public AbstractNPC {
 private:
-	float timer = 3.0f;
+	float timer = 1.5f;
 public:
 	NPCDecorator(AbstractNPC *n) { npc = n; }
 	~NPCDecorator() {

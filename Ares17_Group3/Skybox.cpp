@@ -1,7 +1,7 @@
 #include "Skybox.h"
 
 Skybox::Skybox(const char *cubeTexFiles[6]) {
-	skyboxProgram = ShaderManager::initShaders("Shaders/cubeMap.vert", "Shaders/cubeMap.frag");
+	skyboxProgram = ShaderManager::initShaders("../Ares17_Group3/Shaders/cubeMap.vert", "../Ares17_Group3/Shaders/cubeMap.frag");
 		loadCubeMap(cubeTexFiles, &textures);
 }
 

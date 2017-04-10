@@ -36,11 +36,11 @@ namespace SceneManager {
 	unordered_set<AbstractNPC *> enemies;
 
 	const char *testTexFiles[6] = {
-		"Town-skybox/Town_bk.bmp", "Town-skybox/Town_ft.bmp", "Town-skybox/Town_rt.bmp", "Town-skybox/Town_lf.bmp", "Town-skybox/Town_up.bmp", "Town-skybox/Town_dn.bmp"
+		"../Ares17_Group3/Town-skybox/Town_bk.bmp", "../Ares17_Group3/Town-skybox/Town_ft.bmp", "../Ares17_Group3/Town-skybox/Town_rt.bmp", "../Ares17_Group3/Town-skybox/Town_lf.bmp", "../Ares17_Group3/Town-skybox/Town_up.bmp", "../Ares17_Group3/Town-skybox/Town_dn.bmp"
 	};
 
 	const char *skyTexFiles[6] = {
-		"star-skybox/sky_back.bmp", "star-skybox/sky_front.bmp", "star-skybox/sky_right.bmp", "star-skybox/sky_left.bmp", "star-skybox/sky_top.bmp", "star-skybox/sky_bot.bmp"
+		"../Ares17_Group3/star-skybox/sky_back.bmp", "../Ares17_Group3/star-skybox/sky_front.bmp", "../Ares17_Group3/star-skybox/sky_right.bmp", "../Ares17_Group3/star-skybox/sky_left.bmp", "../Ares17_Group3/star-skybox/sky_top.bmp", "../Ares17_Group3/star-skybox/sky_bot.bmp"
 	};
 
 	// Load modelTypes
@@ -202,7 +202,7 @@ namespace SceneManager {
 
 	void writeFile() {
 		// writing on a text file
-		ofstream myfile("bodies.txt");
+		ofstream myfile("../Ares17_Group3/bodies.txt");
 		if (myfile.is_open())
 		{
 			myfile << "BoundingName | ModelName | Positions | BoundingScale | ModelScale | Model Rotation | Bounding Rotation | Offset | Mass \t//numberOfBodies on first line\n";
@@ -341,7 +341,7 @@ namespace SceneManager {
 	void readFile() {
 		// reading a text file
 		string line;
-		ifstream myfile("bodies.txt");
+		ifstream myfile("../Ares17_Group3/bodies.txt");
 		if (myfile.is_open())
 		{
 			int numberOfBodies;
@@ -523,30 +523,30 @@ namespace SceneManager {
 		//modelTypes.insert(std::pair<string, Model*>("enforcerRun", new Model("Models/Enemies/Enforcer/Run/running.dae")));
 		//modelTypes.insert(std::pair<string, Model*>("enforcerDie", new Model("Models/Enemies/Enforcer/Die/falling_back_death.dae")));
 
-		modelTypes.insert(std::pair<string, Model*>("assaultAttack", new Model("Models/Enemies/Assault/Attack/gunplay.dae")));
-		modelTypes.insert(std::pair<string, Model*>("assaultRun", new Model("Models/Enemies/Assault/Run/run_with_sword.dae")));
-		modelTypes.insert(std::pair<string, Model*>("assaultDie", new Model("Models/Enemies/Assault/Die/falling_back_death.dae")));
+		modelTypes.insert(std::pair<string, Model*>("assaultAttack", new Model("../Ares17_Group3/Models/Enemies/Assault/Attack/gunplay.dae")));
+		modelTypes.insert(std::pair<string, Model*>("assaultRun", new Model("../Ares17_Group3/Models/Enemies/Assault/Run/run_with_sword.dae")));
+		modelTypes.insert(std::pair<string, Model*>("assaultDie", new Model("../Ares17_Group3/Models/Enemies/Assault/Die/falling_back_death.dae")));
 		
 		// Robotto
-		modelTypes.insert(std::pair<string, Model*>("robot", new Model("Models/Enemies/Robot/Roboto.obj")));
+		modelTypes.insert(std::pair<string, Model*>("robot", new Model("../Ares17_Group3/Models/Enemies/Robot/Roboto.obj")));
 		//Environment
-		modelTypes.insert(std::pair<string, Model*>("sphere", new Model("Models/Environment/sphere.obj")));
+		modelTypes.insert(std::pair<string, Model*>("sphere", new Model("../Ares17_Group3/Models/Environment/sphere.obj")));
 		modelTypes.insert(std::pair<string, Model*>("capsule", modelTypes["sphere"]));
-		modelTypes.insert(std::pair<string, Model*>("house", new Model("Models/Environment/House/houselow.obj")));
-		modelTypes.insert(std::pair<string, Model*>("carpile", new Model("Models/Environment/CarPile/wasteddisplay.obj")));
-		modelTypes.insert(std::pair<string, Model*>("oiltank", new Model("Models/Environment/OilTank/Oiltank.obj")));
-		//modelTypes.insert(std::pair<string, Model*>("rock", new Model("Models/Environment/Rock/model.obj")));
-		modelTypes.insert(std::pair<string, Model*>("barrier", new Model("Models/Environment/Barrier/model.obj")));
+		modelTypes.insert(std::pair<string, Model*>("house", new Model("../Ares17_Group3/Models/Environment/House/houselow.obj")));
+		modelTypes.insert(std::pair<string, Model*>("carpile", new Model("../Ares17_Group3/Models/Environment/CarPile/wasteddisplay.obj")));
+		modelTypes.insert(std::pair<string, Model*>("oiltank", new Model("../Ares17_Group3/Models/Environment/OilTank/Oiltank.obj")));
+		//modelTypes.insert(std::pair<string, Model*>("rock", new Model("../Ares17_Group3/Models/Environment/Rock/model.obj")));
+		modelTypes.insert(std::pair<string, Model*>("barrier", new Model("../Ares17_Group3/Models/Environment/Barrier/model.obj")));
 		//Collectable
-		modelTypes.insert(std::pair<string, Model*>("heart", new Model("Models/Collectable/Heart/Heart.obj")));
+		modelTypes.insert(std::pair<string, Model*>("heart", new Model("../Ares17_Group3/Models/Collectable/Heart/Heart.obj")));
 		//modelTypes.insert(std::pair<string, Model*>("potion", new Model("Models/Collectable/Potion/pocion lowpoly.obj")));
-		modelTypes.insert(std::pair<string, Model*>("shield", new Model("Models/Collectable/Shield/shield.obj")));
+		modelTypes.insert(std::pair<string, Model*>("shield", new Model("../Ares17_Group3/Models/Collectable/Shield/shield.obj")));
 
 		//Guns
 		//modelTypes.insert(std::pair<string, Model*>("pistol", new Model("Models/Guns/Pistol/Gun.obj")));
-		modelTypes.insert(std::pair<string, Model*>("scifigun", new Model("Models/Guns/Scifi/25ad7fc3a09f4a958dd62b5b522257ee.obj")));
-		modelTypes.insert(std::pair<string, Model*>("scifipistol", new Model("Models/Guns/ScifiPistol/ceeb75e9f4e34b6191d92c38a470453d.obj")));
-		modelTypes.insert(std::pair<string, Model*>("nukacola", new Model("Models/Guns/NukaCola/NukaColaGun.obj")));
+		modelTypes.insert(std::pair<string, Model*>("scifigun", new Model("../Ares17_Group3/Models/Guns/Scifi/25ad7fc3a09f4a958dd62b5b522257ee.obj")));
+		modelTypes.insert(std::pair<string, Model*>("scifipistol", new Model("../Ares17_Group3/Models/Guns/ScifiPistol/ceeb75e9f4e34b6191d92c38a470453d.obj")));
+		modelTypes.insert(std::pair<string, Model*>("nukacola", new Model("../Ares17_Group3/Models/Guns/NukaCola/NukaColaGun.obj")));
 	}
 
 	void insertBounding(glm::vec3 boundingPos, glm::vec3 modelScale, glm::vec3 boundingScale, glm::vec3 modelRotation, glm::vec3 boundingRotation, float mass) {
@@ -696,17 +696,17 @@ namespace SceneManager {
 
 		//cout << globalData->foo << endl;
 		// Preliminary loading for loading screen
-		texturedProgram = ShaderManager::initShaders("Shaders/textured.vert", "Shaders/textured.frag");
-		modelTypes.insert(std::pair<string, Model*>("cube", new Model("Models/Environment/cube.obj")));
+		texturedProgram = ShaderManager::initShaders("../Ares17_Group3/Shaders/textured.vert", "../Ares17_Group3/Shaders/textured.frag");
+		modelTypes.insert(std::pair<string, Model*>("cube", new Model("../Ares17_Group3/Models/Environment/cube.obj")));
 		modelTypes.insert(std::pair<string, Model*>("box", modelTypes["cube"]));
 		globalData->h_manager->renderLoading(texturedProgram, modelTypes["cube"]);
 		SDL_GL_SwapWindow(window); // swap buffers once
 		
 
 		initmodelTypes();
-		modelProgram = ShaderManager::initShaders("Shaders/modelLoading.vert", "Shaders/modelLoading.frag");
+		modelProgram = ShaderManager::initShaders("../Ares17_Group3/Shaders/modelLoading.vert", "../Ares17_Group3/Shaders/modelLoading.frag");
 		//+++
-		depthShaderProgram = ShaderManager::initShaders("Shaders/simpleShadowMap.vert", "Shaders/simpleShadowMap.frag", "Shaders/simpleShadowMap.gs");
+		depthShaderProgram = ShaderManager::initShaders("../Ares17_Group3/Shaders/simpleShadowMap.vert", "../Ares17_Group3/Shaders/simpleShadowMap.frag", "../Ares17_Group3/Shaders/simpleShadowMap.gs");
 
 		//makes locations for gBones[1] e.t.c.
 		//for (unsigned int i = 0; i < (sizeof(m_boneLocation)/sizeof(m_boneLocation[0])); i++) {
@@ -724,9 +724,9 @@ namespace SceneManager {
 		}
 
 		//sound_manager->loadSample("Sounds/wilhelm.wav");
-		defaultTexture = loadBitmap::loadBitmap("Textures/wall.bmp");
-		groundTexture = loadBitmap::loadBitmap("Textures/terrain.bmp");
-		heartTexture = loadBitmap::loadBitmap("Textures/ruby.bmp");
+		defaultTexture = loadBitmap::loadBitmap("../Ares17_Group3/Textures/wall.bmp");
+		groundTexture = loadBitmap::loadBitmap("../Ares17_Group3/Textures/terrain.bmp");
+		heartTexture = loadBitmap::loadBitmap("../Ares17_Group3/Textures/ruby.bmp");
     
 		//initPlayer(1.0f, 1.5f, 40.0f);
 		initBoxes();

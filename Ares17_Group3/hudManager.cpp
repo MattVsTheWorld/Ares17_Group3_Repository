@@ -40,11 +40,11 @@ hudManager::hudManager(bool shadows) {
 	if (TTF_Init() == -1)
 		std::cout << "TTF failed to initialise." << std::endl;
 
-	textFont = TTF_OpenFont("Nippon_Tech.ttf", 24);
+	textFont = TTF_OpenFont("../Ares17_Group3/Nippon_Tech.ttf", 24);
 	if (textFont == NULL)
 		std::cout << "Failed to open font." << std::endl;
 
-	menuFont = TTF_OpenFont("Roboto-Black.ttf", 32);
+	menuFont = TTF_OpenFont("../Ares17_Group3/Roboto-Black.ttf", 32);
 	if (menuFont == NULL)
 		std::cout << "Failed to open font." << std::endl;
 
@@ -85,11 +85,11 @@ hudManager::hudManager(bool shadows) {
 	cstr = str.c_str();
 	menuLabel[4] = textToTexture(cstr, menuLabel[4], menuFont);
 
-	crosshair = TextureFromFile("crosshair.png", "Textures");
+	crosshair = TextureFromFile("crosshair.png", "../Ares17_Group3/Textures");
 	// https://dribbble.com/shots/897447-Ares-Logo-Mark
-	menuScreen = loadBitmap::loadBitmap("Textures/menu.bmp");
-	loadingScreen = loadBitmap::loadBitmap("Textures/loading.bmp");
-	defeatScreen = loadBitmap::loadBitmap("Textures/defeat.bmp");
+	menuScreen = loadBitmap::loadBitmap("../Ares17_Group3/Textures/menu.bmp");
+	loadingScreen = loadBitmap::loadBitmap("../Ares17_Group3/Textures/loading.bmp");
+	defeatScreen = loadBitmap::loadBitmap("../Ares17_Group3/Textures/defeat.bmp");
 }
 
 // Requires change ***

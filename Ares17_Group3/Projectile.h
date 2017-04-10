@@ -2,7 +2,7 @@
 #define PROJECTILE
 
 #include "btShapeManager.h"
-#define BULLET_SIZE 0.04f
+#define BULLET_SIZE 0.05f
 #define DEFAULT_LIFESPAN 6.0f
 #define DEFAULT_MASS 1.0f
 #define PROJ_SPEED 100.0f
