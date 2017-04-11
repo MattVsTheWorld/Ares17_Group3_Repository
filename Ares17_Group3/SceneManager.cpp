@@ -616,7 +616,7 @@ namespace SceneManager {
 		else
 			enemies.insert(new Heavy(new NonPC(300, 5,
 				globalData->bt_manager, glm::vec3(0, 5, 0),
-				1.25, 2.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
+				1.25, 1.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
 	}
 
 	void reset() {
@@ -636,6 +636,7 @@ namespace SceneManager {
 		bodies.clear();
 		models.clear();
 		initBoxes();
+
 	}
 	static const GLuint MAX_BONES = 50;
 	GLuint m_boneLocation[MAX_BONES];
@@ -1169,7 +1170,9 @@ namespace SceneManager {
 		if (keys[SDL_SCANCODE_5]) {
 			currentLevel = BOSS;
 			globalData->sound_manager->stopBG();
-			globalData->sound_manager->playSound(globalData->sound_manager->getSound(BG_2), 0.2f, 2);
+			
+			globalData->sound_manager->playSound(globalData->sound_manager->getSound(BG_2), 0.4f, 2);
+			BASS_Pause();
 		}
 
 		if (keys[SDL_SCANCODE_ESCAPE]) {
@@ -1458,13 +1461,16 @@ namespace SceneManager {
 	int killedEnemies = 0;
 	double victory = 3;
 	void update(SDL_Window * window, SDL_Event sdlEvent) {
-		if (killedEnemies >= 10)
+		if (killedEnemies >= 5)
 		{
 			if (currentLevel == FIRST) { currentLevel = SECOND; }
 			else if (currentLevel == SECOND) { currentLevel = BOSS; }
 			//else { currentLevel = FIRST; }
 			killedEnemies = 0;
 			reset();
+			//TODO: maybe change
+			globalData->sound_manager->stopBG();
+			globalData->sound_manager->playSound(globalData->sound_manager->getSound(BG_2), 0.4f, 2);
 		}
 		
 		controls(window, sdlEvent);
