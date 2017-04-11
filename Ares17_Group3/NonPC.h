@@ -240,7 +240,11 @@ public:
 
 		btQuaternion& rotation = npcBody->getWorldTransform().getRotation().normalized();
 		glm::mat4 model;
-		model = glm::translate(model, glm::vec3(pos.x(), pos.y() - 1.50, pos.z()));
+		if (this->name == "boss"){
+			model = glm::translate(model, glm::vec3(pos.x(), pos.y() - 1.0, pos.z()));
+		}
+		else
+			model = glm::translate(model, glm::vec3(pos.x(), pos.y() - 1.50, pos.z()));
 		glm::vec3 eulerRotation;
 		toEulerianAngle(rotation, eulerRotation);
 		model = glm::rotate(model, eulerRotation.x, glm::vec3(1.0f, 0.0f, 0.0f));

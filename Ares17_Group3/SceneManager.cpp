@@ -25,7 +25,6 @@ namespace SceneManager {
 	// AI
 	Grid* level1Grid;
 
-
 	// SHADOWS
 	GLuint depthShaderProgram; //shader to create shadow cubemaps
 	GLuint depthMapFBO; // FBO
@@ -48,9 +47,6 @@ namespace SceneManager {
 		"../Ares17_Group3/star-skybox/sky_back.bmp", "../Ares17_Group3/star-skybox/sky_front.bmp", "../Ares17_Group3/star-skybox/sky_right.bmp", "../Ares17_Group3/star-skybox/sky_left.bmp", "../Ares17_Group3/star-skybox/sky_top.bmp", "../Ares17_Group3/star-skybox/sky_bot.bmp"
 	};
 
-	//const char *skyTexFiles_2[6] = {
-	//	"../Ares17_Group3/Sky_2/back.bmp", "../Ares17_Group3/Sky_2/front.bmp", "../Ares17_Group3/Sky_2/right.bmp", "../Ares17_Group3/Sky_2/left.bmp", "../Ares17_Group3/Sky_2/top.bmp", "../Ares17_Group3/Sky_2/bot.bmp"
-	//};
 	const char *skyTexFiles_2[6] = {
 		"../Ares17_Group3/Violent/violentdays_bk.bmp", "../Ares17_Group3/Violent/violentdays_ft.bmp", "../Ares17_Group3/Violent/violentdays_rt.bmp", "../Ares17_Group3/Violent/violentdays_lf.bmp", "../Ares17_Group3/Violent/violentdays_up.bmp", "../Ares17_Group3/Violent/violentdays_dn.bmp"
 	};
@@ -80,7 +76,6 @@ namespace SceneManager {
 	glm::vec3 eye(2.0f, 3.0f, -6.0f);
 	glm::vec3 at(0.0f, 0.5f, -1.0f);
 	glm::vec3 up(0.0f, 1.0f, 0.0f);
-
 
 	float mass = 0;
 	unsigned int objectID = 0;
@@ -136,8 +131,6 @@ namespace SceneManager {
 	}
 
 	btVector3 speedRight(GLfloat _speed, GLfloat angle, bool concurrent) {
-
-		//playerBody->getVelocityInLocalPoint();
 		btVector3 speed = getLinearVelocityInBodyFrame(globalData->player->playerBody);
 		if (!concurrent && speed.absolute().x() <= globalData->player->getSpeed() && speed.absolute().z() <= globalData->player->getSpeed())
 			speed = btVector3(speed.x() + _speed*std::cos(angle*DEG_TO_RADIAN), speed.y(), speed.z() + _speed*std::sin(angle*DEG_TO_RADIAN));
@@ -154,27 +147,6 @@ namespace SceneManager {
 		}
 		return speed;
 	}
-
-	/*static void toEulerianAngle(const glm::quat& q, glm::vec3& rotationAngles)
-	{
-		double ysqr = q.y * q.y;
-
-		// rotationAngles.z (x-axis rotation)
-		double t0 = +2.0 * (q.w * q.x + q.y * q.z);
-		double t1 = +1.0 - 2.0 * (q.x * q.x + ysqr);
-		rotationAngles.z = std::atan2(t0, t1);
-
-		// rotationAngles.x (y-axis rotation)
-		double t2 = +2.0 * (q.w * q.y - q.z * q.x);
-		t2 = t2 > 1.0 ? 1.0 : t2;
-		t2 = t2 < -1.0 ? -1.0 : t2;
-		rotationAngles.x = std::asin(t2);
-
-		// rotationAngles.y (z-axis rotation)
-		double t3 = +2.0 * (q.w * q.z + q.x * q.y);
-		double t4 = +1.0 - 2.0 * (ysqr + q.z * q.z);
-		rotationAngles.y = std::atan2(t3, t4);
-	}*/
 
 	static void toEulerianAngle(const btQuaternion& q, glm::vec3& rotation)
 	{
@@ -455,7 +427,6 @@ namespace SceneManager {
 					if (modelName == "heart" || modelName == "shield") {
 						btRigidBody *temp = globalData->bt_manager->addBox(boundingScale.x, boundingScale.y, boundingScale.z, position.x, position.y, position.z, mass, COL_COLLECTABLE, COL_PLAYER);
 
-						//temp->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);
 						bodies.insert(std::pair<string, btRigidBody*>(key, temp));
 						btPairCachingGhostObject* tempGhost = new btPairCachingGhostObject();
 						tempGhost->setCollisionShape(temp->getCollisionShape());
@@ -467,17 +438,14 @@ namespace SceneManager {
 					else
 						bodies.insert(std::pair<string, btRigidBody*>(key, globalData->bt_manager->addBox(boundingScale.x, boundingScale.y, boundingScale.z, position.x, position.y, position.z, mass)));
 					models.insert(std::pair<string, std::tuple<string, glm::vec3, glm::vec3, glm::vec3>>(key, std::make_tuple(modelName, modelScale, modelRotation, offset)));
-					//cout << "Box Added\n";
 				}
 				else if (key.find("sphere") != std::string::npos) {
 					bodies.insert(std::pair<string, btRigidBody*>(key, globalData->bt_manager->addSphere(radius, position.x, position.y, position.z, mass)));
 					models.insert(std::pair<string, std::tuple<string, glm::vec3, glm::vec3, glm::vec3>>(key, std::make_tuple(modelName, modelScale, glm::vec3(0., 0., 0.), offset)));
-					//cout << "Sphere Added\n";
 				}
 				else if (key.find("capsule") != std::string::npos) {
 					bodies.insert(std::pair<string, btRigidBody*>(key, globalData->bt_manager->addCapsule(radius, height, position.x, position.y, position.z, mass)));
 					models.insert(std::pair<string, std::tuple<string, glm::vec3, glm::vec3, glm::vec3>>(key, std::make_tuple(modelName, modelScale, modelRotation, offset)));
-					//cout << "Sphere Added\n";
 				}
 
 			}//while loop
@@ -498,7 +466,6 @@ namespace SceneManager {
 			if (id_pair.second->getCollisionShape()->getShapeType() == BOX_SHAPE_PROXYTYPE) {
 				key = "box";
 				key.append(to_string(boxNo));
-				//bodies[key]->setActivationState(DISABLE_DEACTIVATION);
 				boxNo++;
 			}
 			else if (id_pair.second->getCollisionShape()->getShapeType() == SPHERE_SHAPE_PROXYTYPE) {
@@ -586,7 +553,6 @@ namespace SceneManager {
 			bodies[key]->setAngularFactor(0); // Doesn't fall sideways
 		}
 		bodies[key]->setFriction(8);
-	//	bodies[key]->setActivationState(DISABLE_DEACTIVATION);
 		models.insert(std::pair<string, std::tuple<string, glm::vec3, glm::vec3, glm::vec3>>(key, make_tuple(currentModel, modelScale, modelRotation, glm::vec3(0.0f, 0.0f, 0.0f))));
 	}
 
@@ -613,11 +579,7 @@ namespace SceneManager {
 						const btVector3& ptA = pt.getPositionWorldOnA();
 						const btVector3& ptB = pt.getPositionWorldOnB();
 						const btVector3& normalOnB = pt.m_normalWorldOnB;
-						// <START>  handle collisions here
-					//	cout << "Player colliding with something while jumping." << endl;
 						return true;
-						//player->setState(ON_GROUND);
-						//  <END>   handle collisions here
 					}
 				}
 			}
@@ -682,7 +644,6 @@ namespace SceneManager {
 
 		globalData = make_shared<GlobalData>(eye);
 
-		//cout << globalData->foo << endl;
 		// Preliminary loading for loading screen
 		texturedProgram = ShaderManager::initShaders("../Ares17_Group3/Shaders/textured.vert", "../Ares17_Group3/Shaders/textured.frag");
 		modelTypes.insert(std::pair<string, Model*>("cube", new Model("../Ares17_Group3/Models/Environment/cube.obj")));
@@ -696,29 +657,18 @@ namespace SceneManager {
 		//+++
 		depthShaderProgram = ShaderManager::initShaders("../Ares17_Group3/Shaders/simpleShadowMap.vert", "../Ares17_Group3/Shaders/simpleShadowMap.frag", "../Ares17_Group3/Shaders/simpleShadowMap.gs");
 
-		//makes locations for gBones[1] e.t.c.
-		//for (unsigned int i = 0; i < (sizeof(m_boneLocation)/sizeof(m_boneLocation[0])); i++) {
-		//	char Name[40];
-		//	memset(Name, 0, sizeof(Name));
-		//	snprintf(Name, sizeof(Name), "gBones[%d]", i);
-		//	m_boneLocation[i] = glGetUniformLocation(modelProgram, Name);
-		//}
-		//SAME THING??????
 		for (unsigned int i = 0; i < MAX_BONES; i++) {
 			char Name[MAX_BONES];
-			//memset(Name, 0, sizeof(Name));
 			snprintf(Name, MAX_BONES, "gBones[%d]", i);
 			m_boneLocation[i] = glGetUniformLocation(modelProgram, Name);
 		}
 
-		//sound_manager->loadSample("Sounds/wilhelm.wav");
 		defaultTexture = loadBitmap::loadBitmap("../Ares17_Group3/Textures/wall.bmp");
 		groundTexture = loadBitmap::loadBitmap("../Ares17_Group3/Textures/terrain.bmp");
 		groundTexture_2 = loadBitmap::loadBitmap("../Ares17_Group3/Textures/terrain_2.bmp");
 		groundTexture_3 = loadBitmap::loadBitmap("../Ares17_Group3/Textures/boss.bmp");
 		heartTexture = loadBitmap::loadBitmap("../Ares17_Group3/Textures/ruby.bmp");
-    
-		//initPlayer(1.0f, 1.5f, 40.0f);
+
 		initBoxes();
 		temp[0] = std::make_tuple(currentModel, at, glm::vec3(0.02, 0.02, 0.02), glm::vec3(0.0f, rotationAngles.y, 0.0f));
 		temp[1] = std::make_tuple(currentBounding, std::get<1>(temp[0]), glm::vec3(0.2, 0.2, 0.2), glm::vec3(0.0f, rotationAngles.y, 0.0f));
@@ -728,19 +678,12 @@ namespace SceneManager {
 		skybox_2 = new Skybox(skyTexFiles_2);
 
 		glm::mat4 projection;
-		// +++ \_/
-		// health, range, manager, sp, radius, height, mass, model, shader, textuer
-		//for (int i = 0; i < 3; i++) {
-		initEnemies();
-		//	enemies.push_back(new Melee(new NonPC(100, 10, bt_manager, glm::vec3(2, 10, 0), 1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture)));
-			//}
-			// +++ /-\
 
+		initEnemies();
 
 		globalData->sound_manager->playSound(globalData->sound_manager->getSound(BG), 0.2f, 2);
 		if (!globalData->sound_manager->getState())
 			BASS_Pause();
-			//globalData->sound_manager->stopBG();
 
 		glEnable(GL_DEPTH_TEST);
 		glEnable(GL_BLEND);
@@ -752,7 +695,6 @@ namespace SceneManager {
 		/////////////////////
 		glGenFramebuffers(1, &depthMapFBO);
 		// Create depth cubemap texture
-		//	GLuint depthCubemap;
 		glGenTextures(1, &depthCubemap);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
 		for (GLuint i = 0; i < 6; ++i)
@@ -772,23 +714,8 @@ namespace SceneManager {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
-	/* Might be useful http://bulletphysics.org/Bullet/phpBB3/viewtopic.php?f=9&t=2069
-	btVector3 getVelocityAtWorldPosition(btRigidBody* body, const btVector3& worldposition, bool local)
-	{
-		/* That's the 'localpoint'
-		const btVector3 relpos = worldposition - body->getCenterOfMassPosition();
-		/* That's velocity in world space
-		const btVector3 wvel = body->getVelocityInLocalPoint(relpos);
-		/* Now you can transform it in body local frame
-		if (local) return(body->getWorldTransform().getBasis().transpose()*wvel);
-		/* Or keep it in world frame
-		return(wvel);
-
-	} */
-	//#define rotationAngles.xLOCK 3.0f //TODO: edit rotationAngles.x lock
 	void lockCamera()
 	{
-		//	cout << rotationAngles.x << endl;
 		if (rotationAngles.x > PITCHLOCK)
 			rotationAngles.x = PITCHLOCK;
 		if (rotationAngles.x < -PITCHLOCK)
@@ -838,11 +765,6 @@ namespace SceneManager {
 		} else if (currentState == PAUSE || currentState == MENU)
 			SDL_ShowCursor(SDL_ENABLE);
 
-		//MOUSECLICK
-
-		//KEYBOARD
-		// To be changed ****
-
 		btTransform t;
 		t.setIdentity();
 		t.setOrigin(btVector3(0, 10, -10));
@@ -851,8 +773,7 @@ namespace SceneManager {
 
 		const Uint8 *keys = SDL_GetKeyboardState(NULL);
 
-		if (keys[SDL_SCANCODE_P] && clickable)
-		{
+		if (keys[SDL_SCANCODE_P] && clickable) {
 			clickable = false;
 			// Pausee
 			if (currentState == RUNNING) {
@@ -872,24 +793,19 @@ namespace SceneManager {
 
 			}
 		}
-		//
+		
 		pauseTimeout -= dt_secs;
-		if (pauseTimeout <= 0)
-		{
+		if (pauseTimeout <= 0) {
 			pauseTimeout = 1.0f;
 			clickable = true;
 		}
-		//
-		if (keys[SDL_SCANCODE_LEFTBRACKET]) {
-			mode = PLAY;
-		}
-		else if (keys[SDL_SCANCODE_RIGHTBRACKET]) {
-			mode = EDIT;
-		}
+		
+		if (keys[SDL_SCANCODE_LEFTBRACKET]) { mode = PLAY; }
+		else if (keys[SDL_SCANCODE_RIGHTBRACKET]) {	mode = EDIT; }
 
 		float increase;
 		if (mode == PLAY) {
-			if (sdlEvent.type == SDL_MOUSEBUTTONDOWN) { // && pointOfView == FIRST_PERSON) {
+			if (sdlEvent.type == SDL_MOUSEBUTTONDOWN) {
 				if (sdlEvent.button.button == SDL_BUTTON_LEFT) {
 					if (coolDown <= 0.0f && currentState == RUNNING) {
 						leftClick = true;
@@ -906,7 +822,7 @@ namespace SceneManager {
 								rotationAngles, 1.0f), rotationAngles, 0.5), PROJ_SPEED, (rotationAngles.y*DEG_TO_RADIAN), rotationAngles.x); //!++!
 
 							coolDown = COOL_TIME/2;
-						globalData->sound_manager->playSound(globalData->sound_manager->getSound(LASER), 1, 1);																												  //sound_manager->playSound(sound_manager->getSound(2), 2, 1);
+						globalData->sound_manager->playSound(globalData->sound_manager->getSound(LASER), 1, 1);																												
 						}
 
 						if (globalData->player->getWeapon().getName() == SCIFI) {
@@ -914,7 +830,7 @@ namespace SceneManager {
 								rotationAngles, 1.0f), rotationAngles, 0.5), PROJ_SPEED, (rotationAngles.y*DEG_TO_RADIAN), rotationAngles.x); //!++!
 
 							coolDown = COOL_TIME*2.0;
-						globalData->sound_manager->playSound(globalData->sound_manager->getSound(WINCH), 0.4f, 1);																													  //sound_manager->playSound(sound_manager->getSound(2), 2, 1);
+						globalData->sound_manager->playSound(globalData->sound_manager->getSound(WINCH), 0.4f, 1);																											
 						}
 					}
 				}
@@ -938,11 +854,9 @@ namespace SceneManager {
 				globalData->player->playerBody->setLinearVelocity(speedForward(-increase, rotationAngles.y, (keys[SDL_SCANCODE_A] == SDL_PRESSED || keys[SDL_SCANCODE_D] == SDL_PRESSED)));
 			}
 			if (keys[SDL_SCANCODE_A]) {
-				//player->setPosition(moveRight(player->getPosition(), rotationAngles.y, -0.1f));
 				globalData->player->playerBody->setLinearVelocity(speedRight(-increase, rotationAngles.y, (keys[SDL_SCANCODE_W] == SDL_PRESSED || keys[SDL_SCANCODE_S] == SDL_PRESSED)));
 			}
 			else if (keys[SDL_SCANCODE_D]) {
-				//player->setPosition(moveRight(player->getPosition(), rotationAngles.y, 0.1f));
 				globalData->player->playerBody->setLinearVelocity(speedRight(increase, rotationAngles.y, (keys[SDL_SCANCODE_W] == SDL_PRESSED || keys[SDL_SCANCODE_S] == SDL_PRESSED)));
 			}
 
@@ -966,7 +880,7 @@ namespace SceneManager {
 			btTransform t;
 			t.setIdentity();
 			
-			if (sdlEvent.type == SDL_MOUSEBUTTONDOWN) { // && pointOfView == FIRST_PERSON) {
+			if (sdlEvent.type == SDL_MOUSEBUTTONDOWN) {
 				if (sdlEvent.button.button == SDL_BUTTON_LEFT) {
 					if (coolDown <= 0.0f) {
 						leftClick = true;
@@ -979,7 +893,7 @@ namespace SceneManager {
 				if (sdlEvent.button.button == SDL_BUTTON_RIGHT) rightClick = true;
 			}
 
-			if (sdlEvent.type == SDL_MOUSEBUTTONUP) { //  && pointOfView == FIRST_PERSON) {
+			if (sdlEvent.type == SDL_MOUSEBUTTONUP) {
 				leftClick = false;
 				rightClick = false;
 			}
@@ -1044,14 +958,6 @@ namespace SceneManager {
 				currentBounding = "capsule";
 				std::cout << "Bounding Type: CAPSULE" << std::endl;
 			}
-
-			/*if (keys[SDL_SCANCODE_R]) {
-				double x = -3.05048;
-				double y = 3;
-				double z = -30.6176;
-				t.setOrigin(btVector3(x, y, z));
-				playerBody->setWorldTransform(t);
-			}*/
 
 			if (creation == true) {
 				if (keys[SDL_SCANCODE_KP_8]) {
@@ -1236,36 +1142,6 @@ namespace SceneManager {
 			}
 		}
 
-		//++++
-		if (keys[SDL_SCANCODE_M]) {
-			//	cout << "Curiously cinnamon\n";
-			bodies["box1"]->setLinearVelocity(btVector3(0.0, 5.0, 0.0));
-		}
-		if (keys[SDL_SCANCODE_N]) {
-
-			//btTransform t;
-			t.setIdentity();
-			t.setOrigin(btVector3(0, 10, -10));
-			//btMotionState* motion = new btDefaultMotionState(t);
-			cout << "Setting y\n";
-			motion->setWorldTransform(t);
-			bodies["box1"]->setMotionState(motion);
-		}
-		//++++
-		//if (keys[SDL_SCANCODE_K]) {
-		//	if (pointOfView == FIRST_PERSON) pointOfView = THIRD_PERSON;
-		//	else pointOfView = FIRST_PERSON;
-		//}
-
-		//if (keys[SDL_SCANCODE_1]) {
-		//	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		//	glDisable(GL_CULL_FACE);
-		//}
-		//if (keys[SDL_SCANCODE_2]) {
-		//	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		//	glEnable(GL_CULL_FACE);
-		//}
-
 		if (keys[SDL_SCANCODE_1]) {
 			if (currentState == MENU)
 				currentState = PAUSE;
@@ -1309,9 +1185,6 @@ namespace SceneManager {
 
 		glm::mat4 model;
 		model = glm::translate(model, pos);
-		//model = glm::rotate(model, float(-rotationAngles.y*DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
-		//model = glm::rotate(model, float(180 * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
-		//model = glm::rotate(model, float(rotation.y * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
 		glm::vec3 eulerRotation;
 		toEulerianAngle(rotation, eulerRotation);
 		model = glm::rotate(model, eulerRotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
@@ -1322,7 +1195,6 @@ namespace SceneManager {
 		model = glm::rotate(model, eulerRotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
 		
 		model = glm::scale(model, scale);	// It's a bit too big for our scene, so scale it down
-		//model = glm::scale(model, glm::vec3(0.05f, 0.05f, 0.05f));	// for gun]
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texture);
 		glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
@@ -1481,12 +1353,12 @@ namespace SceneManager {
 	}
 
 	//TODO: delete
-	void renderPlayer(glm::mat4 proj, Model *modelData, glm::vec3 pos, glm::vec3 scale, glm::vec3 rotation, GLuint shader, GLuint texture) {
+	void renderEditObject(glm::mat4 proj, Model *modelData, glm::vec3 pos, glm::vec3 scale, glm::vec3 rotation, GLuint shader, GLuint texture) {
 		glm::mat4 model;
 		model = glm::translate(model, pos);
 		model = glm::rotate(model, float(rotation.y * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::scale(model, scale);	// It's a bit too big for our scene, so scale it down
-											//model = glm::scale(model, glm::vec3(0.05f, 0.05f, 0.05f));	// for gun]
+
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texture);
 		glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
@@ -1524,24 +1396,11 @@ namespace SceneManager {
 	}
 
 	void updatePlayer(float dt) {
-		//btTransform t;
-		//t.setIdentity();
-		//playerBody->getMotionState()->getWorldTransform(t);
-		//	playerBody->getMotionState();
-		//btVector3 pos = t.getOrigin();
-		//globalData->player->setPosition(glm::vec3(pos.x(), pos.y(), pos.z()));
-		//ghostObject->setWorldTransform(t);
 		globalData->player->update(dt);
-
-
-		//cout << getLinearVelocityInBodyFrame(playerBody).y();
 	}
 
 	void updateCollectables() { 
-
 		unsigned int max = collectables.size();
-		//	for (const auto it : collectables)
-
 		for (unsigned int i = 0; i < max; i++) {
 			if (findCollision(get<0>(collectables[i]))) {
 				if (get<2>(collectables[i]) == "heart")
@@ -1672,21 +1531,9 @@ namespace SceneManager {
 		at.y -= rotationAngles.x;
 
 		view = glm::lookAt(globalData->player->getPosition(), at, up);
-		//mvStack.top() = glm::lookAt(player->getPosition(), at, up);
-	//}
-
-
-	//else {
-	//	at = player->getPosition(); // look at player position
-	//	eye = moveForward(at, pitch, -6.0f); // move behind him
-	//	eye.y += pitch; // displacement determined by user interaction
-	//	view = glm::lookAt(eye, at, up);
-	//}
-
 	}
 
 	//function that passes all light positions and properties to the shader
-
 	void pointLight(GLuint shader) {
 		GLuint uniformIndex = glGetUniformLocation(shader, "viewPos");
 		glUniform3fv(uniformIndex, 1, glm::value_ptr(globalData->player->getPosition()));
@@ -1775,12 +1622,6 @@ namespace SceneManager {
 			btQuaternion rotation = bodies[id_pair.first]->getWorldTransform().getRotation().normalized();
 
 			if (id_pair.second->getCollisionShape()->getShapeType() == BOX_SHAPE_PROXYTYPE) {
-				//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-				//glDisable(GL_CULL_FACE);
-				//globalData->bt_manager->renderBox(bodies[id_pair.first], view, projection, modelTypes["cube"], shader, groundTexture);
-				//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-				//glEnable(GL_CULL_FACE);
-
 				if (modelTypes[get<0>(models[id_pair.first])] == modelTypes["heart"] || modelTypes[get<0>(models[id_pair.first])] == modelTypes["shield"])
 					renderObject(projection, modelTypes[get<0>(models[id_pair.first])], position, get<1>(models[id_pair.first]), rotation, shader, heartTexture, true);
 				else
@@ -1800,31 +1641,22 @@ namespace SceneManager {
 			}
 
 			if (id_pair.second->getCollisionShape()->getShapeType() == SPHERE_SHAPE_PROXYTYPE) {
-				/*glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-				glDisable(GL_CULL_FACE);
-				bt_manager->renderSphere(bodies[id_pair.first], view, projection, modelTypes["sphere"], shader, defaultTexture);
-				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-				glEnable(GL_CULL_FACE);*/
+
 				renderObject(projection, modelTypes[get<0>(models[id_pair.first])], spherePosition, get<1>(models[id_pair.first]), rotation, shader, defaultTexture, false);
 			}
 
 			if (id_pair.second->getCollisionShape()->getShapeType() == CAPSULE_SHAPE_PROXYTYPE) {
-			/*	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-				glDisable(GL_CULL_FACE);
-				bt_manager->renderCapsule(bodies[id_pair.first], view, projection, modelTypes["capsule"], shader, defaultTexture);
-				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-				glEnable(GL_CULL_FACE);*/
+
 				renderObject(projection, modelTypes[get<0>(models[id_pair.first])], spherePosition, get<1>(models[id_pair.first]), rotation, shader, defaultTexture, false);
 			}
-			//	i++;
 		}
 
 		if (mode == EDIT) {
 			if (creation == true) {
-				renderPlayer(projection, modelTypes[std::get<0>(temp[0])], std::get<1>(temp[0]), std::get<2>(temp[0]), std::get<3>(temp[0]), shader, 0);
+				renderEditObject(projection, modelTypes[std::get<0>(temp[0])], std::get<1>(temp[0]), std::get<2>(temp[0]), std::get<3>(temp[0]), shader, 0);
 				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 				glDisable(GL_CULL_FACE);
-				renderPlayer(projection, modelTypes[std::get<0>(temp[1])], std::get<1>(temp[1]), std::get<2>(temp[1]), std::get<3>(temp[1]), shader, 0);
+				renderEditObject(projection, modelTypes[std::get<0>(temp[1])], std::get<1>(temp[1]), std::get<2>(temp[1]), std::get<3>(temp[1]), shader, 0);
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 				glDisable(GL_CULL_FACE);
 			}
@@ -1858,7 +1690,7 @@ namespace SceneManager {
 			glUniform1i(uniformIndex, 0);
 			uniformIndex = glGetUniformLocation(shader, "material.specular");
 			glUniform1i(uniformIndex, 0);
-			glUniform1f(glGetUniformLocation(shader, "material.shininess"), 32.0f); //??
+			glUniform1f(glGetUniformLocation(shader, "material.shininess"), 32.0f); 
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, defaultTexture);
 			// pass in the shadowmap
@@ -1869,8 +1701,7 @@ namespace SceneManager {
 
 		}
 		
-		//draw normal scene
-		renderWorldObjects(shader, projection);
+		renderWorldObjects(shader, projection); //draw normal scene
 
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, 0);
@@ -1900,14 +1731,12 @@ namespace SceneManager {
 		}
 	}
 
-	void draw(SDL_Window * window) { //, int fps) { // fps counter; 4 of 5
+	void draw(SDL_Window * window) { 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear window
 		glEnable(GL_CULL_FACE);
 		glClearColor(0.5f, 0.7f, 0.8f, 1.0f);
 		glm::mat4 projection(1.0);
 		GLfloat scale(1.0f); // just to allow easy scaling of complete scene
-		//glm::mat4 modelview(1.0); // set base position for scene
-		//mvStack.push(modelview);
 		glDepthMask(GL_TRUE);
 		view = glm::mat4(1.0);
 
@@ -1940,7 +1769,6 @@ namespace SceneManager {
 				glEnable(GL_CULL_FACE);
 				glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
 
-				//skybox->renderSkybox(projection, view, modelTypes["cube"]);
 				if (currentLevel == FIRST)
 					skybox_2->renderSkybox(projection, view, modelTypes["cube"]);
 				else if (currentLevel == SECOND)
@@ -1949,8 +1777,6 @@ namespace SceneManager {
 					skybox->renderSkybox(projection, view, modelTypes["cube"]);
 				// normal rendering
 				renderShadowedScene(projection, view, modelProgram, false); // render normal scene from normal point of view
-				// fps counter; 5 of 5
-				//h_manager->renderToHud(5, texturedProgram, modelTypes["cube"], glm::vec3(-0.0f, 0.0f, 0.9f));
 
 				string wepType;
 				float offsetRight = 0.5f;
