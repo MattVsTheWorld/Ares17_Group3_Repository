@@ -51,7 +51,7 @@ HSAMPLE SoundManager::loadSample(char * filename) {
 }
 
 // plays a sound at a certain volume, on a certain channel
-void SoundManager::playSound(HSAMPLE sound, int volume, int channel) {
+void SoundManager::playSound(HSAMPLE sound, float volume, int channel) {
 	ch[channel] = BASS_SampleGetChannel(sound, FALSE);
 	BASS_ChannelSetAttribute(ch[channel], BASS_ATTRIB_FREQ, 0);
 	BASS_ChannelSetAttribute(ch[channel], BASS_ATTRIB_VOL, volume);

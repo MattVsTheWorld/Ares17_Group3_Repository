@@ -684,28 +684,28 @@ namespace SceneManager {
 	void initEnemies() {
 		enemies.insert(new Ranged(new NonPC(100, 6,
 			globalData->bt_manager, glm::vec3(0, 5, 0), 
-			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture)));
+			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
 
 		enemies.insert(new Ranged(new NonPC(100, 6,
 			globalData->bt_manager, glm::vec3(25, 5, 0),
-			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture)));
+			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
 
 		enemies.insert(new Ranged(new NonPC(100, 6,
 			globalData->bt_manager, glm::vec3(0, 5, -10),
-			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture)));
+			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
 
 
 		enemies.insert(new Melee(new NonPC(200, 3,
 			globalData->bt_manager, glm::vec3(0, 5, 0),
-			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture)));
+			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
 
 		enemies.insert(new Melee(new NonPC(200, 3,
 			globalData->bt_manager, glm::vec3(25, 5, 5),
-			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture)));
+			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
 
 		enemies.insert(new Melee(new NonPC(200, 3,
 			globalData->bt_manager, glm::vec3(0, 5, -25),
-			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture)));
+			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
 
 	}
 
@@ -790,7 +790,7 @@ namespace SceneManager {
 			// +++ /-\
 
 
-		globalData->sound_manager->playSound(globalData->sound_manager->getSound(BG), 1, 2);
+		globalData->sound_manager->playSound(globalData->sound_manager->getSound(BG), 0.2, 2);
 		if (!globalData->sound_manager->getState())
 			BASS_Pause();
 			//globalData->sound_manager->stopBG();
@@ -967,7 +967,7 @@ namespace SceneManager {
 								rotationAngles, 1.0f), rotationAngles, 0.5), PROJ_SPEED, (rotationAngles.y*DEG_TO_RADIAN), rotationAngles.x); //!++!
 
 							coolDown = COOL_TIME*2.0;
-						globalData->sound_manager->playSound(globalData->sound_manager->getSound(WINCH), 1, 1);																													  //sound_manager->playSound(sound_manager->getSound(2), 2, 1);
+						globalData->sound_manager->playSound(globalData->sound_manager->getSound(WINCH), 0.4, 1);																													  //sound_manager->playSound(sound_manager->getSound(2), 2, 1);
 						}
 					}
 				}
@@ -1363,8 +1363,11 @@ namespace SceneManager {
 
 		if (keys[SDL_SCANCODE_4])
 			cout << "X: " << globalData->player->getPosition().x << "| Y: " << globalData->player->getPosition().y << "| Z: " << globalData->player->getPosition().z << endl;
-		if (keys[SDL_SCANCODE_5])
+		if (keys[SDL_SCANCODE_5]) {
 			currentLevel = SECOND;
+			globalData->sound_manager->stopBG();
+			globalData->sound_manager->playSound(globalData->sound_manager->getSound(BG_2), 0.2, 2);
+		}
 
 	/*	if (keys[SDL_SCANCODE_5]) {
 			globalData->sound_manager->playSound(globalData->sound_manager->getSound(BG), 1, 2);
@@ -1649,12 +1652,12 @@ namespace SceneManager {
 			if (num == 1) {
 				enemies.insert(new Ranged(new NonPC(100, 10,
 								globalData->bt_manager, spawnPoint,
-								1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture)));
+								1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
 			}
 			else {
 				enemies.insert(new Melee(new NonPC(200, 3,
 					globalData->bt_manager, spawnPoint,
-					1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture)));
+					1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
 			}
 		}
 	}
@@ -1754,7 +1757,7 @@ namespace SceneManager {
 			}
 			//TODO: fix
 			SetBoneTransform((*it)->getState(), name);
-			if (!(*it)->update(currentModel, view, projection, dt_secs, globalData->level1Grid, globalData->player, modelProgram))
+			if (!(*it)->update(currentModel, view, projection, dt_secs, level1Grid, globalData->player, modelProgram))
 				it = enemies.erase(it);
 			else
 				++it;

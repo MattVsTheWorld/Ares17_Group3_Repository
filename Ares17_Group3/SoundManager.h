@@ -25,7 +25,7 @@ class SoundManager
 public:
 	SoundManager(); // constructor initializes bass and loads sound files
 	HSAMPLE loadSample(char * filename); // function used to load the samples
-	void playSound(HSAMPLE sound, int volume, int channel); // function used to play sounds
+	void playSound(HSAMPLE sound, float volume, int channel); // function used to play sounds
 															// accessor for sound sample
 	HSAMPLE getSound(int i);
 	// set background music state (on/off)

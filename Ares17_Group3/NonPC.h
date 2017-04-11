@@ -4,7 +4,7 @@
 
 #define PI 3.14159265359f
 #define REFRESHRATE 1.0f
-#define DEFAULT_LOS 20.0f
+#define DEFAULT_LOS 50.0f
 
 // NPC implements AbstractNPC - all methods defined inline
 class NonPC : public AbstractNPC {
@@ -108,6 +108,7 @@ public:
 		texture = _text;
 		// Construct body
 		btRigidBody *temp = addBoundingCapsule(radius, height, spawn.x, spawn.y, spawn.z, mass);
+		temp->setFriction(FRICTION);
 		btPairCachingGhostObject* tempGhost = new btPairCachingGhostObject();
 		tempGhost->setCollisionShape(temp->getCollisionShape());
 		tempGhost->setWorldTransform(temp->getWorldTransform());
