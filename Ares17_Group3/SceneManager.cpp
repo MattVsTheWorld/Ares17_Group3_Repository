@@ -675,19 +675,19 @@ namespace SceneManager {
 			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture)));
 
 		enemies.insert(new Ranged(new NonPC(100, 6,
-			globalData->bt_manager, glm::vec3(25, 10, 0),
+			globalData->bt_manager, glm::vec3(25, 5, 0),
 			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture)));
 
 		enemies.insert(new Ranged(new NonPC(100, 6,
-			globalData->bt_manager, glm::vec3(0, 10, -10),
+			globalData->bt_manager, glm::vec3(0, 5, -10),
 			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture)));
 
 		enemies.insert(new Melee(new NonPC(200, 3,
-			globalData->bt_manager, glm::vec3(0, 0, 0),
+			globalData->bt_manager, glm::vec3(0, 5, 0),
 			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture)));
 
 		enemies.insert(new Melee(new NonPC(200, 3,
-			globalData->bt_manager, glm::vec3(25, 10, 5),
+			globalData->bt_manager, glm::vec3(25, 5, 5),
 			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture)));
 
 		enemies.insert(new Melee(new NonPC(200, 3,
@@ -844,7 +844,9 @@ namespace SceneManager {
 		return dt_secs;
 	}
 
+	float AttackingTime = 0.0f;
 	float RunningTime = 0.0f;
+	float DyingTime = 0.0f;
 
 	//*****************************CONTROLS********************
 	void controls(SDL_Window * window, SDL_Event sdlEvent) {
@@ -965,7 +967,9 @@ namespace SceneManager {
 				increase = 1.0f;
 			else increase = 0.3f;
 			if (keys[SDL_SCANCODE_W]) {
+				glm::vec3 posBefore = globalData->player->getPosition();
 				globalData->player->playerBody->setLinearVelocity(speedForward(increase, rotationAngles.y, (keys[SDL_SCANCODE_A] == SDL_PRESSED || keys[SDL_SCANCODE_D] == SDL_PRESSED)));
+				glm::vec3 posAfter = globalData->player->getPosition();
 			}
 			else if (keys[SDL_SCANCODE_S]) {
 				globalData->player->playerBody->setLinearVelocity(speedForward(-increase, rotationAngles.y, (keys[SDL_SCANCODE_A] == SDL_PRESSED || keys[SDL_SCANCODE_D] == SDL_PRESSED)));
@@ -1359,13 +1363,6 @@ namespace SceneManager {
 		//	if (keys[SDL_SCANCODE_5])cout << bullet.size() << endl;
 	}
 
-
-	void SetBoneTransform(GLuint Index, const Matrix4f& Transform)
-	{
-		assert(Index < MAX_BONES);
-		glUniformMatrix4fv(m_boneLocation[Index], 1, GL_TRUE, (const GLfloat*)Transform);
-	}
-
 	void renderObject(glm::mat4 proj, Model *modelData, glm::vec3 pos, glm::vec3 scale, btQuaternion& rotation, GLuint shader, GLuint texture, bool spin) {
 
 		glm::mat4 model;
@@ -1404,28 +1401,89 @@ namespace SceneManager {
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
-	void animationTransforms(npcState state, string name) {
-		vector<Matrix4f> Transforms;
-		RunningTime += dt_secs;
-		int speed = 1;
-		//Model* temp;
+	vector<Matrix4f> assaultAttackTransforms;
+	vector<Matrix4f> assaultRunTransforms;
+	vector<Matrix4f> assaultDieTransforms;
+	vector<Matrix4f> enforcerAttackTransforms;
+	vector<Matrix4f> enforcerRunTransforms;
+	vector<Matrix4f> enforcerDieTransforms;
+
+	void SetBoneTransform(npcState state, string name) {
 		if (state == ATTACKING) {
-			name.append("Attack");
-			modelTypes[name]->BoneTransform(RunningTime, Transforms, speed);
+			if (name == "assault") {
+				for (GLuint i = 0; i < assaultAttackTransforms.size(); i++) {
+					assert(i < MAX_BONES);
+					glUniformMatrix4fv(m_boneLocation[i], 1, GL_TRUE, (const GLfloat*)& assaultAttackTransforms[i]);
+				}
+			}
+			else {
+				for (GLuint i = 0; i < enforcerAttackTransforms.size(); i++) {
+					assert(i < MAX_BONES);
+					glUniformMatrix4fv(m_boneLocation[i], 1, GL_TRUE, (const GLfloat*)& enforcerAttackTransforms[i]);
+				}
+			}
 		}
 		else if (state == DYING) {
-			name.append("Die");
-			modelTypes[name]->BoneTransform(RunningTime, Transforms, speed);
+			if (name == "assault") {
+				for (GLuint i = 0; i < assaultDieTransforms.size(); i++) {
+					assert(i < MAX_BONES);
+					glUniformMatrix4fv(m_boneLocation[i], 1, GL_TRUE, (const GLfloat*)& assaultDieTransforms[i]);
+				}
+			}
+			else {
+				for (GLuint i = 0; i < enforcerDieTransforms.size(); i++) {
+					assert(i < MAX_BONES);
+					glUniformMatrix4fv(m_boneLocation[i], 1, GL_TRUE, (const GLfloat*)& enforcerDieTransforms[i]);
+				}
+			}
 		}
-		else if (state == TRIGGERED){
-			name.append("Run");
-			modelTypes[name]->BoneTransform(RunningTime, Transforms, speed);
+		else {
+			if (name == "assault") {
+				for (GLuint i = 0; i < assaultRunTransforms.size(); i++) {
+					assert(i < MAX_BONES);
+					glUniformMatrix4fv(m_boneLocation[i], 1, GL_TRUE, (const GLfloat*)& assaultRunTransforms[i]);
+				}
+			}
+			else {
+				for (GLuint i = 0; i < enforcerRunTransforms.size(); i++) {
+					assert(i < MAX_BONES);
+					glUniformMatrix4fv(m_boneLocation[i], 1, GL_TRUE, (const GLfloat*)& enforcerRunTransforms[i]);
+				}
+			}
+			
+		}	
+	}
 
+	int attackingEnemies = 0;
+	int runningEnemies = 0;
+	int dyingEnemies = 0;
+
+	void animationTransforms() {
+		int speed = 2;
+		//only play if animation is being used by something
+		if (attackingEnemies > 0) {
+			AttackingTime += dt_secs;
+			modelTypes["assaultAttack"]->BoneTransform(RunningTime, assaultAttackTransforms, speed);
+			modelTypes["enforcerAttack"]->BoneTransform(RunningTime, enforcerAttackTransforms, speed);
 		}
-		//SetBoneTransform
-		
-		for (GLuint i = 0; i < Transforms.size(); i++) {
-			SetBoneTransform(i, Transforms[i]);
+		else {
+			AttackingTime = 0.0f;
+		}
+		if (dyingEnemies > 0) {
+			DyingTime += dt_secs;
+			modelTypes["assaultDie"]->BoneTransform(RunningTime, assaultDieTransforms, speed);
+			modelTypes["enforcerDie"]->BoneTransform(RunningTime, enforcerDieTransforms, speed);
+		}
+		else {
+			DyingTime = 0.0f;
+		}
+		if (runningEnemies > 0) {
+			RunningTime += dt_secs;
+			modelTypes["assaultRun"]->BoneTransform(RunningTime, assaultRunTransforms, speed);
+			modelTypes["enforcerRun"]->BoneTransform(RunningTime, enforcerRunTransforms, speed);
+		}
+		else {
+			RunningTime = 0.0f;
 		}
 	}
 
@@ -1443,8 +1501,7 @@ namespace SceneManager {
 
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
-
-
+	
 	void renderWeapon(glm::mat4 proj, Model *modelData, GLuint shader, glm::vec3 scale, bool flip) {
 		glDisable(GL_CULL_FACE);
 		glm::mat4 model;
@@ -1644,28 +1701,41 @@ namespace SceneManager {
 		//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		//glEnable(GL_CULL_FACE);
 		/////+++++++++++++++
-
 		//btVector3 playerPos(globalData->player->getPosition().x, globalData->player->getPosition().y, globalData->player->getPosition().z);
+		int tempAttacking = 0;
+		int tempRunning = 0;
+		int tempDying = 0;
 		for (auto it = enemies.begin(); it != enemies.end(); ) {
 			string name = (*it)->getName();
-			//if ((it) == enemies.begin()) {
-			//	animationTransforms((*it)->getState(), name); //TODO: fix
-			//	cout << " asdasd asd "<< endl;
-			//}
-			//else if ((*it)->getState() == ATTACKING && (*it--)->getState() != ATTACKING
-			//	|| (*it)->getState() == DYING && (*it--)->getState() != DYING
-			//	|| (*it)->getState() == TRIGGERED && (*it--)->getState() != TRIGGERED) {
-			//	cout << " a45544546546 " << endl;
-			//	animationTransforms((*it)->getState(), name); //TODO: fix
-			//}
-			animationTransforms((*it)->getState(), name); //TODO: fix
-			if (!(*it)->update((make_tuple(modelTypes[name + "Run"], modelTypes[name + "Attack"], modelTypes[name + "Die"])), view, projection, dt_secs, globalData->level1Grid, globalData->player, modelProgram))
+			Model* currentModel = modelTypes[name + "Run"];
+			if ((*it)->getState() == ATTACKING) {
+				//if (attackingEnemies == 0)
+				//	AttackingTime = 0.0f; //ResetAnimationTime
+				tempAttacking++;
+				currentModel = modelTypes[name + "Attack"];
+			}
+			else if ((*it)->getState() == TRIGGERED) {
+				//if (runningEnemies == 0)
+				//	RunningTime = 0.0f; //ResetAnimationTime
+				tempRunning++;
+				currentModel = modelTypes[name + "Run"];
+			}
+			else if ((*it)->getState() == DYING) {
+				//if (dyingEnemies == 0)
+				//	DyingTime = 0.0f; //ResetAnimationTime
+				tempDying++;
+				currentModel = modelTypes[name + "Die"];
+			}
+			//TODO: fix
+			SetBoneTransform((*it)->getState(), name);
+			if (!(*it)->update(currentModel, view, projection, dt_secs, globalData->level1Grid, globalData->player, modelProgram))
 				it = enemies.erase(it);
 			else
 				++it;
-			
 		}
-
+		attackingEnemies = tempAttacking;
+		runningEnemies = tempRunning;
+		dyingEnemies = tempDying;
 
 		for (const auto& id_pair : bodies) {
 			// First = name / key
@@ -1873,7 +1943,7 @@ namespace SceneManager {
 
 				}
 
-
+				animationTransforms();
 	    	
 				renderWeapon(projection, modelTypes[wepType], modelProgram, wepScale, flip); //TODO: Render current weapon
 

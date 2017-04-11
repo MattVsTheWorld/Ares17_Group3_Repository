@@ -157,7 +157,9 @@ public:
 		return toVisit;
 	} // findPath function
 
-	bool update(std::tuple<Model*, Model*, Model*> modelDatas, glm::mat4 view, glm::mat4 proj, float dt, Grid* _g, Player *player, GLuint shader) {
+	bool update(Model* modelData, glm::mat4 view, glm::mat4 proj, float dt, Grid* _g, Player *player, GLuint shader) {
+
+		this->render(modelData, view, proj, shader, player);
 
 		//TODO: unstuck
 		btVector3 playerPos(player->getPosition().x, player->getPosition().y, player->getPosition().z);
@@ -165,8 +167,6 @@ public:
 		t.setIdentity();
 		npcBody->getMotionState()->getWorldTransform(t);
 		btVector3 pos = t.getOrigin();
-
-		Model* currentAnimation = get<2>(modelDatas);
 
 		if ((this->currentState != PAUSED && this->currentState != DYING) && sqrt(pow(playerPos.x() - pos.x(), 2) + pow(playerPos.z() - pos.z(), 2) <= DEFAULT_LOS))
 			this->currentState = TRIGGERED;
@@ -186,19 +186,15 @@ public:
 					recalcTimer = REFRESHRATE;
 				}
 
+				//TODO: why two of the same if statements
 				if (!currentPath.empty())
 					if (_g->getAdjList()->getVertex(_g->getNodeFromWorldPos(pos)) == currentPath.front())
 						currentPath.pop();
 				if (!currentPath.empty()) {
 					this->moveNpc(currentPath.front());
-					currentAnimation = get<0>(modelDatas); //running animation
 				}
 			} else {
 				this->currentState = ATTACKING;
-				//Attack player
-				//player->varyHealth(-(this->attack));
-				//TODO: MESHAL attack animation
-				currentAnimation = get<1>(modelDatas); //attack animation
 				if (this->attackTimer <= 0) {
 					player->takeDamage(this->attack);
 					this->attackTimer = this->attackSpeed;
@@ -206,26 +202,21 @@ public:
 				else this->attackTimer -= dt;
 			}
 		}
-		if (currentState == DYING){
-			currentAnimation = get<2>(modelDatas);
+
+		if (findCollision(npcGhost))
+		{
+			this->health -= player->getWeapon().getDamage();
+			/*if (player->getWeapon() == PISTOL || player->getWeapon() == NUKA)
+				this->health -= 10;
+			else if (player->getWeapon() == SCIFI)
+				this->health -= 40;*/
+			//cout << "HIT! Health = " << this->health << endl;
 		}
-
-		this->render(currentAnimation, view, proj, shader);
-
-			if (findCollision(npcGhost))
-			{
-				this->health -= player->getWeapon().getDamage();
-				/*if (player->getWeapon() == PISTOL || player->getWeapon() == NUKA)
-					this->health -= 10;
-				else if (player->getWeapon() == SCIFI)
-					this->health -= 40;*/
-				cout << "HIT! Health = " << this->health << endl;
-			}
 
 		return true;
 	}
 
-	void render(Model * modelData, glm::mat4 view, glm::mat4 proj, GLuint shader) {
+	void render(Model * modelData, glm::mat4 view, glm::mat4 proj, GLuint shader, Player *player) {
 		//	glUseProgram(shader);
 		btTransform t;
 		t.setIdentity();
@@ -238,16 +229,21 @@ public:
 
 		btQuaternion& rotation = npcBody->getWorldTransform().getRotation().normalized();
 		glm::mat4 model;
-		model = glm::translate(model, glm::vec3(pos.x(), pos.y() - 1.75, pos.z()));
+		model = glm::translate(model, glm::vec3(pos.x(), pos.y() - 1.50, pos.z()));
 		glm::vec3 eulerRotation;
 		toEulerianAngle(rotation, eulerRotation);
 		model = glm::rotate(model, eulerRotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
-		model = glm::rotate(model, std::atan2(std::cos(angle), std::sin(angle)), glm::vec3(0.0f, 1.0f, 0.0f));
+		if (currentState == ATTACKING) {
+			btVector3 playerPos(player->getPosition().x, player->getPosition().y, player->getPosition().z);
+			float toPlayerAngle = (atan2(playerPos.z() - pos.z(), playerPos.x() - pos.x())); // RADIANS
+			model = glm::rotate(model, std::atan2(std::cos(toPlayerAngle), std::sin(toPlayerAngle)), glm::vec3(0.0f, 1.0f, 0.0f));
+		}
+		else {
+			model = glm::rotate(model, std::atan2(std::cos(angle), std::sin(angle)), glm::vec3(0.0f, 1.0f, 0.0f));
+		}
 		model = glm::rotate(model, eulerRotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
-		model = glm::scale(model, glm::vec3(0.7, 0.7, 0.7));	// It's a bit too big for our scene, so scale it down
-	//	model = glm::scale(model, glm::vec3(0.05f, 0.05f, 0.05f));	// for gun]
-	//	glActiveTexture(GL_TEXTURE0);
-	//	glBindTexture(GL_TEXTURE_2D, texture);
+		model = glm::scale(model, glm::vec3(0.5, 0.5, 0.5));	// It's a bit too big for our scene, so scale it down
+
 		glUniform1i(glGetUniformLocation(shader, "animated"), 1); //zero is no animations
 		glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
 		modelData->Draw(shader);
