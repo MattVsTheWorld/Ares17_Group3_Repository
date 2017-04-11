@@ -52,6 +52,12 @@ enum modes {
 	PLAY, EDIT
 };
 
+enum level {
+	FIRST,
+	SECOND,
+	THIRD
+};
+
 namespace SceneManager {
 
 	void init(SDL_Window * window);

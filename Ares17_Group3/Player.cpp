@@ -8,7 +8,7 @@ Player::Player(glm::vec3 _eye, float rad, float height, float mass, btShapeManag
 	invincible = false;
 	speed = SPEED_CAP_XZ;
 	vitState = ALIVE;
-	availableWeapons.push_back(Weapon(PISTOL, 10));
+	availableWeapons.push_back(Weapon(PISTOL, 20));
 	availableWeapons.push_back(Weapon(NUKA, 10));
 	availableWeapons.push_back(Weapon(SCIFI, 40));
 	

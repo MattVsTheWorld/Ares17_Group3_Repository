@@ -43,7 +43,7 @@ private:
 			}
 		}
 		return false;
-	} //TODO: use somewhere
+	}
 
 	static void toEulerianAngle(const btQuaternion& q, glm::vec3& rotation)
 	{
@@ -70,7 +70,7 @@ private:
 
 	void changeSpeed(float speed, float angle) {
 		//cout << angle << endl;
-		//TODO: fix
+		//TODO: increase speed
 		this->npcBody->setLinearVelocity(btVector3(/*npcBody->getLinearVelocity().x() + */speed*std::cos(angle),
 			npcBody->getLinearVelocity().y(), /*npcBody->getLinearVelocity().z()*/ speed*std::sin(angle)));
 	}
@@ -96,13 +96,13 @@ public:
 	}
 
 	NonPC(double _h, double _r, btShapeManager* _sm, glm::vec3 _spawn, float radius, float height, float mass,
-		Model* _bmodel, GLuint _shader, GLuint _text /*other parameters*/) {
+		Model* _bmodel, GLuint _shader, GLuint _text, SoundManager *sound_man /*other parameters*/) {
 		health = _h;
 		max_hp = _h;
 		range = _r;
 		shapeManager = _sm;
 		boundingModel = _bmodel;
-
+		s_manager = sound_man;
 		spawn = _spawn;
 		//shader = _shader;
 		texture = _text;
@@ -197,21 +197,23 @@ public:
 				this->currentState = ATTACKING;
 				if (this->attackTimer <= 0) {
 					player->takeDamage(this->attack);
+					s_manager->playSound(s_manager->getSound(PAINED_PL), 1, 1);
 					this->attackTimer = this->attackSpeed;
 				}
 				else this->attackTimer -= dt;
 			}
 		}
 
-		if (findCollision(npcGhost))
-		{
-			this->health -= player->getWeapon().getDamage();
-			/*if (player->getWeapon() == PISTOL || player->getWeapon() == NUKA)
-				this->health -= 10;
-			else if (player->getWeapon() == SCIFI)
-				this->health -= 40;*/
-			//cout << "HIT! Health = " << this->health << endl;
-		}
+			if (findCollision(npcGhost))
+			{
+				this->health -= player->getWeapon().getDamage();
+				s_manager->playSound(s_manager->getSound(PAINED_EN), 1, 1);
+				/*if (player->getWeapon() == PISTOL || player->getWeapon() == NUKA)
+					this->health -= 10;
+				else if (player->getWeapon() == SCIFI)
+					this->health -= 40;*/
+				//cout << "HIT! Health = " << this->health << endl;
+			}
 
 		return true;
 	}
@@ -224,7 +226,6 @@ public:
 		btVector3 pos = t.getOrigin();
 		npcGhost->setWorldTransform(t);
 		// Bounding box
-		//TODO: fix (or feature)
 		//this->shapeManager->renderCapsule(npcBody, view, proj, boundingModel, shader, texture);
 
 		btQuaternion& rotation = npcBody->getWorldTransform().getRotation().normalized();
@@ -239,7 +240,7 @@ public:
 			model = glm::rotate(model, std::atan2(std::cos(toPlayerAngle), std::sin(toPlayerAngle)), glm::vec3(0.0f, 1.0f, 0.0f));
 		}
 		else {
-			model = glm::rotate(model, std::atan2(std::cos(angle), std::sin(angle)), glm::vec3(0.0f, 1.0f, 0.0f));
+		model = glm::rotate(model, std::atan2(std::cos(angle), std::sin(angle)), glm::vec3(0.0f, 1.0f, 0.0f));
 		}
 		model = glm::rotate(model, eulerRotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
 		model = glm::scale(model, glm::vec3(0.5, 0.5, 0.5));	// It's a bit too big for our scene, so scale it down
@@ -249,9 +250,8 @@ public:
 		modelData->Draw(shader);
 
 		glBindTexture(GL_TEXTURE_2D, 0);
-		//TODO: actual model
 
-	} //TODO: actual model
+	}
 
 	void setAttack(double atk) { this->attack = atk; }
 	double getAttack() { return this->attack; }
@@ -270,21 +270,11 @@ public:
 
 	void setState(npcState newState) { this->currentState = newState; }
 	npcState getState() { return this->currentState; }
-
-	void reset() {
-	/*	this->health = this->max_hp;
-		btTransform t;
-		t.setIdentity();
-		npcBody->getMotionState()->getWorldTransform(t);
-		t.setOrigin(btVector3(spawn.x, spawn.y, spawn.z));
-		this->npcBody->setWorldTransform(t);
-		this->npcBody->setLinearVelocity(btVector3(0.5, -0.5, 0.0));*/
-		//;
-	}
 protected:
 	//string name;
 	// ++
 	btShapeManager *shapeManager;
+	SoundManager *s_manager;
 	btRigidBody* npcBody;
 	btPairCachingGhostObject* npcGhost;
 	//

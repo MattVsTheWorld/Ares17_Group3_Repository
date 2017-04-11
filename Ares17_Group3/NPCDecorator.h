@@ -80,9 +80,7 @@ public:
 	npcState getState() { 
 		return npc->getState();
 	}
-	void reset() {
-		return npc->reset();
-	}
+
 
 	string getName() {
 		return npc->getName();
