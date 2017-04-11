@@ -90,6 +90,7 @@ hudManager::hudManager(bool shadows) {
 	menuScreen = loadBitmap::loadBitmap("../Ares17_Group3/Textures/menu.bmp");
 	loadingScreen = loadBitmap::loadBitmap("../Ares17_Group3/Textures/loading.bmp");
 	defeatScreen = loadBitmap::loadBitmap("../Ares17_Group3/Textures/defeat.bmp");
+	victoryScreen = loadBitmap::loadBitmap("../Ares17_Group3/Textures/victory.bmp");
 }
 
 // Requires change ***
@@ -311,8 +312,8 @@ void hudManager::renderMenu(GLuint shader, Model *modelData, bool shadows) {
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+void hudManager::renderToScreen(GLuint shader, Model *modelData, GLuint label) {
 
-void hudManager::renderDefeat(GLuint shader, Model *modelData) {
 	glDisable(GL_DEPTH_TEST);//Disable depth test for HUD label
 	glm::mat4 id = glm::mat4();
 	glUseProgram(shader); //texture-only shader will be used for teture rendering
@@ -321,9 +322,20 @@ void hudManager::renderDefeat(GLuint shader, Model *modelData) {
 	glUniform3fv(glGetUniformLocation(shader, "text_color"), 1, glm::value_ptr(glm::vec3(0.0, 0.0, 0.0)));
 	MeshManager::setUniformMatrix4fv(shader, "model", glm::value_ptr(id));
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, defeatScreen);
+	glBindTexture(GL_TEXTURE_2D, label);
 	modelData->Draw(shader);
 	glEnable(GL_DEPTH_TEST);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
+
+
+void hudManager::renderDefeat(GLuint shader, Model *modelData) {
+	renderToScreen(shader, modelData, defeatScreen);
+}
+
+
+void hudManager::renderVictory(GLuint shader, Model *modelData) {
+	renderToScreen(shader, modelData, victoryScreen);
+}
+

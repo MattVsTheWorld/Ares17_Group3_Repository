@@ -48,7 +48,7 @@ void Projectile::addProjectile(glm::vec3 spawn, float speed, float yaw, float pi
 
 void Projectile::renderProjectiles(glm::mat4 view, glm::mat4 proj, Model * modelData, GLuint shader, GLuint texture, double time_step) {
 
-	int i = 0;
+	unsigned int i = 0;
 	while (liveProjectiles.size() > 0 && i < liveProjectiles.size())
 	{
 		liveProjectiles[i] = make_tuple(get<0>(liveProjectiles[i]), get<1>(liveProjectiles[i]) - time_step, get<2>(liveProjectiles[i]));
@@ -57,14 +57,14 @@ void Projectile::renderProjectiles(glm::mat4 view, glm::mat4 proj, Model * model
 
 		if (findCollision(get<2>(liveProjectiles[i])))
 		{
-			cout << "Collision between bullet and collidable detected. Deleting..." << endl;
+			//cout << "Collision between bullet and collidable detected. Deleting..." << endl;
 
 			shapeManager->removeObject(get<0>(liveProjectiles[i])); // Remove from world
 			shapeManager->removeObject(get<2>(liveProjectiles[i]));
 
 			liveProjectiles.erase(remove(liveProjectiles.begin(), liveProjectiles.end(), liveProjectiles[i]), liveProjectiles.end());
 			//	projectileIterator++;
-			cout << "Removed." << endl;
+			//cout << "Removed." << endl;
 			//cout << liveProjectiles.size();
 			continue;
 		}
@@ -74,7 +74,7 @@ void Projectile::renderProjectiles(glm::mat4 view, glm::mat4 proj, Model * model
 			shapeManager->removeObject(get<0>(liveProjectiles[i])); // Remove from world
 			shapeManager->removeObject(get<2>(liveProjectiles[i]));
 			liveProjectiles.erase(remove(liveProjectiles.begin(), liveProjectiles.end(), liveProjectiles[i]), liveProjectiles.end());
-			cout << "Projectile lifespan < 0. Removing..." << endl;
+			//cout << "Projectile lifespan < 0. Removing..." << endl;
 		}
 
 		else {

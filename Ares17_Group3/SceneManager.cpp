@@ -67,13 +67,10 @@ namespace SceneManager {
 	string currentModel = "box";
 	string currentBounding = "box";
 
-	// TEST
-
-	int run = 0;
-	//	
 	GLuint defaultTexture;
 	GLuint groundTexture;
 	GLuint groundTexture_2;
+	GLuint groundTexture_3;
 	GLuint heartTexture;
 
 	glm::mat4 view;
@@ -108,7 +105,6 @@ namespace SceneManager {
 		return glm::vec3(pos.x + d*std::sin(rotationAngles.y*DEG_TO_RADIAN), pos.y - d*std::sin(rotationAngles.x), pos.z - d*std::cos(rotationAngles.y*DEG_TO_RADIAN));
 	}
 
-
 	glm::vec3 moveRight(glm::vec3 pos, GLfloat angle, GLfloat d) {
 		return glm::vec3(pos.x + d*std::cos(rotationAngles.y*DEG_TO_RADIAN), pos.y, pos.z + d*std::sin(rotationAngles.y*DEG_TO_RADIAN));
 	}
@@ -120,9 +116,6 @@ namespace SceneManager {
 	glm::vec3 shiftRight(glm::vec3 pos, glm::vec3 angle, GLfloat d) {
 		return glm::vec3(pos.x + d*std::cos(angle.y*DEG_TO_RADIAN), pos.y, pos.z + d*std::sin(angle.y*DEG_TO_RADIAN));
 	}
-
-
-	// 		projectile_manager->addProjectile(moveForward(player->getPosition(), rotationAngles, 1.0f), PROJ_SPEED, (rotationAngles.y*DEG_TO_RADIAN), rotationAngles.x); //!++!
 
 	static btVector3 getLinearVelocityInBodyFrame(btRigidBody* body)
 	{
@@ -356,6 +349,8 @@ namespace SceneManager {
 			myfile = ifstream("../Ares17_Group3/level1.txt");
 		else if (currentLevel == SECOND)
 			myfile = ifstream("../Ares17_Group3/level2.txt");
+		else if (currentLevel == BOSS)
+			myfile = ifstream("../Ares17_Group3/levelBoss.txt");
 		if (myfile.is_open())
 		{
 			int numberOfBodies;
@@ -519,65 +514,44 @@ namespace SceneManager {
 				capsuleNo++;
 			}
 		}
-		// NOTE : should probably use this
-		/*
-		body->setCollisionFlags( body->getCollisionFlags() |
-		btCollisionObject::CF_KINEMATIC_OBJECT);
-		*/
 	}
 
 	void initmodelTypes() {
 		//Enemies
-		//modelTypes.insert(std::pair<string, Model*>("enforcerAttack", new Model("Models/Enemies/Enforcer/Attack/standing_melee_attack_downward.dae")));
-		//modelTypes.insert(std::pair<string, Model*>("enforcerRun", new Model("Models/Enemies/Enforcer/Run/running.dae")));
-		//modelTypes.insert(std::pair<string, Model*>("enforcerDie", new Model("Models/Enemies/Enforcer/Die/falling_back_death.dae")));
-
-		cout << "Enforcer models: " << endl;
 		modelTypes.insert(std::pair<string, Model*>("enforcerAttack", new Model("../Ares17_Group3/Models/Enemies/Enforcer/Attack/standing_melee_attack_downward.dae")));
 		modelTypes.insert(std::pair<string, Model*>("enforcerRun", new Model("../Ares17_Group3/Models/Enemies/Enforcer/Run/running.dae")));
 		modelTypes.insert(std::pair<string, Model*>("enforcerDie", new Model("../Ares17_Group3/Models/Enemies/Enforcer/Die/falling_back_death.dae")));
-		cout << "Assault models: " << endl;
+
 		modelTypes.insert(std::pair<string, Model*>("assaultAttack", new Model("../Ares17_Group3/Models/Enemies/Assault/Attack/gunplay.dae")));
 		modelTypes.insert(std::pair<string, Model*>("assaultRun", new Model("../Ares17_Group3/Models/Enemies/Assault/Run/run_with_sword.dae")));
 		modelTypes.insert(std::pair<string, Model*>("assaultDie", new Model("../Ares17_Group3/Models/Enemies/Assault/Die/falling_back_death.dae")));
-		cout << "Swarmer models: " << endl;
+
 		modelTypes.insert(std::pair<string, Model*>("swarmerAttack", new Model("../Ares17_Group3/Models/Enemies/Swarmer/Attack/Standing_Torch_Melee_Attack_01.dae")));
 		modelTypes.insert(std::pair<string, Model*>("swarmerRun", new Model("../Ares17_Group3/Models/Enemies/Swarmer/Run/run.dae")));
 		modelTypes.insert(std::pair<string, Model*>("swarmerDie", new Model("../Ares17_Group3/Models/Enemies/Swarmer/Die/flying_back_death.dae")));
+		cout << "boss: " << endl;
+		modelTypes.insert(std::pair<string, Model*>("bossAttack", new Model("../Ares17_Group3/Models/Enemies/Boss/Attack/mutant_swiping.dae")));
+		modelTypes.insert(std::pair<string, Model*>("bossRun", new Model("../Ares17_Group3/Models/Enemies/Boss/Run/mutant_run.dae")));
+		modelTypes.insert(std::pair<string, Model*>("bossDie", new Model("../Ares17_Group3/Models/Enemies/Boss/Die/sword_and_shield_death.dae")));
 		
-		// Robotto
-		cout << "Robot: " << endl;
-		modelTypes.insert(std::pair<string, Model*>("robot", new Model("../Ares17_Group3/Models/Enemies/Robot/Roboto.obj")));
 		//Environment
-		cout << "sphere: " << endl;
 		modelTypes.insert(std::pair<string, Model*>("sphere", new Model("../Ares17_Group3/Models/Environment/sphere.obj")));
 		modelTypes.insert(std::pair<string, Model*>("capsule", modelTypes["sphere"]));
-		cout << "house: " << endl;
 		modelTypes.insert(std::pair<string, Model*>("house", new Model("../Ares17_Group3/Models/Environment/House/houselow.obj")));
-		cout << "carpile: " << endl;
 		modelTypes.insert(std::pair<string, Model*>("carpile", new Model("../Ares17_Group3/Models/Environment/CarPile/wasteddisplay.obj")));
-		cout << "oiltank: " << endl;
 		modelTypes.insert(std::pair<string, Model*>("oiltank", new Model("../Ares17_Group3/Models/Environment/OilTank/Oiltank.obj")));
-		cout << "catjeep: " << endl;
 		modelTypes.insert(std::pair<string, Model*>("catjeep", new Model("../Ares17_Group3/Models/Environment/cyberpunk-truck/hovertruck_lowpoly.obj")));
-		cout << "heli: " << endl;
 		modelTypes.insert(std::pair<string, Model*>("heli", new Model("../Ares17_Group3/Models/Environment/Helicopter/hheli.obj")));
-		cout << "tower: " << endl;
 		modelTypes.insert(std::pair<string, Model*>("tower", new Model("../Ares17_Group3/Models/Environment/sci-fi-tower/building_02_fbx.FBX.obj")));
-		cout << "barrier: " << endl;
 		modelTypes.insert(std::pair<string, Model*>("barrier", new Model("../Ares17_Group3/Models/Environment/Barrier/model.obj")));
+		
 		//Collectable
-		cout << "heart: " << endl;
 		modelTypes.insert(std::pair<string, Model*>("heart", new Model("../Ares17_Group3/Models/Collectable/Heart/Heart.obj")));
-		cout << "shield: " << endl;
 		modelTypes.insert(std::pair<string, Model*>("shield", new Model("../Ares17_Group3/Models/Collectable/Shield/shield.obj")));
 
 		//Guns
-		cout << "scifigun: " << endl;
 		modelTypes.insert(std::pair<string, Model*>("scifigun", new Model("../Ares17_Group3/Models/Guns/Scifi/25ad7fc3a09f4a958dd62b5b522257ee.obj")));
-		cout << "scifipistol: " << endl;
 		modelTypes.insert(std::pair<string, Model*>("scifipistol", new Model("../Ares17_Group3/Models/Guns/ScifiPistol/ceeb75e9f4e34b6191d92c38a470453d.obj")));
-		cout << "nukacola: " << endl;
 		modelTypes.insert(std::pair<string, Model*>("nukacola", new Model("../Ares17_Group3/Models/Guns/NukaCola/NukaColaGun.obj")));
 	}
 
@@ -616,40 +590,6 @@ namespace SceneManager {
 		models.insert(std::pair<string, std::tuple<string, glm::vec3, glm::vec3, glm::vec3>>(key, make_tuple(currentModel, modelScale, modelRotation, glm::vec3(0.0f, 0.0f, 0.0f))));
 	}
 
-	// +++!
-	//btPairCachingGhostObject* ghostObject;
-
-	//void initPlayer(float rad, float height, float mass) {
-	//	//player = new Player(eye);
-
-	//	btTransform t;
-	//	t.setIdentity();
-	//	t.setOrigin(btVector3(globalData->player->getPosition().x, globalData->player->getPosition().y, globalData->player->getPosition().z));
-	//	btCapsuleShape* playerShape = new btCapsuleShape(rad, height);
-	//	btVector3 inertia(0, 0, 0);
-	//	if (mass != 0.0)
-	//		playerShape->calculateLocalInertia(mass, inertia);
-	//	btMotionState* motion = new btDefaultMotionState(t);
-	//	btRigidBody::btRigidBodyConstructionInfo info(mass, motion, playerShape, inertia);
-
-	//	playerBody = new btRigidBody(info);
-	//	playerBody->setAngularFactor(0); // Doesn't fall sideways
-	//	int playerCollidesWith = COL_DEFAULT | COL_ENEMY | COL_COLLECTABLE;
-	//	// body, group, mask
-	//	globalData->bt_manager->addToWorld(playerBody, COL_PLAYER, playerCollidesWith);
-	//	playerBody->setActivationState(DISABLE_DEACTIVATION);
-	//	playerBody->setFriction(FRICTION);
-
-	//	// Now ghost
-	//	ghostObject = new btPairCachingGhostObject();								// create object
-	//	ghostObject->setCollisionShape(playerShape);								// set shape
-	//	ghostObject->setWorldTransform(t);											// set world transform	
-	//	ghostObject->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);  // disable collision response // could also add CF_CHARACTER_OBJECT // If I knew what that flag did...
-
-	//	globalData->bt_manager->addGhostToWorld(ghostObject, COL_PLAYER, playerCollidesWith);
-
-	//}
-
 	bool findCollision(btPairCachingGhostObject* ghostObject) { // ignore player?
 		btManifoldArray manifoldArray;
 		btBroadphasePairArray& pairArray =
@@ -686,31 +626,35 @@ namespace SceneManager {
 	}
 
 	void initEnemies() {
-		enemies.insert(new Ranged(new NonPC(125, 6,
-			globalData->bt_manager, glm::vec3(0, 5, 0), 
-			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
+		if (currentLevel != BOSS) {
+			enemies.insert(new Ranged(new NonPC(125, 6,
+				globalData->bt_manager, glm::vec3(0, 5, 0),
+				1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
 
-		enemies.insert(new Ranged(new NonPC(125, 6,
-			globalData->bt_manager, glm::vec3(25, 5, 0),
-			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
+			enemies.insert(new Ranged(new NonPC(125, 6,
+				globalData->bt_manager, glm::vec3(25, 5, 0),
+				1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
 
-		enemies.insert(new Melee(new NonPC(200, 3,
-			globalData->bt_manager, glm::vec3(0, 5, 0),
-			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
+			enemies.insert(new Melee(new NonPC(200, 3,
+				globalData->bt_manager, glm::vec3(0, 5, 0),
+				1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
 
-		enemies.insert(new Melee(new NonPC(200, 3,
-			globalData->bt_manager, glm::vec3(25, 5, 5),
-			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
+			enemies.insert(new Melee(new NonPC(200, 3,
+				globalData->bt_manager, glm::vec3(25, 5, 5),
+				1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
 
-		enemies.insert(new Light(new NonPC(80, 3,
-			globalData->bt_manager, glm::vec3(0, 5, -10),
-			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
+			enemies.insert(new Light(new NonPC(80, 3,
+				globalData->bt_manager, glm::vec3(0, 5, -10),
+				1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
 
-		enemies.insert(new Light(new NonPC(80, 3,
-			globalData->bt_manager, glm::vec3(0, 5, -25),
-			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
-
-		
+			enemies.insert(new Light(new NonPC(80, 3,
+				globalData->bt_manager, glm::vec3(0, 5, -25),
+				1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
+		}
+		else
+			enemies.insert(new Heavy(new NonPC(300, 5,
+				globalData->bt_manager, glm::vec3(0, 5, 0),
+				1.25, 2.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
 	}
 
 	void reset() {
@@ -721,7 +665,6 @@ namespace SceneManager {
 		for (auto it = enemies.begin(); it != enemies.end(); )
 			it = enemies.erase(it);
 		initEnemies();
-
 		for (const auto it : bodies)
 			globalData->bt_manager->removeObject(it.second);
 		for (const auto it : collectables)
@@ -731,9 +674,8 @@ namespace SceneManager {
 		bodies.clear();
 		models.clear();
 		initBoxes();
-
 	}
-	static const GLuint MAX_BONES = 30;
+	static const GLuint MAX_BONES = 50;
 	GLuint m_boneLocation[MAX_BONES];
 
 	void init(SDL_Window * window) {
@@ -773,6 +715,7 @@ namespace SceneManager {
 		defaultTexture = loadBitmap::loadBitmap("../Ares17_Group3/Textures/wall.bmp");
 		groundTexture = loadBitmap::loadBitmap("../Ares17_Group3/Textures/terrain.bmp");
 		groundTexture_2 = loadBitmap::loadBitmap("../Ares17_Group3/Textures/terrain_2.bmp");
+		groundTexture_3 = loadBitmap::loadBitmap("../Ares17_Group3/Textures/boss.bmp");
 		heartTexture = loadBitmap::loadBitmap("../Ares17_Group3/Textures/ruby.bmp");
     
 		//initPlayer(1.0f, 1.5f, 40.0f);
@@ -794,7 +737,7 @@ namespace SceneManager {
 			// +++ /-\
 
 
-		globalData->sound_manager->playSound(globalData->sound_manager->getSound(BG), 0.2, 2);
+		globalData->sound_manager->playSound(globalData->sound_manager->getSound(BG), 0.2f, 2);
 		if (!globalData->sound_manager->getState())
 			BASS_Pause();
 			//globalData->sound_manager->stopBG();
@@ -971,7 +914,7 @@ namespace SceneManager {
 								rotationAngles, 1.0f), rotationAngles, 0.5), PROJ_SPEED, (rotationAngles.y*DEG_TO_RADIAN), rotationAngles.x); //!++!
 
 							coolDown = COOL_TIME*2.0;
-						globalData->sound_manager->playSound(globalData->sound_manager->getSound(WINCH), 0.4, 1);																													  //sound_manager->playSound(sound_manager->getSound(2), 2, 1);
+						globalData->sound_manager->playSound(globalData->sound_manager->getSound(WINCH), 0.4f, 1);																													  //sound_manager->playSound(sound_manager->getSound(2), 2, 1);
 						}
 					}
 				}
@@ -1323,7 +1266,6 @@ namespace SceneManager {
 		//	glEnable(GL_CULL_FACE);
 		//}
 
-		//	if (keys[SDL_SCANCODE_3]) bodies[4]->setLinearVelocity(btVector3(0.0, 0.0, 4.0));
 		if (keys[SDL_SCANCODE_1]) {
 			if (currentState == MENU)
 				currentState = PAUSE;
@@ -1347,23 +1289,13 @@ namespace SceneManager {
 				globalData->player->setWeapon(SCIFI);
 
 		}
-		//if (keys[SDL_SCANCODE_4]) {
-		//	//globalData->sound_manager->playSound(globalData->sound_manager->getSound(BG_2), 1, 2);
-		//	globalData->sound_manager->stopBG();
-		//}
-
 		if (keys[SDL_SCANCODE_4])
 			cout << "X: " << globalData->player->getPosition().x << "| Y: " << globalData->player->getPosition().y << "| Z: " << globalData->player->getPosition().z << endl;
 		if (keys[SDL_SCANCODE_5]) {
-			currentLevel = SECOND;
+			currentLevel = BOSS;
 			globalData->sound_manager->stopBG();
-			globalData->sound_manager->playSound(globalData->sound_manager->getSound(BG_2), 0.2, 2);
+			globalData->sound_manager->playSound(globalData->sound_manager->getSound(BG_2), 0.2f, 2);
 		}
-
-	/*	if (keys[SDL_SCANCODE_5]) {
-			globalData->sound_manager->playSound(globalData->sound_manager->getSound(BG), 1, 2);
-		}
-*/
 
 		if (keys[SDL_SCANCODE_ESCAPE]) {
 			if (currentState == PAUSE)
@@ -1372,12 +1304,6 @@ namespace SceneManager {
 
 		if (keys[SDL_SCANCODE_6])
 			exit(0);
-
-		//if (keys[SDL_SCANCODE_ESCAPE]) {
-		//	exit(0);
-		//}
-
-		//	if (keys[SDL_SCANCODE_5])cout << bullet.size() << endl;
 	}
 
 	void renderObject(glm::mat4 proj, Model *modelData, glm::vec3 pos, glm::vec3 scale, btQuaternion& rotation, GLuint shader, GLuint texture, bool spin) {
@@ -1407,88 +1333,93 @@ namespace SceneManager {
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
-	void renderAnimatedObject(Model* modelData, glm::mat4 proj, glm::vec3 pos, glm::vec3 scale, GLuint shader, GLuint texture) {
-
-		glm::mat4 model;
-		model = glm::translate(model, pos);
-		model = glm::scale(model, scale);	// It's a bit too big for our scene, so scale it down
-
-		
-		modelData->Draw(shader);
-		glBindTexture(GL_TEXTURE_2D, 0);
-	}
-
-	vector<Matrix4f> assaultAttackTransforms;
-	vector<Matrix4f> assaultRunTransforms;
-	vector<Matrix4f> assaultDieTransforms;
-	vector<Matrix4f> enforcerAttackTransforms;
-	vector<Matrix4f> enforcerRunTransforms;
-	vector<Matrix4f> enforcerDieTransforms;
-	vector<Matrix4f> swarmerAttackTransforms;
-	vector<Matrix4f> swarmerRunTransforms;
-	vector<Matrix4f> swarmerDieTransforms;
+	vector<Matrix4f> assaultAttackTransforms; vector<Matrix4f> assaultRunTransforms; vector<Matrix4f> assaultDieTransforms;
+	vector<Matrix4f> enforcerAttackTransforms; vector<Matrix4f> enforcerRunTransforms; vector<Matrix4f> enforcerDieTransforms;
+	vector<Matrix4f> swarmerAttackTransforms; vector<Matrix4f> swarmerRunTransforms; vector<Matrix4f> swarmerDieTransforms;
+	vector<Matrix4f> bossAttackTransforms; vector<Matrix4f> bossRunTransforms; vector<Matrix4f> bossDieTransforms;
 
 	void SetBoneTransform(npcState state, string name) {
-		if (state == ATTACKING) {
-			if (name == "assault") {
-				for (GLuint i = 0; i < assaultAttackTransforms.size(); i++) {
+		if (currentLevel == BOSS) {
+			if (state == ATTACKING) {
+				for (GLuint i = 0; i < bossAttackTransforms.size(); i++) {
 					assert(i < MAX_BONES);
-					glUniformMatrix4fv(m_boneLocation[i], 1, GL_TRUE, (const GLfloat*)& assaultAttackTransforms[i]);
+					glUniformMatrix4fv(m_boneLocation[i], 1, GL_TRUE, (const GLfloat*)& bossAttackTransforms[i]);
 				}
 			}
-			else if (name == "enforcer") {
-				for (GLuint i = 0; i < enforcerAttackTransforms.size(); i++) {
+			else if (state == DYING) {
+				for (GLuint i = 0; i < bossDieTransforms.size(); i++) {
 					assert(i < MAX_BONES);
-					glUniformMatrix4fv(m_boneLocation[i], 1, GL_TRUE, (const GLfloat*)& enforcerAttackTransforms[i]);
-				}
-			}
-			else {
-				for (GLuint i = 0; i < swarmerAttackTransforms.size(); i++) {
-					assert(i < MAX_BONES);
-					glUniformMatrix4fv(m_boneLocation[i], 1, GL_TRUE, (const GLfloat*)& swarmerAttackTransforms[i]);
-				}
-			}
-		}
-		else if (state == DYING) {
-			if (name == "assault") {
-				for (GLuint i = 0; i < assaultDieTransforms.size(); i++) {
-					assert(i < MAX_BONES);
-					glUniformMatrix4fv(m_boneLocation[i], 1, GL_TRUE, (const GLfloat*)& assaultDieTransforms[i]);
-		}
-			}
-			else if (name == "enforcer") {
-				for (GLuint i = 0; i < enforcerDieTransforms.size(); i++) {
-					assert(i < MAX_BONES);
-					glUniformMatrix4fv(m_boneLocation[i], 1, GL_TRUE, (const GLfloat*)& enforcerDieTransforms[i]);
+					glUniformMatrix4fv(m_boneLocation[i], 1, GL_TRUE, (const GLfloat*)& bossDieTransforms[i]);
 				}
 			}
 			else {
-				for (GLuint i = 0; i < swarmerDieTransforms.size(); i++) {
+				for (GLuint i = 0; i < bossRunTransforms.size(); i++) {
 					assert(i < MAX_BONES);
-					glUniformMatrix4fv(m_boneLocation[i], 1, GL_TRUE, (const GLfloat*)& swarmerDieTransforms[i]);
+					glUniformMatrix4fv(m_boneLocation[i], 1, GL_TRUE, (const GLfloat*)& bossRunTransforms[i]);
 				}
 			}
 		}
 		else {
-			if (name == "assault") {
-				for (GLuint i = 0; i < assaultRunTransforms.size(); i++) {
-					assert(i < MAX_BONES);
-					glUniformMatrix4fv(m_boneLocation[i], 1, GL_TRUE, (const GLfloat*)& assaultRunTransforms[i]);
+			if (state == ATTACKING) {
+				if (name == "assault") {
+					for (GLuint i = 0; i < assaultAttackTransforms.size(); i++) {
+						assert(i < MAX_BONES);
+						glUniformMatrix4fv(m_boneLocation[i], 1, GL_TRUE, (const GLfloat*)& assaultAttackTransforms[i]);
+					}
+				}
+				else if (name == "enforcer") {
+					for (GLuint i = 0; i < enforcerAttackTransforms.size(); i++) {
+						assert(i < MAX_BONES);
+						glUniformMatrix4fv(m_boneLocation[i], 1, GL_TRUE, (const GLfloat*)& enforcerAttackTransforms[i]);
+					}
+				}
+				else {
+					for (GLuint i = 0; i < swarmerAttackTransforms.size(); i++) {
+						assert(i < MAX_BONES);
+						glUniformMatrix4fv(m_boneLocation[i], 1, GL_TRUE, (const GLfloat*)& swarmerAttackTransforms[i]);
+					}
 				}
 			}
-			else if (name == "enforcer") {
-				for (GLuint i = 0; i < enforcerRunTransforms.size(); i++) {
-					assert(i < MAX_BONES);
-					glUniformMatrix4fv(m_boneLocation[i], 1, GL_TRUE, (const GLfloat*)& enforcerRunTransforms[i]);
+			else if (state == DYING) {
+				if (name == "assault") {
+					for (GLuint i = 0; i < assaultDieTransforms.size(); i++) {
+						assert(i < MAX_BONES);
+						glUniformMatrix4fv(m_boneLocation[i], 1, GL_TRUE, (const GLfloat*)& assaultDieTransforms[i]);
+					}
+				}
+				else if (name == "enforcer") {
+					for (GLuint i = 0; i < enforcerDieTransforms.size(); i++) {
+						assert(i < MAX_BONES);
+						glUniformMatrix4fv(m_boneLocation[i], 1, GL_TRUE, (const GLfloat*)& enforcerDieTransforms[i]);
+					}
+				}
+				else {
+					for (GLuint i = 0; i < swarmerDieTransforms.size(); i++) {
+						assert(i < MAX_BONES);
+						glUniformMatrix4fv(m_boneLocation[i], 1, GL_TRUE, (const GLfloat*)& swarmerDieTransforms[i]);
+					}
 				}
 			}
 			else {
-				for (GLuint i = 0; i < swarmerRunTransforms.size(); i++) {
-					assert(i < MAX_BONES);
-					glUniformMatrix4fv(m_boneLocation[i], 1, GL_TRUE, (const GLfloat*)& swarmerRunTransforms[i]);
+				if (name == "assault") {
+					for (GLuint i = 0; i < assaultRunTransforms.size(); i++) {
+						assert(i < MAX_BONES);
+						glUniformMatrix4fv(m_boneLocation[i], 1, GL_TRUE, (const GLfloat*)& assaultRunTransforms[i]);
+					}
+				}
+				else if (name == "enforcer") {
+					for (GLuint i = 0; i < enforcerRunTransforms.size(); i++) {
+						assert(i < MAX_BONES);
+						glUniformMatrix4fv(m_boneLocation[i], 1, GL_TRUE, (const GLfloat*)& enforcerRunTransforms[i]);
+					}
+				}
+				else {
+					for (GLuint i = 0; i < swarmerRunTransforms.size(); i++) {
+						assert(i < MAX_BONES);
+						glUniformMatrix4fv(m_boneLocation[i], 1, GL_TRUE, (const GLfloat*)& swarmerRunTransforms[i]);
+					}
 				}
 			}
-
 		}
 	}
 
@@ -1498,7 +1429,9 @@ namespace SceneManager {
 	int animationOn = 0;
 		
 	void animationTransforms() {
-		int speed = 2;
+		float speed;
+		if (currentLevel == BOSS) { speed = 1; }
+		else { speed = 1.5; }
 		//only play if animation is being used by something
 		if (attackingEnemies > 0)
 			animationOn++;
@@ -1509,27 +1442,39 @@ namespace SceneManager {
 
 		if (attackingEnemies > 0) {
 			AttackingTime += dt_secs;
-			modelTypes["assaultAttack"]->BoneTransform(AttackingTime, assaultAttackTransforms, speed);
-			modelTypes["enforcerAttack"]->BoneTransform(AttackingTime, enforcerAttackTransforms, speed);
-			modelTypes["swarmerAttack"]->BoneTransform(AttackingTime, swarmerAttackTransforms, speed);
+			if (currentLevel != BOSS) {
+				modelTypes["assaultAttack"]->BoneTransform(AttackingTime, assaultAttackTransforms, speed);
+				modelTypes["enforcerAttack"]->BoneTransform(AttackingTime, enforcerAttackTransforms, speed);
+				modelTypes["swarmerAttack"]->BoneTransform(AttackingTime, swarmerAttackTransforms, speed);
+			}
+			else
+				modelTypes["bossAttack"]->BoneTransform(AttackingTime, bossAttackTransforms, speed);
 		}
 		else {
 			AttackingTime = 0.0f;
 		}
 		if (dyingEnemies > 0) {
 			DyingTime += dt_secs;
-			modelTypes["assaultDie"]->BoneTransform(DyingTime, assaultDieTransforms, speed);
-			modelTypes["enforcerDie"]->BoneTransform(DyingTime, enforcerDieTransforms, speed);
-			modelTypes["swarmerDie"]->BoneTransform(DyingTime, swarmerDieTransforms, speed);
+			if (currentLevel != BOSS) {
+				modelTypes["assaultDie"]->BoneTransform(DyingTime, assaultDieTransforms, speed);
+				modelTypes["enforcerDie"]->BoneTransform(DyingTime, enforcerDieTransforms, speed);
+				modelTypes["swarmerDie"]->BoneTransform(DyingTime, swarmerDieTransforms, speed);
+			}
+			else
+				modelTypes["bossDie"]->BoneTransform(DyingTime, bossDieTransforms, speed);
 		}
 		else {
 			DyingTime = 0.0f;
 		}
 		if (runningEnemies > 0) {
 			RunningTime += dt_secs;
-			modelTypes["assaultRun"]->BoneTransform(RunningTime, assaultRunTransforms, speed);
-			modelTypes["enforcerRun"]->BoneTransform(RunningTime, enforcerRunTransforms, speed);
-			modelTypes["swarmerRun"]->BoneTransform(RunningTime, swarmerRunTransforms, speed);
+			if (currentLevel != BOSS) {
+				modelTypes["assaultRun"]->BoneTransform(RunningTime, assaultRunTransforms, speed);
+				modelTypes["enforcerRun"]->BoneTransform(RunningTime, enforcerRunTransforms, speed);
+				modelTypes["swarmerRun"]->BoneTransform(RunningTime, swarmerRunTransforms, speed);
+			}
+			else
+				modelTypes["bossRun"]->BoneTransform(RunningTime, bossRunTransforms, speed);
 		}
 		else {
 			RunningTime = 0.0f;
@@ -1653,18 +1598,29 @@ namespace SceneManager {
 	}
 
 	int killedEnemies = 0;
+	double victory = 3;
 	void update(SDL_Window * window, SDL_Event sdlEvent) {
 		if (killedEnemies >= 10)
 		{
 			if (currentLevel == FIRST) { currentLevel = SECOND; }
-			else { currentLevel = FIRST; }
+			else if (currentLevel == SECOND) { currentLevel = BOSS; }
+			//else { currentLevel = FIRST; }
 			killedEnemies = 0;
-				reset();
+			reset();
 		}
+		
 		controls(window, sdlEvent);
 		dt_secs = gameTime();
 		coolDown -= dt_secs;	
 		
+		if (currentState == VICTORY) {
+			victory -= dt_secs;
+			if (victory <= 0)
+			{
+				reset();
+				currentLevel = FIRST;
+			}
+		}
 		if (currentState == RUNNING) {
 			updatePlayer(dt_secs);
 			if (globalData->player->getState() == JUMPING)
@@ -1672,7 +1628,7 @@ namespace SceneManager {
 					globalData->player->setState(ON_GROUND);
 				
 			updateCollectables();
-			theta += 0.1;
+			theta += 0.1f;
 			globalData->bt_manager->update();
 		}
 
@@ -1686,24 +1642,27 @@ namespace SceneManager {
 			}
 		}
 
-		if (enemies.size() < 6) {
-			glm::vec3 spawnPoint = randomSpawnPoint();
-			srand(time(NULL));
-			int num = std::rand() % 4 + 1; //random int between 1 and 4
-			if (num == 1) {
-				enemies.insert(new Ranged(new NonPC(125, 6,
-								globalData->bt_manager, spawnPoint,
-								1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
-			}
-			else if (num == 2) {
-				enemies.insert(new Melee(new NonPC(200, 3,
-					globalData->bt_manager, spawnPoint,
-					1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
-			}
-			else {
-				enemies.insert(new Light(new NonPC(80, 3,
-					globalData->bt_manager, spawnPoint,
-					1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
+		if (currentLevel != BOSS) {
+			if (enemies.size() < 6) {
+				glm::vec3 spawnPoint = randomSpawnPoint();
+				srand(time(NULL));
+				int num = std::rand() % 4 + 1; //random int between 1 and 4
+				if (num == 1) {
+					enemies.insert(new Ranged(new NonPC(125, 6,
+						globalData->bt_manager, spawnPoint,
+						1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
+				}
+				else if (num == 2) {
+					enemies.insert(new Melee(new NonPC(200, 3,
+						globalData->bt_manager, spawnPoint,
+						1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
+				}
+				else {
+					enemies.insert(new Light(new NonPC(80, 3,
+						globalData->bt_manager, spawnPoint,
+						1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
+
+				}
 			}
 		}
 	}
@@ -1768,63 +1727,44 @@ namespace SceneManager {
 			glUniformMatrix4fv(glGetUniformLocation(shader, ("shadowMatrices[" + std::to_string(k) + "]").c_str()), 1, GL_FALSE, glm::value_ptr(shadowTransforms[k]));
 	}
 
-
 	void renderWorldObjects(GLuint shader, glm::mat4 projection) {
-		//// PLAYER capsule
-		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		//glDisable(GL_CULL_FACE);
-		//globalData->bt_manager->renderCapsule(globalData->player->playerBody, view, projection, modelTypes["sphere"], shader, defaultTexture);
-		//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		//glEnable(GL_CULL_FACE);
-		/////+++++++++++++++
-		//btVector3 playerPos(globalData->player->getPosition().x, globalData->player->getPosition().y, globalData->player->getPosition().z);
 		int tempAttacking = 0;
 		int tempRunning = 0;
 		int tempDying = 0;
 		for (auto it = enemies.begin(); it != enemies.end(); ) {
 			int speed = 0;
 			string name = (*it)->getName();
-			if (name == "assault") {
-				speed = 8;
-			}
-			else if (name == "enforcer") {
-				speed = 8;
-			}
-			else {
-				speed = 10;
-			}
 			Model* currentModel = modelTypes[name + "Run"];
+			
+			if (name == "swarmer") { speed = 10; }
+			else if (name == "boss") { speed = 7; }
+			else { speed = 8; }
+
 			if ((*it)->getState() == ATTACKING) {
-				//if (attackingEnemies == 0)
-				//	AttackingTime = 0.0f; //ResetAnimationTime
 				tempAttacking++;
 				currentModel = modelTypes[name + "Attack"];
 			}
 			else if ((*it)->getState() == TRIGGERED) {
-				//if (runningEnemies == 0)
-				//	RunningTime = 0.0f; //ResetAnimationTime
 				tempRunning++;
 				currentModel = modelTypes[name + "Run"];
 			}
 			else if ((*it)->getState() == DYING) {
-				//if (dyingEnemies == 0)
-				//	DyingTime = 0.0f; //ResetAnimationTime
 				tempDying++;
 				currentModel = modelTypes[name + "Die"];
 			}
-			//TODO: fix
+
 			SetBoneTransform((*it)->getState(), name);
 			if (!(*it)->update(currentModel, view, projection, dt_secs, level1Grid, globalData->player, modelProgram, speed)) {
 				it = enemies.erase(it);
 				killedEnemies++;
+				if (currentLevel == BOSS)
+					currentState = VICTORY;
 			}
-			else
-				++it;
+			else { ++it; }
 		}
 		attackingEnemies = tempAttacking;
 		runningEnemies = tempRunning;
 		dyingEnemies = tempDying;
-
 
 		for (const auto& id_pair : bodies) {
 			// First = name / key
@@ -1853,8 +1793,8 @@ namespace SceneManager {
 					case SECOND:
 						renderObject(projection, modelTypes[get<0>(models[id_pair.first])], position, get<1>(models[id_pair.first]), rotation, shader, groundTexture_2, false);
 						break;
-					case THIRD:
-						renderObject(projection, modelTypes[get<0>(models[id_pair.first])], position, get<1>(models[id_pair.first]), rotation, shader, groundTexture, false);
+					case BOSS:
+						renderObject(projection, modelTypes[get<0>(models[id_pair.first])], position, get<1>(models[id_pair.first]), rotation, shader, groundTexture_3, false);
 						break;
 					}
 				}
@@ -1879,20 +1819,6 @@ namespace SceneManager {
 			}
 			//	i++;
 		}
-		///+++++++++++++++
-
-		//	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		//	glEnable(GL_CULL_FACE);
-			//--------
-
-
-			//if (pointOfView == THIRD_PERSON)
-			//	renderObject(projection, modelTypes["nanosuit"], glm::vec3(player->getPosition().x, player->getPosition().y - 1.75, player->getPosition().z), glm::vec3(0.2, 0.2, 0.2), glm::vec3(0.0, -yaw, 0.0), shader, 0);
-			//// rip robot
-			  //		renderObject(projection, modelTypes["robot"], glm::vec3(4.0, 0.0, 0.0), glm::vec3(0.2, 0.2, 0.2), shader);
-
-		//	if (pointOfView == FIRST_PERSON)
-		
 
 		if (mode == EDIT) {
 			if (creation == true) {
@@ -1955,7 +1881,7 @@ namespace SceneManager {
 	}
 
 	void renderHud(GLuint shader, Model *modelData) {
-	
+
 		if (currentState == PAUSE)
 			globalData->h_manager->renderPause(texturedProgram, modelTypes["cube"]);
 		else if (currentState == MENU)
@@ -1969,7 +1895,9 @@ namespace SceneManager {
 			globalData->h_manager->renderPlayerHud("Armor: ", globalData->player->getArmor(), ARMOR, shader, modelData, glm::vec3(-0.65f, 0.925f, 1.0f), glm::vec3(0, 0, 0.4));
 			// Crosshair
 			globalData->h_manager->renderCrosshair(texturedProgram, modelTypes["cube"]);
-
+		}
+		else if (currentState == VICTORY) {
+			globalData->h_manager->renderVictory(texturedProgram, modelTypes["cube"]);
 		}
 	}
 
@@ -2017,7 +1945,9 @@ namespace SceneManager {
 				if (currentLevel == FIRST)
 					skybox_2->renderSkybox(projection, view, modelTypes["cube"]);
 				else if (currentLevel == SECOND)
-				skybox->renderSkybox(projection, view, modelTypes["cube"]);
+					skybox->renderSkybox(projection, view, modelTypes["cube"]);
+				else if (currentLevel == BOSS)
+					skybox->renderSkybox(projection, view, modelTypes["cube"]);
 				// normal rendering
 				renderShadowedScene(projection, view, modelProgram, false); // render normal scene from normal point of view
 				// fps counter; 5 of 5

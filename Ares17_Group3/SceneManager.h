@@ -37,7 +37,7 @@
 
 
 enum gameState {
-	RUNNING, PAUSE, MENU, DEFEAT
+	RUNNING, PAUSE, MENU, DEFEAT, VICTORY
 };
 
 enum bound { 
@@ -55,7 +55,7 @@ enum modes {
 enum level {
 	FIRST,
 	SECOND,
-	THIRD
+	BOSS
 };
 
 namespace SceneManager {

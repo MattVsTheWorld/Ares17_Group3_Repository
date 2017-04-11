@@ -35,7 +35,10 @@ public:
 
 	void renderMenu(GLuint shader, Model *modelData, bool shadows);
 
+	void renderToScreen(GLuint shader, Model *modelData, GLuint label);
 	void renderDefeat(GLuint shader, Model *modelData);
+	void renderVictory(GLuint shader, Model *modelData);
+
 
 	GLuint TextureFromFile(const char* path, string directory)
 	{
@@ -69,6 +72,7 @@ private:
 	GLuint loadingScreen;
 	GLuint menuScreen;
 	GLuint defeatScreen;
+	GLuint victoryScreen;
 	GLuint menuLabel[5];
 	GLuint crosshair;
 	currentVals _current;

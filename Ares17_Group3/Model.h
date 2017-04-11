@@ -94,7 +94,7 @@ public:
 	// Draws the model, and thus all its meshes
 	void Draw(GLuint shader);
 
-	void BoneTransform(float TimeInSeconds, vector<Matrix4f>& Transforms, int speed);
+	void BoneTransform(float TimeInSeconds, vector<Matrix4f>& Transforms, float speed);
 
 	struct BoneInfo
 	{

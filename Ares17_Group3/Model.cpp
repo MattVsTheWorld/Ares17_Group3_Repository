@@ -45,7 +45,7 @@ void Model::loadModel(string path)
 		this->meshes.push_back(this->processMesh(i, mesh));
 	}
 
-	cout << "vertices: " << vertices << ", " << "faces" << faces << endl;
+	//cout << "vertices: " << vertices << ", " << "faces" << faces << endl;
 }
 
 Mesh Model::processMesh(GLuint MeshIndex, aiMesh* mesh)
@@ -364,7 +364,7 @@ void Model::ReadNodeHeirarchy(float AnimationTime, const aiNode* pNode, const Ma
 }
 
 
-void Model::BoneTransform(float TimeInSeconds, vector<Matrix4f>& Transforms, int speed)
+void Model::BoneTransform(float TimeInSeconds, vector<Matrix4f>& Transforms, float speed)
 {
 	Matrix4f Identity;
 	Identity.InitIdentity();

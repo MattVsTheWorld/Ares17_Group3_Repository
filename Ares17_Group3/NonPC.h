@@ -133,7 +133,7 @@ public:
 		return glm::vec3(pos.x + d*std::sin(angle * DEG_TO_RADIAN), pos.y, pos.z - d*std::cos(angle * DEG_TO_RADIAN));
 	}
 
-	void moveNpc(vertex* v, int speed) {
+	void moveNpc(vertex* v, float speed) {
 		btVector3 goTo(v->getCoords().first, 0, v->getCoords().second);
 		btTransform t;
 		t.setIdentity();
@@ -151,14 +151,10 @@ public:
 
 		npcBody->getMotionState()->setWorldTransform(t);
 
-		
 		changeSpeed(speed, angle);
 
-		// find angle between direction
-		//changeSpeed(newDir);
 	}
 
-	//TODO: search only if reachable
 	queue<vertex*> findPath(AdjacencyList *adjList, int startId, int endId) {
 		A_star *pathfinder = new A_star(adjList);
 		//	cout << "////////\n" << startId << " to " << endId << endl;
@@ -173,7 +169,7 @@ public:
 		return toVisit;
 	} // findPath function
 
-	bool update(Model* modelData, glm::mat4 view, glm::mat4 proj, float dt, Grid* _g, Player *player, GLuint shader, int speed) {
+	bool update(Model* modelData, glm::mat4 view, glm::mat4 proj, float dt, Grid* _g, Player *player, GLuint shader, float speed) {
 
 		this->render(modelData, view, proj, shader, player);
 
@@ -225,12 +221,8 @@ public:
 			if (findCollision(npcGhost))
 			{
 				this->health -= player->getWeapon().getDamage();
+				//cout << "Hit! :" << this->health << endl;
 				s_manager->playSound(s_manager->getSound(PAINED_EN), 1, 1);
-				/*if (player->getWeapon() == PISTOL || player->getWeapon() == NUKA)
-					this->health -= 10;
-				else if (player->getWeapon() == SCIFI)
-					this->health -= 40;*/
-				//cout << "HIT! Health = " << this->health << endl;
 			}
 
 		return true;
@@ -261,8 +253,10 @@ public:
 		model = glm::rotate(model, std::atan2(std::cos(angle), std::sin(angle)), glm::vec3(0.0f, 1.0f, 0.0f));
 		}
 		model = glm::rotate(model, eulerRotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
-		model = glm::scale(model, glm::vec3(0.5, 0.5, 0.5));	// It's a bit too big for our scene, so scale it down
-
+		if (this->name == "boss") { model = glm::scale(model, glm::vec3(0.05, 0.05, 0.05)); }
+		else
+			model = glm::scale(model, glm::vec3(0.5, 0.5, 0.5));	// It's a bit too big for our scene, so scale it down
+		
 		glUniform1i(glGetUniformLocation(shader, "animated"), 1); //zero is no animations
 		glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
 		modelData->Draw(shader);

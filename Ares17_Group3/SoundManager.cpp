@@ -56,8 +56,8 @@ void SoundManager::playSound(HSAMPLE sound, float volume, int channel) {
 	BASS_ChannelSetAttribute(ch[channel], BASS_ATTRIB_FREQ, 0);
 	BASS_ChannelSetAttribute(ch[channel], BASS_ATTRIB_VOL, volume);
 	BASS_ChannelSetAttribute(ch[channel], BASS_ATTRIB_PAN, -1);
-	if (!BASS_ChannelPlay(ch[channel], TRUE))
-		std::cout << "Can't play sample" << std::endl;
+	/*if (!BASS_ChannelPlay(ch[channel], TRUE))
+		std::cout << "Can't play sample" << std::endl;*/
 }
 // accessor for sound sample
 HSAMPLE SoundManager::getSound(int i) {

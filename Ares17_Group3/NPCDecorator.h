@@ -7,16 +7,19 @@ class NPCDecorator : public AbstractNPC {
 private:
 	float timer = 0.7f;
 public:
-	NPCDecorator(AbstractNPC *n) { npc = n; }
+	NPCDecorator(AbstractNPC *n) { 
+		npc = n; 
+		if (n->getName() == "boss") { timer = 1.5f; }
+	}
 	~NPCDecorator() {
 		//	delete this;
 	}
 
 	
 
-	void moveNpc(vertex* v, int speed) { ; }
+	void moveNpc(vertex* v, float speed) { ; }
 	queue<vertex*> findPath(AdjacencyList *adjList, int startId, int endId) { return npc->findPath(adjList, startId, endId); }
-	bool update(Model* modelData, glm::mat4 view, glm::mat4 proj, float dt, Grid* _g, Player* player, GLuint shader, int speed) {
+	bool update(Model* modelData, glm::mat4 view, glm::mat4 proj, float dt, Grid* _g, Player* player, GLuint shader, float speed) {
 
 		if (npc->getHealth() <= 0) {
 
@@ -154,9 +157,11 @@ public:
 class Heavy : public NPCDecorator {
 public:
 	Heavy(AbstractNPC *n) : NPCDecorator(n) {
-		modifyHealth(200);
-		setAttack(getAttack() + 25);
+		modifyHealth(150);
+		setAttack(getAttack() + 50);
+		setRange(getRange() + 5);
 		setAttackSpeed(getAttackSpeed() + 3.0);
+		setName("boss");
 	}
 	void modifyHealth(double newHp) { this->npc->modifyHealth(newHp); }
 	double getRange() { return NPCDecorator::getRange(); }
