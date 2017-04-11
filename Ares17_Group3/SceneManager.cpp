@@ -1289,8 +1289,7 @@ namespace SceneManager {
 				globalData->player->setWeapon(SCIFI);
 
 		}
-		if (keys[SDL_SCANCODE_4])
-			cout << "X: " << globalData->player->getPosition().x << "| Y: " << globalData->player->getPosition().y << "| Z: " << globalData->player->getPosition().z << endl;
+
 		if (keys[SDL_SCANCODE_5]) {
 			currentLevel = BOSS;
 			globalData->sound_manager->stopBG();
