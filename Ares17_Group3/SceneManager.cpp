@@ -529,7 +529,7 @@ namespace SceneManager {
 		modelTypes.insert(std::pair<string, Model*>("swarmerAttack", new Model("../Ares17_Group3/Models/Enemies/Swarmer/Attack/Standing_Torch_Melee_Attack_01.dae")));
 		modelTypes.insert(std::pair<string, Model*>("swarmerRun", new Model("../Ares17_Group3/Models/Enemies/Swarmer/Run/run.dae")));
 		modelTypes.insert(std::pair<string, Model*>("swarmerDie", new Model("../Ares17_Group3/Models/Enemies/Swarmer/Die/flying_back_death.dae")));
-		cout << "boss: " << endl;
+
 		modelTypes.insert(std::pair<string, Model*>("bossAttack", new Model("../Ares17_Group3/Models/Enemies/Boss/Attack/mutant_swiping.dae")));
 		modelTypes.insert(std::pair<string, Model*>("bossRun", new Model("../Ares17_Group3/Models/Enemies/Boss/Run/mutant_run.dae")));
 		modelTypes.insert(std::pair<string, Model*>("bossDie", new Model("../Ares17_Group3/Models/Enemies/Boss/Die/sword_and_shield_death.dae")));
@@ -1584,7 +1584,7 @@ namespace SceneManager {
 			spawnPoint4 = glm::vec3(-26.0f, 5.0f, -30.57f);
 		}
 		glm::vec3 def(0.0f, 0.0, 0.0f);
-		cout << "num " << num << endl;
+
 		if (num == 1)
 			return spawnPoint1;
 		if (num == 2)
