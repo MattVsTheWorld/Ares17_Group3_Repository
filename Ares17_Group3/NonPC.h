@@ -5,11 +5,12 @@
 #define PI 3.14159265359f
 #define REFRESHRATE 1.0f
 #define DEFAULT_LOS 50.0f
+#define DEG_TO_RADIAN 0.017453293f
 
 // NPC implements AbstractNPC - all methods defined inline
 class NonPC : public AbstractNPC {
 private:
-
+	bool moved;
 	float angle;
 	// +++++++++++++++
 	bool findCollision(btPairCachingGhostObject* ghostObject) {
@@ -128,7 +129,11 @@ public:
 		cout << "Done deleting enemy object" << endl;
 	}
 
-	void moveNpc(vertex* v) {
+	glm::vec3 moveForward(glm::vec3 pos, GLfloat angle, GLfloat d) {
+		return glm::vec3(pos.x + d*std::sin(angle * DEG_TO_RADIAN), pos.y, pos.z - d*std::cos(angle * DEG_TO_RADIAN));
+	}
+
+	void moveNpc(vertex* v, int speed) {
 		btVector3 goTo(v->getCoords().first, 0, v->getCoords().second);
 		btTransform t;
 		t.setIdentity();
@@ -137,7 +142,17 @@ public:
 
 		//	cout << "Going to: " << v->getIndex() << endl;
 		angle = (atan2(goTo.z() - pos.z(), goTo.x() - pos.x())); // RADIANS
-		changeSpeed(8, angle);
+
+		if (moved == false) {
+			float rotationAngle = std::atan2(std::cos(angle), std::sin(angle));
+			glm::vec3 move = moveForward(glm::vec3(pos.x(), pos.y()+0.5, pos.z()), rotationAngle, 0.1f);
+			t.setOrigin(btVector3(move.x, move.y, move.z));
+		}
+
+		npcBody->getMotionState()->setWorldTransform(t);
+
+		
+		changeSpeed(speed, angle);
 
 		// find angle between direction
 		//changeSpeed(newDir);
@@ -158,7 +173,7 @@ public:
 		return toVisit;
 	} // findPath function
 
-	bool update(Model* modelData, glm::mat4 view, glm::mat4 proj, float dt, Grid* _g, Player *player, GLuint shader) {
+	bool update(Model* modelData, glm::mat4 view, glm::mat4 proj, float dt, Grid* _g, Player *player, GLuint shader, int speed) {
 
 		this->render(modelData, view, proj, shader, player);
 
@@ -192,7 +207,8 @@ public:
 					if (_g->getAdjList()->getVertex(_g->getNodeFromWorldPos(pos)) == currentPath.front())
 						currentPath.pop();
 				if (!currentPath.empty()) {
-					this->moveNpc(currentPath.front());
+					this->moveNpc(currentPath.front(), speed);
+					moved = true;
 				}
 			} else {
 				this->currentState = ATTACKING;
@@ -202,6 +218,7 @@ public:
 					this->attackTimer = this->attackSpeed;
 				}
 				else this->attackTimer -= dt;
+				moved = false;
 			}
 		}
 

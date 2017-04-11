@@ -540,6 +540,10 @@ namespace SceneManager {
 		modelTypes.insert(std::pair<string, Model*>("assaultAttack", new Model("../Ares17_Group3/Models/Enemies/Assault/Attack/gunplay.dae")));
 		modelTypes.insert(std::pair<string, Model*>("assaultRun", new Model("../Ares17_Group3/Models/Enemies/Assault/Run/run_with_sword.dae")));
 		modelTypes.insert(std::pair<string, Model*>("assaultDie", new Model("../Ares17_Group3/Models/Enemies/Assault/Die/falling_back_death.dae")));
+		cout << "Swarmer models: " << endl;
+		modelTypes.insert(std::pair<string, Model*>("swarmerAttack", new Model("../Ares17_Group3/Models/Enemies/Swarmer/Attack/Standing_Torch_Melee_Attack_01.dae")));
+		modelTypes.insert(std::pair<string, Model*>("swarmerRun", new Model("../Ares17_Group3/Models/Enemies/Swarmer/Run/run.dae")));
+		modelTypes.insert(std::pair<string, Model*>("swarmerDie", new Model("../Ares17_Group3/Models/Enemies/Swarmer/Die/flying_back_death.dae")));
 		
 		// Robotto
 		cout << "Robot: " << endl;
@@ -554,21 +558,21 @@ namespace SceneManager {
 		modelTypes.insert(std::pair<string, Model*>("carpile", new Model("../Ares17_Group3/Models/Environment/CarPile/wasteddisplay.obj")));
 		cout << "oiltank: " << endl;
 		modelTypes.insert(std::pair<string, Model*>("oiltank", new Model("../Ares17_Group3/Models/Environment/OilTank/Oiltank.obj")));
+		cout << "catjeep: " << endl;
 		modelTypes.insert(std::pair<string, Model*>("catjeep", new Model("../Ares17_Group3/Models/Environment/cyberpunk-truck/hovertruck_lowpoly.obj")));
+		cout << "heli: " << endl;
 		modelTypes.insert(std::pair<string, Model*>("heli", new Model("../Ares17_Group3/Models/Environment/Helicopter/hheli.obj")));
+		cout << "tower: " << endl;
 		modelTypes.insert(std::pair<string, Model*>("tower", new Model("../Ares17_Group3/Models/Environment/sci-fi-tower/building_02_fbx.FBX.obj")));
-		//modelTypes.insert(std::pair<string, Model*>("rock", new Model("../Ares17_Group3/Models/Environment/Rock/model.obj")));
 		cout << "barrier: " << endl;
 		modelTypes.insert(std::pair<string, Model*>("barrier", new Model("../Ares17_Group3/Models/Environment/Barrier/model.obj")));
 		//Collectable
 		cout << "heart: " << endl;
 		modelTypes.insert(std::pair<string, Model*>("heart", new Model("../Ares17_Group3/Models/Collectable/Heart/Heart.obj")));
-		//modelTypes.insert(std::pair<string, Model*>("potion", new Model("Models/Collectable/Potion/pocion lowpoly.obj")));
 		cout << "shield: " << endl;
 		modelTypes.insert(std::pair<string, Model*>("shield", new Model("../Ares17_Group3/Models/Collectable/Shield/shield.obj")));
 
 		//Guns
-		//modelTypes.insert(std::pair<string, Model*>("pistol", new Model("Models/Guns/Pistol/Gun.obj")));
 		cout << "scifigun: " << endl;
 		modelTypes.insert(std::pair<string, Model*>("scifigun", new Model("../Ares17_Group3/Models/Guns/Scifi/25ad7fc3a09f4a958dd62b5b522257ee.obj")));
 		cout << "scifipistol: " << endl;
@@ -682,18 +686,13 @@ namespace SceneManager {
 	}
 
 	void initEnemies() {
-		enemies.insert(new Ranged(new NonPC(100, 6,
+		enemies.insert(new Ranged(new NonPC(125, 6,
 			globalData->bt_manager, glm::vec3(0, 5, 0), 
 			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
 
-		enemies.insert(new Ranged(new NonPC(100, 6,
+		enemies.insert(new Ranged(new NonPC(125, 6,
 			globalData->bt_manager, glm::vec3(25, 5, 0),
 			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
-
-		enemies.insert(new Ranged(new NonPC(100, 6,
-			globalData->bt_manager, glm::vec3(0, 5, -10),
-			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
-
 
 		enemies.insert(new Melee(new NonPC(200, 3,
 			globalData->bt_manager, glm::vec3(0, 5, 0),
@@ -703,10 +702,15 @@ namespace SceneManager {
 			globalData->bt_manager, glm::vec3(25, 5, 5),
 			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
 
-		enemies.insert(new Melee(new NonPC(200, 3,
+		enemies.insert(new Light(new NonPC(80, 3,
+			globalData->bt_manager, glm::vec3(0, 5, -10),
+			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
+
+		enemies.insert(new Light(new NonPC(80, 3,
 			globalData->bt_manager, glm::vec3(0, 5, -25),
 			1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
 
+		
 	}
 
 	void reset() {
@@ -997,19 +1001,6 @@ namespace SceneManager {
 			else if (keys[SDL_SCANCODE_D]) {
 				//player->setPosition(moveRight(player->getPosition(), rotationAngles.y, 0.1f));
 				globalData->player->playerBody->setLinearVelocity(speedRight(increase, rotationAngles.y, (keys[SDL_SCANCODE_W] == SDL_PRESSED || keys[SDL_SCANCODE_S] == SDL_PRESSED)));
-			}
-
-			if (keys[SDL_SCANCODE_C]) {
-				RunningTime = 0.0f;
-				run = 0;
-			}
-			if (keys[SDL_SCANCODE_V]) {
-				RunningTime = 0.0f;
-				run = 1;
-			}
-			if (keys[SDL_SCANCODE_B]) {
-				RunningTime = 0.0f;
-				run = 2;
 			}
 
 			if (keys[SDL_SCANCODE_SPACE]) {
@@ -1381,9 +1372,6 @@ namespace SceneManager {
 
 		if (keys[SDL_SCANCODE_6])
 			exit(0);
-		if (keys[SDL_SCANCODE_7]) {
-			cout << "x:" << globalData->player->getPosition().x << ", y:" << globalData->player->getPosition().y << ", z:" << globalData->player->getPosition().z << endl;
-		}
 
 		//if (keys[SDL_SCANCODE_ESCAPE]) {
 		//	exit(0);
@@ -1436,6 +1424,9 @@ namespace SceneManager {
 	vector<Matrix4f> enforcerAttackTransforms;
 	vector<Matrix4f> enforcerRunTransforms;
 	vector<Matrix4f> enforcerDieTransforms;
+	vector<Matrix4f> swarmerAttackTransforms;
+	vector<Matrix4f> swarmerRunTransforms;
+	vector<Matrix4f> swarmerDieTransforms;
 
 	void SetBoneTransform(npcState state, string name) {
 		if (state == ATTACKING) {
@@ -1443,12 +1434,18 @@ namespace SceneManager {
 				for (GLuint i = 0; i < assaultAttackTransforms.size(); i++) {
 					assert(i < MAX_BONES);
 					glUniformMatrix4fv(m_boneLocation[i], 1, GL_TRUE, (const GLfloat*)& assaultAttackTransforms[i]);
-		}
+				}
 			}
-			else {
+			else if (name == "enforcer") {
 				for (GLuint i = 0; i < enforcerAttackTransforms.size(); i++) {
 					assert(i < MAX_BONES);
 					glUniformMatrix4fv(m_boneLocation[i], 1, GL_TRUE, (const GLfloat*)& enforcerAttackTransforms[i]);
+				}
+			}
+			else {
+				for (GLuint i = 0; i < swarmerAttackTransforms.size(); i++) {
+					assert(i < MAX_BONES);
+					glUniformMatrix4fv(m_boneLocation[i], 1, GL_TRUE, (const GLfloat*)& swarmerAttackTransforms[i]);
 				}
 			}
 		}
@@ -1459,10 +1456,16 @@ namespace SceneManager {
 					glUniformMatrix4fv(m_boneLocation[i], 1, GL_TRUE, (const GLfloat*)& assaultDieTransforms[i]);
 		}
 			}
-			else {
+			else if (name == "enforcer") {
 				for (GLuint i = 0; i < enforcerDieTransforms.size(); i++) {
 					assert(i < MAX_BONES);
 					glUniformMatrix4fv(m_boneLocation[i], 1, GL_TRUE, (const GLfloat*)& enforcerDieTransforms[i]);
+				}
+			}
+			else {
+				for (GLuint i = 0; i < swarmerDieTransforms.size(); i++) {
+					assert(i < MAX_BONES);
+					glUniformMatrix4fv(m_boneLocation[i], 1, GL_TRUE, (const GLfloat*)& swarmerDieTransforms[i]);
 				}
 			}
 		}
@@ -1473,10 +1476,16 @@ namespace SceneManager {
 					glUniformMatrix4fv(m_boneLocation[i], 1, GL_TRUE, (const GLfloat*)& assaultRunTransforms[i]);
 				}
 			}
-			else {
+			else if (name == "enforcer") {
 				for (GLuint i = 0; i < enforcerRunTransforms.size(); i++) {
 					assert(i < MAX_BONES);
 					glUniformMatrix4fv(m_boneLocation[i], 1, GL_TRUE, (const GLfloat*)& enforcerRunTransforms[i]);
+				}
+			}
+			else {
+				for (GLuint i = 0; i < swarmerRunTransforms.size(); i++) {
+					assert(i < MAX_BONES);
+					glUniformMatrix4fv(m_boneLocation[i], 1, GL_TRUE, (const GLfloat*)& swarmerRunTransforms[i]);
 				}
 			}
 
@@ -1486,22 +1495,32 @@ namespace SceneManager {
 	int attackingEnemies = 0;
 	int runningEnemies = 0;
 	int dyingEnemies = 0;
+	int animationOn = 0;
 		
 	void animationTransforms() {
 		int speed = 2;
 		//only play if animation is being used by something
+		if (attackingEnemies > 0)
+			animationOn++;
+		if (dyingEnemies > 0)
+			animationOn++;
+		if (runningEnemies > 0)
+			animationOn++;
+
 		if (attackingEnemies > 0) {
 			AttackingTime += dt_secs;
-			modelTypes["assaultAttack"]->BoneTransform(RunningTime, assaultAttackTransforms, speed);
-			modelTypes["enforcerAttack"]->BoneTransform(RunningTime, enforcerAttackTransforms, speed);
+			modelTypes["assaultAttack"]->BoneTransform(AttackingTime, assaultAttackTransforms, speed);
+			modelTypes["enforcerAttack"]->BoneTransform(AttackingTime, enforcerAttackTransforms, speed);
+			modelTypes["swarmerAttack"]->BoneTransform(AttackingTime, swarmerAttackTransforms, speed);
 		}
 		else {
 			AttackingTime = 0.0f;
 		}
 		if (dyingEnemies > 0) {
 			DyingTime += dt_secs;
-			modelTypes["assaultDie"]->BoneTransform(RunningTime, assaultDieTransforms, speed);
-			modelTypes["enforcerDie"]->BoneTransform(RunningTime, enforcerDieTransforms, speed);
+			modelTypes["assaultDie"]->BoneTransform(DyingTime, assaultDieTransforms, speed);
+			modelTypes["enforcerDie"]->BoneTransform(DyingTime, enforcerDieTransforms, speed);
+			modelTypes["swarmerDie"]->BoneTransform(DyingTime, swarmerDieTransforms, speed);
 		}
 		else {
 			DyingTime = 0.0f;
@@ -1510,6 +1529,7 @@ namespace SceneManager {
 			RunningTime += dt_secs;
 			modelTypes["assaultRun"]->BoneTransform(RunningTime, assaultRunTransforms, speed);
 			modelTypes["enforcerRun"]->BoneTransform(RunningTime, enforcerRunTransforms, speed);
+			modelTypes["swarmerRun"]->BoneTransform(RunningTime, swarmerRunTransforms, speed);
 		}
 		else {
 			RunningTime = 0.0f;
@@ -1601,10 +1621,23 @@ namespace SceneManager {
 	glm::vec3 randomSpawnPoint() {
 		srand(time(NULL));
 		int num = std::rand() % 4 + 1; //random int between 1 and 4
-		glm::vec3 spawnPoint1(29.6f, 2.0f, -31.02f);
-		glm::vec3 spawnPoint2(40.0f, 2.0f, 18.59f);
-		glm::vec3 spawnPoint3(-33.7f, 2.0f, 19.95f);
-		glm::vec3 spawnPoint4(-26.0f, 2.0f, -30.57f);
+		glm::vec3 spawnPoint1(0.0f, 0.0f, 0.0f);
+		glm::vec3 spawnPoint2(0.0f, 0.0f, 0.0f);
+		glm::vec3 spawnPoint3(0.0f, 0.0f, 0.0f);
+		glm::vec3 spawnPoint4(0.0f, 0.0f, 0.0f);
+
+		if (currentLevel == FIRST) {
+			spawnPoint1 = glm::vec3(39.0f, 5.0f, 21.62f);
+			spawnPoint2 = glm::vec3(20.3f, 5.0f, -19.17f);
+			spawnPoint3 = glm::vec3(-36.7f, 5.0f, -33.79f);
+			spawnPoint4 = glm::vec3(-34.9f, 5.0f, 35.02f);
+		}
+		else {
+			spawnPoint1 = glm::vec3(29.6f, 5.0f, -31.02f);
+			spawnPoint2 = glm::vec3(39.0f, 5.0f, 18.59f);
+			spawnPoint3 = glm::vec3(-33.7f, 5.0f, 19.95f);
+			spawnPoint4 = glm::vec3(-26.0f, 5.0f, -30.57f);
+		}
 		glm::vec3 def(0.0f, 0.0, 0.0f);
 		cout << "num " << num << endl;
 		if (num == 1)
@@ -1619,7 +1652,15 @@ namespace SceneManager {
 			return def;
 	}
 
+	int killedEnemies = 0;
 	void update(SDL_Window * window, SDL_Event sdlEvent) {
+		if (killedEnemies >= 10)
+		{
+			if (currentLevel == FIRST) { currentLevel = SECOND; }
+			else { currentLevel = FIRST; }
+			killedEnemies = 0;
+				reset();
+		}
 		controls(window, sdlEvent);
 		dt_secs = gameTime();
 		coolDown -= dt_secs;	
@@ -1648,14 +1689,19 @@ namespace SceneManager {
 		if (enemies.size() < 6) {
 			glm::vec3 spawnPoint = randomSpawnPoint();
 			srand(time(NULL));
-			int num = std::rand() % 2 + 1; //random int between 1 and 4
+			int num = std::rand() % 4 + 1; //random int between 1 and 4
 			if (num == 1) {
-				enemies.insert(new Ranged(new NonPC(100, 10,
+				enemies.insert(new Ranged(new NonPC(125, 6,
 								globalData->bt_manager, spawnPoint,
 								1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
 			}
-			else {
+			else if (num == 2) {
 				enemies.insert(new Melee(new NonPC(200, 3,
+					globalData->bt_manager, spawnPoint,
+					1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
+			}
+			else {
+				enemies.insert(new Light(new NonPC(80, 3,
 					globalData->bt_manager, spawnPoint,
 					1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
 			}
@@ -1722,6 +1768,7 @@ namespace SceneManager {
 			glUniformMatrix4fv(glGetUniformLocation(shader, ("shadowMatrices[" + std::to_string(k) + "]").c_str()), 1, GL_FALSE, glm::value_ptr(shadowTransforms[k]));
 	}
 
+
 	void renderWorldObjects(GLuint shader, glm::mat4 projection) {
 		//// PLAYER capsule
 		//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -1735,7 +1782,17 @@ namespace SceneManager {
 		int tempRunning = 0;
 		int tempDying = 0;
 		for (auto it = enemies.begin(); it != enemies.end(); ) {
+			int speed = 0;
 			string name = (*it)->getName();
+			if (name == "assault") {
+				speed = 8;
+			}
+			else if (name == "enforcer") {
+				speed = 8;
+			}
+			else {
+				speed = 10;
+			}
 			Model* currentModel = modelTypes[name + "Run"];
 			if ((*it)->getState() == ATTACKING) {
 				//if (attackingEnemies == 0)
@@ -1757,14 +1814,17 @@ namespace SceneManager {
 			}
 			//TODO: fix
 			SetBoneTransform((*it)->getState(), name);
-			if (!(*it)->update(currentModel, view, projection, dt_secs, level1Grid, globalData->player, modelProgram))
+			if (!(*it)->update(currentModel, view, projection, dt_secs, level1Grid, globalData->player, modelProgram, speed)) {
 				it = enemies.erase(it);
+				killedEnemies++;
+			}
 			else
 				++it;
 		}
 		attackingEnemies = tempAttacking;
 		runningEnemies = tempRunning;
 		dyingEnemies = tempDying;
+
 
 		for (const auto& id_pair : bodies) {
 			// First = name / key
@@ -1794,12 +1854,10 @@ namespace SceneManager {
 						renderObject(projection, modelTypes[get<0>(models[id_pair.first])], position, get<1>(models[id_pair.first]), rotation, shader, groundTexture_2, false);
 						break;
 					case THIRD:
-					renderObject(projection, modelTypes[get<0>(models[id_pair.first])], position, get<1>(models[id_pair.first]), rotation, shader, groundTexture, false);
+						renderObject(projection, modelTypes[get<0>(models[id_pair.first])], position, get<1>(models[id_pair.first]), rotation, shader, groundTexture, false);
 						break;
 					}
-				
-			
-			}
+				}
 			}
 
 			if (id_pair.second->getCollisionShape()->getShapeType() == SPHERE_SHAPE_PROXYTYPE) {

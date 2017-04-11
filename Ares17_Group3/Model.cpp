@@ -45,7 +45,7 @@ void Model::loadModel(string path)
 		this->meshes.push_back(this->processMesh(i, mesh));
 	}
 
-	//cout << "vertices: " << vertices << ", " << "faces" << faces << endl;
+	cout << "vertices: " << vertices << ", " << "faces" << faces << endl;
 }
 
 Mesh Model::processMesh(GLuint MeshIndex, aiMesh* mesh)

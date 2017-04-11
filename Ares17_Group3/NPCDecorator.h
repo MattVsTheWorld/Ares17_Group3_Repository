@@ -5,7 +5,7 @@
 // NPCDecorator implements AbstractNPC
 class NPCDecorator : public AbstractNPC {
 private:
-	float timer = 1.5f;
+	float timer = 0.7f;
 public:
 	NPCDecorator(AbstractNPC *n) { npc = n; }
 	~NPCDecorator() {
@@ -14,16 +14,16 @@ public:
 
 	
 
-	void moveNpc(vertex* v) { ; }
+	void moveNpc(vertex* v, int speed) { ; }
 	queue<vertex*> findPath(AdjacencyList *adjList, int startId, int endId) { return npc->findPath(adjList, startId, endId); }
-	bool update(Model* modelData, glm::mat4 view, glm::mat4 proj, float dt, Grid* _g, Player* player, GLuint shader) {
+	bool update(Model* modelData, glm::mat4 view, glm::mat4 proj, float dt, Grid* _g, Player* player, GLuint shader, int speed) {
 
 		if (npc->getHealth() <= 0) {
 
 			npc->setState(DYING);
 			if (timer > 0.0f) {
 				
-				npc->update(modelData, view, proj, dt, _g, player, shader);
+				npc->update(modelData, view, proj, dt, _g, player, shader, speed);
 				timer -= dt;
 				return true;
 			}
@@ -35,7 +35,7 @@ public:
 		}
 
 		else {
-			npc->update(modelData, view, proj, dt, _g, player, shader);
+			npc->update(modelData, view, proj, dt, _g, player, shader, speed);
 			//render(modelData, view, proj);
 			return true;
 		}
@@ -127,7 +127,9 @@ class Light : public NPCDecorator {
 public:
 	Light(AbstractNPC *n) : NPCDecorator(n) {
 		modifyHealth(10);
+		setAttack(getAttack() + 10);
 		setAttackSpeed(getAttackSpeed() + 1.0);
+		setName("swarmer");
 	}
 	void modifyHealth(double newHp) { this->npc->modifyHealth(newHp); }
 	double getRange() { return NPCDecorator::getRange(); }

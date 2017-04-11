@@ -58,6 +58,8 @@ void Player::update(float dt) {
 		this->armor = ARMOR_CAP;
 	if (this->health <= 0)
 		this->vitState = DEAD;
+	if (this->armor < 0)
+		this->armor = 0;
 
 	////
 	btTransform t;
