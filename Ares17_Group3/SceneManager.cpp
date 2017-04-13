@@ -1160,13 +1160,13 @@ namespace SceneManager {
 
 		}
 
-		if (keys[SDL_SCANCODE_5]) {
+	/*	if (keys[SDL_SCANCODE_5]) {
 			currentLevel = BOSS;
 			globalData->sound_manager->stopBG();
 
 			globalData->sound_manager->playSound(globalData->sound_manager->getSound(BG_2), 0.4f, 2);
 			BASS_Pause();
-		}
+		}*/
 
 		if (keys[SDL_SCANCODE_ESCAPE]) {
 			if (currentState == PAUSE)
