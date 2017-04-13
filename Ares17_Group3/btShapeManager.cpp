@@ -2,9 +2,9 @@
 
 btShapeManager::btShapeManager() {
 	btSettings.collisionConfig = new btDefaultCollisionConfiguration();
-	btSettings.dispatcher = new btCollisionDispatcher(btSettings.collisionConfig); //base algorithm good (?)
-	btSettings.broadphase = new btDbvtBroadphase(); //divide space into different spaces // can use a more performancy ones // axis sweep?
-	btSettings.solver = new btSequentialImpulseConstraintSolver(); // can use OpenCL, multithreading (?)
+	btSettings.dispatcher = new btCollisionDispatcher(btSettings.collisionConfig); //base algorithm
+	btSettings.broadphase = new btDbvtBroadphase(); //divide space into different spaces
+	btSettings.solver = new btSequentialImpulseConstraintSolver(); // can use OpenCL, multithreading
 	btSettings.world = new btDiscreteDynamicsWorld(btSettings.dispatcher, btSettings.broadphase, btSettings.solver, btSettings.collisionConfig);
 	btSettings.world->setGravity(btVector3(0, GRAVITY, 0)); // x y z as usual
 }
@@ -29,8 +29,6 @@ btRigidBody* btShapeManager::addBox(float width, float height, float depth, floa
 
 	btRigidBody* body = new btRigidBody(info);
 	btSettings.world->addRigidBody(body, COL_DEFAULT, COLLIDE_ALL);
-	//bodies.push_back(body);
-
 	return body;
 }
 
@@ -49,8 +47,6 @@ btRigidBody* btShapeManager::addBox(float width, float height, float depth, floa
 	btRigidBody::btRigidBodyConstructionInfo info(mass, motion, box, inertia);
 
 	btRigidBody* body = new btRigidBody(info);
-	//btSettings.world->addRigidBody(body, group, mask);
-	//bodies.push_back(body);
 
 	return body;
 }
@@ -70,7 +66,6 @@ btRigidBody* btShapeManager::addSphere(float rad, float x, float y, float z, flo
 	btRigidBody::btRigidBodyConstructionInfo info(mass, motion, sphere, inertia);
 	btRigidBody* body = new btRigidBody(info);
 	btSettings.world->addRigidBody(body, COL_DEFAULT, COLLIDE_ALL);
-	//bodies.push_back(body);
 	return body;
 }
 
@@ -95,7 +90,7 @@ btRigidBody* btShapeManager::addCapsule(float rad, float height, float x, float 
 
 void btShapeManager::renderSphere(btRigidBody* sphere, glm::mat4 view, glm::mat4 proj, Model *modelData, GLuint shader, GLuint texture) {
 
-	if (sphere->getCollisionShape()->getShapeType() != SPHERE_SHAPE_PROXYTYPE) //cout << "Wrong collision shape ";	
+	if (sphere->getCollisionShape()->getShapeType() != SPHERE_SHAPE_PROXYTYPE)
 		return;
 
 	float r = ((btSphereShape*)sphere->getCollisionShape())->getRadius();
@@ -105,11 +100,11 @@ void btShapeManager::renderSphere(btRigidBody* sphere, glm::mat4 view, glm::mat4
 	glm::mat4 model;
 	t.getOpenGLMatrix(glm::value_ptr(model));
 
-	glActiveTexture(GL_TEXTURE0); // ? not working ?
+	glActiveTexture(GL_TEXTURE0); 
 	glBindTexture(GL_TEXTURE_2D, texture);
 
 	model = glm::scale(model, glm::vec3(r, r, r));
-	glUniform1i(glGetUniformLocation(shader, "animated"), 0); //zero is no animations
+	glUniform1i(glGetUniformLocation(shader, "animated"), 0);
 	glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
 	modelData->Draw(shader);
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -117,7 +112,7 @@ void btShapeManager::renderSphere(btRigidBody* sphere, glm::mat4 view, glm::mat4
 
 void btShapeManager::renderCapsule(btRigidBody* capsule, glm::mat4 view, glm::mat4 proj, Model *modelData, GLuint shader, GLuint texture) {
 
-	if (capsule->getCollisionShape()->getShapeType() != CAPSULE_SHAPE_PROXYTYPE) //cout << "Wrong collision shape ";	
+	if (capsule->getCollisionShape()->getShapeType() != CAPSULE_SHAPE_PROXYTYPE)
 		return;
 
 	float r = ((btCapsuleShape*)capsule->getCollisionShape())->getRadius();
@@ -141,7 +136,7 @@ void btShapeManager::renderCapsule(btRigidBody* capsule, glm::mat4 view, glm::ma
 
 void btShapeManager::renderBox(btRigidBody* box, glm::mat4 view, glm::mat4 proj, Model *modelData, GLuint shader, GLuint texture) {
 
-	if (box->getCollisionShape()->getShapeType() != BOX_SHAPE_PROXYTYPE) 			//cout << "Wrong collision shape";
+	if (box->getCollisionShape()->getShapeType() != BOX_SHAPE_PROXYTYPE) 	
 		return;
 
 	btVector3 extent = ((btBoxShape*)box->getCollisionShape())->getHalfExtentsWithMargin();
@@ -150,12 +145,12 @@ void btShapeManager::renderBox(btRigidBody* box, glm::mat4 view, glm::mat4 proj,
 
 	glm::mat4 model;
 	t.getOpenGLMatrix(glm::value_ptr(model));
-	model = glm::scale(model, glm::vec3(extent.x(), extent.y(), extent.z())); //DEFINITELY goes after
+	model = glm::scale(model, glm::vec3(extent.x(), extent.y(), extent.z())); 
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture);
 
-	glUniform1i(glGetUniformLocation(shader, "animated"), 0); //zero is no animations
+	glUniform1i(glGetUniformLocation(shader, "animated"), 0);
 	glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
 	modelData->Draw(shader);
 
@@ -178,9 +173,6 @@ void btShapeManager::addGhostToWorld(btPairCachingGhostObject* ghost) {
 
 void btShapeManager::addGhostToWorld(btPairCachingGhostObject* ghost, collisiontype COLL_TYPE, int collidesWith) {
 	btSettings.world->addCollisionObject(ghost, COLL_TYPE, collidesWith); // ?
-	
-
-	// world->addCollisionObject(ghostobject, btBroadphaseProxy::KinematicFilter, btBroadphaseProxy::StaticFilter | btBroadphaseProxy::DefaultFilter);
 	btSettings.world->getPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());
 }
 
@@ -194,53 +186,3 @@ void btShapeManager::removeObject(btRigidBody* body) {
 void btShapeManager::removeObject(btPairCachingGhostObject* ghost) {
 	btSettings.world->removeCollisionObject(ghost);
 }
-
-// Create plane + info on bullet
-/*
-btTransform t; // orientation and position // quaternion :))))) """SIMPLE VARIABLE"""
-t.setIdentity(); // 0 position, 0 rotation
-t.setOrigin(btVector3(0, 0, 0));
-btStaticPlaneShape* plane = new btStaticPlaneShape(btVector3(0,1,0),0); // 1st == normal (0,1,0) -> pointing upwards // second == distance from origin = 0 (AA) //infinite in every direction
-//motion state, although position for this is already set
-btMotionState* motion = new btDefaultMotionState(t);
-// mass = 0 == static, mass > 0 == dinamic ( < 0 no sense)
-btRigidBody::btRigidBodyConstructionInfo info(0,motion,plane); // no need to dynamically allocate
-// for dinamic bodies will have to add inertia (?)
-btRigidBody* body = new btRigidBody(info);
-world->addRigidBody(body);
-bodies.push_back(body);
-*/
-
-/*
-void renderPlane(btRigidBody* plane, glm::mat4 projection)
-{
-if (plane->getCollisionShape()->getShapeType() != STATIC_PLANE_PROXYTYPE)
-{
-return;
-cout << "Wrong collision shape (?)";
-}
-//glColor3f(0.8, 0.8, 0.8);
-glUseProgram(shaderProgram);
-MeshManager::setLight(shaderProgram, testLight);
-MeshManager::setMaterial(shaderProgram, defaultMaterial);
-mvStack.push(mvStack.top());// push modelview to stack
-
-btTransform t;
-plane->getMotionState()->getWorldTransform(t);
-
-t.getOpenGLMatrix(glm::value_ptr(mvStack.top()));
-
-/*
-glActiveTexture(GL_TEXTURE0);
-glBindTexture(GL_TEXTURE_2D, testCubes[0]->object_getTexture());
-mvStack.top() = glm::scale(mvStack.top(), glm::vec3(10, 0.5, 10));
-MeshManager::setUniformMatrix4fv(shaderProgram, "modelview", glm::value_ptr(mvStack.top()));
-MeshManager::setUniformMatrix4fv(shaderProgram, "projection", glm::value_ptr(projection));
-//cout << "GASGHDJ";
-
-MeshManager::drawIndexedMesh(testCubes[0]->object_getMesh(), testCubes[0]->object_getIndex(), GL_TRIANGLES);
-glBindTexture(GL_TEXTURE_2D, 0);
-
-mvStack.pop();
-
-} */

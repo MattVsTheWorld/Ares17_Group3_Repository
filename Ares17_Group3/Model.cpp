@@ -13,11 +13,10 @@ void Model::Draw(GLuint shader)
 	}
 }
 
-
 void Model::loadModel(string path)
 {
 	// Read file via ASSIMP
-	scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs); // aiProcess_JoinIdenticalVertices???? Actually...it makes it slower so no
+	scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs); // aiProcess_JoinIdenticalVertices makes it slower so no
 	// Check for errors
 	if (!scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
 	{
@@ -44,8 +43,6 @@ void Model::loadModel(string path)
 		faces += mesh->mNumFaces;
 		this->meshes.push_back(this->processMesh(i, mesh));
 	}
-
-	//cout << "vertices: " << vertices << ", " << "faces" << faces << endl;
 }
 
 Mesh Model::processMesh(GLuint MeshIndex, aiMesh* mesh)
@@ -59,7 +56,9 @@ Mesh Model::processMesh(GLuint MeshIndex, aiMesh* mesh)
 	for (GLuint i = 0; i < mesh->mNumVertices; i++)
 	{
 		Vertex vertex;
-		glm::vec3 vector; // We declare a placeholder vector since assimp uses its own vector class that doesn't directly convert to glm's vec3 class so we transfer the data to this placeholder glm::vec3 first.
+		// We declare a placeholder vector since assimp uses its own vector class 
+		// that doesn't directly convert to glm's vec3 class so we transfer the data to this placeholder glm::vec3 first.
+		glm::vec3 vector; 
 		// Positions
 		if (mesh->HasPositions()) {
 			vector.x = mesh->mVertices[i].x;
@@ -118,7 +117,7 @@ Mesh Model::processMesh(GLuint MeshIndex, aiMesh* mesh)
 				aiVertexWeight weight = mesh->mBones[i]->mWeights[j];
 				// where to start reading vertex weights
 				GLuint vertexStart = weight.mVertexId*NUM_BONES_PER_VERTEX;
-				// fill teh arrays
+				// fill the arrays
 				for (GLuint k = 0; k < NUM_BONES_PER_VERTEX; k++)
 				{
 					if (boneWeights.at(vertexStart + k) == 0.0f) //if 0 not filled with weight

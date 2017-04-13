@@ -1,7 +1,6 @@
 #include "loadBitmap.h"
 
-// just created a simple namespace for the load bitmap function
-// taken from the labs
+// From RT3D labs
 namespace loadBitmap
 {
 	GLuint loadBitmap(char *fname) {
