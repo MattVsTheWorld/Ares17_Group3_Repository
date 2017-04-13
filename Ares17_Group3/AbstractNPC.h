@@ -10,6 +10,7 @@
 #include "A_star.h"
 #include <chrono>
 #include "Grid.h"
+#include "Player.h"
 
 using std::cout;
 using std::endl;

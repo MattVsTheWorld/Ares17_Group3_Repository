@@ -8,12 +8,6 @@
     <Filter Include="Engine">
       <UniqueIdentifier>{f7566477-288d-478d-b7d0-c31cf8a5c67e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Being worked on">
-      <UniqueIdentifier>{d6406d72-4a65-4021-8bdf-075a39d54a7a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="To be deleted / redone">
-      <UniqueIdentifier>{1caede58-4bd3-4b03-b024-ef6f6ff1167b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Shaders">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
@@ -30,33 +24,30 @@
     <Filter Include="Shaders\Texture only">
       <UniqueIdentifier>{65cca100-ca89-4def-b07e-44b2d6444f05}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Shaders\Unused">
-      <UniqueIdentifier>{5d86fb33-3f44-4257-97b9-9cdc7b8be3bf}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Being worked on\Game">
-      <UniqueIdentifier>{76cc8627-93b5-433d-a3b6-5babe0b004ac}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Being worked on\Game\AI">
-      <UniqueIdentifier>{2ad699c1-f32e-4de0-b5ea-60a74c4e9e07}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Being worked on\Game\AI headers">
-      <UniqueIdentifier>{6c90ab0e-1acd-42a0-b9bd-10c1635ef321}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Engine headers">
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
-    <Filter Include="Being worked on\Game\Entities">
+    <Filter Include="Game">
+      <UniqueIdentifier>{76cc8627-93b5-433d-a3b6-5babe0b004ac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\AI">
+      <UniqueIdentifier>{2ad699c1-f32e-4de0-b5ea-60a74c4e9e07}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\AI headers">
+      <UniqueIdentifier>{6c90ab0e-1acd-42a0-b9bd-10c1635ef321}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Entities">
       <UniqueIdentifier>{5021f36f-e9a7-46f0-be35-76a81b067a78}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Being worked on\Game\Entities headers">
+    <Filter Include="Game\Entities\NPC">
+      <UniqueIdentifier>{6b14a11b-4488-4ae4-ace5-f7ee41710bbc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game\Entities headers">
       <UniqueIdentifier>{4bdd8e42-f436-4a12-8dc2-43d4f4d6b27f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Being worked on\Game\Entities headers\NPC headers">
+    <Filter Include="Game\Entities headers\NPC headers">
       <UniqueIdentifier>{d601aa7d-74fb-4a95-90f1-b35352cf176d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Being worked on\Game\Entities\NPC">
-      <UniqueIdentifier>{6b14a11b-4488-4ae4-ace5-f7ee41710bbc}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -72,9 +63,6 @@
     <ClCompile Include="Skybox.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
-    <ClCompile Include="SceneManager.cpp">
-      <Filter>Being worked on</Filter>
-    </ClCompile>
     <ClCompile Include="Mesh.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
@@ -82,16 +70,16 @@
       <Filter>Engine</Filter>
     </ClCompile>
     <ClCompile Include="A_star.cpp">
-      <Filter>Being worked on\Game\AI</Filter>
+      <Filter>Game\AI</Filter>
     </ClCompile>
     <ClCompile Include="AdjacencyList.cpp">
-      <Filter>Being worked on\Game\AI</Filter>
+      <Filter>Game\AI</Filter>
     </ClCompile>
     <ClCompile Include="Grid.cpp">
-      <Filter>Being worked on\Game\AI</Filter>
+      <Filter>Game\AI</Filter>
     </ClCompile>
     <ClCompile Include="Projectile.cpp">
-      <Filter>Being worked on\Game\Entities</Filter>
+      <Filter>Game\Entities</Filter>
     </ClCompile>
     <ClCompile Include="SoundManager.cpp">
       <Filter>Engine</Filter>
@@ -103,13 +91,28 @@
       <Filter>Engine</Filter>
     </ClCompile>
     <ClCompile Include="Player.cpp">
-      <Filter>Being worked on\Game\Entities</Filter>
+      <Filter>Game\Entities</Filter>
     </ClCompile>
     <ClCompile Include="SDLmanager.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
     <ClCompile Include="MeshManager.cpp">
       <Filter>Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="NonPC.cpp">
+      <Filter>Game\Entities\NPC</Filter>
+    </ClCompile>
+    <ClCompile Include="NPCDecorator.cpp">
+      <Filter>Game\Entities\NPC</Filter>
+    </ClCompile>
+    <ClCompile Include="Weapon.cpp">
+      <Filter>Game\Entities</Filter>
+    </ClCompile>
+    <ClCompile Include="SceneManager.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
+    <ClCompile Include="GlobalData.cpp">
+      <Filter>Game</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -125,9 +128,6 @@
     <ClInclude Include="Mesh.h">
       <Filter>Engine headers</Filter>
     </ClInclude>
-    <ClInclude Include="SceneManager.h">
-      <Filter>Being worked on</Filter>
-    </ClInclude>
     <ClInclude Include="main.h">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -135,22 +135,22 @@
       <Filter>Engine headers</Filter>
     </ClInclude>
     <ClInclude Include="AbstractNPC.h">
-      <Filter>Being worked on\Game\Entities headers\NPC headers</Filter>
+      <Filter>Game\Entities headers\NPC headers</Filter>
     </ClInclude>
     <ClInclude Include="NPCDecorator.h">
-      <Filter>Being worked on\Game\Entities headers\NPC headers</Filter>
+      <Filter>Game\Entities headers\NPC headers</Filter>
     </ClInclude>
     <ClInclude Include="NonPC.h">
-      <Filter>Being worked on\Game\Entities headers\NPC headers</Filter>
+      <Filter>Game\Entities headers\NPC headers</Filter>
     </ClInclude>
     <ClInclude Include="Grid.h">
-      <Filter>Being worked on\Game\AI headers</Filter>
+      <Filter>Game\AI headers</Filter>
     </ClInclude>
     <ClInclude Include="AdjacencyList.h">
-      <Filter>Being worked on\Game\AI headers</Filter>
+      <Filter>Game\AI headers</Filter>
     </ClInclude>
     <ClInclude Include="A_star.h">
-      <Filter>Being worked on\Game\AI headers</Filter>
+      <Filter>Game\AI headers</Filter>
     </ClInclude>
     <ClInclude Include="bass.h">
       <Filter>Engine headers</Filter>
@@ -165,10 +165,10 @@
       <Filter>Engine headers</Filter>
     </ClInclude>
     <ClInclude Include="Projectile.h">
-      <Filter>Being worked on\Game\Entities headers</Filter>
+      <Filter>Game\Entities headers</Filter>
     </ClInclude>
     <ClInclude Include="Player.h">
-      <Filter>Being worked on\Game\Entities headers</Filter>
+      <Filter>Game\Entities headers</Filter>
     </ClInclude>
     <ClInclude Include="SDLmanager.h">
       <Filter>Engine headers</Filter>
@@ -176,11 +176,14 @@
     <ClInclude Include="MeshManager.h">
       <Filter>Engine headers</Filter>
     </ClInclude>
-    <ClInclude Include="GlobalData.h">
-      <Filter>Being worked on</Filter>
-    </ClInclude>
     <ClInclude Include="Weapon.h">
-      <Filter>Being worked on</Filter>
+      <Filter>Game\Entities headers</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneManager.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="GlobalData.h">
+      <Filter>Game</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -210,12 +213,6 @@
     </None>
     <None Include="Shaders\textured.frag">
       <Filter>Shaders\Texture only</Filter>
-    </None>
-    <None Include="Shaders\phong-tex.frag">
-      <Filter>Shaders\Unused</Filter>
-    </None>
-    <None Include="Shaders\phong-tex.vert">
-      <Filter>Shaders\Unused</Filter>
     </None>
   </ItemGroup>
 </Project>

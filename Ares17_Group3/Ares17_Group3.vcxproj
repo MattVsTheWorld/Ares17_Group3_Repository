@@ -158,6 +158,7 @@
     <ClCompile Include="AdjacencyList.cpp" />
     <ClCompile Include="A_star.cpp" />
     <ClCompile Include="btShapeManager.cpp" />
+    <ClCompile Include="GlobalData.cpp" />
     <ClCompile Include="Grid.cpp" />
     <ClCompile Include="hudManager.cpp" />
     <ClCompile Include="loadBitmap.cpp" />
@@ -165,6 +166,8 @@
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="MeshManager.cpp" />
     <ClCompile Include="Model.cpp" />
+    <ClCompile Include="NonPC.cpp" />
+    <ClCompile Include="NPCDecorator.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Projectile.cpp" />
     <ClCompile Include="SceneManager.cpp" />
@@ -172,6 +175,7 @@
     <ClCompile Include="ShaderManager.cpp" />
     <ClCompile Include="Skybox.cpp" />
     <ClCompile Include="SoundManager.cpp" />
+    <ClCompile Include="Weapon.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AdjacencyList.h" />
@@ -203,8 +207,6 @@
     <None Include="Shaders\cubeMap.vert" />
     <None Include="Shaders\modelLoading.frag" />
     <None Include="Shaders\modelLoading.vert" />
-    <None Include="Shaders\phong-tex.frag" />
-    <None Include="Shaders\phong-tex.vert" />
     <None Include="Shaders\simpleShadowMap.frag" />
     <None Include="Shaders\simpleShadowMap.gs" />
     <None Include="Shaders\simpleShadowMap.vert" />

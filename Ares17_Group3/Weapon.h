@@ -6,15 +6,10 @@ enum wepType { PISTOL, NUKA, SCIFI };
 
 class Weapon {
 public:
-
-	Weapon() {};
-	Weapon(wepType _type, double _dmg) {
-		name = _type;
-		damage = _dmg;
-	}
-
-	wepType getName() { return name; }
-	double getDamage() { return damage; }
+	Weapon();
+	Weapon(wepType _type, double _dmg);
+	wepType getName();
+	double getDamage();
 
 private:
 	wepType name;
