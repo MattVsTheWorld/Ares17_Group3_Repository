@@ -63,7 +63,6 @@ btRigidBody* NonPC::addBoundingCapsule(float rad, float height, float x, float y
 NonPC::NonPC(double _h, double _r, btShapeManager* _sm, glm::vec3 _spawn, float radius, float height, float mass,
 	Model* _bmodel, GLuint _shader, GLuint _text, SoundManager *sound_man /*other parameters*/) {
 	health = _h;
-	max_hp = _h;
 	range = _r;
 	shapeManager = _sm;
 	boundingModel = _bmodel;

@@ -71,7 +71,6 @@ protected:
 	double recalcTimer = REFRESHRATE;
 	double attackTimer = 0;
 	glm::vec3 spawn;
-	double max_hp;
 	double health;
 	double range;
 	double attack;
