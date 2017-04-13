@@ -103,7 +103,7 @@ namespace SceneManager {
 	glm::vec3 moveRight(glm::vec3 pos, GLfloat angle, GLfloat d) {
 		return glm::vec3(pos.x + d*std::cos(rotationAngles.y*DEG_TO_RADIAN), pos.y, pos.z + d*std::sin(rotationAngles.y*DEG_TO_RADIAN));
 	}
-	
+
 	glm::vec3 shiftForward(glm::vec3 pos, glm::vec3 angle, GLfloat d) {
 		return glm::vec3(pos.x + d*std::sin(angle.y*DEG_TO_RADIAN), pos.y - d*std::sin(angle.x), pos.z - d*std::cos(angle.y*DEG_TO_RADIAN));
 	}
@@ -126,7 +126,7 @@ namespace SceneManager {
 		if (!concurrent && speed.absolute().x() <= globalData->player->getSpeed() && speed.absolute().z() <= globalData->player->getSpeed())
 			speed = btVector3(speed.x() + _speed*std::sin(angle*DEG_TO_RADIAN), speed.y(), speed.z() - _speed*std::cos(angle*DEG_TO_RADIAN));
 		else if (concurrent)
-			speed = btVector3(speed.x() + (speed.absolute().x() >globalData->player->getSpeed() ? 0 : _speed*std::sin(angle*DEG_TO_RADIAN)), speed.y(), speed.z() - (speed.absolute().z() > globalData->player->getSpeed() ? 0 : _speed*std::cos(angle*DEG_TO_RADIAN)));
+			speed = btVector3(speed.x() + (speed.absolute().x() > globalData->player->getSpeed() ? 0 : _speed*std::sin(angle*DEG_TO_RADIAN)), speed.y(), speed.z() - (speed.absolute().z() > globalData->player->getSpeed() ? 0 : _speed*std::cos(angle*DEG_TO_RADIAN)));
 		return speed;
 	}
 
@@ -500,7 +500,7 @@ namespace SceneManager {
 		modelTypes.insert(std::pair<string, Model*>("bossAttack", new Model("../Ares17_Group3/Models/Enemies/Boss/Attack/mutant_swiping.dae")));
 		modelTypes.insert(std::pair<string, Model*>("bossRun", new Model("../Ares17_Group3/Models/Enemies/Boss/Run/mutant_run.dae")));
 		modelTypes.insert(std::pair<string, Model*>("bossDie", new Model("../Ares17_Group3/Models/Enemies/Boss/Die/sword_and_shield_death.dae")));
-		
+
 		//Environment
 		modelTypes.insert(std::pair<string, Model*>("sphere", new Model("../Ares17_Group3/Models/Environment/sphere.obj")));
 		modelTypes.insert(std::pair<string, Model*>("capsule", modelTypes["sphere"]));
@@ -511,7 +511,7 @@ namespace SceneManager {
 		modelTypes.insert(std::pair<string, Model*>("heli", new Model("../Ares17_Group3/Models/Environment/Helicopter/hheli.obj")));
 		modelTypes.insert(std::pair<string, Model*>("tower", new Model("../Ares17_Group3/Models/Environment/sci-fi-tower/building_02_fbx.FBX.obj")));
 		modelTypes.insert(std::pair<string, Model*>("barrier", new Model("../Ares17_Group3/Models/Environment/Barrier/model.obj")));
-		
+
 		//Collectable
 		modelTypes.insert(std::pair<string, Model*>("heart", new Model("../Ares17_Group3/Models/Collectable/Heart/Heart.obj")));
 		modelTypes.insert(std::pair<string, Model*>("shield", new Model("../Ares17_Group3/Models/Collectable/Shield/shield.obj")));
@@ -549,9 +549,7 @@ namespace SceneManager {
 			capsuleNo++;
 		}
 		if (boundingType != SPHERE)
-		{
 			bodies[key]->setAngularFactor(0); // Doesn't fall sideways
-		}
 		bodies[key]->setFriction(8);
 		models.insert(std::pair<string, std::tuple<string, glm::vec3, glm::vec3, glm::vec3>>(key, make_tuple(currentModel, modelScale, modelRotation, glm::vec3(0.0f, 0.0f, 0.0f))));
 	}
@@ -651,7 +649,7 @@ namespace SceneManager {
 		modelTypes.insert(std::pair<string, Model*>("box", modelTypes["cube"]));
 		globalData->h_manager->renderLoading(texturedProgram, modelTypes["cube"]);
 		SDL_GL_SwapWindow(window); // swap buffers once
-		
+
 		level1Grid = new Grid();
 		initmodelTypes();
 		modelProgram = ShaderManager::initShaders("../Ares17_Group3/Shaders/modelLoading.vert", "../Ares17_Group3/Shaders/modelLoading.frag");
@@ -717,15 +715,10 @@ namespace SceneManager {
 
 	void lockCamera()
 	{
-		if (rotationAngles.x > PITCHLOCK)
-			rotationAngles.x = PITCHLOCK;
-		if (rotationAngles.x < -PITCHLOCK)
-			rotationAngles.x = -PITCHLOCK;
-		if (rotationAngles.y < 0.0)
-			rotationAngles.y += 360.0;
-		if (rotationAngles.y > 360.0)
-			rotationAngles.y -= 360;
-
+		if (rotationAngles.x > PITCHLOCK)	rotationAngles.x = PITCHLOCK;
+		if (rotationAngles.x < -PITCHLOCK)	rotationAngles.x = -PITCHLOCK;
+		if (rotationAngles.y < 0.0)			rotationAngles.y += 360.0;
+		if (rotationAngles.y > 360.0)		rotationAngles.y -= 360;
 	}
 
 	float gameTime() {
@@ -735,7 +728,6 @@ namespace SceneManager {
 		float dt_secs = (float)dt / 1000;
 		if (dt_secs > 0.017f) dt_secs = 0.017f; // first value is off ( 5.5~)
 
-	
 		lastTime = currentTime;
 
 		return dt_secs;
@@ -763,7 +755,8 @@ namespace SceneManager {
 			glRotatef(-rotationAngles.y, 0.0, 1.0, 0.0);
 
 			SDL_WarpMouseInWindow(window, MidX, MidY);
-		} else if (currentState == PAUSE || currentState == MENU)
+		}
+		else if (currentState == PAUSE || currentState == MENU)
 			SDL_ShowCursor(SDL_ENABLE);
 
 		btTransform t;
@@ -778,7 +771,7 @@ namespace SceneManager {
 			clickable = false;
 			// Pausee
 			if (currentState == RUNNING) {
-				for (const auto it : enemies) 
+				for (const auto it : enemies)
 					it->setState(PAUSED);
 				currentState = PAUSE;
 				globalData->sound_manager->setState(false);
@@ -794,15 +787,15 @@ namespace SceneManager {
 
 			}
 		}
-		
+
 		pauseTimeout -= dt_secs;
 		if (pauseTimeout <= 0) {
 			pauseTimeout = 1.0f;
 			clickable = true;
 		}
-		
+
 		if (keys[SDL_SCANCODE_LEFTBRACKET]) { mode = PLAY; }
-		else if (keys[SDL_SCANCODE_RIGHTBRACKET]) {	mode = EDIT; }
+		else if (keys[SDL_SCANCODE_RIGHTBRACKET]) { mode = EDIT; }
 
 		float increase;
 		if (mode == PLAY) {
@@ -813,17 +806,17 @@ namespace SceneManager {
 						if (globalData->player->getWeapon().getName() == PISTOL) {
 							globalData->projectile_manager->addProjectile(shiftRight(moveForward(glm::vec3(globalData->player->getPosition().x, globalData->player->getPosition().y - 0.35, globalData->player->getPosition().z),
 								rotationAngles, 1.0f), rotationAngles, 0.5), PROJ_SPEED, (rotationAngles.y*DEG_TO_RADIAN), rotationAngles.x); //!++!
-							
+
 							coolDown = COOL_TIME;
-						globalData->sound_manager->playSound(globalData->sound_manager->getSound(BULLET), 1, 1);
+							globalData->sound_manager->playSound(globalData->sound_manager->getSound(BULLET), 1, 1);
 						}
 
 						if (globalData->player->getWeapon().getName() == NUKA) {
 							globalData->projectile_manager->addProjectile(shiftRight(moveForward(glm::vec3(globalData->player->getPosition().x, globalData->player->getPosition().y - 0.35, globalData->player->getPosition().z),
 								rotationAngles, 1.0f), rotationAngles, 0.5), PROJ_SPEED, (rotationAngles.y*DEG_TO_RADIAN), rotationAngles.x); //!++!
 
-							coolDown = COOL_TIME/2;
-						globalData->sound_manager->playSound(globalData->sound_manager->getSound(LASER), 1, 1);																												
+							coolDown = COOL_TIME / 2;
+							globalData->sound_manager->playSound(globalData->sound_manager->getSound(LASER), 1, 1);
 						}
 
 						if (globalData->player->getWeapon().getName() == SCIFI) {
@@ -831,7 +824,7 @@ namespace SceneManager {
 								rotationAngles, 1.0f), rotationAngles, 0.5), PROJ_SPEED, (rotationAngles.y*DEG_TO_RADIAN), rotationAngles.x); //!++!
 
 							coolDown = COOL_TIME*2.0;
-						globalData->sound_manager->playSound(globalData->sound_manager->getSound(WINCH), 0.4f, 1);																											
+							globalData->sound_manager->playSound(globalData->sound_manager->getSound(WINCH), 0.4f, 1);
 						}
 					}
 				}
@@ -880,7 +873,7 @@ namespace SceneManager {
 
 			btTransform t;
 			t.setIdentity();
-			
+
 			if (sdlEvent.type == SDL_MOUSEBUTTONDOWN) {
 				if (sdlEvent.button.button == SDL_BUTTON_LEFT) {
 					if (coolDown <= 0.0f) {
@@ -1170,7 +1163,7 @@ namespace SceneManager {
 		if (keys[SDL_SCANCODE_5]) {
 			currentLevel = BOSS;
 			globalData->sound_manager->stopBG();
-			
+
 			globalData->sound_manager->playSound(globalData->sound_manager->getSound(BG_2), 0.4f, 2);
 			BASS_Pause();
 		}
@@ -1192,18 +1185,18 @@ namespace SceneManager {
 		toEulerianAngle(rotation, eulerRotation);
 		model = glm::rotate(model, eulerRotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
 		if (spin)
-			model = glm::rotate(model, eulerRotation.y+theta, glm::vec3(0.0f, 1.0f, 0.0f));
+			model = glm::rotate(model, eulerRotation.y + theta, glm::vec3(0.0f, 1.0f, 0.0f));
 		else
 			model = glm::rotate(model, eulerRotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
 		model = glm::rotate(model, eulerRotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
-		
+
 		model = glm::scale(model, scale);	// It's a bit too big for our scene, so scale it down
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texture);
 		glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
 		glUniform1i(glGetUniformLocation(shader, "animated"), 0); //zero is no animations
 		modelData->Draw(shader);
-		
+
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
@@ -1301,7 +1294,7 @@ namespace SceneManager {
 	int runningEnemies = 0;
 	int dyingEnemies = 0;
 	int animationOn = 0;
-		
+
 	void animationTransforms() {
 		float speed;
 		if (currentLevel == BOSS) { speed = 1; }
@@ -1379,7 +1372,7 @@ namespace SceneManager {
 		if (local_pitch <= -1)
 			local_pitch = -1;
 		glm::vec3 gunPos;
-		gunPos = shiftForward(glm::vec3(globalData->player->getPosition().x, globalData->player->getPosition().y-0.5, globalData->player->getPosition().z), rotationAngles, 0.075f);
+		gunPos = shiftForward(glm::vec3(globalData->player->getPosition().x, globalData->player->getPosition().y - 0.5, globalData->player->getPosition().z), rotationAngles, 0.075f);
 		gunPos = shiftRight(gunPos, rotationAngles, 0.5f);
 		model = glm::translate(model, gunPos);
 		model = glm::rotate(model, -rotationAngles.y*DEG_TO_RADIAN, glm::vec3(0.0, 1.0, 0.0));
@@ -1388,7 +1381,7 @@ namespace SceneManager {
 			model = glm::rotate(model, float(80 * DEG_TO_RADIAN), glm::vec3(0.0, 1.0, 0.0));
 		else
 			model = glm::rotate(model, float(-100 * DEG_TO_RADIAN), glm::vec3(0.0, 1.0, 0.0));
-		model = glm::scale(model,scale);
+		model = glm::scale(model, scale);
 		//I can't fix this. If you want, give it a try. good luck.
 		glUniformMatrix4fv(glGetUniformLocation(shader, "projection"), 1, GL_FALSE, glm::value_ptr(glm::mat4()));
 		glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
@@ -1398,11 +1391,7 @@ namespace SceneManager {
 
 	}
 
-	void updatePlayer(float dt) {
-		globalData->player->update(dt);
-	}
-
-	void updateCollectables() { 
+	void updateCollectables() {
 		unsigned int max = collectables.size();
 		for (unsigned int i = 0; i < max; i++) {
 			if (findCollision(get<0>(collectables[i]))) {
@@ -1460,11 +1449,39 @@ namespace SceneManager {
 
 	int killedEnemies = 0;
 	double victory = 3;
+	const int nextLevel = 5;
+
+	void enemySpawn() {
+		if (enemies.size() < 6) {
+			glm::vec3 spawnPoint = randomSpawnPoint();
+			srand(time(NULL));
+			int num = std::rand() % 4 + 1; //random int between 1 and 4
+			if (num == 1) {
+				enemies.insert(new Ranged(new NonPC(125, 6,
+					globalData->bt_manager, spawnPoint,
+					1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
+			}
+			else if (num == 2) {
+				enemies.insert(new Melee(new NonPC(200, 3,
+					globalData->bt_manager, spawnPoint,
+					1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
+			}
+			else {
+				enemies.insert(new Light(new NonPC(80, 3,
+					globalData->bt_manager, spawnPoint,
+					1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
+
+			}
+		}
+	}
+
 	void update(SDL_Window * window, SDL_Event sdlEvent) {
-		if (killedEnemies >= 5)
+		if (killedEnemies >= nextLevel)
 		{
-			if (currentLevel == FIRST) { currentLevel = SECOND; }
-			else if (currentLevel == SECOND) { currentLevel = BOSS; }
+			if (currentLevel == FIRST)
+				currentLevel = SECOND;
+			else if (currentLevel == SECOND)
+				currentLevel = BOSS;
 			//else { currentLevel = FIRST; }
 			killedEnemies = 0;
 			reset();
@@ -1472,11 +1489,11 @@ namespace SceneManager {
 			globalData->sound_manager->stopBG();
 			globalData->sound_manager->playSound(globalData->sound_manager->getSound(BG_2), 0.4f, 2);
 		}
-		
+
 		controls(window, sdlEvent);
 		dt_secs = gameTime();
-		coolDown -= dt_secs;	
-		
+		coolDown -= dt_secs;
+
 		if (currentState == VICTORY) {
 			victory -= dt_secs;
 			if (victory <= 0)
@@ -1486,56 +1503,29 @@ namespace SceneManager {
 			}
 		}
 		if (currentState == RUNNING) {
-			updatePlayer(dt_secs);
+			globalData->player->update(dt_secs);
 			if (globalData->player->getState() == JUMPING)
 				if (findCollision(globalData->player->playerGhost))
 					globalData->player->setState(ON_GROUND);
-				
+
 			updateCollectables();
 			theta += 0.1f;
 			globalData->bt_manager->update();
 		}
 
-		if (globalData->player->getLifeState() == DEAD)
-		{
+		if (globalData->player->getLifeState() == DEAD) {
 			currentState = DEFEAT;
-
 			defeatTime -= dt_secs;
-			if (defeatTime <= 0) {
+			if (defeatTime <= 0) 
 				reset();
-			}
 		}
-
-		if (currentLevel != BOSS) {
-			if (enemies.size() < 6) {
-				glm::vec3 spawnPoint = randomSpawnPoint();
-				srand(time(NULL));
-				int num = std::rand() % 4 + 1; //random int between 1 and 4
-				if (num == 1) {
-					enemies.insert(new Ranged(new NonPC(125, 6,
-						globalData->bt_manager, spawnPoint,
-						1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
-				}
-				else if (num == 2) {
-					enemies.insert(new Melee(new NonPC(200, 3,
-						globalData->bt_manager, spawnPoint,
-						1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
-				}
-				else {
-					enemies.insert(new Light(new NonPC(80, 3,
-						globalData->bt_manager, spawnPoint,
-						1.25, 0.5, 20, modelTypes["capsule"], modelProgram, defaultTexture, globalData->sound_manager)));
-
-				}
-			}
-		}
+		if (currentLevel != BOSS)
+			enemySpawn();
 	}
 
 	void camera() {
-		//		if (pointOfView == FIRST_PERSON) {
 		at = moveForward(globalData->player->getPosition(), rotationAngles.y, 1.0f);
 		at.y -= rotationAngles.x;
-
 		view = glm::lookAt(globalData->player->getPosition(), at, up);
 	}
 
@@ -1587,7 +1577,7 @@ namespace SceneManager {
 			int speed = 0;
 			string name = (*it)->getName();
 			Model* currentModel = modelTypes[name + "Run"];
-			
+
 			if (name == "swarmer") { speed = 10; }
 			else if (name == "boss") { speed = 7; }
 			else { speed = 8; }
@@ -1631,7 +1621,7 @@ namespace SceneManager {
 				if (modelTypes[get<0>(models[id_pair.first])] == modelTypes["heart"] || modelTypes[get<0>(models[id_pair.first])] == modelTypes["shield"])
 					renderObject(projection, modelTypes[get<0>(models[id_pair.first])], position, get<1>(models[id_pair.first]), rotation, shader, heartTexture, true);
 				else
-				{ 
+				{
 					switch (currentLevel) {
 					case FIRST:
 						renderObject(projection, modelTypes[get<0>(models[id_pair.first])], position, get<1>(models[id_pair.first]), rotation, shader, groundTexture, false);
@@ -1696,7 +1686,7 @@ namespace SceneManager {
 			glUniform1i(uniformIndex, 0);
 			uniformIndex = glGetUniformLocation(shader, "material.specular");
 			glUniform1i(uniformIndex, 0);
-			glUniform1f(glGetUniformLocation(shader, "material.shininess"), 32.0f); 
+			glUniform1f(glGetUniformLocation(shader, "material.shininess"), 32.0f);
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, defaultTexture);
 			// pass in the shadowmap
@@ -1706,7 +1696,7 @@ namespace SceneManager {
 			glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
 
 		}
-		
+
 		renderWorldObjects(shader, projection); //draw normal scene
 
 		glActiveTexture(GL_TEXTURE1);
@@ -1737,7 +1727,7 @@ namespace SceneManager {
 		}
 	}
 
-	void draw(SDL_Window * window) { 
+	void draw(SDL_Window * window) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear window
 		glEnable(GL_CULL_FACE);
 		glClearColor(0.5f, 0.7f, 0.8f, 1.0f);
@@ -1747,7 +1737,7 @@ namespace SceneManager {
 		view = glm::mat4(1.0);
 
 		projection = glm::perspective(float(60.0f*DEG_TO_RADIAN), SCREENWIDTH / SCREENHEIGHT, 0.1f, 150.0f);
-		
+
 		for (int pass = 0; pass < 2; pass++) {
 			camera();
 			if (pass == 0) {
@@ -1806,12 +1796,12 @@ namespace SceneManager {
 				}
 
 				animationTransforms();
-	    	
+
 				renderWeapon(projection, modelTypes[wepType], modelProgram, wepScale, flip); //TODO: Render current weapon
 
 				renderHud(texturedProgram, modelTypes["cube"]);
-				
-				
+
+
 				if (mode == EDIT) {
 					globalData->h_manager->renderEditHud("Bounding", currentBounding, texturedProgram, modelTypes["cube"], glm::vec3(0.7f, 0.45f, 0.9f));
 					globalData->h_manager->renderEditHud("Model", currentModel, texturedProgram, modelTypes["cube"], glm::vec3(0.7f, 0.35f, 0.9f));
