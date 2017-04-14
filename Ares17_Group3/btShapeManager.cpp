@@ -172,7 +172,7 @@ void btShapeManager::addGhostToWorld(btPairCachingGhostObject* ghost) {
 }
 
 void btShapeManager::addGhostToWorld(btPairCachingGhostObject* ghost, collisiontype COLL_TYPE, int collidesWith) {
-	btSettings.world->addCollisionObject(ghost, COLL_TYPE, collidesWith); // ?
+	btSettings.world->addCollisionObject(ghost, COLL_TYPE, collidesWith);
 	btSettings.world->getPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());
 }
 

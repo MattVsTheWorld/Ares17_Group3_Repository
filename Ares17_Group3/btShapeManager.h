@@ -9,7 +9,6 @@
 
 #define GRAVITY -10
 
-//TODO:move
 #define BIT(x) (1<<(x))
 enum collisiontype {
 	COL_NOTHING = 0,
@@ -18,19 +17,15 @@ enum collisiontype {
 	COL_BULLET = BIT(2),
 	COL_ENEMY = BIT(3),
 	COL_COLLECTABLE = BIT(4)
-
-	
-	//(...)
 };
 #define COLLIDE_ALL COL_DEFAULT | COL_PLAYER | COL_BULLET | COL_ENEMY
-//!!
 
 // Settings struct
 struct btSettings {
 	btDynamicsWorld* world;
 	btDispatcher* dispatcher;
 	btCollisionConfiguration* collisionConfig;
-	btBroadphaseInterface* broadphase; //improves collision check (?) // can improve by knowing world size (?)
+	btBroadphaseInterface* broadphase; //improves collision check // can improve by knowing world size
 	btConstraintSolver* solver;
 };
 // Class to manage shapes created with the bullet physics library

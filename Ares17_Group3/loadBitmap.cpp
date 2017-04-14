@@ -7,7 +7,7 @@ namespace loadBitmap
 		GLuint texID;
 		glGenTextures(1, &texID); // generate texture ID
 
-								  // load file - using core SDL library
+		// load file - using core SDL library
 		SDL_Surface *tmpSurface;
 		tmpSurface = SDL_LoadBMP(fname);
 		if (!tmpSurface) {

@@ -1,6 +1,5 @@
 #include "Weapon.h"
 
-
 Weapon::Weapon() {};
 Weapon::Weapon(wepType _type, double _dmg) {
 	name = _type;

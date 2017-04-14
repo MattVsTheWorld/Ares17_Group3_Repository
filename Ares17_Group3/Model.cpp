@@ -124,9 +124,9 @@ Mesh Model::processMesh(GLuint MeshIndex, aiMesh* mesh)
 					{
 						boneWeights.at(vertexStart + k) = weight.mWeight;
 						boneIDs.at(vertexStart + k) = BoneIndex; // i ID of current bone
-						vertices.at(weight.mVertexId).id[k] = BoneIndex; // vertices = data?
+						vertices.at(weight.mVertexId).id[k] = BoneIndex;
 						vertices.at(weight.mVertexId).weight[k] = weight.mWeight;
-						break; //?
+						break;
 					}
 				}
 			}

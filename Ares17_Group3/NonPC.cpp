@@ -35,8 +35,6 @@ bool NonPC::findCollision(btPairCachingGhostObject* ghostObject) {
 }
 
 void NonPC::changeSpeed(float speed, float angle) {
-	//cout << angle << endl;
-	//TODO: increase speed
 	this->npcBody->setLinearVelocity(btVector3(/*npcBody->getLinearVelocity().x() + */speed*std::cos(angle),
 		npcBody->getLinearVelocity().y(), /*npcBody->getLinearVelocity().z()*/ speed*std::sin(angle)));
 }
@@ -55,7 +53,7 @@ btRigidBody* NonPC::addBoundingCapsule(float rad, float height, float x, float y
 	btRigidBody::btRigidBodyConstructionInfo info(mass, motion, capsule, inertia);
 	btRigidBody* body = new btRigidBody(info);
 	body->setAngularFactor(btVector3(0, 1, 0));
-	shapeManager->addToWorld(body, COL_ENEMY, COL_PLAYER | COL_DEFAULT | COL_ENEMY); // Can add COL_ENEMY for enemy to enemy collision
+	shapeManager->addToWorld(body, COL_ENEMY, COL_PLAYER | COL_DEFAULT | COL_ENEMY);
 
 	return body;
 }
@@ -68,7 +66,6 @@ NonPC::NonPC(double _h, double _r, btShapeManager* _sm, glm::vec3 _spawn, float 
 	boundingModel = _bmodel;
 	s_manager = sound_man;
 	spawn = _spawn;
-	//shader = _shader;
 	texture = _text;
 	// Construct body
 	btRigidBody *temp = addBoundingCapsule(radius, height, spawn.x, spawn.y, spawn.z, mass);
@@ -102,8 +99,6 @@ void NonPC::moveNpc(vertex* v, float speed) {
 	t.setIdentity();
 	npcBody->getMotionState()->getWorldTransform(t);
 	btVector3 pos = t.getOrigin();
-
-	//	cout << "Going to: " << v->getIndex() << endl;
 	angle = (atan2(goTo.z() - pos.z(), goTo.x() - pos.x())); // RADIANS
 
 	if (moved == false) {
@@ -120,23 +115,20 @@ void NonPC::moveNpc(vertex* v, float speed) {
 
 queue<vertex*> NonPC::findPath(AdjacencyList *adjList, int startId, int endId) {
 	A_star *pathfinder = new A_star(adjList);
-	//	cout << "////////\n" << startId << " to " << endId << endl;
 	list<vertex*> path = pathfinder->algorithm_standard(adjList->getVertex(startId), adjList->getVertex(endId));
 	queue<vertex*> toVisit;
 	for (const auto &pathIterator : path) {
-		//		cout << " " << pathIterator->getIndex() << " ";
 		toVisit.push(static_cast<vertex*>(pathIterator));
 	}
 	adjList->resetCosts();
 	delete pathfinder;
 	return toVisit;
-} // findPath function
+}
 
 bool NonPC::update(Model* modelData, glm::mat4 view, glm::mat4 proj, float dt, Grid* _g, Player *player, GLuint shader, float speed) {
 
 	this->render(modelData, view, proj, shader, player);
 
-	//TODO: unstuck
 	btVector3 playerPos(player->getPosition().x, player->getPosition().y, player->getPosition().z);
 	btTransform t;
 	t.setIdentity();
@@ -161,7 +153,6 @@ bool NonPC::update(Model* modelData, glm::mat4 view, glm::mat4 proj, float dt, G
 				recalcTimer = REFRESHRATE;
 			}
 
-			//TODO: why two of the same if statements
 			if (!currentPath.empty())
 				if (_g->getAdjList()->getVertex(_g->getNodeFromWorldPos(pos)) == currentPath.front())
 					currentPath.pop();
@@ -182,10 +173,8 @@ bool NonPC::update(Model* modelData, glm::mat4 view, glm::mat4 proj, float dt, G
 		}
 	}
 
-	if (findCollision(npcGhost))
-	{
+	if (findCollision(npcGhost)) {
 		this->health -= player->getWeapon().getDamage();
-		//cout << "Hit! :" << this->health << endl;
 		s_manager->playSound(s_manager->getSound(PAINED_EN), 1, 1);
 	}
 
@@ -193,15 +182,12 @@ bool NonPC::update(Model* modelData, glm::mat4 view, glm::mat4 proj, float dt, G
 }
 
 void NonPC::render(Model * modelData, glm::mat4 view, glm::mat4 proj, GLuint shader, Player *player) {
-	//	glUseProgram(shader);
 	btTransform t;
 	t.setIdentity();
 	npcBody->getMotionState()->getWorldTransform(t);
 	btVector3 pos = t.getOrigin();
 	npcGhost->setWorldTransform(t);
 	// Bounding box
-	//this->shapeManager->renderCapsule(npcBody, view, proj, boundingModel, shader, texture);
-
 	btQuaternion& rotation = npcBody->getWorldTransform().getRotation().normalized();
 	glm::mat4 model;
 	if (this->name == "boss") {
@@ -223,7 +209,7 @@ void NonPC::render(Model * modelData, glm::mat4 view, glm::mat4 proj, GLuint sha
 	model = glm::rotate(model, eulerRotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
 	if (this->name == "boss") { model = glm::scale(model, glm::vec3(0.05, 0.05, 0.05)); }
 	else
-		model = glm::scale(model, glm::vec3(0.5, 0.5, 0.5));	// It's a bit too big for our scene, so scale it down
+		model = glm::scale(model, glm::vec3(0.5, 0.5, 0.5));
 
 	glUniform1i(glGetUniformLocation(shader, "animated"), 1); //zero is no animations
 	glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));

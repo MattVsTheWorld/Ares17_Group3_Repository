@@ -1,5 +1,6 @@
 #include "Grid.h"
 
+// Not really a great implementation to do this
 Grid::Grid() {
 	grid = new AdjacencyList();
 
@@ -18,7 +19,6 @@ Grid::Grid() {
 			try {
 				grid->addVertex(newVertex);
 				IDgrid[foo][bar] = index;
-				//		cout << IDgrid[foo][bar] << " ";
 			}
 			catch (int e) {
 				cout << "Exception occured. Exception Nr:" << e << '.\n';
@@ -28,8 +28,6 @@ Grid::Grid() {
 		bar = 0;
 		foo++;
 	}
-
-	//	int poof = 0;
 	for (int i = 0; i < index; i++)
 	{
 		try {
@@ -46,20 +44,11 @@ Grid::Grid() {
 
 			for (const auto &it : newEdges)
 				grid->getVertex(i)->addEdge(it);
-
-			//	cout << poof++ << " ";
 		}
 		catch (int e) {
 			cout << "Exception occured. Exception Nr:" << e << '.\n';
 		}
 	}
-
-	//for (const auto &it : grid)
-	//	it
-	//grid[i][j] = new Node(true, glm::vec3(i, 0, j));
-
-	//grid->displayVertices();
-	//grid->getVertexNo()
 }
 
 int Grid::getNodeFromWorldPos(btVector3 &pos) {
@@ -76,13 +65,7 @@ int Grid::getNodeFromWorldPos(btVector3 &pos) {
 		percentY = 0;
 
 	int x = (((gridHalfSide * 2) / DEFAULTRADIUS)) * percentX;
-	//cout << x << endl;
 	int y = (((gridHalfSide * 2)) / DEFAULTRADIUS) * percentY;
-	//cout << "\n|||||||||\n";
-	//cout << "percentX: " << percentX << "| percentY: " << percentY << " ";
-	//cout << "x: " << x << "| y: " << y << " ";
-	//cout << "ID: " << IDgrid[x][y];
-	//cout << "\n|||||||||\n";
 	return IDgrid[x][y];
 }
 

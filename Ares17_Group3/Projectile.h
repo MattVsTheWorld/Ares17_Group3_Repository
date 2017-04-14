@@ -11,6 +11,7 @@
 
 typedef tuple<btRigidBody*, double, btPairCachingGhostObject*> _proj;
 
+// Manages projectiles in the world (bullets shot from player)
 class Projectile {
 private:
 	btShapeManager *shapeManager;

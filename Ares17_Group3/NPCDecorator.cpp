@@ -9,7 +9,6 @@ NPCDecorator::~NPCDecorator() { }
 void NPCDecorator::moveNpc(vertex* v, float speed) { ; }
 queue<vertex*> NPCDecorator::findPath(AdjacencyList *adjList, int startId, int endId) { return npc->findPath(adjList, startId, endId); }
 bool NPCDecorator::update(Model* modelData, glm::mat4 view, glm::mat4 proj, float dt, Grid* _g, Player* player, GLuint shader, float speed) {
-
 	if (npc->getHealth() <= 0) {
 
 		npc->setState(DYING);
@@ -25,16 +24,14 @@ bool NPCDecorator::update(Model* modelData, glm::mat4 view, glm::mat4 proj, floa
 			return false;
 		}
 	}
-
 	else {
 		npc->update(modelData, view, proj, dt, _g, player, shader, speed);
-		//render(modelData, view, proj);
 		return true;
 	}
 }
 
 void NPCDecorator::render(Model * modelData, glm::mat4 view, glm::mat4 proj, GLuint shader, Player *player) {
-	//npc->render(modelData, view, proj, shader); //TODO: delete (unused)
+	//npc->render(modelData, view, proj, shader); (unused)
 } // delegate render to npc data member
 
 void NPCDecorator::modifyHealth(double newHp) {
@@ -91,7 +88,7 @@ Melee::Melee(AbstractNPC *n) : NPCDecorator(n) {
 	setName("enforcer");
 }
 void Melee::modifyHealth(double newHp) { this->npc->modifyHealth(newHp); }
-double Melee::getRange() { return NPCDecorator::getRange(); } //TODO: maybe return a fixed melee range instead?
+double Melee::getRange() { return NPCDecorator::getRange(); }
 double Melee::getHealth() { return NPCDecorator::getHealth(); }
 Melee::~Melee() { /*cout << "Deleting decorator" << endl;*/ }
 

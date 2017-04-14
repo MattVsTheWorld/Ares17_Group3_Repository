@@ -2,6 +2,8 @@
 #include "SceneManager.h"
 #include <memory>
 
+// Holds managers globals (an attempt of making SceneManager better)
+
 #ifndef GLOBALDATA
 #define GLOBALDATA
 

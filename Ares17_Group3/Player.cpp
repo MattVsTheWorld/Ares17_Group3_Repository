@@ -38,7 +38,7 @@ Player::Player(glm::vec3 _eye, float rad, float height, float mass, btShapeManag
 	playerGhost = new btPairCachingGhostObject();								// create object
 	playerGhost->setCollisionShape(playerShape);								// set shape
 	playerGhost->setWorldTransform(t);											// set world transform	
-	playerGhost->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);  // disable collision response // could also add CF_CHARACTER_OBJECT // If I knew what that flag did...
+	playerGhost->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);  // disable collision response for ghost
 
 	bt_manager->addGhostToWorld(playerGhost, COL_PLAYER, playerCollidesWith);
 }
@@ -46,7 +46,7 @@ Player::Player(glm::vec3 _eye, float rad, float height, float mass, btShapeManag
 void Player::update(float dt) {
 	if (this->invincible)
 	{
-		invincibility_f -= dt;
+		invincibility_f -= dt;				//Invincibility frames
 		if (invincibility_f <= 0) {
 			invincibility_f = INVINC_TIME;
 			this->invincible = false;
@@ -61,15 +61,12 @@ void Player::update(float dt) {
 	if (this->armor < 0)
 		this->armor = 0;
 
-	////
 	btTransform t;
 	t.setIdentity();
 	playerBody->getMotionState()->getWorldTransform(t);
-	//	playerBody->getMotionState();
 	btVector3 pos = t.getOrigin();
 	this->setPosition(glm::vec3(pos.x(), pos.y(), pos.z()));
 	playerGhost->setWorldTransform(t);
-	//globalData->player->update(dt);
 }
 
 
@@ -106,10 +103,8 @@ void Player::setWeapon(wepType newWep) {
 Weapon Player::getWeapon() { return this->currentWep; }
 
 void Player::takeDamage(double damage) {
-	if (!this->invincible)
-	{
+	if (!this->invincible) {
 		this->invincible = true;
-		//	std::cout << "NO DAMGIO" << std::endl;
 		if (this->armor > 0)
 			this->armor -= (damage / 2);
 		else {
@@ -117,7 +112,6 @@ void Player::takeDamage(double damage) {
 			if (this->health <= 0)
 				this->health = 0;
 		}
-		//	std::cout << "Took a hit! Hp now: " << this->health << std::endl;
 	}
 
 }
