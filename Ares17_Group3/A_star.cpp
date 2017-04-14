@@ -48,19 +48,12 @@ list<vertex*> A_star::algorithm_standard(vertex* start, vertex* end) {
 		closedSet.insert(currentVert);
 		// if current vertex is goal, path found
 		if (currentVert == end) {																					
-		//	cout << "Cost to goal: " << currentVert->getgCost() << endl;
-		//	list<vertex*> foundPath = retracePath(start, end);
-		//	cout << "Path is: " << start->getIndex() << " ";
-		//	for (const auto &pathIterator : foundPath)
-		//		cout << (static_cast<vertex *>(pathIterator))->getIndex() << " ";
-	//		cout << endl;
 			return retracePath(start,end);
 		}
 		using neighbour = pair<vertex*, int>;
 		list<neighbour> neighbourList;
 		// construct list of neighbours from edges of the vertex
 		for (const auto &listIterator : *(static_cast<list<edge*>*>(currentVert->getEdgeList()))) {					
-			//Small note: You don't necessarily need to cast to edge the iterator, but I feel it makes it clearer
 			auto _neighbour = make_pair((static_cast<edge*>(listIterator))->getNeighbour(currentVert), (static_cast<edge*>(listIterator))->getWeight());
 			neighbourList.push_back(_neighbour);
 		}

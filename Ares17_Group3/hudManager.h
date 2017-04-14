@@ -9,7 +9,7 @@
 #include <sstream>
 
 enum valType {
-	HEALTH, ARMOR, AMMO
+	HEALTH, ARMOR//, AMMO
 };
 
 struct currentVals {
@@ -24,7 +24,6 @@ public:
 	GLuint textToTexture(const char * str, GLuint textID, TTF_Font* font);
 	void clearTextTexture(GLuint textID);
 	hudManager(bool shadows); // constructor, initializes values
-	//void renderToHud(int value, GLuint shader, Model *modelData, glm::vec3 pos);
 	void renderPlayerHud(std::string line, double value, valType _type, GLuint shader, Model *modelData, glm::vec3 pos, glm::vec3 color);
 	void renderEditHud(std::string line, std::string value, GLuint shader, Model *modelData, glm::vec3 pos);
 

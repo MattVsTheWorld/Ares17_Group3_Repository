@@ -4,6 +4,9 @@
 #include <GL/glew.h>
 #include "ShaderManager.h"
 #include "Model.h"
+
+// Based on rt3d class
+
 namespace MeshManager {
 
 	struct lightStruct {

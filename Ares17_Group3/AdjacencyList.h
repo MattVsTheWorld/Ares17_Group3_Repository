@@ -39,7 +39,6 @@ private:
 	double hCost;									// A* supporting variable; h contains the value of the heuristic
 	pair <int, int> vertexCoords;					// Coordinates of vertex in the graph
 	vertex* parent;									// A* supporting variable; points to previous vertex visited in the current path
-	//!!
 	bool walkable;
 protected:
 public:
@@ -76,8 +75,6 @@ public:
 	vertex* getVertex(pair<int, int> coords);	// return vertex at given position
 	void displayVertices();							// display elements of the adjacency list (vertices and edges)
 	void resetCosts();								// reset g and h costs for (e.g. for a second search)
-	/*int getVertexNo() {
-		return this->vertexNo;
-	}*/
+
 };
 #endif

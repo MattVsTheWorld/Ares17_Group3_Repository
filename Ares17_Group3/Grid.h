@@ -10,13 +10,6 @@
 #define DEFAULTWEIGHT 10.0f
 #define DEFAULTRADIUS 5
 
-//Node size = 2x2 seems fair
-
-// Adj list; all nodes from -35 to +35, all 9 around neighbours
-// for / for /
-	//	add vertex
-// add neighbours after
-// right = i + size*2j
 class Grid {
 public:
 	Grid();
@@ -24,9 +17,8 @@ public:
 	AdjacencyList* getAdjList();
 protected:
 private:
-	//	glm::vec2 gridWorldSize;
-	//	float nodeMargin = 2;
-	static const int gridHalfSide = 40; //TODO change grid size
+
+	static const int gridHalfSide = 40; // default size
 	int IDgrid[((gridHalfSide * 2) / DEFAULTRADIUS) + 1 ][((gridHalfSide * 2) / DEFAULTRADIUS) + 1];
 	AdjacencyList *grid;
 };

@@ -4,23 +4,6 @@
 SoundManager::SoundManager() {
 	if (!BASS_Init(-1, 44100, 0, 0, NULL))
 		std::cout << "Can't initialize device";
-
-	/*
-	Killers Kevin MacLeod (incompetech.com)
-	Licensed under Creative Commons: By Attribution 3.0 License
-	http://creativecommons.org/licenses/by/3.0/
-
-	Corruption Kevin MacLeod (incompetech.com)
-	Licensed under Creative Commons: By Attribution 3.0 License
-	http://creativecommons.org/licenses/by/3.0/
-	*/
-
-	// pickup
-	// https://www.freesound.org/people/juancamiloorjuela/sounds/204318/
-
-	// enemy hit
-	// http://www.wolfensteingoodies.com/archives/olddoom/music.htm
-
 	// load sound samples
 	samples = new HSAMPLE[10];
 	samples[BG] = loadSample("../Ares17_Group3/Sounds/corruption.wav");

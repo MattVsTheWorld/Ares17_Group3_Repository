@@ -13,18 +13,13 @@
 #include "SDLmanager.h"
 #include "hudManager.h"
 #include "Skybox.h"
-
 #include "btShapeManager.h"
 #include "Player.h"
-// TEMPORARY
 #include "loadBitmap.h"
-//+++
 #include "SoundManager.h"
 #include <time.h>
 #include "Projectile.h"
 #include "NPCDecorator.h"
-//+++
-
 #include "GlobalData.h"
 
 #include <unordered_map>
@@ -59,11 +54,10 @@ enum level {
 };
 
 namespace SceneManager {
-
+	// Main functions needed by main.cpp
 	void init(SDL_Window * window);
 	void update(SDL_Window *window, SDL_Event sdlEvent);
-	//fps counter; 3 of 5
-	void draw(SDL_Window *window);//, int fps);
+	void draw(SDL_Window *window);
 }
 
 #endif
